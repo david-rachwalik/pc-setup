@@ -34,9 +34,14 @@ choco upgrade adobeair
 choco upgrade adobeshockwaveplayer
 choco upgrade geforce-experience
 # choco upgrade gimp
-choco upgrade k-litecodecpackmega
-choco upgrade obs-studio
 choco upgrade spotify
+
+
+# ****** Video Editing ******
+choco upgrade handbrake
+choco upgrade k-litecodecpackmega
+choco upgrade makemkv
+choco upgrade obs-studio
 # choco upgrade vlc
 
 

@@ -60,12 +60,19 @@ choco install adobeshockwaveplayer
 choco install geforce-experience
 # https://chocolatey.org/packages/gimp
 # choco install gimp
-# https://chocolatey.org/packages/k-litecodecpackmega
-choco install k-litecodecpackmega
-# https://chocolatey.org/packages/obs-studio
-choco install obs-studio
 # https://chocolatey.org/packages/spotify
 choco install spotify
+
+
+# ****** Video Editing ******
+# https://chocolatey.org/packages/handbrake
+choco install handbrake
+# https://chocolatey.org/packages/k-litecodecpackmega
+choco install k-litecodecpackmega
+# https://chocolatey.org/packages/MakeMKV
+choco install makemkv
+# https://chocolatey.org/packages/obs-studio
+choco install obs-studio
 # https://chocolatey.org/packages/vlc
 # choco install vlc
 
