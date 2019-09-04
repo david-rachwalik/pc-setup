@@ -1,0 +1,4 @@
+---
+# This file not required: https://docs.ansible.com/ansible/latest/inventory/implicit_localhost.html
+ansible_connection: local
+...

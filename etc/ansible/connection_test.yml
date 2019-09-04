@@ -1,0 +1,10 @@
+---
+# Command: ansible windows -m setup -vvvv
+
+- hosts: windows
+  gather_facts: false
+  become: true
+  tasks:
+  - debug:
+      msg: "Hello, yo!"
+...

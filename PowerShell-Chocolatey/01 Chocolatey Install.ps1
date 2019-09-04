@@ -1,5 +1,4 @@
-﻿choco install chocolatey
-# https://chocolatey.org/packages/chocolatey-core.extension
+﻿# https://chocolatey.org/packages/chocolatey-core.extension
 choco install chocolatey-core.extension
 
 
@@ -7,7 +6,7 @@ choco install chocolatey-core.extension
 # https://chocolatey.org/packages/GoogleChrome
 choco install googlechrome
 # https://chocolatey.org/packages/Office365HomePremium
-choco install office365homepremium
+# choco install office365homepremium  # 2017 available, states 2016, installs 2013
 # https://chocolatey.org/packages/7zip
 choco install 7zip
 # https://chocolatey.org/packages/ccleaner
@@ -18,9 +17,15 @@ choco install ccleaner
 # choco install recuva
 # https://chocolatey.org/packages/speccy
 # choco install speccy
+# https://chocolatey.org/packages/qbittorrent
+choco install qbittorrent
 
 
 # ****** Development ******
+# https://chocolatey.org/packages/openssh
+choco install openssh
+# https://chocolatey.org/packages/python2
+choco install python2
 # https://chocolatey.org/packages/python3
 # choco install python3
 # https://chocolatey.org/packages/git
@@ -32,14 +37,22 @@ choco install azure-cli
 # https://chocolatey.org/packages/microsoftazurestorageexplorer
 choco install microsoftazurestorageexplorer
 # https://chocolatey.org/packages/docker-desktop
-choco install docker-desktop
+# choco install docker-desktop
+# https://chocolatey.org/packages/unity
+choco install unity
+
+
+# https://docs.microsoft.com/en-us/visualstudio/install/use-command-line-parameters-to-install-visual-studio
+# https://docs.microsoft.com/en-us/visualstudio/install/workload-component-id-vs-community
+# -- ASP.NET and web development; Azure development
+choco install visualstudio2017community --params "--locale en-US --add Microsoft.VisualStudio.Workload.NetWeb;includeRecommended --add Microsoft.VisualStudio.Workload.Azure;includeRecommended --passive"
 
 # https://chocolatey.org/packages/VisualStudio2017Community
-choco install visualstudio2017community
+# choco install visualstudio2017community
 # https://chocolatey.org/packages/visualstudio2017-workload-netweb
-choco install visualstudio2017-workload-netweb
+# choco install visualstudio2017-workload-netweb
 # https://chocolatey.org/packages/visualstudio2017-workload-azure
-choco install visualstudio2017-workload-azure
+# choco install visualstudio2017-workload-azure
 
 # https://chocolatey.org/packages/vscode
 choco install vscode --params "/NoDesktopIcon /NoContextMenuFiles /NoContextMenuFolders"

@@ -9,15 +9,18 @@ choco upgrade ccleaner
 # choco upgrade defraggler
 # choco upgrade recuva
 # choco upgrade speccy
+choco upgrade qbittorrent
 
 
 # ****** Development ******
+choco install openssh
 # choco upgrade python3
 choco upgrade git
 choco upgrade dotnetcore-sdk
 choco upgrade azure-cli
 choco upgrade microsoftazurestorageexplorer
 choco upgrade docker-desktop
+choco install unity
 
 choco upgrade visualstudio2017community
 choco upgrade visualstudio2017-workload-netweb

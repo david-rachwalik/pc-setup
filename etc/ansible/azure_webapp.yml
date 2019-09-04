@@ -1,0 +1,25 @@
+---
+# cd /etc/ansible/
+# dos2unix /mnt/d/Repos_Exp/pc-setup/etc/ansible/azure_webapp.yml
+# sudo cp /mnt/d/Repos_Exp/pc-setup/etc/ansible/azure_webapp.yml azure_webapp.yml
+# ansible-playbook azure_webapp.yml -e "resource_group_name=ansible_test_rg" -vvvv
+
+
+# https://github.com/Azure-Samples/ansible-playbooks/blob/master/webapp.yml
+- hosts: localhost
+  connection: local
+  environment: "{{azure_environment}}"
+  vars:
+    app_name: myTestApp
+    location: eastus
+    linux_plan_name: myTestPlan
+    traffic_manager_profile_name: myTMProfile
+    traffic_manager_endpoint_name: endpoint1
+  roles:
+  - azure.azure_preview_modules
+  tasks:
+  - name: Create resource group
+    azure_rm_resourcegroup:
+      name: "{{ resource_group_name }}"
+      location: "{{ location }}"
+...

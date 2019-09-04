@@ -13,6 +13,9 @@ choco feature enable -n=autoUninstaller
 
 # -------- Common Commands --------
 
+# Remove shortcuts from desktop
+Remove-Item C:\Users\*\Desktop\*lnk –Force
+
 # List all locally installed packages
 choco list --localonly
 
@@ -22,3 +25,6 @@ choco outdated
 # https://superuser.com/questions/890251/how-to-list-chocolatey-packages-already-installed-and-newer-version-available-fr
 # Full breakdown summary of outdated packages and upgrade version available
 choco upgrade all --noop
+
+# Perform the all available updates
+choco upgrade all
