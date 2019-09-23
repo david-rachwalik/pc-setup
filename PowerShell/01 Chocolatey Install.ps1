@@ -1,4 +1,4 @@
-﻿# https://chocolatey.org/packages/chocolatey-core.extension
+# https://chocolatey.org/packages/chocolatey-core.extension
 choco install chocolatey-core.extension
 
 
@@ -16,7 +16,7 @@ choco install ccleaner
 # https://chocolatey.org/packages/Recuva
 # choco install recuva
 # https://chocolatey.org/packages/speccy
-# choco install speccy
+choco install speccy
 # https://chocolatey.org/packages/qbittorrent
 choco install qbittorrent
 

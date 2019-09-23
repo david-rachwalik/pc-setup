@@ -1,0 +1,9 @@
+---
+# https://stackoverflow.com/questions/42606837/how-do-i-use-bash-on-windows-from-the-visual-studio-code-integrated-terminal
+
+- name: Create resource group
+  azure_rm_resourcegroup:
+    name: "{{ resource_group_webapp }}"
+    location: "{{ location }}"
+  when: windows_has_git | default(true) == true
+...

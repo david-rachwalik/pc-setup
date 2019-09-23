@@ -28,7 +28,7 @@ chocolatey_install:
 # https://chocolatey.org/packages/Recuva
 # - recuva
 # https://chocolatey.org/packages/speccy
-# - speccy
+- speccy
 # https://chocolatey.org/packages/qbittorrent
 - qbittorrent
 

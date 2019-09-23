@@ -1,0 +1,16 @@
+---
+# dos2unix /mnt/d/Repos_Exp/pc-setup/etc/ansible/git.yml
+# sudo cp /mnt/d/Repos_Exp/pc-setup/etc/ansible/git.yml /etc/ansible/git.yml
+# cd /etc/ansible/
+# ansible-playbook git.yml
+
+- hosts: localhost
+  # gather_facts: false
+  tasks:
+  # https://docs.ansible.com/ansible/latest/modules/git_module.html
+  - name: Pull latest from Git
+    git:
+      repo: "https://github.com/david-rachwalik/pc-setup.git"
+      dest: "~/pc-setup"
+      force: true
+...

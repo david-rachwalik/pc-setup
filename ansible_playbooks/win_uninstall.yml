@@ -1,0 +1,17 @@
+---
+# dos2unix /mnt/d/Repos_Exp/pc-setup/etc/ansible/desktop_uninstall.yml
+# sudo cp /mnt/d/Repos_Exp/pc-setup/etc/ansible/desktop_uninstall.yml /etc/ansible/desktop_uninstall.yml
+# cd /etc/ansible/
+# ansible-playbook desktop_uninstall.yml -vvvv
+
+
+- hosts: windows
+  gather_facts: false
+  tasks:
+  - name: Install 7zip from a network share specifying the credentials
+    win_package:
+      path: C:\Program Files\7-Zip\7z.exe
+      product_id: 7-Zip
+      arguments: /S
+      state: present
+...

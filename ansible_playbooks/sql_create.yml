@@ -1,0 +1,33 @@
+# Description
+# ===========
+# This playbook create a SQL server and an instance of SQL Database.
+# Note: Random number is used to set a globally unique name for SQL Server
+
+# https://github.com/Azure-Samples/ansible-playbooks/blob/master/sql_create.yml
+---
+- hosts: localhost
+  vars:
+    resource_group: "{{ resource_group_name }}"
+    location: eastus
+    sqlserver_name: sqlansible007
+    sqldb_name: sqldbtest
+    admin_username: admxyz
+    admin_password: Abcpasswordxyz12!
+  tasks:
+  - name: Create a resource group
+    azure_rm_resourcegroup:
+      name: "{{ resource_group }}"
+      location: "{{ location }}"
+  - name: Create SQL Server
+    azure_rm_sqlserver:
+      name: "{{sqlserver_name}}"
+      resource_group: "{{resource_group}}"
+      version: 12.0
+      admin_username: "{{admin_username}}"
+      admin_password: "{{admin_password}}"
+  - name: Create instance of SQL Database
+    azure_rm_sqldatabase:
+      resource_group: "{{resource_group}}"
+      server_name: "{{sqlserver_name}}"
+      name: "{{sqldb_name}}"
+...

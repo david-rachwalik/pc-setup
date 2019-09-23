@@ -1,0 +1,9 @@
+---
+- name: Uninstall Basic Chocolatey Packages
+  win_chocolatey:
+    name: "{{item}}"
+    state: absent
+  loop: "{{chocolatey_uninstall}}"
+  when: "{{chocolatey_uninstall | count > 0}}"
+  tags: ["chocolatey", "uninstall"]
+...

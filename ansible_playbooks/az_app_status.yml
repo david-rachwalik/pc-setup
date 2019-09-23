@@ -2,30 +2,24 @@
 # cd /etc/ansible/
 # dos2unix /mnt/d/Repos_Exp/pc-setup/etc/ansible/azure_facts.yml
 # sudo cp /mnt/d/Repos_Exp/pc-setup/etc/ansible/azure_facts.yml azure_facts.yml
-# ansible-playbook azure_facts.yml -vvvv
-
+# ansible-playbook azure_facts.yml
 
 - hosts: localhost
   # become: true
-  gather_facts: false
+  # gather_facts: false
   environment: "{{azure_environment}}"
+  # vars_files:
+  # - group_vars/all/environment.yml
+  # vars:
+  #   ad_user: "{{vaulted_azure_environment.AZURE_AD_USER}}"
+  #   password: "{{vaulted_azure_environment.AZURE_PASSWORD}}"
+  #   subscription_id: "{{vaulted_azure_environment.AZURE_SUBSCRIPTION_ID}}"
+  #   tenant: "{{vaulted_azure_environment.AZURE_TENANT}}"
+  #   client_id: "{{vaulted_azure_environment.AZURE_CLIENT_ID}}"
+  #   secret: "{{vaulted_azure_environment.AZURE_SECRET}}"
   tasks:
-  # - name: Login to Azure
-  #   command: "az login -u {{ansible_user}} -p {{ansible_password}}"
-    
-  # - name: Login to Azure
-  #   command: "az account list --output table"
-
-  - name: Create storage account
-    azure_rm_storageaccount:
-      resource_group: Testing
-      name: testaccount001
-      account_type: Standard_LRS
-    # delegate_to: localhost
-      
-  - debug:
-      var: testerr
-
+  - command: "printenv"
+  
   # https://docs.ansible.com/ansible/latest/modules/azure_rm_resourcegroup_facts_module.html
   - name: Get facts for all resource groups
     azure_rm_resourcegroup_facts:

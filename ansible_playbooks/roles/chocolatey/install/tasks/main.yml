@@ -1,0 +1,41 @@
+---
+- block:
+  - name: Install Basic Chocolatey Packages
+    # win_chocolatey:
+    #   name: "{{item}}"
+    #   state: present
+    win_chocolatey: "{{item | combine({state: present})}}"
+    # https://docs.ansible.com/ansible/latest/user_guide/become.html#become-windows
+    become: true
+    become_user: Administrator
+    become_method: runas
+    loop: "{{chocolatey_install}}"
+  
+  # https://chocolatey.org/packages/VisualStudio2017Community
+  # https://docs.microsoft.com/en-us/visualstudio/install/use-command-line-parameters-to-install-visual-studio
+  # https://docs.microsoft.com/en-us/visualstudio/install/workload-component-id-vs-community
+  - name: Install Visual Studio Community
+    win_chocolatey:
+      name: visualstudio2017community
+      state: present
+      # https://stackoverflow.com/questions/3790454/how-do-i-break-a-string-over-multiple-lines
+      package_params: >-
+        --locale en-US
+        # https://docs.microsoft.com/en-us/visualstudio/install/workload-component-id-vs-community
+        --add Microsoft.VisualStudio.Workload.NetWeb;includeRecommended
+        --add Microsoft.VisualStudio.Workload.Azure;includeRecommended
+        --quiet
+        # --passive
+    
+  # https://chocolatey.org/packages/vscode
+  - name: Install Visual Studio Code
+    win_chocolatey:
+      name: vscode
+      state: present
+      package_params: >-
+        /NoDesktopIcon
+        /NoContextMenuFiles
+        /NoContextMenuFolders
+  
+  tags: ["chocolatey", "install"]
+...

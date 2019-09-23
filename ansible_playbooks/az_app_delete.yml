@@ -1,0 +1,32 @@
+---
+# cd /etc/ansible/
+# dos2unix /mnt/d/Repos_Exp/pc-setup/etc/ansible/az_delete_resourcegroup.yml
+# sudo cp /mnt/d/Repos_Exp/pc-setup/etc/ansible/az_delete_resourcegroup.yml az_delete_resourcegroup.yml
+# ansible-playbook az_delete_resourcegroup.yml -vvvv
+
+
+- hosts: localhost
+  gather_facts: false
+  environment: "{{azure_environment}}"
+  vars:
+    resource_group_names:
+    - ansible_test_rg
+    - ansible_test_rg2nd
+    - myTestPlan
+    - myResourceGroupWebapp
+    - myResourceGroup
+  tasks:
+  - name: Get facts for resource group
+    azure_rm_resourcegroup_facts:
+      name: "{{ item }}"
+    loop: "{{ resource_group_names }}"
+    register: az_resourcegroup_facts
+
+  - name: Delete resource group
+    azure_rm_resourcegroup:
+      name: "{{ item.resourcegroups[0].name }}"
+      state: absent
+      force: true
+    when: "{{ item | json_query('resourcegroups[*]') | list | count > 0 }}"
+    loop: "{{ az_resourcegroup_facts.results }}"
+...

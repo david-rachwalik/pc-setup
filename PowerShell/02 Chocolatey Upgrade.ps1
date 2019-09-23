@@ -1,4 +1,4 @@
-﻿choco upgrade chocolatey-core.extension
+choco upgrade chocolatey-core.extension
 
 
 # ****** General Productivity ******
@@ -8,7 +8,7 @@ choco upgrade 7zip
 choco upgrade ccleaner
 # choco upgrade defraggler
 # choco upgrade recuva
-# choco upgrade speccy
+choco upgrade speccy
 choco upgrade qbittorrent
 
 
