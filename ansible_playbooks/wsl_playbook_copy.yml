@@ -1,0 +1,18 @@
+---
+# sudo cp /mnt/d/Repos_Exp/pc-setup/etc/ansible/wsl_playbook_copy.yml /etc/ansible/wsl_playbook_copy.yml
+# dos2unix /etc/ansible/wsl_playbook_copy.yml
+# cd /etc/ansible/
+# ansible-playbook wsl_playbook_copy.yml
+
+
+- hosts: localhost
+  tasks:
+  - name: Transfer playbooks from Windows to WSL
+    copy:
+      src: /mnt/d/Repos_Exp/pc-setup
+      dest: ~/pc-setup
+      
+  - name: Convert Windows files to *nix
+    command: dos2unix ~/pc-setup
+    register: out_dos2unix
+...
