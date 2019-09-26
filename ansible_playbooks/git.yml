@@ -1,6 +1,6 @@
 ---
-# dos2unix /mnt/d/Repos_Exp/pc-setup/etc/ansible/git.yml
 # sudo cp /mnt/d/Repos_Exp/pc-setup/etc/ansible/git.yml /etc/ansible/git.yml
+# dos2unix /etc/ansible/git.yml
 # cd /etc/ansible/
 # ansible-playbook git.yml
 
@@ -10,7 +10,7 @@
   # https://docs.ansible.com/ansible/latest/modules/git_module.html
   - name: Pull latest from Git
     git:
-      repo: "https://github.com/david-rachwalik/pc-setup.git"
-      dest: "~/pc-setup"
+      repo: "{{git_repo}}"
+      dest: "{{wsl_repo}}"
       force: true
 ...

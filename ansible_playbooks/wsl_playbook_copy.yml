@@ -4,15 +4,14 @@
 # cd /etc/ansible/
 # ansible-playbook wsl_playbook_copy.yml
 
-
 - hosts: localhost
   tasks:
   - name: Transfer playbooks from Windows to WSL
     copy:
-      src: /mnt/d/Repos_Exp/pc-setup
-      dest: ~/pc-setup
+      src: "{{win_repo}}"
+      dest: "{{wsl_repo}}"
       
   - name: Convert Windows files to *nix
-    command: dos2unix ~/pc-setup
+    command: "dos2unix {{wsl_repo}}"
     register: out_dos2unix
 ...

@@ -1,0 +1,35 @@
+---
+# sudo cp /mnt/d/Repos_Exp/pc-setup/etc/ansible/wsl_playbook_copy.yml /etc/ansible/wsl_playbook_copy.yml
+# dos2unix /etc/ansible/wsl_playbook_copy.yml
+# cd /etc/ansible/
+# ansible-playbook wsl_playbook_copy.yml
+
+- hosts: localhost
+  become: true
+  tasks:
+  # - name: Transfer playbooks from Windows to WSL
+  #   copy:
+  #     src: "{{win_repo}}"
+  #     dest: "{{wsl_repo}}"
+      
+  # - name: Convert Windows files to *nix
+  #   command: "dos2unix {{wsl_repo}}"
+  #   register: out_dos2unix
+
+  # https://stackoverflow.com/questions/41535838/how-to-run-apt-update-and-upgrade-via-ansible-shell
+  # $ ansible all -m apt -a "upgrade=yes update_cache=yes cache_valid_time=86400" --become
+  - name: Update and upgrade apt packages
+    apt:
+      upgrade: yes
+      update_cache: yes
+      cache_valid_time: 86400 #One day
+
+  # - name: Upgrade all packages to the latest version
+  #   apt:
+  #     name: "*"
+  #     state: latest
+
+  # - name: Update all packages to the latest version
+  #   apt:
+  #     upgrade: dist
+...

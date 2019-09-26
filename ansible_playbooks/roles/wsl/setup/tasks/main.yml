@@ -1,0 +1,7 @@
+---
+- name: Create resource group
+  azure_rm_resourcegroup:
+    name: "{{resource_group_webapp}}"
+    location: "{{location}}"
+  when: windows_has_git | default(true) == true
+...

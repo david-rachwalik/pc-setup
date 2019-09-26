@@ -1,22 +1,25 @@
             ::: PC Setup :::
 
 1) Install WSL on Windows 10
-- cd /mnt/d/Repos_Exp
-- sudo git clone https://github.com/david-rachwalik/pc-setup.git
+<!-- - cd /mnt/d/Repos_Exp -->
+- git clone https://github.com/david-rachwalik/pc-setup.git
 - sudo -H ~/pc-setup/bin/provision_pc.sh
 <!-- - sudo -H /mnt/d/Repos_Exp/pc-setup/bin/provision_pc.sh -->
 
 2) Install Ansible on WSL
+- git clone https://github.com/david-rachwalik/pc-setup.git
+- sudo -H ~/pc-setup/bin/wsl_install_ansible.sh
+<!-- - sudo -H /mnt/d/Repos_Exp/pc-setup/bin/wsl_install_ansible.sh -->
 
-3) Use Ansible on WSL to provision Windows 10
+3) Use Ansible on WSL to provision WSL
+- install software using apt
+- configure application settings
+
+4) Use Ansible on WSL to provision Windows 10
 - install software using Chocolatey
 - configure application settings
 - install software not covered by Chocolatey
   - scanner
-
-4) Use Ansible on WSL to provision WSL
-- install software using apt
-- configure application settings
 
 
             ::: PC Health :::

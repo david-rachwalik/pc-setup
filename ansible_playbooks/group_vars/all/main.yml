@@ -1,0 +1,5 @@
+---
+git_repo: "https://github.com/david-rachwalik/pc-setup.git"
+win_repo: "/mnt/d/Repos_Exp/pc-setup"
+wsl_repo: "~/pc-setup"
+...
