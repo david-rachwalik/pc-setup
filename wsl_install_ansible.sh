@@ -4,15 +4,17 @@ export DEBIAN_FRONTEND=noninteractive
 # Run command: sudo -H /mnt/d/Repos_Exp/pc-setup/bin/wsl_install_ansible.sh
 
 # Upgrade baseline files of Linux distribution
-apt update && apt full-upgrade
+# apt-get update && apt full-upgrade -y
+apt-get update && apt-get dist-upgrade -y
+
 # Install Ansible dependencies (Python, Git)
 # DEBIAN_FRONTEND=noninteractive apt install -y python-pip git libffi-dev libssl-dev
-apt install -y python-pip git libffi-dev libssl-dev
+apt-get install -y python-pip git libffi-dev libssl-dev
 # Install Ansible and WinRM
 pip install ansible pywinrm
 
 # Install extra tool to convert Windows files to Linux
-# apt install -y dos2unix
+# apt-get install -y dos2unix
 
 
 # mkdir ~/bin

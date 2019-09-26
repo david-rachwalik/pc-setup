@@ -8,8 +8,8 @@
 
 2) Install Ansible on WSL
 - git clone https://github.com/david-rachwalik/pc-setup.git
-- sudo -H ~/pc-setup/bin/wsl_install_ansible.sh
-<!-- - sudo -H /mnt/d/Repos_Exp/pc-setup/bin/wsl_install_ansible.sh -->
+- chmod +x ~/pc-setup/wsl_install_ansible.sh
+- sudo -H ~/pc-setup/wsl_install_ansible.sh
 
 3) Use Ansible on WSL to provision WSL
 - install software using apt
