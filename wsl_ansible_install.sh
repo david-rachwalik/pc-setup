@@ -1,7 +1,7 @@
 #!/bin/bash
 export DEBIAN_FRONTEND=noninteractive
 
-# Run command: sudo -H /mnt/d/Repos_Exp/pc-setup/bin/wsl_install_ansible.sh
+# Run command: sudo -H /mnt/d/Repos_Exp/pc-setup/wsl_ansible_install.sh
 
 # Upgrade baseline files of Linux distribution
 # apt-get update && apt full-upgrade -y

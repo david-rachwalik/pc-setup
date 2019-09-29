@@ -1,30 +1,42 @@
-            ::: PC Setup :::
+# PC Setup
 
-1) Install WSL on Windows 10
-<!-- - cd /mnt/d/Repos_Exp -->
-- git clone https://github.com/david-rachwalik/pc-setup.git
-- sudo -H ~/pc-setup/bin/provision_pc.sh
-<!-- - sudo -H /mnt/d/Repos_Exp/pc-setup/bin/provision_pc.sh -->
+## Initialization
 
-2) Install Ansible on WSL
-- git clone https://github.com/david-rachwalik/pc-setup.git
-- chmod +x ~/pc-setup/wsl_install_ansible.sh
-- sudo -H ~/pc-setup/wsl_install_ansible.sh
+1. Use PowerShell (Admin mode) to install WSL+Ubuntu on Windows 10
 
-3) Use Ansible on WSL to provision WSL
-- install software using apt
-- configure application settings
+    ``` powershell
+    Set-ExecutionPolicy Bypass -Scope Process -Force; iex ((New-Object System.Net.WebClient).DownloadString('https://github.com/david-rachwalik/pc-setup/win_wsl_install.ps1'))
+    ```
 
-4) Use Ansible on WSL to provision Windows 10
-- install software using Chocolatey
-- configure application settings
-- install software not covered by Chocolatey
-  - scanner
+2. Use Ubuntu (Admin mode) to install Ansible on Ubuntu
 
+    ``` bash
+    git clone https://github.com/david-rachwalik/pc-setup.git
+    chmod -R +x ~/pc-setup/
+    sudo -H ~/pc-setup/wsl_ansible_install.sh
+    ```
 
-            ::: PC Health :::
+3. Use Ansible on Ubuntu to provision Ubuntu
+    - install software using apt
+    - configure application settings
 
-Backup application settings and update Windows:
+4. Use Ansible on Ubuntu to provision Windows 10
+    - install software using Chocolatey
+    - configure application settings
+    - install software not covered by Chocolatey
+      - scanner
+
+> Bonus: Use PowerShell (Admin mode) to [install Chocolatey](https://chocolatey.org/install) (only if not using WSL)
+
+``` powershell
+Set-ExecutionPolicy Bypass -Scope Process -Force; iex ((New-Object System.Net.WebClient).DownloadString('[https://chocolatey.org/install.ps1](https://chocolatey.org/install.ps1)'))
+choco feature enable -n allowGlobalConfirmation
+```
+
+## PC Health & Monitoring
+
+### Backup application settings and update Windows
+
 - backup game saves, screenshots, addons
 - backup preferences for productivity programs
 - update windows features, install patches, chocolatey upgrade, etc.
@@ -32,12 +44,6 @@ Backup application settings and update Windows:
 
 *) For other playbook plans, see TODO.md
 
-
-
 Run WSL in Visual Studio Code
 <!-- https://stackoverflow.com/questions/11929461/how-can-i-run-dos2unix-on-an-entire-directory -->
 find . -type f -print0 | xargs -0 dos2unix
-
-<!-- Commands to initialize new PC:
-Set-ExecutionPolicy Bypass -Scope Process -Force; iex ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))
-choco feature enable -n allowGlobalConfirmation -->
