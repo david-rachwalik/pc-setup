@@ -26,7 +26,7 @@
     - install software not covered by Chocolatey
       - scanner
 
-> Bonus: Use PowerShell (Admin mode) to [install Chocolatey](https://chocolatey.org/install) (only if not using WSL)
+> *Bonus (if not using Ansible)*:  Use PowerShell (Admin mode) to [install Chocolatey](https://chocolatey.org/install)
 
 ``` powershell
 Set-ExecutionPolicy Bypass -Scope Process -Force; iex ((New-Object System.Net.WebClient).DownloadString('[https://chocolatey.org/install.ps1](https://chocolatey.org/install.ps1)'))
