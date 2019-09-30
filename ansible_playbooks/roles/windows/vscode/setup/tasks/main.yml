@@ -6,4 +6,7 @@
     name: "{{ resource_group_webapp }}"
     location: "{{ location }}"
   when: windows_has_git | default(true) == true
+
+# - name: Configure VSCode settings
+#   - move json settings files for user and workspace
 ...

@@ -14,4 +14,17 @@
       product_id: 7-Zip
       arguments: /S
       state: present
+
+
+# - Backup Game Files:
+#   - World of Warcraft
+#   - Terraria
+#   - Skyrim VR
+#   - VRChat
+# - Rip DVD|BluRay disks using MakeMKV
+# - Set default action to rip disks when inserted in any optical drive
+# - Compress a directory of videos using HandBrake
+
+# ::: maybe :::
+# - automate Plex
 ...

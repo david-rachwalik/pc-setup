@@ -9,29 +9,19 @@
     [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
     # Install WSL (*nix kernel) - restart system when prompted
     Enable-WindowsOptionalFeature -Online -FeatureName Microsoft-Windows-Subsystem-Linux
-    # Get the latest raw script from master branch
+    # Cache the latest script from master branch
     $RemoteScript = Invoke-WebRequest https://raw.githubusercontent.com/david-rachwalik/pc-setup/master/win_wsl_install.ps1
-    # Run the script
+    # Run the script to install Ubuntu and RemoteRM
     Invoke-Expression $($RemoteScript.Content)
     ```
 
 2. Run Ubuntu (as Administrator) to install Ansible on Ubuntu
 
     ``` bash
-    curl -sL https://raw.githubusercontent.com/david-rachwalik/pc-setup/master/wsl_ansible_install.sh | sudo bash
-    ```
-
-    Alternate Strategy 1
-
-    ``` bash
-    sudo bash <(curl -sL https://raw.githubusercontent.com/david-rachwalik/pc-setup/master/wsl_ansible_install.sh)
-    ```
-
-    Alternate Strategy 2
-
-    ``` bash
-    sudo git clone https://github.com/david-rachwalik/pc-setup.git ~
+    sudo git clone https://github.com/david-rachwalik/pc-setup.git ~/pc-setup/
     sudo -H ~/pc-setup/wsl_ansible_install.sh
+    # sudo bash <(curl -sL https://raw.githubusercontent.com/david-rachwalik/pc-setup/master/wsl_ansible_install.sh)
+    # curl -sL https://raw.githubusercontent.com/david-rachwalik/pc-setup/master/wsl_ansible_install.sh | sudo bash
     ```
 
 3. Run Ansible on Ubuntu to provision Ubuntu
@@ -54,6 +44,12 @@ choco feature enable -n allowGlobalConfirmation
 ```
 
 ## PC Health & Monitoring
+
+### Command to clean and shutdown system
+
+``` bash
+ansible home -m include_role -a "name=windows/ccleaner/shutdown"
+```
 
 ### Backup application settings and update Windows
 
