@@ -2,13 +2,16 @@
 
 ## Initialization
 
-1. Use PowerShell (Admin mode) to install WSL+Ubuntu on Windows 10
+1. Run PowerShell (as Administrator) to install WSL+Ubuntu on Windows 10
 
     ``` powershell
-    Set-ExecutionPolicy Bypass -Scope Process -Force; iex ((New-Object System.Net.WebClient).DownloadString('https://github.com/david-rachwalik/pc-setup/win_wsl_install.ps1'))
+    # Change security to TLS 1.2 (required by many sites; more secure than default TLS 1.0)
+    [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+    # Run install script from remote address
+    Set-ExecutionPolicy Bypass -Scope Process -Force; iex ((New-Object System.Net.WebClient).DownloadString('https://github.com/david-rachwalik/pc-setup/blob/master/win_wsl_install.ps1'))
     ```
 
-2. Use Ubuntu (Admin mode) to install Ansible on Ubuntu
+2. Run Ubuntu (as Administrator) to install Ansible on Ubuntu
 
     ``` bash
     git clone https://github.com/david-rachwalik/pc-setup.git
@@ -16,20 +19,21 @@
     sudo -H ~/pc-setup/wsl_ansible_install.sh
     ```
 
-3. Use Ansible on Ubuntu to provision Ubuntu
+3. Run Ansible on Ubuntu to provision Ubuntu
     - install software using apt
     - configure application settings
 
-4. Use Ansible on Ubuntu to provision Windows 10
+4. Run Ansible on Ubuntu to provision Windows 10
     - install software using Chocolatey
     - configure application settings
     - install software not covered by Chocolatey
       - scanner
 
-> *Bonus (if not using Ansible)*:  Use PowerShell (Admin mode) to [install Chocolatey](https://chocolatey.org/install)
+> *Bonus (if not using Ansible)*: Run PowerShell (as Administrator) to [install Chocolatey](https://chocolatey.org/install)
 
 ``` powershell
-Set-ExecutionPolicy Bypass -Scope Process -Force; iex ((New-Object System.Net.WebClient).DownloadString('[https://chocolatey.org/install.ps1](https://chocolatey.org/install.ps1)'))
+Set-ExecutionPolicy Bypass -Scope Process -Force; iex ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))
+# Chocolatey will install packages without confirmation prompts
 choco feature enable -n allowGlobalConfirmation
 ```
 
