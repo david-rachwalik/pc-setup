@@ -28,14 +28,14 @@
 
     ``` bash
     cd ~/pc-setup/ansible_playbooks/
-    ansible-playbooks wsl_update.yml
+    ansible-playbook wsl_update.yml
     ```
 
 4. Run Ansible on Linux to provision Windows 10
 
     ``` bash
     cd ~/pc-setup/ansible_playbooks/
-    ansible-playbooks win_update.yml
+    ansible-playbook win_update.yml
     ```
 
 5. Open Visual Studio Code from Linux
