@@ -1,10 +1,4 @@
 ---
-# dos2unix /mnt/d/Repos_Exp/pc-setup/etc/ansible/desktop_backup.yml
-# sudo cp /mnt/d/Repos_Exp/pc-setup/etc/ansible/desktop_backup.yml /etc/ansible/desktop_backup.yml
-# cd /etc/ansible/
-# ansible-playbook desktop_backup.yml -vvvv
-
-
 - hosts: windows
   gather_facts: false
   tasks:
@@ -14,6 +8,9 @@
       product_id: 7-Zip
       arguments: /S
       state: present
+
+  # Backup Elite Dangerous
+  # - keybinds omfg
 
 
 # - Backup Game Files:
@@ -27,4 +24,8 @@
 
 # ::: maybe :::
 # - automate Plex
+
+- hosts: home
+  roles:
+  - windows/backup/games/world_of_warcraft
 ...

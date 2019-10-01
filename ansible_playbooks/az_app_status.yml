@@ -1,9 +1,4 @@
 ---
-# cd /etc/ansible/
-# dos2unix /mnt/d/Repos_Exp/pc-setup/etc/ansible/azure_facts.yml
-# sudo cp /mnt/d/Repos_Exp/pc-setup/etc/ansible/azure_facts.yml azure_facts.yml
-# ansible-playbook azure_facts.yml
-
 - hosts: localhost
   # become: true
   # gather_facts: false

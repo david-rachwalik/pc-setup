@@ -1,10 +1,4 @@
 ---
-# dos2unix /mnt/d/Repos_Exp/pc-setup/etc/ansible/desktop_uninstall.yml
-# sudo cp /mnt/d/Repos_Exp/pc-setup/etc/ansible/desktop_uninstall.yml /etc/ansible/desktop_uninstall.yml
-# cd /etc/ansible/
-# ansible-playbook desktop_uninstall.yml -vvvv
-
-
 - hosts: windows
   gather_facts: false
   tasks:

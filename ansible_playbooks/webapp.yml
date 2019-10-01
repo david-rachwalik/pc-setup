@@ -1,10 +1,4 @@
 ---
-# cd /etc/ansible/
-# dos2unix /mnt/d/Repos_Exp/pc-setup/etc/ansible/azure_webapp.yml
-# sudo cp /mnt/d/Repos_Exp/pc-setup/etc/ansible/azure_webapp.yml azure_webapp.yml
-# ansible-playbook azure_webapp.yml -e "resource_group_name=ansible_test_rg" -vvvv
-
-
 # https://github.com/Azure-Samples/ansible-playbooks/blob/master/webapp.yml
 
 # Description

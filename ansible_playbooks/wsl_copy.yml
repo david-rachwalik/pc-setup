@@ -1,4 +1,7 @@
 ---
+# This playbook's purpose is to transfer files from Windows local to WLS
+
+# --- Previous ad-hoc commands used:
 # sudo cp /mnt/d/Repos_Exp/pc-setup/etc/ansible/wsl_playbook_copy.yml /etc/ansible/wsl_playbook_copy.yml
 # dos2unix /etc/ansible/wsl_playbook_copy.yml
 # cd /etc/ansible/

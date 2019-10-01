@@ -1,10 +1,4 @@
 ---
-# cd /etc/ansible/
-# dos2unix /mnt/d/Repos_Exp/pc-setup/etc/ansible/az_delete_resourcegroup.yml
-# sudo cp /mnt/d/Repos_Exp/pc-setup/etc/ansible/az_delete_resourcegroup.yml az_delete_resourcegroup.yml
-# ansible-playbook az_delete_resourcegroup.yml -vvvv
-
-
 - hosts: localhost
   gather_facts: false
   environment: "{{azure_environment}}"

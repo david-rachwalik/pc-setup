@@ -1,10 +1,4 @@
 ---
-# cd /etc/ansible/
-# dos2unix /mnt/d/Repos_Exp/pc-setup/etc/ansible/az_create_webapp.yml
-# sudo cp /mnt/d/Repos_Exp/pc-setup/etc/ansible/az_create_webapp.yml az_create_webapp.yml
-# ansible-playbook az_create_webapp.yml -vvvv
-
-
 - hosts: localhost
   # connection: local
   vars:
