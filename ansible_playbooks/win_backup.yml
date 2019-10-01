@@ -1,16 +1,10 @@
 ---
+# - hosts: home
 - hosts: windows
   gather_facts: false
-  tasks:
-  - name: Install 7zip from a network share specifying the credentials
-    win_package:
-      path: C:\Program Files\7-Zip\7z.exe
-      product_id: 7-Zip
-      arguments: /S
-      state: present
-
-  # Backup Elite Dangerous
-  # - keybinds omfg
+  roles:
+  - windows/backup/games/world_of_warcraft
+  - windows/backup/games/elite_dangerous
 
 
 # - Backup Game Files:
@@ -24,8 +18,4 @@
 
 # ::: maybe :::
 # - automate Plex
-
-- hosts: home
-  roles:
-  - windows/backup/games/world_of_warcraft
 ...

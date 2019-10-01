@@ -1,4 +1,6 @@
 ---
+username: david
+
 world_of_warcraft_backups:
 - name: beta_classic
   dir: "/mnt/e/GameFiles/World of Warcraft/_classic_beta_"
