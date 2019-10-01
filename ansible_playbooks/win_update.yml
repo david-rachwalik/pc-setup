@@ -1,65 +1,37 @@
 ---
-# dos2unix /mnt/d/Repos_Exp/pc-setup/etc/ansible/desktop_setup.yml
-# sudo cp /mnt/d/Repos_Exp/pc-setup/etc/ansible/desktop_setup.yml /etc/ansible/desktop_setup.yml
-# cd /etc/ansible/
+# This playbook's purpose is to provision Windows 10
+
 # ansible-playbook desktop_setup.yml --tags "packages" -vvvv
 # ansible-playbook desktop_setup.yml --skip-tags "configuration,packages" -vvvv
 
+    # - install software using Chocolatey
+    # - configure application settings
+    # - install software not covered by Chocolatey
+    #   - scanner
+
 
 - hosts: windows
-  gather_facts: false
   roles:
-  - chocolatey/install
-  - chocolatey/uninstall
-
-  tasks:
-  # https://docs.ansible.com/ansible/latest/modules/win_package_module.html
-  - block:
-    # 7-Zip exe doesn't use a guid for the Product ID
-    - name: Install 7zip from a network share specifying the credentials
-      win_package:
-        # path: \\domain\programs\7z.exe
-        path: C:\Program Files\7-Zip\7z.exe
-        product_id: 7-Zip
-        arguments: /S
-        state: present
-        
-    tags: ["packages"]
-
-
   # Windows Updates (auto-reboots, requires remote management)
   # https://docs.ansible.com/ansible/2.5/modules/win_updates_module.html
 
+  - windows/chocolatey/install
+  - windows/chocolatey/uninstall
+  - windows/desktop
 
-  # https://www.ccleaner.com/docs/ccleaner/advanced-usage/command-line-parameters
-  # ccleaner.exe /analyze "log.txt"
-  # ccleaner.exe /clean "log.txt"
-
-
-  - block:
-    # https://docs.ansible.com/ansible/latest/modules/win_find_module.html
-    - name: Find Desktop Shortcuts
-      win_find:
-        paths:
-        - C:\Users\Public\Desktop
-        - C:\Users\david\Desktop
-        patterns: ["*.lnk"]
-      register: find_result
-      
-    # https://docs.ansible.com/ansible/latest/modules/win_file_module.html
-    - name: Delete Desktop Shortcuts
-      win_file:
-        path: "{{item.path}}"
-        state: absent
-      loop: "{{find_result.files}}"
-      register: file_result
-      
-    - name: Display Remaining Files
-      win_find:
-        paths:
-        - C:\Users\Public\Desktop
-        - C:\Users\david\Desktop
-      register: find_result
+  # tasks:
+  # https://docs.ansible.com/ansible/latest/modules/win_package_module.html
+  # - block:
+  #   # 7-Zip exe doesn't use a guid for the Product ID
+  #   - name: Install 7zip from a network share specifying the credentials
+  #     win_package:
+  #       # path: \\domain\programs\7z.exe
+  #       path: C:\Program Files\7-Zip\7z.exe
+  #       product_id: 7-Zip
+  #       arguments: /S
+  #       state: present
+  #   tags: ["packages"]
     
-    tags: ["desktop"]
+  # https://docs.microsoft.com/en-us/cli/azure/install-azure-cli-apt
+  # curl -sL https://aka.ms/InstallAzureCLIDeb | bash
 ...

@@ -1,34 +1,57 @@
-            ::: Ansible for Windows 10 :::
+# Ansible Playbooks
 
-1) Connect to Windows and gather facts about the environment
-- ansible-playbook win_status.yml
+``` bash
+cd ~/pc-setup/ansible_playbooks/
+```
 
-2) Backup Windows settings
-- ansible-playbook win_backup.yml
+## Ansible for Windows 10
 
-3) Install Windows features and applications
-- ansible-playbook win_install.yml
+- Connect to Windows and gather facts about the environment
 
-4) Uninstall Windows features and applications
-- ansible-playbook win_uninstall.yml
+    ``` bash
+    ansible-playbook win_status.yml
+    ```
 
+- Backup Windows application settings & data
 
-Backup application settings and update Windows:
-- backup game saves, screenshots, addons
-- backup preferences for productivity programs
-- update windows features, install patches, chocolatey upgrade, etc.
-- configure security settings
+    ``` bash
+    ansible-playbook win_backup.yml
+    ```
 
-*) For other playbook plans, see TODO.md
+  - backup game saves, screenshots, addons
+  - backup preferences for productivity programs
 
+- Install Windows features and applications
 
-            ::: Ansible for Azure :::
+    ``` bash
+    ansible-playbook win_install.yml
+    ```
 
-1) Connect to Azure and gather facts about resource groups
-- ansible-playbook az_app_status.yml
+  - update windows features, install patches, chocolatey upgrade, etc.
+  - configure security settings
 
-2) Create an Azure WebApp
-- ansible-playbook az_app_create.yml
+- Uninstall Windows features and applications
 
-3) Delete an Azure WebApp
-- ansible-playbook az_app_delete.yml
+    ``` bash
+    ansible-playbook win_uninstall.yml
+    ```
+
+## Ansible for Azure
+
+- Connect to Azure and gather facts about resource groups
+
+    ``` bash
+    ansible-playbook az_app_status.yml
+    ```
+
+- Create an Azure WebApp
+
+    ``` bash
+    ansible-playbook az_app_create.yml
+    ```
+
+- Delete an Azure WebApp
+
+    ``` bash
+    ansible-playbook az_app_delete.yml
+    ```

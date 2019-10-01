@@ -1,0 +1,11 @@
+---
+world_of_warcraft_backups:
+- name: beta_classic
+  dir: "/mnt/e/GameFiles/World of Warcraft/_classic_beta_"
+
+# --- Backup Directories ---
+wow_beta_classic_dir: "/mnt/e/GameFiles/World of Warcraft/_classic_beta_"
+wow_classic_dir: "/mnt/e/GameFiles/World of Warcraft/_classic_"
+# wow_ptr_retail_dir: "/mnt/e/GameFiles/World of Warcraft/_retail_"
+wow_retail_dir: "/mnt/e/GameFiles/World of Warcraft/_retail_"
+...

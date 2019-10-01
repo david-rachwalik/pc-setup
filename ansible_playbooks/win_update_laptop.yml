@@ -1,0 +1,17 @@
+---
+# This playbook's purpose is to provision Windows 10
+# - controls desktop using the laptop
+
+# --- Testing the laptop updating the desktop
+# - ping
+# - hello world powershell command
+# - restart, wait for connection, hello world again
+
+- hosts: home
+  tasks:
+  - name: Test Windows desktop connection
+    win_ping:
+  roles:
+  - chocolatey/install
+  - chocolatey/uninstall
+...

@@ -6,9 +6,6 @@
     #   state: present
     win_chocolatey: "{{item | combine({state: present})}}"
     # https://docs.ansible.com/ansible/latest/user_guide/become.html#become-windows
-    become: true
-    become_user: Administrator
-    become_method: runas
     loop: "{{chocolatey_install}}"
   
   # https://chocolatey.org/packages/VisualStudio2017Community
@@ -36,6 +33,9 @@
         /NoDesktopIcon
         /NoContextMenuFiles
         /NoContextMenuFolders
-  
+
+  become: true
+  become_user: Administrator
+  become_method: runas
   tags: ["chocolatey", "install"]
 ...
