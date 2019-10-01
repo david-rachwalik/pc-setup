@@ -1,7 +1,18 @@
 ---
-- name: Create resource group
-  azure_rm_resourcegroup:
-    name: "{{resource_group_webapp}}"
-    location: "{{location}}"
-  when: windows_has_git | default(true) == true
+- name: Verify ~/bin directory
+  file:
+    path: ~/bin
+    state: directory
+    mode: '0755'
+
+# - name: Link ~/bin to the update playbook
+
+# mkdir /etc/ansible/group_vars
+# mkdir /etc/ansible/host_vars
+# cp /mnt/d/Repos_Exp/pc-setup/etc/ansible/group_vars/windows.yml /etc/ansible/group_vars/windows.yml
+# cp /mnt/d/Repos_Exp/pc-setup/etc/ansible/host_vars/localhost.yml /etc/ansible/host_vars/localhost.yml
+# cp /mnt/d/Repos_Exp/pc-setup/play_test.yml /etc/ansible/play_test.yml
+
+# https://docs.microsoft.com/en-us/cli/azure/install-azure-cli-apt
+# curl -sL https://aka.ms/InstallAzureCLIDeb | bash
 ...

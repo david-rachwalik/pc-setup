@@ -1,59 +1,17 @@
 ---
-# sudo cp /mnt/d/Repos_Exp/pc-setup/etc/ansible/wsl_playbook_copy.yml /etc/ansible/wsl_playbook_copy.yml
-# dos2unix /etc/ansible/wsl_playbook_copy.yml
-# cd /etc/ansible/
-# ansible-playbook wsl_playbook_copy.yml
+# This playbook's purpose is to provision WSL
 
-- hosts: localhost
+- hosts: linux
   become: true
+  roles:
+  - linux/apt
+  - linux/pip
+  - linux/setup
   tasks:
-  # https://stackoverflow.com/questions/41535838/how-to-run-apt-update-and-upgrade-via-ansible-shell
-  # $ ansible all -m apt -a "upgrade=yes update_cache=yes cache_valid_time=86400" --become
-  - name: Update and upgrade apt packages
-    apt:
-      upgrade: yes
-      update_cache: yes
-      cache_valid_time: 86400 #One day
-
-  # - name: Upgrade all packages to the latest version
-  #   apt:
-  #     name: "*"
-  #     state: latest
-
-  # - name: Update all packages to the latest version
-  #   apt:
-  #     upgrade: dist
-
-  
-  # - name: Verify ~/bin directory
-  #   mkdir ~/bin
-  # - name: Link ~/bin to the update playbook
-
-  # Install extra tool to convert Windows files to Linux
-  # apt-get install -y dos2unix
-
-  # https://azure.microsoft.com/en-us/resources/samples/ansible-playbooks/
-  # pip install ansible[azure]
-  # ansible-galaxy install azure.azure_preview_modules
-  # pip install -r ~/.ansible/roles/azure.azure_preview_modules/files/requirements-azure.txt
-
-
-  # mkdir /etc/ansible/group_vars
-  # mkdir /etc/ansible/host_vars
-  # cp /mnt/d/Repos/pc-setup/etc/ansible/group_vars/windows.yml /etc/ansible/group_vars/windows.yml
-  # cp /mnt/d/Repos/pc-setup/etc/ansible/host_vars/localhost.yml /etc/ansible/host_vars/localhost.yml
-  # cp /mnt/d/Repos/pc-setup/play_test.yml /etc/ansible/play_test.yml
-
-  # https://docs.microsoft.com/en-us/cli/azure/install-azure-cli-apt
-  # curl -sL https://aka.ms/InstallAzureCLIDeb | bash
-
-  
-  # - name: Transfer playbooks from Windows to WSL
-  #   copy:
-  #     src: "{{win_repo}}"
-  #     dest: "{{wsl_repo}}"
-      
-  # - name: Convert Windows files to *nix
-  #   command: "dos2unix {{wsl_repo}}"
-  #   register: out_dos2unix
+  # https://docs.ansible.com/ansible/latest/modules/git_module.html
+  - name: Pull the latest files from Git
+    git:
+      repo: "{{git_repo}}"
+      dest: "{{wsl_repo}}"
+      force: true
 ...

@@ -1,0 +1,9 @@
+---
+# ansible localhost -m pip -a "name=pip state=latest"
+- name: Update pip packages
+  pip:
+    name: "{{item}}"
+    state: latest
+  loop: "{{pip_packages}}"
+  register: out_pip
+...

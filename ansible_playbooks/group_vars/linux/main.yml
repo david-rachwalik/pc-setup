@@ -1,0 +1,25 @@
+---
+apt_packages:
+# Ansible recommended:
+- python-pip
+- git
+- libffi-dev
+- libssl-dev
+# Extra:
+# Tool to convert Windows files to Linux format
+# sudo apt-get install -y dos2unix
+# ansible localhost -m apt -a "name=dos2unix"
+- dos2unix
+
+
+# https://azure.microsoft.com/en-us/resources/samples/ansible-playbooks/
+# pip install ansible[azure]
+# ansible-galaxy install azure.azure_preview_modules
+# pip install -r ~/.ansible/roles/azure.azure_preview_modules/files/requirements-azure.txt
+pip_packages:
+# Ansible recommended:
+- ansible
+- pywinrm
+# Extra:
+- pip
+...
