@@ -1,4 +1,6 @@
 ---
+# Windows username = $HOME|basename
+
 # https://docs.ansible.com/ansible/latest/user_guide/intro_inventory.html
 # -------- Host Connection Settings --------
 ansible_connection: winrm

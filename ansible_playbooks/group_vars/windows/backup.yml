@@ -1,13 +1,23 @@
 ---
-username: david
-
 world_of_warcraft_backups:
-- name: beta_classic
-  dir: "/mnt/e/GameFiles/World of Warcraft/_classic_beta_"
+# - name: ptr_retail
+#   root_dir: /mnt/e/GameFiles/World of Warcraft/_retail_
 
-# --- Backup Directories ---
-wow_beta_classic_dir: "/mnt/e/GameFiles/World of Warcraft/_classic_beta_"
-wow_classic_dir: "/mnt/e/GameFiles/World of Warcraft/_classic_"
-# wow_ptr_retail_dir: "/mnt/e/GameFiles/World of Warcraft/_retail_"
-wow_retail_dir: "/mnt/e/GameFiles/World of Warcraft/_retail_"
+- name: retail
+  root_dir: E:\GameFiles\World of Warcraft\_retail_
+  screenshot_dir: E:\GameFiles\World of Warcraft\_retail_\Screenshots
+  wtf_dir: E:\GameFiles\World of Warcraft\_retail_\WTF
+  addon_dir: E:\GameFiles\World of Warcraft\_retail_\Interface\AddOns
+
+- name: beta_classic
+  root_dir: E:\GameFiles\World of Warcraft\_classic_beta_
+  screenshot_dir: E:\GameFiles\World of Warcraft\_classic_beta_\Screenshots
+  wtf_dir: E:\GameFiles\World of Warcraft\_classic_beta_\WTF
+  addon_dir: E:\GameFiles\World of Warcraft\_classic_beta_\Interface\AddOns
+
+- name: classic
+  root_dir: E:\GameFiles\World of Warcraft\_classic_
+  screenshot_dir: E:\GameFiles\World of Warcraft\_classic_\Screenshots
+  wtf_dir: E:\GameFiles\World of Warcraft\_classic_\WTF
+  addon_dir: E:\GameFiles\World of Warcraft\_classic_\Interface\AddOns
 ...
