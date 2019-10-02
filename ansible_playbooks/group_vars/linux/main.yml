@@ -1,11 +1,13 @@
 ---
 apt_packages:
-# Ansible recommended:
+# --- Ansible recommended:
 - python-pip
 - git
 - libffi-dev
 - libssl-dev
-# Extra:
+# --- Extra:
+# Required by Ansible to use 'json_query' filter
+- jmespath
 # Tool to convert Windows files to Linux format
 # sudo apt-get install -y dos2unix
 # ansible localhost -m apt -a "name=dos2unix"
