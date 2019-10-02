@@ -21,6 +21,8 @@
     ``` bash
     # curl -sL https://raw.githubusercontent.com/david-rachwalik/pc-setup/master/wsl_ansible_install.sh | sudo bash
     sudo git clone https://github.com/david-rachwalik/pc-setup.git ~/pc-setup/
+    sudo chmod +x ~/pc-setup/wsl_ansible_install.sh
+    sudo chown -R rhodair:rhodair ~/pc-setup/
     sudo -H ~/pc-setup/wsl_ansible_install.sh
     ```
 
