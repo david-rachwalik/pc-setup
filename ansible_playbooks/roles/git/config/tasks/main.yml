@@ -1,0 +1,10 @@
+---
+# https://git-scm.com/book/en/v2/Getting-Started-First-Time-Git-Setup
+# https://www.atlassian.com/git/tutorials/setting-up-a-repository/git-config
+
+- name: Set Git configuration user.name
+  command: "git config --global user.name '{{username}}'"
+
+- name: Set Git configuration user.email
+  command: "git config --global user.email '{{ansible_user}}'"
+...

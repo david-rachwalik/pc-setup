@@ -7,19 +7,12 @@
   - linux/apt
   - linux/pip
   - linux/setup
-  tasks:
-  # https://docs.ansible.com/ansible/latest/modules/git_module.html
-  - name: Pull the latest files from Git
-    git:
-      repo: "{{git_repo}}"
-      dest: "{{wsl_repo}}"
-      force: true
-
-  # https://www.atlassian.com/git/tutorials/setting-up-a-repository/git-config
-  # - name: Copy in git-config file
-  - name: Set Git configuration user.name
-    command: "git config --global user.name '{{username}}'"
-
-  - name: Set Git configuration user.email
-    command: "git config --global user.email '{{ansible_user}}'"
+  - git/config
+  # tasks:
+  # # https://docs.ansible.com/ansible/latest/modules/git_module.html
+  # - name: Pull the latest files from Git
+  #   git:
+  #     repo: "{{git_repo}}"
+  #     dest: "{{wsl_repo}}"
+  #     force: true
 ...
