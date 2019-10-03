@@ -1,0 +1,23 @@
+---
+# https://en.wikipedia.org/wiki/Windows_Registry
+# https://docs.microsoft.com/en-us/windows-server/administration/windows-commands/reg-query
+
+# --- Key for default optic drive action (maybe): HKEY_CLASSES_ROOT
+# https://docs.microsoft.com/en-us/windows/win32/sysinfo/hkey-classes-root-key
+
+
+# https://docs.ansible.com/ansible/latest/modules/win_reg_stat_module.html
+- name: Get registry key info
+  win_reg_stat:
+    path: HKEY_CLASSES_ROOT
+  register: out_reg_stat
+
+# https://docs.ansible.com/ansible/latest/modules/win_regedit_module.html
+# - name: Add or update registry path MyCompany, with entry 'hello', and containing 'world'
+#   win_regedit:
+#     path: HKCU:\Software\MyCompany
+#     name: hello
+#     data: world
+
+# https://docs.ansible.com/ansible/latest/modules/win_regmerge_module.html
+...

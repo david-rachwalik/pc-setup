@@ -17,7 +17,7 @@
 
   - windows/chocolatey/install
   - windows/chocolatey/uninstall
-  - windows/desktop
+  - windows/desktop/cleanup
 
   # tasks:
   # https://docs.ansible.com/ansible/latest/modules/win_package_module.html
@@ -34,4 +34,8 @@
     
   # https://docs.microsoft.com/en-us/cli/azure/install-azure-cli-apt
   # curl -sL https://aka.ms/InstallAzureCLIDeb | bash
+
+  # https://docs.microsoft.com/en-us/powershell/windows/get-started?view=win10-ps
+  # https://docs.microsoft.com/en-us/windows/configuration/configure-windows-10-taskbar
+  # https://www.winsysadminblog.com/2019/03/change-windows-10-taskbar-icons-script-deploying-a-custom-taskbar-for-windows-10/
 ...
