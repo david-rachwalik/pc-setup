@@ -1,4 +1,7 @@
 ---
+# https://docs.ansible.com/ansible/latest/reference_appendices/special_variables.html
+platform: "{{inventory_file}} | default('cross-platform')"
+
 git_repo: "https://github.com/david-rachwalik/pc-setup.git"
 win_repo: "/mnt/d/Repos_Exp/pc-setup"
 wsl_repo: "~/pc-setup"
