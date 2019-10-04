@@ -3,22 +3,33 @@
 - hosts: windows
   gather_facts: false
   roles:
-  - windows/backup/games/world_of_warcraft
-  # - windows/backup/games/overwatch
-  # - windows/backup/games/elite_dangerous
-  # - windows/backup/games/corruption_of_champions
-  # - windows/backup/games/diablo_iii
-  # - windows/backup/games/final_fantasy_xiv
-  # - windows/backup/games/skyrim_se
-  # - windows/backup/games/skyrim_vr
-  # - windows/backup/games/terraria
-  # - windows/backup/games/vrchat
-  # - windows/backup/games/age_of_empires_ii
-  # - windows/backup/games/age_of_empires_iii
-  # - windows/backup/games/bayonetta
+  - windows/games/world_of_warcraft
+  # - windows/games/overwatch
+  # - windows/games/corruption_of_champions
+  # - windows/games/diablo_iii
+  # - windows/games/skyrim_se
+  # - windows/games/skyrim_vr
+  # - windows/games/terraria
+  # - windows/games/vrchat
+  # - windows/games/age_of_empires_ii
+  # - windows/games/age_of_empires_iii
+  # - windows/games/bayonetta
+  # - windows/games/dragonball_fighter_z
+  # - windows/games/elite_dangerous
+  # - windows/games/final_fantasy_xiv
+  # - windows/games/left_4_dead
+  # - windows/games/left_4_dead_2
+  # - windows/games/magicka
+  # - windows/games/rocket_league
+  # - windows/games/senran_kagura_peach_beach_splash
+  # - windows/games/star_wars_knights_of_the_old_republic
+  # - windows/games/the_elder_scrolls_online
 
-  # - windows/backup/apps/obs
-  # - windows/backup/apps/discord
+  # - windows/apps/discord
+  # - windows/apps/obs
+  # - windows/apps/vscode
+
+  # - windows/system/handbrake
 
 
 # - Rip DVD|BluRay disks using MakeMKV
