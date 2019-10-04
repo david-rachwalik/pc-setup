@@ -4,17 +4,31 @@
   gather_facts: false
   roles:
   - windows/backup/games/world_of_warcraft
-  - windows/backup/games/elite_dangerous
+  # - windows/backup/games/overwatch
+  # - windows/backup/games/elite_dangerous
+  # - windows/backup/games/corruption_of_champions
+  # - windows/backup/games/diablo_iii
+  # - windows/backup/games/final_fantasy_xiv
+  # - windows/backup/games/skyrim_se
+  # - windows/backup/games/skyrim_vr
+  # - windows/backup/games/terraria
+  # - windows/backup/games/vrchat
+  # - windows/backup/games/age_of_empires_ii
+  # - windows/backup/games/age_of_empires_iii
+  # - windows/backup/games/bayonetta
+
+  # - windows/backup/apps/obs
+  # - windows/backup/apps/discord
 
 
-# - Backup Game Files:
-#   - World of Warcraft
-#   - Terraria
-#   - Skyrim VR
-#   - VRChat
 # - Rip DVD|BluRay disks using MakeMKV
 # - Set default action to rip disks when inserted in any optical drive
 # - Compress a directory of videos using HandBrake
+
+# - Sims 3
+#   - backup
+#   - run memory cleanup
+#   - addon directory snapshot
 
 # ::: maybe :::
 # - automate Plex

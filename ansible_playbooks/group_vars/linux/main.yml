@@ -12,6 +12,10 @@ apt_packages:
 # sudo apt-get install -y dos2unix
 # ansible localhost -m apt -a "name=dos2unix"
 - dos2unix
+# --- .NET Core SDK ---
+# https://dotnet.microsoft.com/download/linux-package-manager/ubuntu16-04/sdk-current
+- apt-transport-https
+- dotnet-sdk-3.0
 
 
 # https://azure.microsoft.com/en-us/resources/samples/ansible-playbooks/
