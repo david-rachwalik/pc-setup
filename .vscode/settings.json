@@ -1,4 +1,6 @@
 {
+    // "git.path": "C:\\Git\\cmd\\git.exe",
+    "git.enabled": true,
     "python.pythonPath": "C:\\Python27\\python.exe",
     "workbench.editor.labelFormat": "short"
 }
