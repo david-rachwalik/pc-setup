@@ -8,12 +8,23 @@
 # https://code.visualstudio.com/docs/editor/extension-gallery#_command-line-extension-management
 # TODO: Instead of what's below (which worked!), do this command line version of 'code --install-extension'
 #   for Windows and Linux vscode separately
-- name: Install VSCode Extensions
-  win_command: "code --install-extension {{item}}"
-  loop: "{{vscode_extensions}}"
+
+- name: List VSCode Extensions
+  win_command: "code --list-extensions"
+  register: out_code_extensions
+
+- debug:
+    var: out_code_extensions
+
+# - name: Get the difference between out_code_extensions and vscode_install_extensions
+
+# - name: Install VSCode Extensions
+#   win_command: "code --install-extension {{item}}"
+#   loop: "{{vscode_extensions}}"
+
 # ---------------------------------------------------------
 # ---------------------------------------------------------
-# ansible windows -m include_role -a 'name=windows/vscode/setup'
+# ansible windows -m include_role -a 'name=windows/apps/vscode/setup'
 
 
 # Taken from /home/rhodair/pc-setup/ansible_playbooks/roles/windows/backup/apps/vscode/tasks/main.yml
