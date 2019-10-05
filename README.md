@@ -25,7 +25,7 @@
     sudo chown -R david:david ~/pc-setup/
     sudo -H ~/pc-setup/wsl_setup.sh
     # Copy the public key string to your GitHub Settings
-    view ~/.ssh/id_rsa.pub
+    sudo view /root/.ssh/id_rsa.pub
     ```
 
 3. Run Ansible on Linux to provision Linux
