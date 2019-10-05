@@ -1,0 +1,4 @@
+---
+app_name: null
+az_group: "{{app_name}}Group"
+az_location: "South Central US"

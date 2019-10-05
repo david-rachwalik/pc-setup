@@ -1,0 +1,7 @@
+---
+app_name: null
+az_group: "{{app_name}}Group"
+# 'az_plan' must be between 3-24 chars, only lowercase or numbers
+# TODO: replace() will use regex to strip ALL special characters
+az_plan_name: "{{app_name | trim | replace('_', '') | truncate(20) | lower}}plan"
+az_plan_sku: F1

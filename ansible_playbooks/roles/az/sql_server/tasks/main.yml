@@ -1,0 +1,8 @@
+---
+- name: Create SQL Server
+  azure_rm_sqlserver:
+    name: "{{app_server}}"
+    resource_group: "{{az_group}}"
+    location: "{{az_location}}"
+    admin_username: "{{kit_user}}"
+    admin_password: "{{kit_pass}}"

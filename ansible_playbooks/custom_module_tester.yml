@@ -1,0 +1,8 @@
+---
+# https://docs.ansible.com/ansible/latest/dev_guide/developing_modules.html
+
+- hosts: localhost
+  connection: local
+  gather_facts: false
+  roles:
+    - common/custom_module

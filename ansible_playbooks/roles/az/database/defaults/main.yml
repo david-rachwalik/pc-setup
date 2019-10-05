@@ -1,0 +1,4 @@
+---
+dependencies:
+  - { role: az/resource_group }
+  - { role: az/sql_server }

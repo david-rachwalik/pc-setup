@@ -1,0 +1,28 @@
+---
+# Products available by region
+# https://azure.microsoft.com/en-us/global-infrastructure/services/
+
+- name: Display storage plan name
+  debug:
+    var: az_plan_name
+
+- name: Display web app name
+  debug:
+    var: app_name
+
+- name: Create a windows web app
+  azure_rm_webapp:
+    state: present
+    name: "{{app_name}}"
+    resource_group: "{{az_group}}"
+    plan:
+      resource_group: "{{az_group}}"
+      name: "{{az_plan_name}}"
+      is_linux: false
+      sku: "{{az_plan_sku}}"
+
+# - name: Create web application deployment
+#   azure_rm_deployment:
+#     state: present
+#     name: "{{app_name}}"
+#     resource_group: "{{az_group}}"
