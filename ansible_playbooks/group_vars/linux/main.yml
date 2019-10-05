@@ -1,13 +1,11 @@
 ---
 apt_packages:
-# --- Ansible recommended:
+# --- Ansible ---
 - python-pip
 - git
 - libffi-dev
 - libssl-dev
-# --- Extra:
-# Required by Ansible to use 'json_query' filter
-- jmespath
+# --- misc. ---
 # Tool to convert Windows files to Linux format
 # sudo apt-get install -y dos2unix
 # ansible localhost -m apt -a "name=dos2unix"
@@ -23,9 +21,10 @@ apt_packages:
 # ansible-galaxy install azure.azure_preview_modules
 # pip install -r ~/.ansible/roles/azure.azure_preview_modules/files/requirements-azure.txt
 pip_packages:
-# Ansible recommended:
+- pip
+# Ansible ---
 - ansible
 - pywinrm
-# Extra:
-- pip
+# Required by Ansible to use 'json_query' filter
+- jmespath
 ...
