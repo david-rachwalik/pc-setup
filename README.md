@@ -14,7 +14,7 @@
     Invoke-Expression $($RemoteScript.Content)
     ```
 
-2. Run Linux Ubuntu to install Ansible on Linux
+2. Run Linux Ubuntu to install Ansible on Linux (+step 3)
 
     ``` bash
     curl -sL https://raw.githubusercontent.com/david-rachwalik/pc-setup/master/wsl_setup.sh | sudo bash
@@ -24,14 +24,14 @@
 
     ``` bash
     cd ~/pc-setup/ansible_playbooks/
-    ansible-playbook wsl_update.yml
+    sudo ansible-playbook wsl_update.yml
     ```
 
 4. Run Ansible on Linux to provision Windows 10
 
     ``` bash
     cd ~/pc-setup/ansible_playbooks/
-    ansible-playbook win_update.yml
+    sudo ansible-playbook win_update.yml
     ```
 
 > *Bonus (if not using Ansible)*: Run PowerShell (as Administrator) to [install Chocolatey](https://chocolatey.org/install)
