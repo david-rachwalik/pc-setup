@@ -1,0 +1,4 @@
+---
+powershell_uninstall_appx_packages:
+- CanonicalGroupLimited.Ubuntu18.04onWindows
+...

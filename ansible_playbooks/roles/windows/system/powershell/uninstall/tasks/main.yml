@@ -1,0 +1,5 @@
+---
+- name: Install Appx Packages
+  command: "Remove-AppxPackage {{item}}"
+  loop: "{{}}"
+...

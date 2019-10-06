@@ -1,0 +1,9 @@
+---
+# Gather packages and only install what's needed
+- include_role:
+    name: windows\system\powershell\list
+
+# - name: Install Appx Packages
+#   command: "Add-AppxPackage {{item}}"
+#   loop: "{{out_appx_packages.stdout|list}}"
+...
