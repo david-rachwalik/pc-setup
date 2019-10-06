@@ -14,7 +14,7 @@
     Invoke-Expression $($RemoteScript.Content)
     ```
 
-2. Run Linux Ubuntu (as Administrator) to install Ansible on Linux
+2. Run Linux Ubuntu to install Ansible on Linux
 
     [[REF](https://docs.ansible.com/ansible/devel/reference_appendices/config.html#cfg-in-world-writable-dir)] *Ansible will ignore ansible.cfg in a world writable directory*
 
@@ -45,10 +45,11 @@
 > *Bonus (if not using Ansible)*: Run PowerShell (as Administrator) to [install Chocolatey](https://chocolatey.org/install)
 
 ``` powershell
-# Run the Chocolatey install script from remote address
+# Run the Chocolatey install script
 Set-ExecutionPolicy Bypass -Scope Process -Force; iex ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))
-# Set Chocolatey to install future packages without confirmation prompts
+# Set Chocolatey to skip confirmation prompts
 choco feature enable -n allowGlobalConfirmation
+
 ```
 
 ## PC Health & Monitoring
