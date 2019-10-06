@@ -16,16 +16,8 @@
 
 2. Run Linux Ubuntu to install Ansible on Linux
 
-    [[REF](https://docs.ansible.com/ansible/devel/reference_appendices/config.html#cfg-in-world-writable-dir)] *Ansible will ignore ansible.cfg in a world writable directory*
-
     ``` bash
-    # curl -sL https://raw.githubusercontent.com/david-rachwalik/pc-setup/master/wsl_setup.sh | sudo bash
-    sudo git clone https://github.com/david-rachwalik/pc-setup.git ~/pc-setup/
-    sudo chmod +x ~/pc-setup/wsl_setup.sh
-    sudo chown -R david:david ~/pc-setup/
-    sudo -H ~/pc-setup/wsl_setup.sh
-    # Copy the public key string to your GitHub Settings
-    sudo view /root/.ssh/id_rsa.pub
+    curl -sL https://raw.githubusercontent.com/david-rachwalik/pc-setup/master/wsl_setup.sh | sudo bash
     ```
 
 3. Run Ansible on Linux to provision Linux

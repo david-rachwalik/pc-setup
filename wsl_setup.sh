@@ -31,3 +31,16 @@ if [ ! -d ~/.ssh ]; then
     # Update Git remote from HTTPS to SSH
     # git remote set-url origin git@github.com:david-rachwalik/pc-setup.git
 fi
+
+# Note: Ansible will ignore ansible.cfg in a world writable directory
+# https://docs.ansible.com/ansible/devel/reference_appendices/config.html#cfg-in-world-writable-dir
+git clone https://github.com/david-rachwalik/pc-setup.git ~/pc-setup/
+# chmod +x ~/pc-setup/wsl_setup.sh
+# Written for username 'david'
+chown -R david:david ~/pc-setup/
+# sudo -H ~/pc-setup/wsl_setup.sh
+# Copy the public key string to your GitHub Settings
+# sudo view /root/.ssh/id_rsa.pub
+cd ~/pc-setup/ansible_playbooks/
+ansible-playbook wsl_update.yml
+
