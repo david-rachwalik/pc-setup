@@ -58,25 +58,18 @@ ansible home -m include_role -a "name=windows/backup"
 ansible home -m include_role -a "name=windows/ccleaner/shutdown"
 ```
 
-> *For additional examples: view ~/pc-setup/ansible_playbooks/README.md*
+> *[For additional examples](https://github.com/david-rachwalik/pc-setup/tree/master/ansible_playbooks)*
 
 ## Development
 
-### Open File Explorer from Linux
+### Open File Explorer from Linux Ubuntu
 
 ``` bash
 explorer.exe .
 ```
 
-### Open VSCode from Linux
+### Open VSCode from Linux Ubuntu
 
 ``` bash
 code ~/pc-setup/
-```
-
-### Before using Git in VSCode
-
-``` bash
-git config --global user.email "you@example.com"
-git config --global user.name "Your Name"
 ```

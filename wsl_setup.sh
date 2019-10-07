@@ -1,6 +1,8 @@
 #!/bin/bash
 export DEBIAN_FRONTEND=noninteractive
 
+echo $USER
+
 # Upgrade baseline files of Linux distribution
 # apt update && apt full-upgrade -y
 apt-get update && apt-get dist-upgrade -y
@@ -55,7 +57,7 @@ sudo -u david git clone https://github.com/david-rachwalik/pc-setup.git ~/pc-set
 # https://help.github.com/en/articles/changing-a-remotes-url#switching-remote-urls-from-https-to-ssh
 # Update Git remote from HTTPS to SSH
 # git remote set-url origin git@github.com:david-rachwalik/pc-setup.git
-
+echo $USER
 
 # chmod +x ~/pc-setup/wsl_setup.sh
 # sudo -H ~/pc-setup/wsl_setup.sh
