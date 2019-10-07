@@ -29,6 +29,10 @@ if [ ! -d ~/.ssh ]; then
     # Start the ssh-agent in the background
     eval $(ssh-agent -s)
     ssh-add ~/.ssh/id_rsa
+    # Add the contents of your local public key to authorized_keys
+    if [ ! -f ~/.ssh/authorized_keys ]; then
+        cat ~/.ssh/id_rsa.pub > ~/.ssh/authorized_keys
+    fi
     # Add GitHub to known_hosts if it doesn't exist
     if [ ! -f ~/.ssh/known_hosts ]; then
         touch ~/.ssh/known_hosts
@@ -37,6 +41,12 @@ if [ ! -d ~/.ssh ]; then
     # Copy the public key string to your GitHub Settings
     # sudo view /root/.ssh/id_rsa.pub
     # view ~/.ssh/id_rsa.pub
+
+    # Testing sed command to update SSH config
+    # sed 's/^PasswordAuthentication.*/PasswordAuthentication yes/i' /etc/ssh/sshd_config | grep '^PasswordAuthentication.*'
+    sed -i 's/^PasswordAuthentication.*/PasswordAuthentication yes/i' /etc/ssh/sshd_config
+    sed -i 's/^#PermitRootLogin.*/PermitRootLogin yes/i' /etc/ssh/sshd_config
+    service ssh restart
 fi
 
 # https://git-scm.com/book/en/v2/Getting-Started-First-Time-Git-Setup
