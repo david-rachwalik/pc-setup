@@ -17,7 +17,7 @@
 2. Run Linux Ubuntu to install Ansible on Linux (+step 3)
 
     ``` bash
-    curl -sL https://raw.githubusercontent.com/david-rachwalik/pc-setup/master/wsl_setup.sh | sudo bash
+    curl -sL -H 'Cache-Control: no-cache' https://raw.githubusercontent.com/david-rachwalik/pc-setup/master/wsl_setup.sh | sudo bash
     ```
 
 3. Run Ansible on Linux to provision Linux

@@ -28,6 +28,9 @@ if [ ! -d ~/.ssh ]; then
     eval $(ssh-agent -s)
     ssh-add ~/.ssh/id_rsa
     # Add GitHub to known_hosts if it doesn't exist
+    if [ ! -f ~/.ssh/known_hosts ]; then
+        touch ~/.ssh/known_hosts
+    fi
     ssh-keygen -F github.com || ssh-keyscan -H github.com >> ~/.ssh/known_hosts
     # Copy the public key string to your GitHub Settings
     # sudo view /root/.ssh/id_rsa.pub
@@ -47,8 +50,8 @@ if [ -d ~/pc-setup ]; then
     rm -rf ~/pc-setup
 fi
 
-# git clone https://github.com/david-rachwalik/pc-setup.git ~/pc-setup
-git clone git@github.com:david-rachwalik/pc-setup.git ~/pc-setup
+sudo -u david git clone https://github.com/david-rachwalik/pc-setup.git ~/pc-setup
+# git clone git@github.com:david-rachwalik/pc-setup.git ~/pc-setup
 # https://help.github.com/en/articles/changing-a-remotes-url#switching-remote-urls-from-https-to-ssh
 # Update Git remote from HTTPS to SSH
 # git remote set-url origin git@github.com:david-rachwalik/pc-setup.git
@@ -60,6 +63,6 @@ git clone git@github.com:david-rachwalik/pc-setup.git ~/pc-setup
 
 # https://docs.ansible.com/ansible/devel/reference_appendices/config.html#cfg-in-world-writable-dir
 # Ansible will ignore ansible.cfg in a world writable directory (setting directory to user avoids the issue for git clones)
-chown -R david:david ~/pc-setup
+# chown -R david:david ~/pc-setup
 # cd ~/pc-setup/ansible_playbooks
 ansible-playbook ~/pc-setup/ansible_playbooks/wsl_update.yml
