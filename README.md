@@ -65,7 +65,7 @@ ansible home -m include_role -a "name=windows/ccleaner/shutdown"
 ### Open File Explorer from Linux
 
 ``` bash
-explorer.exe ~/pc-setup/
+explorer.exe .
 ```
 
 ### Open VSCode from Linux
