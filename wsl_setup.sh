@@ -25,7 +25,7 @@ pip install ansible pywinrm
 # Generate SSH keys if they don't exist
 if [ ! -d ~/.ssh ]; then
     # https://help.github.com/en/articles/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent
-    ssh-keygen -f $HOME/.ssh/id_rsa -t rsa -b 4096 -N "" -q
+    ssh-keygen -f $HOME/.ssh/id_rsa -t rsa -b 4096 -N "" -C "david.rachwalik@outlook.com" -q
     # Start the ssh-agent in the background
     eval $(ssh-agent -s)
     ssh-add ~/.ssh/id_rsa
@@ -46,6 +46,8 @@ if [ ! -d ~/.ssh ]; then
     # sed 's/^PasswordAuthentication.*/PasswordAuthentication yes/i' /etc/ssh/sshd_config | grep '^PasswordAuthentication.*'
     sed -i 's/^PasswordAuthentication.*/PasswordAuthentication yes/i' /etc/ssh/sshd_config
     sed -i 's/^#PermitRootLogin.*/PermitRootLogin yes/i' /etc/ssh/sshd_config
+    # sed 's/.*PubkeyAuthentication.*/PubkeyAuthentication yes/i' /etc/ssh/sshd_config | grep 'PubkeyAuthentication yes'
+    sed -i 's/.*PubkeyAuthentication.*/PubkeyAuthentication yes/i' /etc/ssh/sshd_config
     service ssh restart
 fi
 

@@ -10,7 +10,7 @@
     # Install WSL (*nix kernel) - restart system when prompted
     Enable-WindowsOptionalFeature -Online -FeatureName Microsoft-Windows-Subsystem-Linux
     # Cache and run the latest script to install Ubuntu + RemoteRM
-    $RemoteScript = Invoke-WebRequest https://raw.githubusercontent.com/david-rachwalik/pc-setup/master/win_setup.ps1
+    $RemoteScript = Invoke-WebRequest -Uri https://raw.githubusercontent.com/david-rachwalik/pc-setup/master/win_setup.ps1 -UseBasicParsing
     Invoke-Expression $($RemoteScript.Content)
     ```
 
