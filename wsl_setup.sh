@@ -11,10 +11,21 @@ apt-get install -y python-pip git libffi-dev libssl-dev
 # Install Ansible and WinRM
 pip install ansible pywinrm
 
+
 # Create bin directory if it doesn't exist
-if [ ! -d "$HOME/bin" ]; then
-    mkdir $HOME/bin
-fi
+# if [ ! -d "$HOME/bin" ]; then
+#     mkdir $HOME/bin
+# fi
+
+# chmod +x ~/pc-setup/wsl_setup.sh
+# sudo -H ~/pc-setup/wsl_setup.sh
+
+
+# https://docs.ansible.com/ansible/devel/reference_appendices/config.html#cfg-in-world-writable-dir
+# Ansible will ignore ansible.cfg in a world writable directory (setting directory to user avoids the issue for git clones)
+chown -R david:david ~/pc-setup/
+cd ~/pc-setup/ansible_playbooks/
+ansible-playbook wsl_update.yml
 
 
 # --- Git Steps ---
@@ -26,21 +37,17 @@ if [ ! -d ~/.ssh ]; then
     # Start the ssh-agent in the background
     eval $(ssh-agent -s)
     ssh-add ~/.ssh/id_rsa
-    
-    # https://help.github.com/en/articles/changing-a-remotes-url#switching-remote-urls-from-https-to-ssh
-    # Update Git remote from HTTPS to SSH
-    # git remote set-url origin git@github.com:david-rachwalik/pc-setup.git
+    # Copy the public key string to your GitHub Settings
+    # sudo view /root/.ssh/id_rsa.pub
+    # view ~/.ssh/id_rsa.pub
 fi
 
-# Note: Ansible will ignore ansible.cfg in a world writable directory
-# https://docs.ansible.com/ansible/devel/reference_appendices/config.html#cfg-in-world-writable-dir
-git clone https://github.com/david-rachwalik/pc-setup.git ~/pc-setup/
-# chmod +x ~/pc-setup/wsl_setup.sh
-# Written for username 'david'
-chown -R david:david ~/pc-setup/
-# sudo -H ~/pc-setup/wsl_setup.sh
-# Copy the public key string to your GitHub Settings
-# sudo view /root/.ssh/id_rsa.pub
-cd ~/pc-setup/ansible_playbooks/
-ansible-playbook wsl_update.yml
+# Before using Git in VSCode
+git config --global user.email "david.rachwalik@outlook.com"
+git config --global user.name "David Rachwalik"
 
+# git clone https://github.com/david-rachwalik/pc-setup.git ~/pc-setup/
+git clone git@github.com:david-rachwalik/pc-setup.git ~/pc-setup/
+# https://help.github.com/en/articles/changing-a-remotes-url#switching-remote-urls-from-https-to-ssh
+# Update Git remote from HTTPS to SSH
+# git remote set-url origin git@github.com:david-rachwalik/pc-setup.git

@@ -1,4 +1,8 @@
 ---
+# https://docs.ansible.com/ansible/latest/dev_guide/developing_modules.html
+
+# ansible linux -m include_role -a "name=common/custom_module"
+
 - name: run the new module
   my_new_test_module:
     name: 'hello'
