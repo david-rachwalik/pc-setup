@@ -17,16 +17,6 @@ pip install ansible pywinrm
 #     mkdir $HOME/bin
 # fi
 
-# chmod +x ~/pc-setup/wsl_setup.sh
-# sudo -H ~/pc-setup/wsl_setup.sh
-
-
-# https://docs.ansible.com/ansible/devel/reference_appendices/config.html#cfg-in-world-writable-dir
-# Ansible will ignore ansible.cfg in a world writable directory (setting directory to user avoids the issue for git clones)
-chown -R david:david ~/pc-setup
-cd ~/pc-setup/ansible_playbooks
-ansible-playbook wsl_update.yml
-
 
 # --- Git Steps ---
 # https://help.github.com/en/articles/checking-for-existing-ssh-keys
@@ -62,3 +52,14 @@ git clone git@github.com:david-rachwalik/pc-setup.git ~/pc-setup
 # https://help.github.com/en/articles/changing-a-remotes-url#switching-remote-urls-from-https-to-ssh
 # Update Git remote from HTTPS to SSH
 # git remote set-url origin git@github.com:david-rachwalik/pc-setup.git
+
+
+# chmod +x ~/pc-setup/wsl_setup.sh
+# sudo -H ~/pc-setup/wsl_setup.sh
+
+
+# https://docs.ansible.com/ansible/devel/reference_appendices/config.html#cfg-in-world-writable-dir
+# Ansible will ignore ansible.cfg in a world writable directory (setting directory to user avoids the issue for git clones)
+chown -R david:david ~/pc-setup
+# cd ~/pc-setup/ansible_playbooks
+ansible-playbook ~/pc-setup/ansible_playbooks/wsl_update.yml
