@@ -9,4 +9,4 @@ apt-get update && apt-get dist-upgrade -y
 apt-get install -y python-pip git libffi-dev libssl-dev
 
 # Run remaining commands as user
-sudo -H -u david curl -s https://raw.githubusercontent.com/david-rachwalik/pc-setup/master/wsl_user_setup.sh | bash
+sudo su - david curl -s https://raw.githubusercontent.com/david-rachwalik/pc-setup/master/wsl_user_setup.sh | bash
