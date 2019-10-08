@@ -24,6 +24,7 @@ pip install ansible pywinrm
 # https://help.github.com/en/articles/checking-for-existing-ssh-keys
 # Generate SSH keys if they don't exist
 if [ ! -d ~/.ssh ]; then
+    mkdir ~/.ssh
     # https://help.github.com/en/articles/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent
     ssh-keygen -f $HOME/.ssh/id_rsa -t rsa -b 4096 -N "" -C "david.rachwalik@outlook.com" -q
     # Start the ssh-agent in the background
