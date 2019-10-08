@@ -6,4 +6,5 @@
     state: latest
   loop: "{{pip_packages}}"
   register: out_pip
+  tags: ["pip"]
 ...

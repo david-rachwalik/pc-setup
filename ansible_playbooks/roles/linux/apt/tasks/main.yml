@@ -3,22 +3,27 @@
 
 # https://stackoverflow.com/questions/41535838/how-to-run-apt-update-and-upgrade-via-ansible-shell
 # $ ansible all -m apt -a "upgrade=dist update_cache=yes cache_valid_time=86400" --become
-- name: Update and upgrade apt packages
-  apt:
-    upgrade: dist
-    update_cache: yes
-    # cache_valid_time: 3600 #One hour
-    cache_valid_time: 86400 #One day
 
-# - name: Upgrade all packages to the latest version
-#   apt:
-#     name: "*"
-#     state: latest
+- block:
+  - name: Update and upgrade apt packages
+    apt:
+      upgrade: dist
+      update_cache: yes
+      # cache_valid_time: 3600 #One hour
+      cache_valid_time: 86400 #One day
 
-- name: Update apt packages
-  apt:
-    # Provide loop directly into name
-    name: "{{apt_packages}}"
-    state: latest
-  register: out_pip
+  # - name: Upgrade all packages to the latest version
+  #   apt:
+  #     name: "*"
+  #     state: latest
+
+  - name: Update apt packages
+    apt:
+      # Provide loop directly into name
+      name: "{{apt_packages}}"
+      state: latest
+    register: out_pip
+  
+  become: true
+  tags: ["apt"]
 ...

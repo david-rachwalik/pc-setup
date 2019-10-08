@@ -18,6 +18,7 @@ pip install ansible pywinrm
 # Generate SSH keys if they don't exist
 if [ ! -d ~/.ssh ]; then
     mkdir ~/.ssh
+    chmod 755 ~/.ssh
     # https://help.github.com/en/articles/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent
     ssh-keygen -f $HOME/.ssh/id_rsa -t rsa -b 4096 -N "" -C "david.rachwalik@outlook.com" -q
     # Start the ssh-agent in the background
@@ -37,11 +38,11 @@ if [ ! -d ~/.ssh ]; then
 
     # Testing sed command to update SSH config
     # sed 's/^PasswordAuthentication.*/PasswordAuthentication yes/i' /etc/ssh/sshd_config | grep '^PasswordAuthentication.*'
-    sed -i 's/^PasswordAuthentication.*/PasswordAuthentication yes/i' /etc/ssh/sshd_config
-    sed -i 's/^#PermitRootLogin.*/PermitRootLogin yes/i' /etc/ssh/sshd_config
+    sudo sed -i 's/^PasswordAuthentication.*/PasswordAuthentication yes/i' /etc/ssh/sshd_config
+    sudo sed -i 's/^#PermitRootLogin.*/PermitRootLogin yes/i' /etc/ssh/sshd_config
     # sed 's/.*PubkeyAuthentication.*/PubkeyAuthentication yes/i' /etc/ssh/sshd_config | grep 'PubkeyAuthentication yes'
-    sed -i 's/.*PubkeyAuthentication.*/PubkeyAuthentication yes/i' /etc/ssh/sshd_config
-    service ssh restart
+    sudo sed -i 's/.*PubkeyAuthentication.*/PubkeyAuthentication yes/i' /etc/ssh/sshd_config
+    sudo service ssh restart
 fi
 
 # https://git-scm.com/book/en/v2/Getting-Started-First-Time-Git-Setup
@@ -70,6 +71,8 @@ git clone https://github.com/david-rachwalik/pc-setup.git ~/pc-setup
 
 # https://docs.ansible.com/ansible/devel/reference_appendices/config.html#cfg-in-world-writable-dir
 # Ansible will ignore ansible.cfg in a world writable directory (setting directory to user avoids the issue for git clones)
+find ~/pc-setup -type d -print0 | xargs -0 chmod 755
+find ~/pc-setup -type f -print0 | xargs -0 chmod 644
 # chown -R david:david ~/pc-setup
-# cd ~/pc-setup/ansible_playbooks
-# ansible-playbook ~/pc-setup/ansible_playbooks/wsl_update.yml
+cd ~/pc-setup/ansible_playbooks
+ansible-playbook wsl_update.yml

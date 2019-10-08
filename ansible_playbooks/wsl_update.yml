@@ -2,7 +2,6 @@
 # This playbook's purpose is to provision WSL
 
 - hosts: linux
-  become: true
   roles:
   - linux/apt
   - linux/pip
