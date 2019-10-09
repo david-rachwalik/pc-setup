@@ -23,15 +23,15 @@
 3. Run Ansible on Linux to provision Linux
 
     ``` bash
-    cd ~/pc-setup/ansible_playbooks/
-    sudo ansible-playbook wsl_update.yml
+    cd ~/pc-setup/ansible_playbooks
+    ansible-playbook wsl_update.yml
     ```
 
 4. Run Ansible on Linux to provision Windows 10
 
     ``` bash
-    cd ~/pc-setup/ansible_playbooks/
-    sudo ansible-playbook win_update.yml
+    cd ~/pc-setup/ansible_playbooks
+    ansible-playbook win_update.yml
     ```
 
 > *Bonus (if not using Ansible)*: Run PowerShell (as Administrator) to [install Chocolatey](https://chocolatey.org/install)
@@ -41,7 +41,6 @@
 Set-ExecutionPolicy Bypass -Scope Process -Force; iex ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))
 # Set Chocolatey to skip confirmation prompts
 choco feature enable -n allowGlobalConfirmation
-
 ```
 
 ## PC Health & Monitoring
