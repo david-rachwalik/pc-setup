@@ -2,6 +2,8 @@
 
 export DEBIAN_FRONTEND=noninteractive
 
+echo $SUDO_USER
+
 # Upgrade Linux distribution
 apt-get update && apt-get dist-upgrade -y
 # Install Ansible dependencies (Python, Git)
@@ -17,4 +19,5 @@ if [ ! -f /etc/sudoers.d/david ]; then
 fi
 
 # Run remaining commands as user
-sudo -u david curl -s https://raw.githubusercontent.com/david-rachwalik/pc-setup/master/wsl_user_setup.sh | bash
+# sudo -u david curl -s https://raw.githubusercontent.com/david-rachwalik/pc-setup/master/wsl_user_setup.sh | bash
+su -c "curl -s https://raw.githubusercontent.com/david-rachwalik/pc-setup/master/wsl_user_setup.sh | bash" $SUDO_USER
