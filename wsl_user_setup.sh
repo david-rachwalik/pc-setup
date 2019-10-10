@@ -1,10 +1,6 @@
 #!/bin/bash
 
-# --- Commands in this file are expected to be done as a user ---
-# - Doing these as root can cause permission errors with VSCode
-
-echo $USER
-echo $HOME
+# --- Commands in this file are expected to be done as user ---
 
 # Install Ansible and WinRM (TIP: never sudo pip)
 pip install ansible pywinrm
