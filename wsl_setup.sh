@@ -11,8 +11,7 @@ if [ ! -f /etc/sudoers.d/$SUDO_USER ]; then
     # Grant user nopasswd sudo access
     # https://gist.github.com/carlessanagustin/922711701b1cfcc5c7a056c7018e8fe2
     touch /etc/sudoers.d/$SUDO_USER
-    userGroupCommand = "echo '%" + $SUDO_USER + " ALL=NOPASSWD:ALL' > /etc/sudoers.d/" + $SUDO_USER
-    bash -c $userGroupCommand
+    bash -c "echo '%${SUDO_USER} ALL=NOPASSWD:ALL' > /etc/sudoers.d/${SUDO_USER}"
     chmod 440 /etc/sudoers.d/$SUDO_USER
     usermod -a -G sudo $SUDO_USER
 fi
