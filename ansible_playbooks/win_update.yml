@@ -11,6 +11,7 @@
 
 
 - hosts: windows
+  become: true
   roles:
   # Windows Updates (auto-reboots, requires remote management)
   # https://docs.ansible.com/ansible/2.5/modules/win_updates_module.html

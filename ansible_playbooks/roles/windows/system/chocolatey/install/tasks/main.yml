@@ -1,10 +1,11 @@
 ---
 - block:
   - name: Install Basic Chocolatey Packages
-    # win_chocolatey:
-    #   name: "{{item}}"
-    #   state: present
-    win_chocolatey: "{{item | combine({state: present})}}"
+    win_chocolatey:
+      name: "{{item}}"
+      state: present
+    # --- Was a proven failure to pass args dynamically inline
+    # win_chocolatey: "{{item | combine({state: present})}}"
     # https://docs.ansible.com/ansible/latest/user_guide/become.html#become-windows
     loop: "{{chocolatey_install}}"
   
