@@ -6,6 +6,7 @@ export DEBIAN_FRONTEND=noninteractive
 apt-get update && apt-get dist-upgrade -y
 # Install Ansible dependencies (Python, Git)
 apt-get install -y python-pip git libffi-dev libssl-dev
+apt-get install -y ansible
 
 if [ ! -f /etc/sudoers.d/$SUDO_USER ]; then
     # Grant user nopasswd sudo access
@@ -17,4 +18,4 @@ if [ ! -f /etc/sudoers.d/$SUDO_USER ]; then
 fi
 
 # Run remaining commands as user
-su -c "curl -s https://raw.githubusercontent.com/david-rachwalik/pc-setup/master/wsl_user_setup.sh | bash" $SUDO_USER
+# su -c "curl -s https://raw.githubusercontent.com/david-rachwalik/pc-setup/master/wsl_user_setup.sh | bash" $SUDO_USER

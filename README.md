@@ -43,7 +43,7 @@ Set-ExecutionPolicy Bypass -Scope Process -Force; iex ((New-Object System.Net.We
 choco feature enable -n allowGlobalConfirmation
 ```
 
-## PC Health & Monitoring
+## PC Health
 
 ### Backup application settings & data
 

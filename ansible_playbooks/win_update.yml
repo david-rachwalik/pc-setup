@@ -15,8 +15,8 @@
   # Windows Updates (auto-reboots, requires remote management)
   # https://docs.ansible.com/ansible/2.5/modules/win_updates_module.html
 
-  - windows/apps/chocolatey/install
-  - windows/apps/chocolatey/uninstall
+  - windows/system/chocolatey/install
+  - windows/system/chocolatey/uninstall
   - windows/system/desktop/cleanup
 
   # tasks:
