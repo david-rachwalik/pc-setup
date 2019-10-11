@@ -1,5 +1,5 @@
 ---
-# Windows username = $HOME|basename
+# Windows username is the basename of 'echo $HOME'
 
 # https://docs.ansible.com/ansible/latest/user_guide/intro_inventory.html
 # -------- Host Connection Settings --------
