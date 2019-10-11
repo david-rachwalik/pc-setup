@@ -9,22 +9,6 @@
     # https://docs.ansible.com/ansible/latest/user_guide/become.html#become-windows
     loop: "{{chocolatey_install}}"
   
-  # https://chocolatey.org/packages/VisualStudio2017Community
-  # https://docs.microsoft.com/en-us/visualstudio/install/use-command-line-parameters-to-install-visual-studio
-  # https://docs.microsoft.com/en-us/visualstudio/install/workload-component-id-vs-community
-  - name: Install Visual Studio Community
-    win_chocolatey:
-      name: visualstudio2017community
-      state: present
-      # https://stackoverflow.com/questions/3790454/how-do-i-break-a-string-over-multiple-lines
-      package_params: >-
-        --locale en-US
-        # https://docs.microsoft.com/en-us/visualstudio/install/workload-component-id-vs-community
-        --add Microsoft.VisualStudio.Workload.NetWeb;includeRecommended
-        --add Microsoft.VisualStudio.Workload.Azure;includeRecommended
-        --quiet
-        # --passive
-    
   # https://chocolatey.org/packages/vscode
   - name: Install Visual Studio Code
     win_chocolatey:
@@ -34,6 +18,43 @@
         /NoDesktopIcon
         /NoContextMenuFiles
         /NoContextMenuFolders
+
+  # https://chocolatey.org/packages/visualstudio2019community
+  # https://docs.microsoft.com/en-us/visualstudio/install/use-command-line-parameters-to-install-visual-studio
+  # https://docs.microsoft.com/en-us/visualstudio/install/workload-component-id-vs-community
+  - name: Install Visual Studio Community 2019
+    win_chocolatey:
+      name: visualstudio2019community
+      state: present
+      # https://stackoverflow.com/questions/3790454/how-do-i-break-a-string-over-multiple-lines
+      package_params: >-
+        --locale en-US
+        # https://docs.microsoft.com/en-us/visualstudio/install/workload-component-id-vs-community
+        --add Microsoft.VisualStudio.Workload.NetWeb;includeRecommended
+        --add Microsoft.VisualStudio.Workload.Azure;includeRecommended
+        --quiet
+
+  # https://chocolatey.org/packages/VisualStudio2017Community
+  - name: Install Visual Studio Community 2017
+    win_chocolatey:
+      name: visualstudio2017community
+      state: present
+      package_params: >-
+        --locale en-US
+        --add Microsoft.VisualStudio.Workload.NetWeb;includeRecommended
+        --add Microsoft.VisualStudio.Workload.Azure;includeRecommended
+        --quiet
+    
+  # https://chocolatey.org/packages/microsoft-office-deployment
+  - name: Install MS Office 365
+    win_chocolatey:
+      name: visualstudio2017community
+      state: present
+      package_params: >-
+        /64bit
+        /DisableUpdate TRUE
+        /Product O365HomePremRetail
+        /Exclude Publisher,Lync,Groove
 
   become: true
   become_user: Administrator

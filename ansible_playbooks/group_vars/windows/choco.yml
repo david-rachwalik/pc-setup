@@ -1,42 +1,22 @@
 ---
-# chocolatey_vs_ext:
-# https://chocolatey.org/packages/visualstudio2017-workload-netweb
-# - visualstudio2017-workload-netweb
-# https://chocolatey.org/packages/visualstudio2017-workload-azure
-# - visualstudio2017-workload-azure
-# https://chocolatey.org/packages/vscode-csharp
-# - vscode-csharp
-# https://chocolatey.org/packages/vscode-icons
-# - vscode-icons
-
-
 chocolatey_install:
-# https://chocolatey.org/packages/chocolatey-core.extension
-# - chocolatey-core.extension
-
 # ****** General Productivity ******
 # https://chocolatey.org/packages/GoogleChrome
 - googlechrome
-# https://chocolatey.org/packages/Office365HomePremium
-# - office365homepremium  # 2017 available, states 2016, installs 2013
 # https://chocolatey.org/packages/7zip
 - 7zip
 # https://chocolatey.org/packages/ccleaner
 - ccleaner
-# https://chocolatey.org/packages/defraggler
-# - defraggler
-# https://chocolatey.org/packages/Recuva
-# - recuva
-# https://chocolatey.org/packages/speccy
-- speccy
 # https://chocolatey.org/packages/qbittorrent
 - qbittorrent
+# https://chocolatey.org/packages/speccy
+- speccy
+# https://chocolatey.org/packages/Recuva
+# - recuva
+# https://chocolatey.org/packages/defraggler
+# - defraggler
 
 # ****** Development ******
-# https://chocolatey.org/packages/openssh
-# - openssh
-# https://chocolatey.org/packages/python2
-- python2
 # https://chocolatey.org/packages/git
 - git
 # https://chocolatey.org/packages/dotnetcore-sdk
@@ -63,6 +43,8 @@ chocolatey_install:
 - spotify
 
 # ****** Video Editing ******
+# https://chocolatey.org/packages/MakeMKV
+- makemkv
 # https://chocolatey.org/packages/handbrake
 - handbrake
 # https://chocolatey.org/packages/k-litecodecpackmega
@@ -82,10 +64,10 @@ chocolatey_install:
 
 
 chocolatey_uninstall:
+# https://chocolatey.org/packages/python2
+- python2
 # https://chocolatey.org/packages/unity
 - unity
-# https://chocolatey.org/packages/MakeMKV
-- makemkv
 # https://chocolatey.org/packages/vlc
 - vlc
 ...
