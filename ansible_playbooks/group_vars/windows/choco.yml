@@ -51,8 +51,8 @@ chocolatey_install:
 - handbrake
 # https://chocolatey.org/packages/k-litecodecpackmega
 - k-litecodecpackmega
-# https://chocolatey.org/packages/obs-studio
-- obs-studio
+# https://chocolatey.org/packages/streamlabs-obs
+- streamlabs-obs
 
 # ****** Videogames ******
 # https://chocolatey.org/packages/autohotkey
@@ -72,4 +72,6 @@ chocolatey_uninstall:
 - unity
 # https://chocolatey.org/packages/vlc
 - vlc
+# https://chocolatey.org/packages/obs-studio
+# - obs-studio
 ...
