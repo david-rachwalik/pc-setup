@@ -1,3 +1,0 @@
----
-dependencies:
-  - { role: az/resource_group }
