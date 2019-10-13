@@ -25,6 +25,8 @@ chocolatey_install:
 - azure-cli
 # https://chocolatey.org/packages/microsoftazurestorageexplorer
 - microsoftazurestorageexplorer
+# https://chocolatey.org/packages/mitkerberos
+- mitkerberos
 # https://chocolatey.org/packages/docker-desktop
 # - docker-desktop
 
@@ -53,6 +55,8 @@ chocolatey_install:
 - k-litecodecpackmega
 # https://chocolatey.org/packages/streamlabs-obs
 - streamlabs-obs
+# https://chocolatey.org/packages/4k-video-downloader
+- 4k-video-downloader
 
 # ****** Videogames ******
 # https://chocolatey.org/packages/autohotkey
