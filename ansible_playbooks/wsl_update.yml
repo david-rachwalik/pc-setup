@@ -1,10 +1,15 @@
 ---
-# This playbook's purpose is to provision WSL
+# This playbook's purpose is to provision Linux Ubuntu (WSL)
 
 - hosts: linux
+  become: true
   roles:
   - linux/apt
   - linux/pip
+
+
+- hosts: linux
+  roles:
   - linux/setup
   # - git/config
   # tasks:

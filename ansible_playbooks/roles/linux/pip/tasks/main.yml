@@ -1,10 +1,12 @@
 ---
+# https://docs.ansible.com/ansible/latest/modules/pip_module.html
 # ansible localhost -m pip -a "name=pip state=latest"
+
 - name: Update pip packages
   pip:
     name: "{{item}}"
     state: latest
   loop: "{{pip_packages}}"
-  register: out_pip
+  register: out_pip_latest
   tags: ["pip"]
 ...
