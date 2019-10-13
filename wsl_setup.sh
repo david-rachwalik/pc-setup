@@ -32,4 +32,4 @@ pip install pywinrm[kerberos]
 apt-get install -y python-dev libkrb5-dev krb5-user
 
 # Run remaining commands as user
-# su -c "curl -s https://raw.githubusercontent.com/david-rachwalik/pc-setup/master/wsl_user_setup.sh | bash" ${RUN_USER}
+su -c "curl -s https://raw.githubusercontent.com/david-rachwalik/pc-setup/master/wsl_user_setup.sh | bash" ${RUN_USER}

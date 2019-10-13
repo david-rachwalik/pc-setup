@@ -3,7 +3,7 @@
 # --- Commands in this file are expected to be done as user ---
 
 # Install Ansible and WinRM (TIP: never sudo pip)
-pip install ansible pywinrm
+# pip install ansible pywinrm
 
 
 # Create bin directory if it doesn't exist
@@ -15,11 +15,11 @@ pip install ansible pywinrm
 # --- Git Steps ---
 # https://help.github.com/en/articles/checking-for-existing-ssh-keys
 # Generate SSH keys if they don't exist
-if [ ! -d ~/.ssh ]; then
+if ! test -d ~/.ssh; then
     mkdir ~/.ssh
     chmod 755 ~/.ssh
     # https://help.github.com/en/articles/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent
-    ssh-keygen -f $HOME/.ssh/id_rsa -t rsa -b 4096 -N "" -C "david.rachwalik@outlook.com" -q
+    ssh-keygen -f $HOME/.ssh/id_rsa -t rsa -b 4096 -N "" -q
     # Start the ssh-agent in the background
     eval $(ssh-agent -s)
     ssh-add ~/.ssh/id_rsa
@@ -37,11 +37,10 @@ if [ ! -d ~/.ssh ]; then
 
     # Testing sed command to update SSH config
     # sed 's/^PasswordAuthentication.*/PasswordAuthentication yes/i' /etc/ssh/sshd_config | grep '^PasswordAuthentication.*'
-    sudo sed -i 's/^PasswordAuthentication.*/PasswordAuthentication yes/i' /etc/ssh/sshd_config
-    sudo sed -i 's/^#PermitRootLogin.*/PermitRootLogin yes/i' /etc/ssh/sshd_config
-    # sed 's/.*PubkeyAuthentication.*/PubkeyAuthentication yes/i' /etc/ssh/sshd_config | grep 'PubkeyAuthentication yes'
-    sudo sed -i 's/.*PubkeyAuthentication.*/PubkeyAuthentication yes/i' /etc/ssh/sshd_config
-    sudo service ssh restart
+    # sudo sed -i 's/^PasswordAuthentication.*/PasswordAuthentication yes/i' /etc/ssh/sshd_config
+    # sudo sed -i 's/^#PermitRootLogin.*/PermitRootLogin yes/i' /etc/ssh/sshd_config
+    # sudo sed -i 's/.*PubkeyAuthentication.*/PubkeyAuthentication yes/i' /etc/ssh/sshd_config
+    # sudo service ssh restart
 fi
 
 # https://git-scm.com/book/en/v2/Getting-Started-First-Time-Git-Setup
@@ -53,25 +52,20 @@ git config --global user.email "david.rachwalik@outlook.com"
 # https://git-scm.com/book/en/v2/Appendix-C%3A-Git-Commands-Setup-and-Config#_core_editor
 git config --global core.editor "code --wait"
 
-if [ -d ~/pc-setup ]; then
+if test -d ~/pc-setup; then
     rm -rf ~/pc-setup
+    git clone git@github.com:david-rachwalik/pc-setup.git ~/pc-setup
+    # https://help.github.com/en/articles/changing-a-remotes-url#switching-remote-urls-from-https-to-ssh
+
+    # Ansible ignores ansible.cfg in a world-writable directory
+    # https://docs.ansible.com/ansible/devel/reference_appendices/config.html#cfg-in-world-writable-dir
+    find ~/pc-setup -type d -print0 | xargs -0 chmod 755
+    find ~/pc-setup -type f -print0 | xargs -0 chmod 644
 fi
 
-# TIP: never sudo git clone
-git clone https://github.com/david-rachwalik/pc-setup.git ~/pc-setup
-# git clone git@github.com:david-rachwalik/pc-setup.git ~/pc-setup
-# https://help.github.com/en/articles/changing-a-remotes-url#switching-remote-urls-from-https-to-ssh
-# Update Git remote from HTTPS to SSH
-# git remote set-url origin git@github.com:david-rachwalik/pc-setup.git
+if test -f /mnt/d/Repos/pc-setup/ansible_playbooks/group_vars/windows/main_vault.yml; then
+    cp -f /mnt/d/Repos/pc-setup/ansible_playbooks/group_vars/windows/main_vault.yml ~/pc-setup/ansible_playbooks/group_vars/windows/main_vault.yml
+fi
 
-# chmod +x ~/pc-setup/wsl_setup.sh
-# sudo -H ~/pc-setup/wsl_setup.sh
-
-
-# https://docs.ansible.com/ansible/devel/reference_appendices/config.html#cfg-in-world-writable-dir
-# Ansible will ignore ansible.cfg in a world writable directory (setting directory to user avoids the issue for git clones)
-find ~/pc-setup -type d -print0 | xargs -0 chmod 755
-find ~/pc-setup -type f -print0 | xargs -0 chmod 644
-# chown -R david:david ~/pc-setup
-cd ~/pc-setup/ansible_playbooks
-ansible-playbook wsl_update.yml
+# cd ~/pc-setup/ansible_playbooks
+# ansible-playbook wsl_update.yml
