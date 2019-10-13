@@ -53,6 +53,7 @@ git config --global user.email "david.rachwalik@outlook.com"
 git config --global core.editor "code --wait"
 
 if test -d ~/pc-setup; then
+    cd
     rm -rf ~/pc-setup
     git clone git@github.com:david-rachwalik/pc-setup.git ~/pc-setup
     # https://help.github.com/en/articles/changing-a-remotes-url#switching-remote-urls-from-https-to-ssh
@@ -67,5 +68,5 @@ if test -f /mnt/d/Repos/pc-setup/ansible_playbooks/group_vars/windows/main_vault
     cp -f /mnt/d/Repos/pc-setup/ansible_playbooks/group_vars/windows/main_vault.yml ~/pc-setup/ansible_playbooks/group_vars/windows/main_vault.yml
 fi
 
-# cd ~/pc-setup/ansible_playbooks
-# ansible-playbook wsl_update.yml
+cd ~/pc-setup/ansible_playbooks
+ansible-playbook wsl_update.yml
