@@ -4,13 +4,14 @@
 - hosts: linux
   become: true
   roles:
-  - linux/apt
-  - linux/pip
+  - linux/system/apt
+  - linux/system/pip
 
 
 - hosts: linux
   roles:
-  - linux/setup
+  - linux/system/setup
+
   # - git/config
   # tasks:
   # # https://docs.ansible.com/ansible/latest/modules/git_module.html
