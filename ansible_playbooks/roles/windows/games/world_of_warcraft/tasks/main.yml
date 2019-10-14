@@ -1,44 +1,57 @@
 ---
-# ansible home -m include_role -a "name=windows/backup/games/world_of_warcraft"
+# ansible home -m include_role -a "name=windows/games/world_of_warcraft"
 
-- name: Find World of Warcraft screenshots
-  win_find:
-    paths: "{{world_of_warcraft_backups | json_query('[*].screenshot_dir')}}"
-  register: out_find_wow_ss
-  ignore_errors: true
+- block:
+  - name: Check for World of Warcraft screenshot directory
+    win_stat:
+      path: "{{version.value.screenshot_dir}}"
+    loop: "{{versions}}"
+    loop_control:
+      loop_var: version
+    register: out_stat_wow_ss
 
-# - win_stat:
-#     paths: "{{item.stat.path}}"
-#   loop: "{{out_find_wow.results}}"
+  - name: Backup World of Warcraft screenshots
+    win_copy:
+      remote_src: true
+      src: "{{item.version.value.screenshot_dir}}"
+      dest: "{{item.version.value.backup_dir}}"
+    loop: "{{out_stat_wow_ss.results}}"
+    when: item.stat.exists
+    register: out_copy_wow_ss
 
-- name: Find World of Warcraft settings
-  win_find:
-    paths: "{{world_of_warcraft_backups | json_query('[*].wtf_dir')}}"
-  register: out_find_wow_wtf
+  - name: Remove World of Warcraft screenshot directory
+    win_file:
+      path: "{{item.version.value.screenshot_dir}}"
+      state: absent
+    loop: "{{out_stat_wow_ss.results}}"
+    when: item.stat.exists and out_copy_wow_ss|changed
 
-- name: Find World of Warcraft addons
-  win_find:
-    paths: "{{world_of_warcraft_backups | json_query('[*].addon_dir')}}"
-  register: out_find_wow_mod
+  - name: Create World of Warcraft screenshot directory
+    win_file:
+      path: "{{item.version.value.screenshot_dir}}"
+      state: directory
+    loop: "{{out_stat_wow_ss.results}}"
+    when: item.stat.exists and out_copy_wow_ss|changed
 
 
+  - name: Backup World of Warcraft settings
+    win_copy:
+      remote_src: true
+      src: "{{item.value.wtf_dir}}"
+      dest: "{{item.value.backup_dir}}"
+    loop: "{{versions}}"
+    register: out_copy_wow_wtf
 
-# Taken from /home/rhodair/pc-setup/ansible_playbooks/roles/windows/backup/apps/vscode/tasks/main.yml
 
-# ansible windows -m include_role -a 'name=windows/backup/apps/vscode'
+  - name: Backup World of Warcraft addons
+    win_copy:
+      remote_src: true
+      src: "{{item.value.addon_dir}}"
+      dest: "{{item.value.backup_dir}}"
+    loop: "{{versions}}"
+    register: out_copy_wow_addon
 
-# https://docs.ansible.com/ansible/latest/modules/win_file_module.html
-# - name: Ensure backup directory exists
-#   win_file:
-#     path: D:\OneDrive\Backups\vscode-extensions
-#     state: directory
-
-# https://docs.ansible.com/ansible/latest/modules/win_copy_module.html
-# - name: Backup World of Warcraft screenshots
-#   win_copy:
-#     # src: %USERPROFILE%\.vscode\extensions
-#     src: C:\Users\david\.vscode\extensions
-#     dest: D:\OneDrive\Backups\vscode-extensions
-#     remote_src: true
-#   loop: "{{world_of_warcraft_backups | json_query('[*].screenshot_dir')}}"
+  vars:
+    versions: "{{world_of_warcraft_backups | dict2items}}"
+  tags: ["backup", "world_of_warcraft"]
 ...
