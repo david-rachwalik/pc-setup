@@ -44,29 +44,31 @@ if ! test -d ~/.ssh; then
 fi
 
 # https://git-scm.com/book/en/v2/Getting-Started-First-Time-Git-Setup
-# View all of your settings
-# git config --list --show-origin
 # Before using Git in VSCode
 git config --global user.name "David Rachwalik"
 git config --global user.email "david.rachwalik@outlook.com"
 # https://git-scm.com/book/en/v2/Appendix-C%3A-Git-Commands-Setup-and-Config#_core_editor
 git config --global core.editor "code --wait"
+# View Git settings
+# git config --list --show-origin
 
+# Idempotent Git cloning; currently requires manual transfer of SSH to GitHub account before 2nd run
 if test -d ~/pc-setup; then
     cd
     rm -rf ~/pc-setup
 fi
 git clone git@github.com:david-rachwalik/pc-setup.git ~/pc-setup
 # https://help.github.com/en/articles/changing-a-remotes-url#switching-remote-urls-from-https-to-ssh
+if test -d ~/pc-setup; then
+    if test -f /mnt/d/Repos/pc-setup/ansible_playbooks/group_vars/windows/main_vault.yml; then
+        cp -f /mnt/d/Repos/pc-setup/ansible_playbooks/group_vars/windows/main_vault.yml ~/pc-setup/ansible_playbooks/group_vars/windows/main_vault.yml
+    fi
 
-if test -f /mnt/d/Repos/pc-setup/ansible_playbooks/group_vars/windows/main_vault.yml; then
-    cp -f /mnt/d/Repos/pc-setup/ansible_playbooks/group_vars/windows/main_vault.yml ~/pc-setup/ansible_playbooks/group_vars/windows/main_vault.yml
+    # Ansible ignores ansible.cfg in a world-writable directory
+    # https://docs.ansible.com/ansible/devel/reference_appendices/config.html#cfg-in-world-writable-dir
+    find ~/pc-setup -type d -print0 | xargs -0 chmod 755
+    find ~/pc-setup -type f -print0 | xargs -0 chmod 644
+
+    cd ~/pc-setup/ansible_playbooks
+    ansible-playbook wsl_update.yml
 fi
-
-# Ansible ignores ansible.cfg in a world-writable directory
-# https://docs.ansible.com/ansible/devel/reference_appendices/config.html#cfg-in-world-writable-dir
-find ~/pc-setup -type d -print0 | xargs -0 chmod 755
-find ~/pc-setup -type f -print0 | xargs -0 chmod 644
-
-# cd ~/pc-setup/ansible_playbooks
-# ansible-playbook wsl_update.yml
