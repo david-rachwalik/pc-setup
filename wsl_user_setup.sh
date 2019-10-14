@@ -55,18 +55,18 @@ git config --global core.editor "code --wait"
 if test -d ~/pc-setup; then
     cd
     rm -rf ~/pc-setup
-    git clone git@github.com:david-rachwalik/pc-setup.git ~/pc-setup
-    # https://help.github.com/en/articles/changing-a-remotes-url#switching-remote-urls-from-https-to-ssh
-
-    # Ansible ignores ansible.cfg in a world-writable directory
-    # https://docs.ansible.com/ansible/devel/reference_appendices/config.html#cfg-in-world-writable-dir
-    find ~/pc-setup -type d -print0 | xargs -0 chmod 755
-    find ~/pc-setup -type f -print0 | xargs -0 chmod 644
 fi
+git clone git@github.com:david-rachwalik/pc-setup.git ~/pc-setup
+# https://help.github.com/en/articles/changing-a-remotes-url#switching-remote-urls-from-https-to-ssh
 
 if test -f /mnt/d/Repos/pc-setup/ansible_playbooks/group_vars/windows/main_vault.yml; then
     cp -f /mnt/d/Repos/pc-setup/ansible_playbooks/group_vars/windows/main_vault.yml ~/pc-setup/ansible_playbooks/group_vars/windows/main_vault.yml
 fi
 
-cd ~/pc-setup/ansible_playbooks
-ansible-playbook wsl_update.yml
+# Ansible ignores ansible.cfg in a world-writable directory
+# https://docs.ansible.com/ansible/devel/reference_appendices/config.html#cfg-in-world-writable-dir
+find ~/pc-setup -type d -print0 | xargs -0 chmod 755
+find ~/pc-setup -type f -print0 | xargs -0 chmod 644
+
+# cd ~/pc-setup/ansible_playbooks
+# ansible-playbook wsl_update.yml
