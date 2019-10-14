@@ -9,11 +9,11 @@ world_of_warcraft_backups:
     wtf_dir: E:\GameFiles\World of Warcraft\_retail_\WTF
     addon_dir: E:\GameFiles\World of Warcraft\_retail_\Interface\AddOns
 
-  classic_beta:
-    backup_dir: D:\OneDrive\_DMR\Videogames\Blizzard\World of Warcraft (classic beta)
-    screenshot_dir: E:\GameFiles\World of Warcraft\_classic_beta_\Screenshots
-    wtf_dir: E:\GameFiles\World of Warcraft\_classic_beta_\WTF
-    addon_dir: E:\GameFiles\World of Warcraft\_classic_beta_\Interface\AddOns
+  # classic_beta:
+  #   backup_dir: D:\OneDrive\_DMR\Videogames\Blizzard\World of Warcraft (classic beta)
+  #   screenshot_dir: E:\GameFiles\World of Warcraft\_classic_beta_\Screenshots
+  #   wtf_dir: E:\GameFiles\World of Warcraft\_classic_beta_\WTF
+  #   addon_dir: E:\GameFiles\World of Warcraft\_classic_beta_\Interface\AddOns
 
   classic:
     backup_dir: D:\OneDrive\_DMR\Videogames\Blizzard\World of Warcraft (classic)
