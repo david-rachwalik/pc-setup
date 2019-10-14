@@ -1,4 +1,5 @@
 ---
+ansible_python_interpreter: "/usr/bin/python3"
 # https://docs.ansible.com/ansible/latest/reference_appendices/special_variables.html
 platform: "{{inventory_file}} | default('cross-platform')"
 

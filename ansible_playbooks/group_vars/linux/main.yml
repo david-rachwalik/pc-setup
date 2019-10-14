@@ -1,10 +1,11 @@
 ---
 apt_packages:
 # --- Ansible ---
-- python-pip
+# - python3-pip
+# - python-pip
 - git
-- libffi-dev
-- libssl-dev
+# - libffi-dev
+# - libssl-dev
 # --- misc. ---
 # Tool to convert Windows files to Linux format
 # sudo apt-get install -y dos2unix
@@ -12,8 +13,8 @@ apt_packages:
 # - dos2unix
 # --- .NET Core SDK ---
 # https://dotnet.microsoft.com/download/linux-package-manager/ubuntu18-04/sdk-current
-# - apt-transport-https
-# - dotnet-sdk-3.0
+- apt-transport-https
+- dotnet-sdk-3.0
 
 
 # https://azure.microsoft.com/en-us/resources/samples/ansible-playbooks/
@@ -21,7 +22,7 @@ apt_packages:
 # ansible-galaxy install azure.azure_preview_modules
 # pip install -r ~/.ansible/roles/azure.azure_preview_modules/files/requirements-azure.txt
 pip_packages:
-- pip
+# - pip
 # Ansible ---
 - ansible
 - pywinrm
