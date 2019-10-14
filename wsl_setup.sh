@@ -24,12 +24,15 @@ apt-get update && apt-get dist-upgrade -y
 # Install Azure CLI (https://docs.microsoft.com/en-us/cli/azure/install-azure-cli-apt)
 curl -sL https://aka.ms/InstallAzureCLIDeb | bash
 # Install Ansible dependencies (Python, Git)
-apt-get install -y python-pip git libffi-dev libssl-dev
-pip install --upgrade pip
-apt-add-repository -y ppa:ansible/ansible
-apt-get install -y ansible
-pip install pywinrm[kerberos]
-apt-get install -y python-dev libkrb5-dev krb5-user
+# apt-get install -y python-pip git libffi-dev libssl-dev
+apt-get install -y python3-pip
+pip3 install -y ansible
+# pip install --upgrade pip
+# apt-add-repository -y ppa:ansible/ansible
+# apt-get install -y ansible
+
+# pip3 install pywinrm[kerberos]
+# apt-get install -y python-dev libkrb5-dev krb5-user
 
 # Run remaining commands as user
 su -c "curl -s https://raw.githubusercontent.com/david-rachwalik/pc-setup/master/wsl_user_setup.sh | bash" ${RUN_USER}
