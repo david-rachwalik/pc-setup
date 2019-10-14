@@ -45,6 +45,13 @@ choco feature enable -n allowGlobalConfirmation
 
 ## PC Health
 
+### Pull latest from GitHub
+
+``` bash
+cd ~/pc-setup/ansible_playbooks
+git pull
+```
+
 ### Backup application settings & data
 
 ``` bash
