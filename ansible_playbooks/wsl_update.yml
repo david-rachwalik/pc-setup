@@ -8,9 +8,9 @@
   - linux/system/pip
 
 
-- hosts: linux
-  roles:
-  - linux/system/setup
+# - hosts: linux
+#   roles:
+#   - linux/system/setup
 
   # - git/config
   # tasks:

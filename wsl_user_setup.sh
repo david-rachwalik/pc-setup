@@ -1,16 +1,12 @@
-#!/bin/bash
+#!/bin/sh
 
-# --- Commands in this file are expected to be done as user ---
+# --- This file only to be run as user ---
 
-# Install Ansible and WinRM (TIP: never sudo pip)
-# pip install ansible pywinrm
-
-
-# Create bin directory if it doesn't exist
-# if [ ! -d "$HOME/bin" ]; then
-#     mkdir $HOME/bin
-# fi
-
+# Create user bin if it doesn't exist
+if ! test -d ~/bin; then
+    mkdir ~/bin
+    chmod 755 ~/bin
+fi
 
 # --- Git Steps ---
 # https://help.github.com/en/articles/checking-for-existing-ssh-keys
@@ -19,16 +15,16 @@ if ! test -d ~/.ssh; then
     mkdir ~/.ssh
     chmod 755 ~/.ssh
     # https://help.github.com/en/articles/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent
-    ssh-keygen -f $HOME/.ssh/id_rsa -t rsa -b 4096 -N "" -q
+    ssh-keygen -q -f ${HOME}/.ssh/id_rsa -t rsa -b 4096 -N ""
     # Start the ssh-agent in the background
     eval $(ssh-agent -s)
     ssh-add ~/.ssh/id_rsa
     # Add the contents of your local public key to authorized_keys
-    if [ ! -f ~/.ssh/authorized_keys ]; then
+    if ! test -f ~/.ssh/authorized_keys; then
         cat ~/.ssh/id_rsa.pub > ~/.ssh/authorized_keys
     fi
     # Add GitHub to known_hosts if it doesn't exist
-    if [ ! -f ~/.ssh/known_hosts ]; then
+    if ! test -f ~/.ssh/known_hosts; then
         touch ~/.ssh/known_hosts
     fi
     ssh-keygen -F github.com || ssh-keyscan -H github.com >> ~/.ssh/known_hosts

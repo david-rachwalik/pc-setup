@@ -9,12 +9,20 @@ $url = "https://raw.githubusercontent.com/ansible/ansible/devel/examples/scripts
 $file = "$env:temp\ConfigureRemotingForAnsible.ps1"
 (New-Object -TypeName System.Net.WebClient).DownloadFile($url, $file)
 powershell.exe -ExecutionPolicy ByPass -File $file
-# Disable WinRM Basic authentication
-Set-Item -Path WSMan:\localhost\Service\Auth\Basic -Value false
-Set-Item -Path WSMan:\localhost\Service\Auth\Kerberos -Value true
+# Toggle WinRM authentications
+# Set-Item -Path WSMan:\localhost\Service\Auth\Basic -Value true
+# Set-Item -Path WSMan:\localhost\Service\Auth\Kerberos -Value false
 # Verify changes
 # winrm get winrm/config/Service
 # winrm get winrm/config/Winrs
+
+# Ensure correct network connection type for remoting (possibly not needed for Auth\Basic)
+# Set-NetConnectionProfile -NetworkCategory Private
+# winrm quickconfig -quiet
+# Verify Windows IP Configuration
+# winrs -r:DESKTOP-U8ATCTC ipconfig /all
+# Verify existing WinRM listeners
+# winrm enumerate winrm/config/Listener
 
 # Download and install Ubuntu LTS - the preferred, stable release
 Invoke-WebRequest -Uri https://aka.ms/wsl-ubuntu-1804 -OutFile $env:temp\wsl-ubuntu-1804.appx -UseBasicParsing
