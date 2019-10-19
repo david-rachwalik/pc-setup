@@ -1,11 +1,7 @@
 ---
 - hosts: windows
-  gather_facts: false
   roles:
-  # Games already covered by OneDrive
-  - windows/games/world_of_warcraft/backup
-  # - windows/games/overwatch
-  # - windows/games/corruption_of_champions
+  - windows/games/world_of_warcraft
   # - windows/games/diablo_iii
   # - windows/games/skyrim_se
   # - windows/games/skyrim_vr
@@ -25,11 +21,18 @@
   # - windows/games/star_wars_knights_of_the_old_republic
   # - windows/games/the_elder_scrolls_online
 
+  # ----------------------------------------------------------------
+  # Games already covered by OneDrive
+  # - windows/games/overwatch
+  # - windows/games/corruption_of_champions
+  # ----------------------------------------------------------------
+
+  
   # - windows/apps/discord
   # - windows/apps/obs
   # - windows/apps/vscode
 
-  # - windows/apps/handbrake/backup
+  # - windows/apps/handbrake
 
 
 # - Rip DVD|BluRay disks using MakeMKV

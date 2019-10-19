@@ -1,0 +1,12 @@
+---
+# https://docs.ansible.com/ansible/latest/modules/win_copy_module.html
+- name: Backup Handbrake config
+  win_copy:
+    remote_src: true
+    src: "{{handbrake_deploy_config}}"
+    dest: "{{handbrake_backup_config}}"
+  register: out_handbrake_copy
+
+- debug:
+    var: out_handbrake_copy
+...
