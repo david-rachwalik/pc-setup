@@ -1,9 +1,9 @@
 ---
-# - hosts: home
 - hosts: windows
   gather_facts: false
   roles:
-  - windows/games/world_of_warcraft
+  # Games already covered by OneDrive
+  - windows/games/world_of_warcraft/backup
   # - windows/games/overwatch
   # - windows/games/corruption_of_champions
   # - windows/games/diablo_iii
@@ -29,7 +29,7 @@
   # - windows/apps/obs
   # - windows/apps/vscode
 
-  # - windows/system/handbrake
+  # - windows/apps/handbrake/backup
 
 
 # - Rip DVD|BluRay disks using MakeMKV
@@ -42,5 +42,6 @@
 #   - addon directory snapshot
 
 # ::: maybe :::
+# - connect to QNAP + Linux Station
 # - automate Plex
 ...
