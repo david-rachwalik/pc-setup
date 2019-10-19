@@ -1,11 +1,9 @@
 ---
 - hosts: windows
-  gather_facts: false
   roles:
-  - windows/games/world_of_warcraft/backup
-  # - windows/games/final_fantasy_xiv
-  # - windows/games/the_elder_scrolls_online
-  # - windows/games/elite_dangerous
+  - windows/games/world_of_warcraft
+  # - windows/games/diablo_iii
+  # - windows/games/skyrim_se
   # - windows/games/skyrim_vr
   # - windows/games/rocket_league
   # - windows/games/terraria
@@ -20,11 +18,18 @@
   # - windows/games/senran_kagura_peach_beach_splash
   # - windows/games/star_wars_knights_of_the_old_republic
 
+  # ----------------------------------------------------------------
+  # Games already covered by OneDrive
+  # - windows/games/overwatch
+  # - windows/games/corruption_of_champions
+  # ----------------------------------------------------------------
+
+  
   # - windows/apps/discord
   # - windows/apps/obs
   # - windows/apps/vscode
 
-  # - windows/system/handbrake
+  # - windows/apps/handbrake
 
 
 # - Rip DVD|BluRay disks using MakeMKV
@@ -37,5 +42,6 @@
 #   - addon directory snapshot
 
 # ::: maybe :::
+# - connect to QNAP + Linux Station
 # - automate Plex
 ...

@@ -1,0 +1,6 @@
+---
+handbrake_deploy_dir: C:\Program Files\HandBrake
+handbrake_deploy_config: C:\Program Files\HandBrake\Handbrake-config.json
+handbrake_backup_dir: D:\OneDrive\Backups
+handbrake_backup_config: D:\OneDrive\Backups\Handbrake-config.json
+...
