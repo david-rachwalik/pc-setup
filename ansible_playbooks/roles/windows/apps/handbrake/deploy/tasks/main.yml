@@ -1,4 +1,0 @@
----
-- name: Deploy Handbrake configuration
-  win_ping:
-...
