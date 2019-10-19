@@ -1,0 +1,12 @@
+---
+# ansible home -m include_role -a "name=windows/games/world_of_warcraft"
+
+# https://docs.ansible.com/ansible/latest/modules/win_package_module.html
+- name: Install Final Fantasy XIV - A Realm Reborn
+  win_package:
+    path: https://gdl.square-enix.com/ffxiv/inst/ffxivsetup.exe
+    # Got from HKLM:Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall
+    product_id: '{2B41E132-07DF-4925-A3D3-F2D1765CCDFE}'
+    state: present
+  tags: ["install", "final_fantasy_xiv"]
+...

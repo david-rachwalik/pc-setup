@@ -1,40 +1,14 @@
 ---
-# This playbook's purpose is to provision Windows 10
-
-# ansible-playbook desktop_setup.yml --tags "packages" -vvvv
-# ansible-playbook desktop_setup.yml --skip-tags "configuration,packages" -vvvv
-
-    # - install software using Chocolatey
-    # - configure application settings
-    # - install software not covered by Chocolatey
-    #   - scanner
-
+# This playbook will provision Windows 10
 
 - hosts: windows
   become: true
   roles:
-  # Windows Updates (auto-reboots, requires remote management)
-  # https://docs.ansible.com/ansible/2.5/modules/win_updates_module.html
-
   - windows/system/chocolatey/install
   - windows/system/chocolatey/uninstall
+  # Install other software, such as scanner
   - windows/system/desktop/clean
 
-  # tasks:
-  # https://docs.ansible.com/ansible/latest/modules/win_package_module.html
-  # - block:
-  #   # 7-Zip exe doesn't use a guid for the Product ID
-  #   - name: Install 7zip from a network share specifying the credentials
-  #     win_package:
-  #       # path: \\domain\programs\7z.exe
-  #       path: C:\Program Files\7-Zip\7z.exe
-  #       product_id: 7-Zip
-  #       arguments: /S
-  #       state: present
-  #   tags: ["packages"]
-    
-  # https://docs.microsoft.com/en-us/cli/azure/install-azure-cli-apt
-  # curl -sL https://aka.ms/InstallAzureCLIDeb | bash
 
   # https://docs.microsoft.com/en-us/powershell/windows/get-started?view=win10-ps
   # https://docs.microsoft.com/en-us/windows/configuration/configure-windows-10-taskbar

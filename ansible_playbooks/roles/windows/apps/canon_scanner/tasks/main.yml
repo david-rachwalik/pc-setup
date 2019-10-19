@@ -1,0 +1,10 @@
+---
+# https://docs.ansible.com/ansible/latest/modules/win_package_module.html
+- name: Install Canon MP Navigator (scanner)
+  win_package:
+    path: D:\OneDrive\_PC Necessities\Multimedia\Capture & Editting\mpnx_4_1-win-4_1_4-ea23_2.exe
+    product_id: 7-Zip
+    arguments: /S
+    state: present
+  tags: ["packages"]
+...

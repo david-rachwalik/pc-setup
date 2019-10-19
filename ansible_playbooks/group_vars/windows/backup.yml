@@ -20,4 +20,9 @@ world_of_warcraft_backups:
     screenshot_dir: E:\GameFiles\World of Warcraft\_classic_\Screenshots
     wtf_dir: E:\GameFiles\World of Warcraft\_classic_\WTF
     addon_dir: E:\GameFiles\World of Warcraft\_classic_\Interface\AddOns
+
+
+final_fantasy_xiv_backups:
+  backup_dir: D:\OneDrive\_DMR\Videogames\Final Fantasy\Final Fantasy XIV
+  screenshot_dir: C:\Users\david\Documents\My Games\FINAL FANTASY XIV - A Realm Reborn\screenshots
 ...

@@ -2,27 +2,23 @@
 - hosts: windows
   gather_facts: false
   roles:
-  - windows/games/world_of_warcraft
-  # - windows/games/overwatch
-  # - windows/games/corruption_of_champions
-  # - windows/games/diablo_iii
-  # - windows/games/skyrim_se
+  - windows/games/world_of_warcraft/backup
+  # - windows/games/final_fantasy_xiv
+  # - windows/games/the_elder_scrolls_online
+  # - windows/games/elite_dangerous
   # - windows/games/skyrim_vr
+  # - windows/games/rocket_league
   # - windows/games/terraria
   # - windows/games/vrchat
   # - windows/games/age_of_empires_ii
   # - windows/games/age_of_empires_iii
   # - windows/games/bayonetta
   # - windows/games/dragonball_fighter_z
-  # - windows/games/elite_dangerous
-  # - windows/games/final_fantasy_xiv
   # - windows/games/left_4_dead
   # - windows/games/left_4_dead_2
   # - windows/games/magicka
-  # - windows/games/rocket_league
   # - windows/games/senran_kagura_peach_beach_splash
   # - windows/games/star_wars_knights_of_the_old_republic
-  # - windows/games/the_elder_scrolls_online
 
   # - windows/apps/discord
   # - windows/apps/obs
