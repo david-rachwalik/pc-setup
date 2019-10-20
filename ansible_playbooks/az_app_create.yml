@@ -1,4 +1,37 @@
 ---
+# All Azure modules
+# https://docs.ansible.com/ansible/latest/modules/list_of_cloud_modules.html#azure
+
+# - hosts: localhost
+#   connection: local
+#   gather_facts: false
+#   vars:
+#     app_name: "DavidRachwalik"
+#   roles:
+#     - az/resource_group
+    # - az/web_app
+    # - az/database
+    # - az/identity
+
+
+# https://docs.ansible.com/ansible/latest/modules/list_of_cloud_modules.html
+# https://docs.ansible.com/ansible/latest/modules/azure_rm_deployment_module.html
+- hosts: localhost
+  connection: local
+  gather_facts: false
+  vars:
+    app_name: "David_Rachwalik"
+    template_url: "https://github.com/Rhodair/DevOps_AzureResourceGroup/blob/master/WebApp/WebSite.json"
+    parameter_url: "https://github.com/Rhodair/DevOps_AzureResourceGroup/blob/master/WebApp/WebSite.parameters.json"
+  tasks:
+    - name: Create Azure Deploy
+      azure_rm_deployment:
+        state: present
+        resource_group_name: "{{app_name}}"
+        template_link: "{{template_url}}"
+        parameters_link: "{{parameter_url}}"
+
+
 - hosts: localhost
   # connection: local
   vars:
@@ -11,6 +44,84 @@
     traffic_manager_profile_name: myTrafficManagerProfile
     traffic_manager_endpoint_name: myTrafficManagerEndpoint
   
-  roles:
-  - { role: azure/webapp/create, resource_group: "{{resource_group}}" }
+  # roles:
+  # - { role: azure/webapp/create, resource_group: "{{resource_group}}" }
+
+  tasks:
+  - name: Create storage account
+    azure_rm_storageaccount:
+      resource_group: Testing
+      name: testaccount001
+      account_type: Standard_LRS
+      
+  - debug:
+      var: testerr
+
+
+  # - name: Create resource group
+  #   azure_rm_resourcegroup:
+  #     name: "{{ resource_group_webapp }}"
+  #     location: "{{ location }}"
+
+  # - name: Create secondary resource group
+  #   azure_rm_resourcegroup:
+  #     name: "{{ resource_group }}"
+  #     location: "{{ location }}"
+
+  # - name: Create App Service Plan
+  #   azure_rm_appserviceplan:
+  #     resource_group: "{{ resource_group }}"
+  #     name: "{{ plan_name }}"
+  #     location: "{{ location }}"
+  #     is_linux: true
+  #     sku: S1
+  #     number_of_workers: 1
+
+  # - name: Create App Service on Linux with Java Runtime
+  #   azure_rm_webapp:
+  #     resource_group: "{{ resource_group_webapp }}"
+  #     name: "{{ webapp_name }}"
+  #     plan:
+  #       resource_group: "{{ resource_group }}"
+  #       name: "{{ plan_name }}"
+  #       is_linux: true
+  #       sku: S1
+  #       number_of_workers: 1
+  #     app_settings:
+  #       testkey: "testvalue"
+  #     frameworks:
+  #     - name: java
+  #       version: 8
+  #       settings:
+  #         java_container: "Tomcat"
+  #         java_container_version: "8.5"
+
+  # - name: Get web app facts
+  #   azure_rm_webapp_facts:
+  #     resource_group: "{{ resource_group_webapp }}"
+  #     name: "{{ webapp_name }}"
+  #   register: webapp
+    
+  # - name: Create Traffic Manager Profile
+  #   azure_rm_trafficmanagerprofile:
+  #     resource_group: "{{ resource_group_webapp }}"
+  #     name: "{{ traffic_manager_profile_name }}"
+  #     location: global
+  #     routing_method: performance
+  #     dns_config:
+  #       relative_name: "{{ traffic_manager_profile_name }}"
+  #       ttl:  60
+  #     monitor_config:
+  #       protocol: HTTPS
+  #       port: 80
+  #       path: '/'
+
+  # - name: Add endpoint to traffic manager profile, using created web site
+  #   azure_rm_trafficmanagerendpoint:
+  #     resource_group: "{{ resource_group_webapp }}"
+  #     profile_name: "{{ traffic_manager_profile_name }}"
+  #     name: "{{ traffic_manager_endpoint_name }}"
+  #     type: azure_endpoints
+  #     location: "{{ location }}"
+  #     target_resource_id: "{{ webapp.webapps[0].id }}"
 ...
