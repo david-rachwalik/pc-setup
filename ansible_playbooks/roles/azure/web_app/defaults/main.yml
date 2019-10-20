@@ -1,7 +1,10 @@
 ---
-app_name: null
-az_group: "{{app_name}}Group"
 # 'az_plan' must be between 3-24 chars, only lowercase or numbers
 # TODO: replace() will use regex to strip ALL special characters
-az_plan_name: "{{app_name | trim | replace('_', '') | truncate(20) | lower}}plan"
-az_plan_sku: F1
+plan_name: "{{webapp_name | trim | replace('_', '') | truncate(20) | lower}}plan"
+plan_sku: F1
+# Products available by region
+# https://azure.microsoft.com/en-us/global-infrastructure/services/
+webapp_name: null
+group_name: "{{webapp_name}}-group"
+...
