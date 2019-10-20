@@ -1,0 +1,4 @@
+---
+dependencies:
+- { role: azure/resource_group }
+...
