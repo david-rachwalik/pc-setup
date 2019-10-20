@@ -38,7 +38,8 @@ if ! test -f ${ms_packages_deb}; then
 fi
 
 # Install Azure CLI (https://docs.microsoft.com/en-us/cli/azure/install-azure-cli-apt)
-curl -sL https://aka.ms/InstallAzureCLIDeb | bash
+# curl -sL https://aka.ms/InstallAzureCLIDeb | bash
+# TODO: verify in Ansible before removing lines above
 
 # Run remaining commands as user
 su -c "curl -s https://raw.githubusercontent.com/david-rachwalik/pc-setup/master/wsl_user_setup.sh | bash" ${run_user}
