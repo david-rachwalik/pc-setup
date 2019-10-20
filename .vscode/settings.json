@@ -2,6 +2,8 @@
     // "git.path": "C:\\Git\\cmd\\git.exe",
     "git.enabled": true,
     "python.pythonPath": "C:\\Python27\\python.exe",
+    "update.channel": "none",
+    "update.enableWindowsBackgroundUpdates": false,
     "workbench.editor.labelFormat": "short",
     // WSL1 workaround for renaming non-empty directories
     // https://devblogs.microsoft.com/commandline/tips-and-tricks-for-linux-development-with-wsl-and-visual-studio-code/
