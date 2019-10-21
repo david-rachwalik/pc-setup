@@ -1,0 +1,11 @@
+---
+# https://docs.ansible.com/ansible/latest/modules/azure_rm_sqlserver_facts_module.html
+- name: List instances of SQL Server
+  azure_rm_sqlserver_facts:
+    resource_group: "{{ resource_group }}"
+
+# - name: Get instance of SQL Server
+#   azure_rm_sqlserver_facts:
+#     resource_group: "{{ resource_group }}"
+#     server_name: "{{ sql_server }}"
+...

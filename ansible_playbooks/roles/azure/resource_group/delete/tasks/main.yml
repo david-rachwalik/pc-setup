@@ -1,0 +1,10 @@
+---
+# ansible localhost -m include_role -a "name=azure/resource_group/delete"
+
+# https://docs.ansible.com/ansible/latest/modules/azure_rm_resourcegroup_module.html
+- name: Delete resource group
+  azure_rm_resourcegroup:
+    name: "{{ resource_group }}"
+    force_delete_nonempty: yes
+    state: absent
+...

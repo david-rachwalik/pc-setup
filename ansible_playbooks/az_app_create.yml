@@ -1,40 +1,38 @@
 ---
+# https://docs.microsoft.com/en-us/azure/ansible/ansible-overview
 # All Azure modules
 # https://docs.ansible.com/ansible/latest/modules/list_of_cloud_modules.html#azure
 
+
+# https://www.youtube.com/watch?v=G_gDYlRBAZw
+# - hosts: localhost
+#   vars:
+#     resource_group: StaticWebsite
+#     storage_account: superfancysitename
+#   roles:
+#   - azure/storage_account/create
+#   - azure/storage_account/status
+
+
 - hosts: localhost
   vars:
-    webapp_name: DMR
+    resource_group: DMR
   roles:
-  - azure/webapp/create
+  # - azure/webapp/create
   # - azure/webapp/database
   # - azure/webapp/identity
+  - azure/service_plan/create
+  # - azure/app_service/create
 
 
-- hosts: localhost
-  vars:
-    # https://docs.microsoft.com/en-us/azure/architecture/best-practices/naming-conventions
-    resource_group: myResourceGroup
-    resource_group_webapp: "{{resource_group}}_app"
-    webapp_name: myLinuxWebApp
-    plan_name: myAppServicePlan
-    location: eastus
-    traffic_manager_profile_name: myTrafficManagerProfile
-    traffic_manager_endpoint_name: myTrafficManagerEndpoint
-  
-  # roles:
-  # - { role: azure/webapp/create, resource_group: "{{resource_group}}" }
 
-  tasks:
-  - name: Create storage account
-    azure_rm_storageaccount:
-      resource_group: Testing
-      name: testaccount001
-      account_type: Standard_LRS
-      
-  - debug:
-      var: testerr
-
+# - hosts: localhost
+#   tasks:
+#   - name: Create storage account
+#     azure_rm_storageaccount:
+#       resource_group: Testing
+#       name: testaccount001
+#       account_type: Standard_LRS
 
   # - name: Create resource group
   #   azure_rm_resourcegroup:

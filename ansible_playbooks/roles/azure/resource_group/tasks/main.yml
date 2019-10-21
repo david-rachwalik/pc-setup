@@ -1,9 +1,0 @@
----
-- name: Display resource group name
-  debug:
-    var: az_group
-
-- name: Create resource group
-  azure_rm_resourcegroup:
-    name: "{{az_group}}"
-    location: "{{az_location}}"

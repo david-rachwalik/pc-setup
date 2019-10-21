@@ -1,0 +1,13 @@
+---
+# ansible localhost -m include_role -a "name=azure/app_service/status"
+
+# https://docs.ansible.com/ansible/latest/modules/azure_rm_webapp_facts_module.html
+- name: Get app service facts
+  azure_rm_webapp_facts:
+    resource_group: "{{ resource_group }}"
+    name: "{{ webapp_name }}"
+  register: out_app_facts
+
+- debug:
+    var: out_app_facts
+...

@@ -1,0 +1,21 @@
+---
+# ansible localhost -m include_role -a "name=azure/app_service/create"
+
+# https://docs.ansible.com/ansible/latest/modules/azure_rm_webapp_module.html
+- name: Create a windows web app
+  azure_rm_webapp:
+    name: "{{ app_service }}"
+    resource_group: "{{ resource_group }}"
+    plan:
+      resource_group: "{{ resource_group }}"
+      name: "{{az_plan_name}}"
+      is_linux: true
+      sku: "{{az_plan_sku}}"
+    state: present
+
+# - name: Create web application deployment
+#   azure_rm_deployment:
+#     name: "{{ app_service }}"
+#     resource_group: "{{ resource_group }}"
+#     state: present
+...
