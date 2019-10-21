@@ -5,6 +5,7 @@
 
 
 # https://www.youtube.com/watch?v=G_gDYlRBAZw
+# https://docs.microsoft.com/en-us/azure/storage/blobs/storage-blob-static-website
 # - hosts: localhost
 #   vars:
 #     resource_group: StaticWebsite
