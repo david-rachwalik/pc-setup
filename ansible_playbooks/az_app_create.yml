@@ -18,11 +18,7 @@
   vars:
     resource_group: DMR
   roles:
-  # - azure/webapp/create
-  # - azure/webapp/database
-  # - azure/webapp/identity
-  - azure/service_plan/create
-  # - azure/app_service/create
+  - azure/app_service/create
 
 
 

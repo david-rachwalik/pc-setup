@@ -1,5 +1,0 @@
----
-dependencies:
-- { role: azure/resource_group }
-- { role: azure/sql_server }
-...

@@ -1,7 +1,0 @@
----
-- name: Create SQL database instance
-  azure_rm_sqldatabase:
-    name: "{{app_db}}"
-    resource_group: "{{az_group}}"
-    server_name: "{{app_server}}"
-    location: "{{az_location}}"

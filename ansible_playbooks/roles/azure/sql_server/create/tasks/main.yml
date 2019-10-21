@@ -1,6 +1,6 @@
 ---
 # https://docs.ansible.com/ansible/latest/modules/azure_rm_sqlserver_module.html
-- name: Create SQL Server
+- name: Create SQL server
   azure_rm_sqlserver:
     name: "{{ sql_server }}"
     resource_group: "{{ resource_group }}"
