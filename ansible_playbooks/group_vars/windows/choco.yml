@@ -27,10 +27,6 @@ chocolatey_install:
 - azure-cli
 # https://chocolatey.org/packages/microsoftazurestorageexplorer
 - microsoftazurestorageexplorer
-# https://chocolatey.org/packages/mitkerberos
-- mitkerberos
-# https://chocolatey.org/packages/docker-desktop
-# - docker-desktop
 
 # ****** Media ******
 # https://chocolatey.org/packages/adobereader
@@ -43,8 +39,6 @@ chocolatey_install:
 - geforce-experience
 # https://chocolatey.org/packages/paint.net
 - paint.net
-# https://chocolatey.org/packages/gimp
-# - gimp
 # https://chocolatey.org/packages/spotify
 - spotify
 
@@ -74,10 +68,16 @@ chocolatey_install:
 chocolatey_uninstall:
 # https://chocolatey.org/packages/python2
 - python2
+# https://chocolatey.org/packages/mitkerberos
+- mitkerberos
+# https://chocolatey.org/packages/docker-desktop
+- docker-desktop
 # https://chocolatey.org/packages/unity
 - unity
-# https://chocolatey.org/packages/vlc
-- vlc
 # https://chocolatey.org/packages/obs-studio
 # - obs-studio
+# https://chocolatey.org/packages/gimp
+- gimp
+# https://chocolatey.org/packages/vlc
+- vlc
 ...
