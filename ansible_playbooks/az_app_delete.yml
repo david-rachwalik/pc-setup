@@ -1,7 +1,5 @@
 ---
 - hosts: localhost
-  gather_facts: false
-  environment: "{{azure_environment}}"
   vars:
     resource_group_names:
     - ansible_test_rg
