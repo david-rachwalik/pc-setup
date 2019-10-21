@@ -1,4 +1,6 @@
 ---
+# This role is useful for creating a static app (client-side only)
+
 # https://docs.ansible.com/ansible/latest/modules/azure_rm_storageaccount_module.html
 - name: Create a storage account
   azure_rm_storageaccount:
