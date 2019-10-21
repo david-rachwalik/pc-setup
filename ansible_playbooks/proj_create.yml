@@ -1,0 +1,11 @@
+---
+# This playbook creates a new .NET project
+
+- hosts: localhost
+  vars:
+    resource_group: DMR
+  roles:
+  - linux/web_project/create
+  - linux/web_project/database
+  - linux/web_project/identity
+...
