@@ -2,17 +2,15 @@
 # https://docs.ansible.com/ansible/latest/modules/list_of_cloud_modules.html
 # https://docs.ansible.com/ansible/latest/modules/azure_rm_deployment_module.html
 - hosts: localhost
-  connection: local
-  gather_facts: false
   vars:
-    webapp_name: "David_Rachwalik"
     template_url: "https://github.com/Rhodair/DevOps_AzureResourceGroup/blob/master/WebApp/WebSite.json"
     parameter_url: "https://github.com/Rhodair/DevOps_AzureResourceGroup/blob/master/WebApp/WebSite.parameters.json"
   tasks:
     - name: Create Azure Deploy
       azure_rm_deployment:
+        resource_group_name: "{{ resource_group }}"
+        name: "{{ app_service }}"
+        template_link: "{{ template_url }}"
+        parameters_link: "{{ parameter_url }}"
         state: present
-        resource_group_name: "{{webapp_name}}"
-        template_link: "{{template_url}}"
-        parameters_link: "{{parameter_url}}"
 ...

@@ -6,16 +6,6 @@
   azure_rm_webapp:
     name: "{{ app_service }}"
     resource_group: "{{ resource_group }}"
-    plan:
-      resource_group: "{{ resource_group }}"
-      name: "{{az_plan_name}}"
-      is_linux: true
-      sku: "{{az_plan_sku}}"
+    plan: "{{ service_plan }}"
     state: present
-
-# - name: Create web application deployment
-#   azure_rm_deployment:
-#     name: "{{ app_service }}"
-#     resource_group: "{{ resource_group }}"
-#     state: present
 ...

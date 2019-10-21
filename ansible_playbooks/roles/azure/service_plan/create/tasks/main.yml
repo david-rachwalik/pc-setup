@@ -8,6 +8,7 @@
     name: "{{ service_plan }}"
     is_linux: true
     sku: F1
+    state: present
 
 # https://azure.microsoft.com/en-us/pricing/details/app-service/linux/
 # Price Tiers:  F1, D1, B1, B2, B3, S1, P1, P1V2
