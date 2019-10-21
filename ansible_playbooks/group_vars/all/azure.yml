@@ -1,0 +1,32 @@
+---
+# Products available by region
+# https://azure.microsoft.com/en-us/global-infrastructure/services/
+
+
+# ------------------------------------------------
+# https://docs.microsoft.com/en-us/azure/architecture/best-practices/naming-conventions
+sku: FREE
+# basename: CloudShell
+# basename: DMR
+# resource_group: "rg-{{basename}}"
+location: "South Central US"
+# sql_server must contain only lowercase letters, numbers, and hyphens; must be 3-50 characters long
+sql_server: "sqlsv-{{resource_group}}"
+sql_database: "sqldb-{{resource_group}}"
+db_username: Rhodair
+db_password: null
+# username must be unique within Azure; must not contain the '@' symbol for local Git pushes
+deploy_username: null
+# password must contain at least 2 of the 3 elements: letters, numbers, and symbols; must be >= 8 characters long
+deploy_password: null
+storage_account: "sa-{{resource_group}}"
+
+# 'az_plan' must be between 3-24 chars, only lowercase or numbers
+# TODO: replace() will use regex to strip ALL special characters
+# service_plan: "plan-{{resource_group | replace('_', '') | truncate(19) | lower}}"
+service_plan: "plan-{{resource_group}}"
+plan_sku: F1
+# app must be globally unique with valid characters a-z, 0-9, and -
+app_service: "azapp-{{resource_group}}"
+connection_string: null
+...

@@ -1,8 +1,0 @@
----
-webapp_name: null
-# 'az_plan' must be between 3-24 chars, only lowercase or numbers
-# TODO: replace() will use regex to strip ALL special characters
-az_plan: "{{webapp_name | trim | replace('_', '') | truncate(20) | lower}}plan"
-az_group: "{{webapp_name}}Group"
-az_account_type: F1
-az_account_type: Standard_LRS

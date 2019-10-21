@@ -1,4 +1,0 @@
----
-webapp_name: null
-az_group: "{{webapp_name}}Group"
-az_location: "South Central US"
