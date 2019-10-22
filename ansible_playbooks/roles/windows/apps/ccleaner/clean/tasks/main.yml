@@ -1,0 +1,11 @@
+---
+# ansible windows -m include_role -a "name=windows/apps/ccleaner/clean"
+
+# https://www.ccleaner.com/docs/ccleaner/advanced-usage/command-line-parameters
+# https://gist.github.com/theinventor/7b9f2e1f96420291db28592727ede8d3
+# For Windows, always use shell instead of command
+# https://docs.ansible.com/ansible/latest/modules/win_shell_module.html
+- name: Clean machine and shutdown
+  win_shell: Start-Process -FilePath 'C:\Program Files\CCleaner\CCleaner64.exe' -ArgumentList '/AUTO'
+  register: out_ccleaner_auto
+...
