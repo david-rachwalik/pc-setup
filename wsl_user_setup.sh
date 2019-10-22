@@ -1,37 +1,40 @@
 #!/bin/sh
+win_bin=${HOME}/bin
+wsl_ssh=${HOME}/.ssh
+wsl_repo=${HOME}/pc-setup
 
 # --- This file only to be run as user ---
 
 # Create user bin if it doesn't exist
-if ! test -d ~/bin; then
-    mkdir ~/bin
-    chmod 755 ~/bin
+if ! test -d ${win_bin}; then
+    mkdir ${win_bin}
+    chmod 755 ${win_bin}
 fi
 
 # --- Git Steps ---
 # https://help.github.com/en/articles/checking-for-existing-ssh-keys
 # Generate SSH keys if they don't exist
-if ! test -d ~/.ssh; then
-    mkdir ~/.ssh
-    chmod 755 ~/.ssh
+if ! test -d ${wsl_ssh}; then
+    mkdir ${wsl_ssh}
+    chmod 755 ${wsl_ssh}
     # https://help.github.com/en/articles/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent
-    ssh-keygen -q -f ${HOME}/.ssh/id_rsa -t rsa -b 4096 -N ""
+    ssh-keygen -q -f ${wsl_ssh}/id_rsa -t rsa -b 4096 -N ""
     # Start the ssh-agent in the background
     eval $(ssh-agent -s)
-    ssh-add ~/.ssh/id_rsa
+    ssh-add ${wsl_ssh}/id_rsa
     # Add the contents of your local public key to authorized_keys
-    if ! test -f ~/.ssh/authorized_keys; then
-        cat ~/.ssh/id_rsa.pub > ~/.ssh/authorized_keys
+    if ! test -f ${wsl_ssh}/authorized_keys; then
+        cat ${wsl_ssh}/id_rsa.pub > ${wsl_ssh}/authorized_keys
     fi
     # Add GitHub to known_hosts if it doesn't exist
-    if ! test -f ~/.ssh/known_hosts; then
-        touch ~/.ssh/known_hosts
+    if ! test -f ${wsl_ssh}/known_hosts; then
+        touch ${wsl_ssh}/known_hosts
     fi
-    ssh-keygen -F github.com || ssh-keyscan -H github.com >> ~/.ssh/known_hosts
+    ssh-keygen -F github.com || ssh-keyscan -H github.com >> ${wsl_ssh}/known_hosts
     # Above must be run once, copy public SSH key to GitHub Settings, and run again
     echo "Copy this SSH key to your GitHub Settings:"
-    cat ~/.ssh/id_rsa.pub
-    while [ "$ssh_response" != "y" ]; do
+    cat ${wsl_ssh}/id_rsa.pub
+    while [ "${ssh_response}" != "y" ]; do
         read -p "Enter (y) after SSH key has been added to GitHub: " ssh_response
     done
 
@@ -43,32 +46,30 @@ if ! test -d ~/.ssh; then
     # sudo service ssh restart
 fi
 
-# https://git-scm.com/book/en/v2/Getting-Started-First-Time-Git-Setup
-# Before using Git in VSCode
-git config --global user.name "David Rachwalik"
-git config --global user.email "david.rachwalik@outlook.com"
-# https://git-scm.com/book/en/v2/Appendix-C%3A-Git-Commands-Setup-and-Config#_core_editor
-git config --global core.editor "code --wait"
-# View Git settings
-# git config --list --show-origin
-
-# Idempotent Git cloning; currently requires manual transfer of SSH to GitHub account before 2nd run
-if test -d ~/pc-setup; then
-    cd
-    rm -rf ~/pc-setup
+if ! test -d ${wsl_repo}; then
+    # https://git-scm.com/book/en/v2/Getting-Started-First-Time-Git-Setup
+    git config --global user.name "David Rachwalik"
+    git config --global user.email "david.rachwalik@outlook.com"
+    # https://git-scm.com/book/en/v2/Appendix-C%3A-Git-Commands-Setup-and-Config#_core_editor
+    git config --global core.editor "code --wait"
+    # View Git settings
+    git config --list --show-origin
+    git clone git@github.com:david-rachwalik/pc-setup.git ${wsl_repo}
 fi
-git clone git@github.com:david-rachwalik/pc-setup.git ~/pc-setup
-# https://help.github.com/en/articles/changing-a-remotes-url#switching-remote-urls-from-https-to-ssh
-if test -d ~/pc-setup; then
-    if test -f /mnt/d/Repos/pc-setup/ansible_playbooks/group_vars/windows/main_vault.yml; then
-        cp -f /mnt/d/Repos/pc-setup/ansible_playbooks/group_vars/windows/main_vault.yml ~/pc-setup/ansible_playbooks/group_vars/windows/main_vault.yml
+
+if test -d ${wsl_repo}; then
+    win_vault=/mnt/d/Repos/pc-setup/ansible_playbooks/group_vars/windows/main_vault.yml
+    wsl_vault=${wsl_repo}/ansible_playbooks/group_vars/windows/main_vault.yml
+    if test -f ${win_vault}; then
+        cp -f ${win_vault} ${wsl_vault}
     fi
+    git pull
 
     # Ansible ignores ansible.cfg in a world-writable directory
     # https://docs.ansible.com/ansible/devel/reference_appendices/config.html#cfg-in-world-writable-dir
-    find ~/pc-setup -type d -print0 | xargs -0 chmod 755
-    find ~/pc-setup -type f -print0 | xargs -0 chmod 644
+    find ${wsl_repo} -type d -print0 | xargs -0 chmod 755
+    find ${wsl_repo} -type f -print0 | xargs -0 chmod 644
 
-    cd ~/pc-setup/ansible_playbooks
+    cd ${wsl_repo}/ansible_playbooks
     ansible-playbook wsl_update.yml
 fi
