@@ -1,17 +1,19 @@
 ---
-# This playbook's purpose is to provision Windows 10
-# - controls desktop using the laptop
-
-# --- Testing the laptop updating the desktop
-# - ping
-# - hello world powershell command
-# - restart, wait for connection, hello world again
+# This playbook's purpose is to provision Windows
+# --- Test laptop updating the desktop
+# - ping, 'hello world', restart, wait for connection, 'hello world' again
 
 - hosts: home
+  become: true
+  become_user: david
+  become_method: runas
   tasks:
   - name: Test Windows desktop connection
     win_ping:
   roles:
-  - chocolatey/install
-  - chocolatey/uninstall
+  - windows/system/chocolatey/install
+  - windows/system/chocolatey/uninstall
+  # Install other software, such as scanner
+  - windows/system/desktop/clean
+  # - windows/apps/ccleaner/shutdown
 ...
