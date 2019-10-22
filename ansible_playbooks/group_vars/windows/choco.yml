@@ -27,6 +27,8 @@ chocolatey_install:
 - azure-cli
 # https://chocolatey.org/packages/microsoftazurestorageexplorer
 - microsoftazurestorageexplorer
+# https://chocolatey.org/packages/python3
+- python3
 
 # ****** Media ******
 # https://chocolatey.org/packages/adobereader
@@ -39,8 +41,6 @@ chocolatey_install:
 - geforce-experience
 # https://chocolatey.org/packages/paint.net
 - paint.net
-# https://chocolatey.org/packages/spotify
-- spotify
 
 # ****** Video Editing ******
 # https://chocolatey.org/packages/MakeMKV
@@ -80,4 +80,6 @@ chocolatey_uninstall:
 - gimp
 # https://chocolatey.org/packages/vlc
 - vlc
+# https://chocolatey.org/packages/spotify
+- spotify
 ...

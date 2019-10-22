@@ -12,6 +12,6 @@ ansible_host: "{{vault_ansible_host}}"
 ansible_port: 5986
 # -------- WinRM Connection Settings --------
 ansible_winrm_transport: basic
-ansible_winrm_message_encryption: auto
+# ansible_winrm_message_encryption: auto
 ansible_winrm_server_cert_validation: ignore
 ...

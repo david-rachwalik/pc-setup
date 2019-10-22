@@ -3,6 +3,8 @@
 
 - hosts: windows
   become: true
+  become_user: david
+  become_method: runas
   roles:
   - windows/system/chocolatey/install
   - windows/system/chocolatey/uninstall
