@@ -28,8 +28,12 @@ if ! test -d ~/.ssh; then
         touch ~/.ssh/known_hosts
     fi
     ssh-keygen -F github.com || ssh-keyscan -H github.com >> ~/.ssh/known_hosts
-    # Copy the public key string to your GitHub Settings
-    # view ~/.ssh/id_rsa.pub
+    # Above must be run once, copy public SSH key to GitHub Settings, and run again
+    echo "Copy this SSH key to your GitHub Settings:"
+    cat ~/.ssh/id_rsa.pub
+    while [ "$ssh_response" != "y" ]; do
+        read -p "Enter (y) after SSH key has been added to GitHub: " ssh_response
+    done
 
     # Testing sed command to update SSH config
     # sed 's/^PasswordAuthentication.*/PasswordAuthentication yes/i' /etc/ssh/sshd_config | grep '^PasswordAuthentication.*'
