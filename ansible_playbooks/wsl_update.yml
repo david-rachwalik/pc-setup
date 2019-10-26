@@ -5,8 +5,8 @@
   become: true
   roles:
   - linux/system/apt
-  - linux/system/npm
   - linux/system/pip
+  - linux/system/npm
 
 
 # - hosts: linux
