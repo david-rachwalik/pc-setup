@@ -3,9 +3,39 @@
 
 - hosts: localhost
   vars:
-    resource_group: DMR
-  roles:
-  - linux/web_project/create
-  - linux/web_project/database
-  - linux/web_project/identity
+    resource_group: AngularWebApp
+    app_path: ~/AngularWebApp
+    # resource_group: DMR
+  # roles:
+  # - linux/web_project/create
+  # - linux/web_project/database
+  # - linux/web_project/identity
+  tasks:
+  # - name: Ensure project directory exists
+  #   file:
+  #     path: "{{app_path}}"
+  #     state: directory
+  #     # owner: foo
+  #     # group: foo
+  #     mode: '0755'
+
+  - name: Create a Razor Pages web app
+    command: "dotnet new webapp -o {{app_path}}"
+    args:
+      creates: "{{app_path}}"
+    register: out_webapp_create
+
+  - block:
+    - name: Add EFCore design package
+      command: "dotnet add package Microsoft.EntityFrameworkCore.Design"
+
+    - name: Create initial database migration
+      command: "dotnet ef migrations add {{migration_message|default('Initial')}}"
+    
+    when: out_webapp_create is changed
+
+
+
+  # - name: Launch web app in VSCode
+  #   command: "code -r {{app_path}}"
 ...
