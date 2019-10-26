@@ -10,6 +10,7 @@
   - windows/system/chocolatey/uninstall
   # Install other software, such as scanner
   - windows/system/desktop/clean
+  - windows/apps/ccleaner/clean
 
 
   # https://docs.microsoft.com/en-us/powershell/windows/get-started?view=win10-ps
