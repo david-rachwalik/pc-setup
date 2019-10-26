@@ -1,85 +1,55 @@
 ---
+# https://chocolatey.org/packages/*
+
 chocolatey_install:
-# ****** General Productivity ******
-# https://chocolatey.org/packages/nordvpn
-- nordvpn
-# https://chocolatey.org/packages/GoogleChrome
-- googlechrome
-# https://chocolatey.org/packages/ccleaner
+# --- General Productivity ---
 - ccleaner
-# https://chocolatey.org/packages/7zip
 - 7zip
-# https://chocolatey.org/packages/qbittorrent
+- nordvpn
+- googlechrome
 - qbittorrent
-# https://chocolatey.org/packages/speccy
 - speccy
-# https://chocolatey.org/packages/Recuva
 # - recuva
-# https://chocolatey.org/packages/defraggler
 # - defraggler
 
-# ****** Development ******
-# https://chocolatey.org/packages/git
+# --- Development ---
 - git
-# https://chocolatey.org/packages/dotnetcore-sdk
-- dotnetcore-sdk
-# https://chocolatey.org/packages/azure-cli
-- azure-cli
-# https://chocolatey.org/packages/microsoftazurestorageexplorer
-- microsoftazurestorageexplorer
-# https://chocolatey.org/packages/python3
 - python3
+- dotnetcore-sdk
+- azure-cli
+- microsoftazurestorageexplorer
+- sass
+- typescript
+- nodejs
 
-# ****** Media ******
-# https://chocolatey.org/packages/adobereader
-- adobereader
-# https://chocolatey.org/packages/AdobeAIR
-- adobeair
-# https://chocolatey.org/packages/adobeshockwaveplayer
-- adobeshockwaveplayer
-# https://chocolatey.org/packages/geforce-experience
+# --- Media ---
 - geforce-experience
-# https://chocolatey.org/packages/paint.net
+- adobereader
+- adobeair
+- adobeshockwaveplayer
 - paint.net
 
-# ****** Video Editing ******
-# https://chocolatey.org/packages/MakeMKV
+# --- Video Editing ---
 - makemkv
-# https://chocolatey.org/packages/handbrake
 - handbrake
-# https://chocolatey.org/packages/k-litecodecpackmega
 - k-litecodecpackmega
-# https://chocolatey.org/packages/streamlabs-obs
-- streamlabs-obs
-# https://chocolatey.org/packages/4k-video-downloader
 - 4k-video-downloader
+- streamlabs-obs
 
-# ****** Videogames ******
-# https://chocolatey.org/packages/autohotkey
+# --- Videogames ---
 - autohotkey
-# https://chocolatey.org/packages/discord
 - discord
-# https://chocolatey.org/packages/steam
 - steam
-# https://chocolatey.org/packages/twitch
 - twitch
 
 
 chocolatey_uninstall:
-# https://chocolatey.org/packages/python2
 - python2
-# https://chocolatey.org/packages/mitkerberos
 - mitkerberos
-# https://chocolatey.org/packages/docker-desktop
 - docker-desktop
-# https://chocolatey.org/packages/unity
 - unity
-# https://chocolatey.org/packages/obs-studio
 # - obs-studio
-# https://chocolatey.org/packages/gimp
 - gimp
-# https://chocolatey.org/packages/vlc
 - vlc
-# https://chocolatey.org/packages/spotify
 - spotify
 ...
