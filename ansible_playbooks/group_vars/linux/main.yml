@@ -10,6 +10,14 @@ apt_packages:
 # https://dotnet.microsoft.com/download/linux-package-manager/ubuntu18-04/sdk-current
 - apt-transport-https
 - dotnet-sdk-3.0
+# --- NPM ---
+- nodejs
+- npm
+
+
+npm_packages:
+- sass
+- typescript
 
 
 pip_packages:
