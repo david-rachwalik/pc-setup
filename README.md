@@ -18,8 +18,6 @@
 
     ``` bash
     curl -s https://raw.githubusercontent.com/david-rachwalik/pc-setup/master/wsl_setup.sh | sudo -H bash
-    # Above must be run once, copy public SSH key to GitHub Settings, and run again
-    view ~/.ssh/id_rsa.pub
     ```
 
 3. Run Ansible on Linux to provision Linux
