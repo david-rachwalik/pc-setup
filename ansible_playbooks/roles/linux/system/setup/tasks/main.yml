@@ -1,27 +1,16 @@
 ---
-# https://docs.ansible.com/ansible/latest/modules/template_module.html
-- name: Template shell aliases
+- name: Update shell aliases
   copy:
     src: "{{shell_alias | basename}}"
     dest: "{{shell_alias}}"
     mode: '0644'
-  tags: ["setup"]
+  notify: source_shell_alias
+  tags: ["setup", "alias"]
 
-- name: Verify ~/bin directory
+- name: Verify script directory
   file:
     path: ~/bin
     state: directory
     mode: '0755'
-  tags: ["setup"]
-
-# - name: Link ~/bin to the update playbook
-
-# mkdir /etc/ansible/group_vars
-# mkdir /etc/ansible/host_vars
-# cp /mnt/d/Repos_Exp/pc-setup/etc/ansible/group_vars/windows.yml /etc/ansible/group_vars/windows.yml
-# cp /mnt/d/Repos_Exp/pc-setup/etc/ansible/host_vars/localhost.yml /etc/ansible/host_vars/localhost.yml
-# cp /mnt/d/Repos_Exp/pc-setup/play_test.yml /etc/ansible/play_test.yml
-
-# https://docs.microsoft.com/en-us/cli/azure/install-azure-cli-apt
-# curl -sL https://aka.ms/InstallAzureCLIDeb | bash
+  tags: ["setup", "bin"]
 ...

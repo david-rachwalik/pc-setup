@@ -1,13 +1,19 @@
 ---
-- name: Create a .NET project
+- name: Delete a .NET project
   hosts: localhost
   vars:
     resource_group: AngularWebApp
     app_path: ~/AngularWebApp
     app_service: WebApp
     # resource_group: DMR
-  roles:
-  - cross_platform/dotnet/new
+  tasks:
+  - name: Purge directory
+    file:
+      name: "{{app_path}}"
+      state: absent
+      
+  # roles:
+  # - cross_platform/dotnet/new
   # - linux/web_project/create
   # - linux/web_project/database
   # - linux/web_project/identity

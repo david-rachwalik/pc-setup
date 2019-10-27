@@ -1,0 +1,48 @@
+---
+# ansible localhost -m include_role -a "name=cross_platform/dotnet/new" -e "app_path=~/Core3WebApp"
+
+# https://docs.microsoft.com/en-us/dotnet/core/tools/dotnet-new
+# https://docs.ansible.com/ansible/latest/modules/command_module.html
+- name: Create a Razor Pages web app
+  command: >-
+    dotnet new webapp
+    --name {{app_service}}
+    --output {{app_path}}
+    --auth Individual
+  # --dry-run
+  args:
+    creates: "{{app_path}}"
+  register: out_webapp_create
+
+- block:
+  - debug:
+      msg: "Change detected for {{app_path}}/{{app_service}}"
+
+  - name: List all package references of the project or solution
+    command: "dotnet list {{app_path}} package"
+    changed_when: false
+
+  - name: List all project-to-project references of the project
+    command: "dotnet list {{app_path}} reference"
+    changed_when: false
+
+  # - name: Add EFCore design package
+  #   command: "dotnet add package Microsoft.EntityFrameworkCore.Design"
+
+  # - name: Create initial database migration
+  #   command: "dotnet ef migrations add {{migration_message|default('Initial')}}"
+  
+  # - name: Launch web app in VSCode
+  #   command: "code -r {{app_path}}"
+
+  when: out_webapp_create is changed
+
+
+# --- Never run the app from command line; stick to VSCode ---
+# # https://docs.microsoft.com/en-us/dotnet/core/tools/dotnet-run
+# - name: Run the web application
+#   command: >-
+#     dotnet run
+#     --project {{app_path}}
+#     --launch-profile Development
+...
