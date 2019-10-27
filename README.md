@@ -34,7 +34,7 @@ Open File Explorer in Linux (only accepts . for path)
 explorer.exe .
 ```
 
-Open VSCode in Linux
+Open VSCode in Linux [using CLI](https://code.visualstudio.com/docs/editor/command-line#_core-cli-options)
 
 ``` bash
 code ~/pc-setup/
