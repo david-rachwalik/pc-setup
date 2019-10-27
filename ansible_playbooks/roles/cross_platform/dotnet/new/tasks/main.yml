@@ -32,13 +32,10 @@
   # - name: Create initial database migration
   #   command: "dotnet ef migrations add {{migration_message|default('Initial')}}"
   
-  # - name: Launch web app in VSCode
-  #   command: "code -r {{app_path}}"
-
   when: out_webapp_create is changed
 
 
-# --- Never run the app from command line; stick to VSCode ---
+# --- Don't run app from command line; stay in Visual Studio ---
 # # https://docs.microsoft.com/en-us/dotnet/core/tools/dotnet-run
 # - name: Run the web application
 #   command: >-

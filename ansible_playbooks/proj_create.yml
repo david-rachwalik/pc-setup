@@ -1,4 +1,6 @@
 ---
+# Modes: [nodb, sqlserver, identity, docker]
+
 - name: Create a .NET project
   hosts: localhost
   vars:
