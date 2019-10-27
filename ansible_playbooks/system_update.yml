@@ -46,6 +46,15 @@
   - windows/apps/ccleaner/clean
   tags: ["windows"]
 
+# - Connect to Windows and gather facts about the environment
+# - Backup Windows application settings & data
+#   - backup game saves, screenshots, addons
+#   - backup preferences for productivity programs
+# - Uninstall Windows features and applications
+# - Install Windows features and applications
+#   - update windows features, install patches, chocolatey upgrade, etc.
+#   - configure security settings
+
 # https://docs.microsoft.com/en-us/powershell/windows/get-started?view=win10-ps
 # https://docs.microsoft.com/en-us/windows/configuration/configure-windows-10-taskbar
 # https://www.winsysadminblog.com/2019/03/change-windows-10-taskbar-icons-script-deploying-a-custom-taskbar-for-windows-10/
