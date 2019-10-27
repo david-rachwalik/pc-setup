@@ -1,4 +1,12 @@
 ---
+# https://docs.ansible.com/ansible/latest/modules/template_module.html
+- name: Template shell aliases
+  copy:
+    src: "{{shell_alias | basename}}"
+    dest: "{{shell_alias}}"
+    mode: '0644'
+  tags: ["setup"]
+
 - name: Verify ~/bin directory
   file:
     path: ~/bin

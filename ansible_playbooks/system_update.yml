@@ -1,0 +1,52 @@
+---
+# ----------------------------------------------------------------
+# FROM: wsl_update.yml
+# ----------------------------------------------------------------
+- name: Upgrade all software, provision system settings, Git pull
+  hosts: linux
+  become: true
+  roles:
+  - linux/system/apt
+  - linux/system/pip
+  - linux/system/npm
+  - linux/system/setup
+  tags: ["linux"]
+
+  # - git/config
+  # tasks:
+  # # https://docs.ansible.com/ansible/latest/modules/git_module.html
+  # - name: Pull the latest files from Git
+  #   git:
+  #     repo: "{{git_repo}}"
+  #     dest: "{{wsl_repo}}"
+  #     force: true
+
+  # ansible-playbook wsl_update.yml --tags "vscode"
+  # tasks:
+  # - name: Install VSCode
+  #   snap:
+  #     name: code
+  #     classic: true
+  #   tags: ["vscode"]
+
+
+# ----------------------------------------------------------------
+# FROM: win_update.yml
+# ----------------------------------------------------------------
+- name: Upgrade all software, provision system settings
+  hosts: windows
+  become: true
+  become_user: david
+  become_method: runas
+  roles:
+  - windows/system/chocolatey/install
+  - windows/system/chocolatey/uninstall
+  # Install other software, such as scanner
+  - windows/system/desktop/clean
+  - windows/apps/ccleaner/clean
+  tags: ["windows"]
+
+# https://docs.microsoft.com/en-us/powershell/windows/get-started?view=win10-ps
+# https://docs.microsoft.com/en-us/windows/configuration/configure-windows-10-taskbar
+# https://www.winsysadminblog.com/2019/03/change-windows-10-taskbar-icons-script-deploying-a-custom-taskbar-for-windows-10/
+...

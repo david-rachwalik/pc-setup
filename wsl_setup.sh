@@ -31,10 +31,11 @@ pip3 install -y ansible
 # apt-get install -y python-dev libkrb5-dev krb5-user
 
 # Register Microsoft key and feed to prep for .NET SDK
-ms_packages_deb="/var/cache/apt/archives/packages-microsoft-prod.deb"
-if ! test -f ${ms_packages_deb}; then
-    wget -q https://packages.microsoft.com/config/ubuntu/18.04/packages-microsoft-prod.deb -O ${ms_packages_deb}
-    dpkg -i ${ms_packages_deb}
+ubuntu_src="https://packages.microsoft.com/config/ubuntu/18.04/packages-microsoft-prod.deb"
+ubuntu_tmp="/var/cache/apt/archives/packages-microsoft-prod.deb"
+if ! test -f ${ubuntu_tmp}; then
+    wget -q ${ubuntu_src} -O ${ubuntu_tmp}
+    dpkg -i ${ubuntu_tmp}
 fi
 
 # Install Azure CLI (https://docs.microsoft.com/en-us/cli/azure/install-azure-cli-apt)

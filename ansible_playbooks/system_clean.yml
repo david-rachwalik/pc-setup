@@ -1,0 +1,94 @@
+---
+# Purpose: Archive all important files, scrub temporary system files and bin, shutdown system
+
+# ----------------------------------------------------------------
+# FROM: wsl_sync.yml
+# ----------------------------------------------------------------
+- hosts: windows
+  roles:
+  - windows/games/world_of_warcraft
+  # - windows/games/sims_iii    # [archive screenshots/settings/addons, run memory cleanup]
+  # - windows/games/diablo_iii
+  # - windows/games/skyrim_se
+  # - windows/games/skyrim_vr
+  # - windows/games/rocket_league
+  # - windows/games/terraria
+  # - windows/games/vrchat
+  # - windows/games/age_of_empires_ii
+  # - windows/games/age_of_empires_iii
+  # - windows/games/bayonetta
+  # - windows/games/dragonball_fighter_z
+  # - windows/games/left_4_dead
+  # - windows/games/left_4_dead_2
+  # - windows/games/magicka
+  # - windows/games/senran_kagura_peach_beach_splash
+  # - windows/games/star_wars_knights_of_the_old_republic
+
+  # ----------------------------------------------------------------
+  # --- Games already covered by OneDrive ---
+  # - windows/games/overwatch
+  # - windows/games/corruption_of_champions
+  # ----------------------------------------------------------------
+
+  # - windows/apps/discord
+  # - windows/apps/obs
+  # - windows/apps/vscode
+  # - windows/apps/handbrake
+
+# - Rip DVD|BluRay disks using MakeMKV
+# - Set default action to rip disks when inserted in any optical drive
+# - Compress a directory of videos using HandBrake
+
+# ::: maybe :::
+# - connect to QNAP + Linux Station + automate Plex
+
+
+# ----------------------------------------------------------------
+# FROM: win_sync.yml
+# ----------------------------------------------------------------
+# - name: Transfer files from Windows to WLS
+#   hosts: localhost
+#   tasks:
+#   - name: Transfer playbooks from Windows to WSL
+#     copy:
+#       src: "{{win_repo}}"
+#       dest: "{{wsl_repo}}"
+      
+#   - name: Convert Windows files to *nix
+#     command: "dos2unix {{wsl_repo}}"
+#     register: out_dos2unix
+
+# --- Previous ad-hoc commands used:
+# sudo cp /mnt/d/Repos_Exp/pc-setup/etc/ansible/wsl_playbook_copy.yml /etc/ansible/wsl_playbook_copy.yml
+# dos2unix /etc/ansible/wsl_playbook_copy.yml
+# cd /etc/ansible/
+# ansible-playbook wsl_playbook_copy.yml
+
+
+# ----------------------------------------------------------------
+# FROM: win_via_laptop.yml
+# ----------------------------------------------------------------
+# - name: Provision Windows desktop from laptop
+#   hosts: home
+#   become: true
+#   become_user: david
+#   become_method: runas
+#   tasks:
+#   # --- Test laptop updating the desktop
+#   # - ping, 'hello world', restart, wait for connection, 'hello world' again
+#   - name: Test Windows desktop connection
+#     win_ping:
+
+
+# ----------------------------------------------------------------
+# FROM: shutdown.yml
+# ----------------------------------------------------------------
+- name: Clean and shutdown Windows
+  hosts: windows
+  become: true
+  become_user: david
+  become_method: runas
+  roles:
+  - windows/apps/ccleaner/shutdown
+  when: "{{shutdown | default(false)}}"
+...

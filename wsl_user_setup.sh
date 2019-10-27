@@ -1,15 +1,8 @@
 #!/bin/sh
-win_bin=${HOME}/bin
 wsl_ssh=${HOME}/.ssh
 wsl_repo=${HOME}/pc-setup
 
 # --- This file only to be run as user ---
-
-# Create user bin if it doesn't exist
-if ! test -d ${win_bin}; then
-    mkdir ${win_bin}
-    chmod 755 ${win_bin}
-fi
 
 # --- Git Steps ---
 # https://help.github.com/en/articles/checking-for-existing-ssh-keys
@@ -58,11 +51,14 @@ if ! test -d ${wsl_repo}; then
 fi
 
 if test -d ${wsl_repo}; then
+    # Fetch the vault file if it exists
+    # TODO: test whether creating a file symlink with Ansible will retroactively win_ping in same playbook
     win_vault=/mnt/d/Repos/pc-setup/ansible_playbooks/group_vars/windows/main_vault.yml
     wsl_vault=${wsl_repo}/ansible_playbooks/group_vars/windows/main_vault.yml
     if test -f ${win_vault}; then
         cp -f ${win_vault} ${wsl_vault}
     fi
+
     git pull
 
     # Ansible ignores ansible.cfg in a world-writable directory
@@ -70,6 +66,7 @@ if test -d ${wsl_repo}; then
     find ${wsl_repo} -type d -print0 | xargs -0 chmod 755
     find ${wsl_repo} -type f -print0 | xargs -0 chmod 644
 
+    # Update all systems; shutdown=false is default - prevents Windows restarts
     cd ${wsl_repo}/ansible_playbooks
-    ansible-playbook wsl_update.yml
+    ansible-playbook system_update.yml
 fi

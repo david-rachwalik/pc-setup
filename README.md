@@ -2,7 +2,7 @@
 
 ## Initialization
 
-1. Run Windows PowerShell (as Administrator) to install Linux on Windows 10
+1. Run Windows PowerShell (as Administrator) to install Linux on Windows
 
     ``` powershell
     # Change security to TLS 1.2 (required by many sites; more secure than default TLS 1.0)
@@ -14,27 +14,17 @@
     Invoke-Expression $($RemoteScript.Content)
     ```
 
-2. Run Linux Ubuntu to install Ansible on Linux (+step 3)
+2. Run script to install Ansible on Linux and call provisioning playbooks
 
     ``` bash
     curl -s https://raw.githubusercontent.com/david-rachwalik/pc-setup/master/wsl_setup.sh | sudo -H bash
     ```
 
-3. Run Ansible on Linux to provision Linux
+### Windows Only Alternative (No WSL+Ansible)
 
-    ``` bash
-    cd ~/pc-setup/ansible_playbooks
-    ansible-playbook wsl_update.yml
-    ```
+> *Most actions are only run the first time except `upgrade all`*
 
-4. Run Ansible on Linux to provision Windows 10
-
-    ``` bash
-    cd ~/pc-setup/ansible_playbooks
-    ansible-playbook win_update.yml
-    ```
-
-> *Bonus (if not using Ansible)*: Run PowerShell (as Administrator) to [install Chocolatey](https://chocolatey.org/install)
+Run PowerShell (as Administrator) to [install Chocolatey](https://chocolatey.org/install)
 
 ``` powershell
 # Run the Chocolatey install script
@@ -43,38 +33,28 @@ Set-ExecutionPolicy Bypass -Scope Process -Force; iex ((New-Object System.Net.We
 choco feature enable -n allowGlobalConfirmation
 ```
 
-## PC Health
+Search for [Chocolatey packages](https://chocolatey.org/packages) (apps/programs)
 
-### Pull latest from GitHub
+Install what you like using: `choco install <package>`
+
+Upgrade all packages at once using: `choco upgrade all`
+
+## Development & PC Health
+
+### Review aliases to common actions
 
 ``` bash
-cd ~/pc-setup/ansible_playbooks
-git pull
+view ~/.bash_aliases
 ```
 
-### Backup application settings & data
+### Open File Explorer in Linux
 
 ``` bash
-ansible home -m include_role -a "name=windows/backup"
-```
-
-### Clean and shutdown system
-
-``` bash
-ansible home -m include_role -a "name=windows/ccleaner/shutdown"
-```
-
-> *[For additional examples](https://github.com/david-rachwalik/pc-setup/tree/master/ansible_playbooks)*
-
-## Development
-
-### Open File Explorer from Linux Ubuntu
-
-``` bash
+# This command won't accept a path, only .
 explorer.exe .
 ```
 
-### Open VSCode from Linux Ubuntu
+### Open VSCode in Linux
 
 ``` bash
 code ~/pc-setup/
