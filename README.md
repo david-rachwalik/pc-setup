@@ -20,42 +20,41 @@
     curl -s https://raw.githubusercontent.com/david-rachwalik/pc-setup/master/wsl_setup.sh | sudo -H bash
     ```
 
-### Windows Only Alternative (No WSL+Ansible)
-
-> *Most actions are only run the first time except `upgrade all`*
-
-Run PowerShell (as Administrator) to [install Chocolatey](https://chocolatey.org/install)
-
-``` powershell
-# Run the Chocolatey install script
-Set-ExecutionPolicy Bypass -Scope Process -Force; iex ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))
-# Set Chocolatey to skip confirmation prompts
-choco feature enable -n allowGlobalConfirmation
-```
-
-Search for [Chocolatey packages](https://chocolatey.org/packages) (apps/programs)
-
-Install what you like using: `choco install <package>`
-
-Upgrade all packages at once using: `choco upgrade all`
-
 ## Development & PC Health
 
-### Review aliases to common actions
+> Review aliases to common actions
 
 ``` bash
 view ~/.bash_aliases
 ```
 
-### Open File Explorer in Linux
+> Open File Explorer in Linux (only accepts . for path)
 
 ``` bash
-# This command won't accept a path, only .
 explorer.exe .
 ```
 
-### Open VSCode in Linux
+> Open VSCode in Linux
 
 ``` bash
 code ~/pc-setup/
 ```
+
+## Initialization Alternative: Windows Only (No WSL+Ansible)
+
+> *Most actions are only run the first time except `upgrade all`*
+
+1. Run PowerShell (as Administrator) to [install Chocolatey](https://chocolatey.org/install)
+
+    ``` powershell
+    # Run the Chocolatey install script
+    Set-ExecutionPolicy Bypass -Scope Process -Force; iex ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))
+    # Set Chocolatey to skip confirmation prompts
+    choco feature enable -n allowGlobalConfirmation
+    ```
+
+2. Search for [Chocolatey packages](https://chocolatey.org/packages) (apps/programs)
+
+3. Install what you like using: `choco install <package>`
+
+4. Upgrade all packages at once using: `choco upgrade all`
