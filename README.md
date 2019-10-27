@@ -22,19 +22,19 @@
 
 ## Development & PC Health
 
-> Review aliases to common actions
+Review aliases to common actions
 
 ``` bash
 view ~/.bash_aliases
 ```
 
-> Open File Explorer in Linux (only accepts . for path)
+Open File Explorer in Linux (only accepts . for path)
 
 ``` bash
 explorer.exe .
 ```
 
-> Open VSCode in Linux
+Open VSCode in Linux
 
 ``` bash
 code ~/pc-setup/
