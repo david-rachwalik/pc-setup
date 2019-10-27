@@ -1,22 +1,13 @@
 ---
+# Modes: [nodb, sqlserver, docker] (when F1, ignore custom domain)
+
 # https://docs.microsoft.com/en-us/azure/ansible/ansible-overview
-# All Azure modules
 # https://docs.ansible.com/ansible/latest/modules/list_of_cloud_modules.html#azure
 
-
-- hosts: localhost
+- name: Create Azure App Service
+  hosts: localhost
   vars:
     resource_group: DMR
   roles:
   - azure/app_service/create
-
-
-# https://www.youtube.com/watch?v=G_gDYlRBAZw
-# https://docs.microsoft.com/en-us/azure/storage/blobs/storage-blob-static-website
-# - hosts: localhost
-#   vars:
-#     resource_group: StaticWebsite
-#     storage_account: superfancysitename
-#   roles:
-#   - azure/storage_account/create
 ...
