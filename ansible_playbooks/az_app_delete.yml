@@ -1,5 +1,8 @@
 ---
-- hosts: localhost
+# Use purge=True to remove [resource group, service plan]
+
+- name: Delete Azure App Service
+  hosts: localhost
   vars:
     resource_group_names:
     - ansible_test_rg
