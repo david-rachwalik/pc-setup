@@ -2,6 +2,8 @@
 # ansible localhost -m include_role -a "name=azure/service_plan/create"
 
 # https://docs.ansible.com/ansible/latest/modules/azure_rm_appserviceplan_module.html
+# Price Tiers:  F1, D1, B1, B2, B3, S1, P1, P1V2
+# https://azure.microsoft.com/en-us/pricing/details/app-service/linux/
 - name: Create app service plan
   azure_rm_appserviceplan:
     resource_group: "{{ resource_group }}"
@@ -10,6 +12,6 @@
     sku: F1
     state: present
 
-# https://azure.microsoft.com/en-us/pricing/details/app-service/linux/
-# Price Tiers:  F1, D1, B1, B2, B3, S1, P1, P1V2
+# https://samcogan.com/what-is-an-azure-app-service-plan-and-what-does-it-do/
+# https://docs.microsoft.com/en-us/azure/app-service/overview-hosting-plans
 ...

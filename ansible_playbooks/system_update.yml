@@ -10,6 +10,7 @@
   - linux/system/pip
   - linux/system/npm
   - linux/system/setup
+  # template new Chocolatey.ps1 to start using as README example instead of group_vars
   tags: ["linux"]
 
   # - git/config
@@ -44,6 +45,12 @@
   # Install other software, such as scanner
   - windows/system/desktop/clean
   - windows/apps/ccleaner/clean
+  # https://docs.ansible.com/ansible/latest/modules/win_mapped_drive_module.html
+  # - H: \\HeroCamp\home
+  # - O: \\HeroCamp\OneDrive
+  # - M: \\HeroCamp\Multimedia
+  # - P: \\HeroCamp\Public
+  # - Z: \\HeroCamp\Pervy Yum Sauce
   tags: ["windows"]
 
 # - Connect to Windows and gather facts about the environment
