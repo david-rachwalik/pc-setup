@@ -59,14 +59,12 @@ if test -d ${wsl_repo}; then
         cp -f ${win_vault} ${wsl_vault}
     fi
 
+    # Update all systems; shutdown=false is default - prevents Windows restarts
+    cd ${wsl_repo}/ansible_playbooks
     git pull
-
     # Ansible ignores ansible.cfg in a world-writable directory
     # https://docs.ansible.com/ansible/devel/reference_appendices/config.html#cfg-in-world-writable-dir
     find ${wsl_repo} -type d -print0 | xargs -0 chmod 755
     find ${wsl_repo} -type f -print0 | xargs -0 chmod 644
-
-    # Update all systems; shutdown=false is default - prevents Windows restarts
-    cd ${wsl_repo}/ansible_playbooks
     ansible-playbook system_update.yml
 fi
