@@ -53,7 +53,7 @@ code ~/pc-setup/
     choco feature enable -n allowGlobalConfirmation
     ```
 
-2. Search for [Chocolatey packages](https://chocolatey.org/packages) (apps/programs)
+2. Search for [Chocolatey packages](https://chocolatey.org/packages) (apps/programs) - *[examples](https://raw.githubusercontent.com/david-rachwalik/pc-setup/master/ansible_playbooks/group_vars/windows/choco.yml)*
 
 3. Install what you like using: `choco install <package>`
 
