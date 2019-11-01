@@ -1,14 +1,14 @@
 ---
 apt_packages:
 - git
-- libffi-dev
-- libssl-dev
+# - libffi-dev
+# - libssl-dev
 # --- Miscellaneous ---
 # Tool to convert Windows files to Linux format
-- dos2unix
+# - dos2unix
 # --- .NET Core SDK ---
 # https://dotnet.microsoft.com/download/linux-package-manager/ubuntu18-04/sdk-current
-- apt-transport-https
+# - apt-transport-https
 - dotnet-sdk-3.0
 # --- NPM ---
 - nodejs
