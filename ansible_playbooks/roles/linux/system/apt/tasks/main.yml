@@ -1,32 +1,76 @@
 ---
 # https://docs.ansible.com/ansible/latest/modules/apt_module.html
 # https://stackoverflow.com/questions/41535838/how-to-run-apt-update-and-upgrade-via-ansible-shell
-# $ ansible localhost -m apt -a "upgrade=dist update_cache=yes cache_valid_time=86400" --become
+# ansible-playbook system_update.yml --tags "apt"
 
-- name: Upgrade all packages to latest version
-  apt:
-    # name: "*"
-    upgrade: dist
-    autoclean: yes
-    autoremove: yes
-    # cache_valid_time: 3600 #One hour
-    cache_valid_time: 86400 #One day
-    force_apt_get: true
-    update_cache: yes
-  register: out_apt_dist
+- block:
+  - name: Update repositories cache
+    apt:
+      update_cache: true
+      # cache_valid_time: 3600 #One hour
+      cache_valid_time: 86400 #One day
+    register: out_apt_update
+
+  - name: Upgrade distro packages to latest version
+    apt:
+      upgrade: dist
+    register: out_apt_dist
+
+
+  # - name: Query all installed packages 01
+  #   command: "apt list --installed"
+  #   register: out_apt_installed_list
+  #   changed_when: false
+  #   # Using no_log here due to verbosity, not for security reasons
+  #   no_log: true
+  # - debug:
+  #     var: out_apt_installed_list.stdout_lines | count
+  
+  - name: Query all installed packages
+    command: "dpkg-query -f '${binary:Package}\n' -W"
+    register: out_apt_installed_list
+    changed_when: false
+    # Using no_log here due to verbosity, not for security reasons
+    no_log: true
+
+  # - name: Query all installed packages 03
+  #   command: "dpkg -l"
+  #   register: out_apt_installed_list
+  #   changed_when: false
+  #   # Using no_log here due to verbosity, not for security reasons
+  #   no_log: true
+  # - debug:
+  #     var: out_apt_installed_list.stdout_lines | count
+  
+  - name: Find which packages need to be installed
+    set_fact:
+      apt_install_list: "{{apt_packages | difference(out_apt_installed_list.stdout_lines)}}"
+  # - debug:
+  #     var: apt_install_list
+
+
+  - name: Install missing apt packages
+    apt:
+      name: "{{apt_install_list}}"
+      state: latest
+    register: out_apt_latest
+
+  - name: Upgrade all packages to the latest version
+    apt:
+      name: "*"
+      state: latest
+
+
+  - name: Remove useless packages from the cache
+    apt:
+      autoclean: true
+
+  - name: Remove dependencies no longer required
+    apt:
+      autoremove: true
+  
+  module_defaults:
+    apt:
+      force_apt_get: true
   tags: ["apt"]
-
-# TODO: query package list
-
-# --- Only do this way if a package is missing ---
-# - name: Update apt packages
-#   apt:
-#     # Provide loop directly into name
-#     name: "{{apt_packages_diff}}"
-#     state: latest
-#     force_apt_get: true
-#     autoclean: yes
-#     autoremove: yes
-#   register: out_apt_latest
-#   tags: ["apt"]
 ...
