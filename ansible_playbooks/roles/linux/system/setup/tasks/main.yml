@@ -1,16 +1,24 @@
 ---
-- name: Update shell aliases
-  copy:
-    src: "{{shell_alias | basename}}"
-    dest: "{{shell_alias}}"
-    mode: '0644'
-  notify: source_shell_alias
-  tags: ["setup", "alias"]
+- block:
+  - name: Update shell aliases
+    copy:
+      src: "{{shell_alias | basename}}"
+      dest: "{{shell_alias}}"
+      mode: '0644'
+    notify: source_shell_alias
+    tags: ["alias"]
 
-- name: Verify script directory
-  file:
-    path: ~/bin
-    state: directory
-    mode: '0755'
-  tags: ["setup", "bin"]
+  - name: Verify script directory
+    file:
+      path: ~/bin
+      state: directory
+      mode: '0755'
+    tags: ["bin"]
+
+  # https://git-scm.com/book/en/v2/Getting-Started-First-Time-Git-Setup
+  # https://www.atlassian.com/git/tutorials/setting-up-a-repository/git-config
+
+
+
+  tags: ["setup"]
 ...
