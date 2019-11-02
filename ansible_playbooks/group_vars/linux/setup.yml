@@ -1,3 +1,4 @@
 ---
+git_config: ~/.gitconfig
 shell_alias: ~/.bash_aliases
 ...
