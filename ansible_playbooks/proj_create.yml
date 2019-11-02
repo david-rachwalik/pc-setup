@@ -9,7 +9,7 @@
     app_service: WebApp
     # resource_group: DMR
   roles:
-  - cross_platform/dotnet/new
+  - windows/apps/dotnet/new
   # - linux/web_project/create
   # - linux/web_project/database
   # - linux/web_project/identity
