@@ -1,20 +1,12 @@
 ---
-- name: Delete a .NET project
-  hosts: localhost
+- name: Delete a .NET Core project
+  hosts: home
   vars:
-    resource_group: AngularWebApp
-    app_path: ~/AngularWebApp
-    app_service: WebApp
-    # resource_group: DMR
+    app_solution: DMR
   tasks:
+  # https://docs.ansible.com/ansible/latest/modules/win_file_module.html
   - name: Purge directory
-    file:
-      name: "{{app_path}}"
+    win_file:
+      name: "{{app_path}}\\DMR"
       state: absent
-      
-  # roles:
-  # - windows/apps//dotnet/new
-  # - linux/web_project/create
-  # - linux/web_project/database
-  # - linux/web_project/identity
 ...
