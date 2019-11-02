@@ -1,5 +1,6 @@
 ---
 # ansible home -m include_role -a "name=windows/games/world_of_warcraft"
+# ansible-playbook system_clean.yml --tags "world_of_warcraft"
 
 - block:
   - name: Check for World of Warcraft screenshot directory
@@ -24,14 +25,14 @@
       path: "{{item.version.value.screenshot_dir}}"
       state: absent
     loop: "{{out_stat_wow_ss.results}}"
-    when: item.stat.exists and out_copy_wow_ss|changed
+    when: item.stat.exists and out_copy_wow_ss is changed
 
   - name: Create World of Warcraft screenshot directory
     win_file:
       path: "{{item.version.value.screenshot_dir}}"
       state: directory
     loop: "{{out_stat_wow_ss.results}}"
-    when: item.stat.exists and out_copy_wow_ss|changed
+    when: item.stat.exists and out_copy_wow_ss is changed
 
 
   - name: Backup World of Warcraft settings
@@ -50,6 +51,9 @@
       dest: "{{item.value.backup_dir}}"
     loop: "{{versions}}"
     register: out_copy_wow_addon
+
+
+  # - name: Backup TradeSkillMaster settings
 
   vars:
     versions: "{{world_of_warcraft_backups | dict2items}}"
