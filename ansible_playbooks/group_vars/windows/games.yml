@@ -11,6 +11,17 @@ world_of_warcraft_backups:
     screenshot_dir: E:\GameFiles\World of Warcraft\_classic_\Screenshots
     wtf_dir: E:\GameFiles\World of Warcraft\_classic_\WTF
     addon_dir: E:\GameFiles\World of Warcraft\_classic_\Interface\AddOns
+    account: E:\GameFiles\World of Warcraft\_classic_\WTF\Account\RAVIN83
+    servers:
+    - Bloodsail Buccaneers
+    characters:
+    - Goof
+    - Maiti
+    - Ninfu
+    - Rhodair
+    - Skeptic
+    - Zayn
+    - Zyphire
 
 
 final_fantasy_xiv_backups:
