@@ -13,7 +13,7 @@
       state: absent
       
   # roles:
-  # - cross_platform/dotnet/new
+  # - windows/apps//dotnet/new
   # - linux/web_project/create
   # - linux/web_project/database
   # - linux/web_project/identity

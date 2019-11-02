@@ -1,5 +1,5 @@
 ---
-# ansible localhost -m include_role -a "name=cross_platform/dotnet/new" -e "app_path=~/Core3WebApp"
+# ansible localhost -m include_role -a "name=windows/apps//dotnet/new" -e "app_path=~/Core3WebApp"
 
 # https://docs.microsoft.com/en-us/dotnet/core/tools/dotnet-new
 # https://docs.ansible.com/ansible/latest/modules/command_module.html
