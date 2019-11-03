@@ -11,13 +11,22 @@
 
   # Instead of forcing a lower case list, match 'chocolatey_packages' to the installed case
   - set_fact:
-      choco_packages_to_install: "{{chocolatey_packages.install | difference(out_choco_installed.stdout_lines)}}"
-  - set_fact:
       choco_packages_to_uninstall: "{{chocolatey_packages.uninstall | intersect(out_choco_installed.stdout_lines)}}"
+  - set_fact:
+      choco_packages_to_install: "{{chocolatey_packages.install | difference(out_choco_installed.stdout_lines)}}"
   - set_fact:
       choco_to_install_visualstudio: "{{'visualstudio2019community' not in out_choco_installed.stdout_lines}}"
   - set_fact:
       choco_to_install_office365: "{{'Office365HomePremium' not in out_choco_installed.stdout_lines}}"
+
+
+  - name: Uninstall Basic Chocolatey Packages
+    win_chocolatey:
+      name: "{{item}}"
+      state: absent
+    loop: "{{choco_packages_to_uninstall}}"
+    when: choco_packages_to_uninstall | count > 0
+    tags: ["uninstall"]
 
 
   # https://docs.ansible.com/ansible/latest/modules/win_chocolatey_module.html
@@ -60,19 +69,12 @@
     tags: ["install", "office365"]
 
 
-  - name: Uninstall Basic Chocolatey Packages
-    win_chocolatey:
-      name: "{{item}}"
-      state: absent
-    loop: "{{choco_packages_to_uninstall}}"
-    when: choco_packages_to_uninstall | count > 0
-    tags: ["uninstall"]
-
-
   - name: Upgrade all installed Chocolatey Packages
     win_chocolatey:
       name: all
       state: latest
+    # Sometimes dependencies can't be met
+    ignore_errors: true
     tags: ["upgrade"]
 
   tags: ["chocolatey", "choco"]
