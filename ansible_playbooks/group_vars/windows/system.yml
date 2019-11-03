@@ -57,7 +57,6 @@ chocolatey_packages:
 
 
 vscode_extensions:
-- tester
 - DavidAnson.vscode-markdownlint
 - donjayamanne.githistory
 - ms-azure-devops.azure-pipelines
