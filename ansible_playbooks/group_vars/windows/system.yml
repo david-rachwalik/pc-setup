@@ -4,56 +4,51 @@ powershell_uninstall_appx_packages:
 
 
 # https://chocolatey.org/packages/*
+chocolatey_packages:
+  install:
+  # --- Productivity ---
+  - ccleaner
+  - 7zip
+  - nordvpn
+  - googlechrome
+  - qbittorrent
+  - speccy
+  # - recuva
+  # - defraggler
+  # --- Development ---
+  - git
+  - python3
+  - dotnetcore-sdk
+  - azure-cli
+  - microsoftazurestorageexplorer
+  - sass
+  - typescript
+  - nodejs
+  # --- Media ---
+  - geforce-experience
+  - adobereader
+  - adobeair
+  - adobeshockwaveplayer
+  - spotify
+  - paint.net
+  # --- Video Editing ---
+  - makemkv
+  - handbrake
+  - k-litecodecpackmega
+  - 4k-video-downloader
+  - streamlabs-obs
+  # --- Videogames ---
+  - autohotkey
+  - discord
+  - steam
+  - twitch
 
-chocolatey_install:
-# --- General Productivity ---
-- ccleaner
-- 7zip
-- nordvpn
-- googlechrome
-- qbittorrent
-- speccy
-# - recuva
-# - defraggler
-
-# --- Development ---
-- git
-- python3
-- dotnetcore-sdk
-- azure-cli
-- microsoftazurestorageexplorer
-- sass
-- typescript
-- nodejs
-
-# --- Media ---
-- geforce-experience
-- adobereader
-- adobeair
-- adobeshockwaveplayer
-- paint.net
-
-# --- Video Editing ---
-- makemkv
-- handbrake
-- k-litecodecpackmega
-- 4k-video-downloader
-- streamlabs-obs
-
-# --- Videogames ---
-- autohotkey
-- discord
-- steam
-- twitch
-
-
-chocolatey_uninstall:
-- python2
-- mitkerberos
-- docker-desktop
-- unity
-# - obs-studio
-- gimp
-- vlc
-- spotify
+  uninstall:
+  - python2
+  - mitkerberos
+  - docker-desktop
+  - unity
+  # - obs-studio
+  - gimp
+  - vlc
 ...
