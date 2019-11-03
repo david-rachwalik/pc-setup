@@ -1,4 +1,8 @@
 ---
+powershell_uninstall_appx_packages:
+- CanonicalGroupLimited.Ubuntu18.04onWindows
+
+
 # https://chocolatey.org/packages/*
 
 chocolatey_install:
@@ -52,4 +56,9 @@ chocolatey_uninstall:
 - gimp
 - vlc
 - spotify
+
+
+npm_packages:
+- sass
+- typescript
 ...

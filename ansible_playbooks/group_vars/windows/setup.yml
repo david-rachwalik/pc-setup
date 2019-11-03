@@ -18,8 +18,6 @@ file_naming_convention:
       - Superheroes
     - Writings
 
-  - _PC Necessities: null
-
   nas:
   - Container           # QNAP Container Station data
   - Download
