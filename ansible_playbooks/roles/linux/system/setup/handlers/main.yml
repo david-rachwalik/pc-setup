@@ -1,7 +1,0 @@
----
-- name: Activate shell aliases
-  command: "source {{shell_alias}}"
-  changed_when: false
-  listen: source_shell_alias
-  tags: ["setup"]
-...

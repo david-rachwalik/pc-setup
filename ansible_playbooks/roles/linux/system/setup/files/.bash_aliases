@@ -1,3 +1,4 @@
+# Anytime the aliases are updated, be sure to restart your shell; source (.) has permission errors
 alias update='( cd "$HOME/pc-setup/ansible_playbooks" && ansible-playbook update.yml )'
 alias shutdown='( cd "$HOME/pc-setup/ansible_playbooks" && ansible-playbook clean.yml -e "shutdown=true" )'
 alias clean='( cd "$HOME/pc-setup/ansible_playbooks" && ansible-playbook clean.yml )'
