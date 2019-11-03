@@ -1,6 +1,6 @@
 ---
 # Modes: [nodb, sqlserver, identity, docker]
-- name: Create a .NET Core project
+- name: Create a .NET Core application project
   # Only for main PC
   hosts: home
   vars:

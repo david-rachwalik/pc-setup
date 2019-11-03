@@ -22,6 +22,30 @@ clean () {
     play_run=$([ -n "$1" ] && echo "system_clean.yml $*" || echo "system_clean.yml")
     ansible-playbook $play_run
 }
+
+appc () {
+    cd "$HOME/pc-setup/ansible_playbooks"
+    play_run=$([ -n "$1" ] && echo "proj_create.yml $*" || echo "proj_create.yml")
+    ansible-playbook $play_run
+}
+appd () {
+    cd "$HOME/pc-setup/ansible_playbooks"
+    play_run=$([ -n "$1" ] && echo "proj_delete.yml $*" || echo "proj_delete.yml")
+    ansible-playbook $play_run
+}
+
+azc () {
+    cd "$HOME/pc-setup/ansible_playbooks"
+    play_run=$([ -n "$1" ] && echo "az_app_create.yml $*" || echo "az_app_create.yml")
+    ansible-playbook $play_run
+}
+azd () {
+    cd "$HOME/pc-setup/ansible_playbooks"
+    play_run=$([ -n "$1" ] && echo "az_app_delete.yml $*" || echo "az_app_delete.yml")
+    ansible-playbook $play_run
+}
+
+# update --tags "alias"
 # ansible-playbook system_update.yml --tags "alias"
 
 # alias update='( cd "$HOME/pc-setup/ansible_playbooks" && ansible-playbook system_update.yml )'
