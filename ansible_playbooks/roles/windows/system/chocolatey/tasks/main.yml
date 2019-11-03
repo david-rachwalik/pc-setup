@@ -1,33 +1,33 @@
 ---
-- name: List Chocolatey packages installed
-  win_shell: >-
-    choco list
-    --local-only
-    --id-only
-  register: out_choco_installed
-
-- set_face:
-    choco_packages_to_install: "{{chocolatey_packages.install | difference(out_choco_installed.stdout_lines)}}"
-
 - block:
+  - name: List Chocolatey packages installed
+    win_shell: >-
+      choco list
+      --local-only
+      --id-only
+    register: out_choco_installed
+    changed_when: false
+    no_log: true
+
+  # Instead of forcing a lower case list, match 'chocolatey_packages' to the installed case
+  - set_fact:
+      choco_packages_to_install: "{{chocolatey_packages.install | difference(out_choco_installed.stdout_lines)}}"
+  - set_fact:
+      choco_packages_to_uninstall: "{{chocolatey_packages.uninstall | intersect(out_choco_installed.stdout_lines)}}"
+  - set_fact:
+      choco_to_install_visualstudio: "{{'visualstudio2019community' not in out_choco_installed.stdout_lines}}"
+  - set_fact:
+      choco_to_install_office365: "{{'Office365HomePremium' not in out_choco_installed.stdout_lines}}"
+
+
+  # https://docs.ansible.com/ansible/latest/modules/win_chocolatey_module.html
   - name: Install Basic Chocolatey Packages
     win_chocolatey:
       name: "{{item}}"
       state: present
-    # --- Was a proven failure to pass args dynamically inline
-    # win_chocolatey: "{{item | combine({state: present})}}"
-    # https://docs.ansible.com/ansible/latest/user_guide/become.html#become-windows
     loop: "{{choco_packages_to_install}}"
-
-  # https://chocolatey.org/packages/vscode
-  - name: Install Visual Studio Code
-    win_chocolatey:
-      name: vscode
-      state: present
-      package_params: >-
-        /NoDesktopIcon
-        /NoContextMenuFiles
-        /NoContextMenuFolders
+    when: choco_packages_to_install | count > 0
+    tags: ["install"]
 
   # https://chocolatey.org/packages/visualstudio2019community
   # https://docs.microsoft.com/en-us/visualstudio/install/use-command-line-parameters-to-install-visual-studio
@@ -43,38 +43,37 @@
         --add Microsoft.VisualStudio.Workload.NetWeb;includeRecommended
         --add Microsoft.VisualStudio.Workload.Azure;includeRecommended
         --quiet
-
-  # # https://chocolatey.org/packages/VisualStudio2017Community
-  # - name: Install Visual Studio Community 2017
-  #   win_chocolatey:
-  #     name: visualstudio2017community
-  #     state: present
-  #     package_params: >-
-  #       --locale en-US
-  #       --add Microsoft.VisualStudio.Workload.NetWeb;includeRecommended
-  #       --add Microsoft.VisualStudio.Workload.Azure;includeRecommended
-  #       --quiet
+    when: choco_to_install_visualstudio
+    tags: ["install", "visualstudio", "visualstudio2019"]
 
   # https://chocolatey.org/packages/microsoft-office-deployment
   - name: Install MS Office 365
     win_chocolatey:
-      name: visualstudio2017community
+      name: microsoft-office-deployment
       state: present
       package_params: >-
         /64bit
         /DisableUpdate TRUE
         /Product O365HomePremRetail
         /Exclude Publisher,Lync,Groove
+    when: choco_to_install_office365
+    tags: ["install", "office365"]
 
 
   - name: Uninstall Basic Chocolatey Packages
     win_chocolatey:
       name: "{{item}}"
       state: absent
-    loop: "{{chocolatey_packages.uninstall}}"
-    when: "{{chocolatey_packages.uninstall | count > 0}}"
+    loop: "{{choco_packages_to_uninstall}}"
+    when: choco_packages_to_uninstall | count > 0
     tags: ["uninstall"]
 
-  # tags: ["chocolatey", "choco"]
-  when: "{{break_dance_stew_time | default(false)}}"
+
+  - name: Upgrade all installed Chocolatey Packages
+    win_chocolatey:
+      name: all
+      state: latest
+    tags: ["upgrade"]
+
+  tags: ["chocolatey", "choco"]
 ...
