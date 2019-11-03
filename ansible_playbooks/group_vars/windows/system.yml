@@ -5,6 +5,17 @@ powershell_uninstall_appx_packages:
 
 # https://chocolatey.org/packages/*
 chocolatey_packages:
+  uninstall:
+  - python2
+  - mitkerberos
+  - docker-desktop
+  - unity
+  # - obs-studio
+  - gimp
+  - vlc
+  - passkey
+  # - visualstudio2017community
+
   install:
   # --- Productivity ---
   - ccleaner
@@ -44,14 +55,21 @@ chocolatey_packages:
   - steam
   - twitch
 
-  uninstall:
-  - python2
-  - mitkerberos
-  - docker-desktop
-  - unity
-  # - obs-studio
-  - gimp
-  - vlc
-  - passkey
-  # - visualstudio2017community
+
+vscode_extensions:
+- tester
+- DavidAnson.vscode-markdownlint
+- donjayamanne.githistory
+- ms-azure-devops.azure-pipelines
+- ms-python.python
+- ms-vscode-remote.remote-ssh
+- ms-vscode-remote.remote-ssh-edit
+- ms-vscode-remote.remote-wsl
+- ms-vscode.azure-account
+- ms-vscode.csharp
+- ms-vscode.powershell
+- ms-vscode.vscode-typescript-tslint-plugin
+- rog2.luacheck
+- tangzx.emmylua
+- vscode-icons-team.vscode-icons
 ...
