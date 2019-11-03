@@ -5,7 +5,6 @@
       src: "{{shell_alias | basename}}"
       dest: "{{shell_alias}}"
       mode: '0644'
-    notify: source_shell_alias
     tags: ["alias"]
 
   - name: Verify script directory
@@ -29,7 +28,6 @@
     tags: ["config"]
 
   - name: Check Git repo for changes
-    # command: "git status -uno"
     command: "git diff --name-only"
     args:
       chdir: "{{git_work_repo}}"
