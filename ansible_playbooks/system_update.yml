@@ -21,8 +21,7 @@
   become_user: david
   become_method: runas
   roles:
-  - windows/system/chocolatey/install
-  - windows/system/chocolatey/uninstall
+  - windows/system/chocolatey
   # Install other software, such as scanner
   - windows/apps/dotnet/setup
   - windows/apps/vscode/setup
