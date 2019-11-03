@@ -10,7 +10,7 @@ chocolatey_packages:
   - ccleaner
   - 7zip
   - nordvpn
-  - googlechrome
+  - GoogleChrome
   - qbittorrent
   - speccy
   # - recuva
@@ -20,19 +20,20 @@ chocolatey_packages:
   - python3
   - dotnetcore-sdk
   - azure-cli
-  - microsoftazurestorageexplorer
   - sass
   - typescript
   - nodejs
+  - vscode
+  - microsoftazurestorageexplorer
   # --- Media ---
   - geforce-experience
   - adobereader
-  - adobeair
+  - AdobeAIR
   - adobeshockwaveplayer
   - spotify
   - paint.net
   # --- Video Editing ---
-  - makemkv
+  - MakeMKV
   - handbrake
   - k-litecodecpackmega
   - 4k-video-downloader
@@ -51,4 +52,6 @@ chocolatey_packages:
   # - obs-studio
   - gimp
   - vlc
+  - passkey
+  # - visualstudio2017community
 ...
