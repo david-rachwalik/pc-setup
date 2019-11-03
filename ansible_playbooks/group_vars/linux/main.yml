@@ -9,15 +9,15 @@ apt_packages:
 # --- .NET Core SDK ---
 # https://dotnet.microsoft.com/download/linux-package-manager/ubuntu18-04/sdk-current
 # - apt-transport-https
-- dotnet-sdk-3.0
+# - dotnet-sdk-3.0
 # --- NPM ---
-- nodejs
-- npm
+# - nodejs
+# - npm
 
 
-npm_packages:
-- sass
-- typescript
+# npm_packages:
+# - sass
+# - typescript
 
 
 pip_packages:

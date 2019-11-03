@@ -1,6 +1,6 @@
 ---
 # https://docs.ansible.com/ansible/latest/modules/npm_module.html
-# ansible linux -m include_role -a "name=linux/system/npm"
+# ansible windows -m include_role -a "name=linux/system/npm"
 
 - name: Update the latest NPM packages globally
   npm:
@@ -9,6 +9,6 @@
     state: latest
   loop: "{{npm_packages}}"
   register: out_npm_latest
-  ignore_errors: true
+  # ignore_errors: true
   tags: ["npm"]
 ...
