@@ -9,5 +9,6 @@
     state: latest
   loop: "{{npm_packages}}"
   register: out_npm_latest
+  ignore_errors: true
   tags: ["npm"]
 ...

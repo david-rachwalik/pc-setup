@@ -1,0 +1,6 @@
+---
+- name: Ensure .NET Core SDK also has EFCore
+  win_shell: "dotnet tool install -g dotnet-ef"
+  register: out_efcore_install
+  failed_when: not 'is already installed' in out_efcore_install.stdout
+...

@@ -43,9 +43,12 @@
   - windows/system/chocolatey/install
   - windows/system/chocolatey/uninstall
   # Install other software, such as scanner
+  - windows/apps/dotnet/setup
+  - windows/apps/vscode/setup
+  
   - windows/system/desktop/clean
   - windows/apps/ccleaner/clean
-  - windows/apps/vscode/setup
+
   # https://docs.ansible.com/ansible/latest/modules/win_mapped_drive_module.html
   # - H: \\HeroCamp\home
   # - O: \\HeroCamp\OneDrive
