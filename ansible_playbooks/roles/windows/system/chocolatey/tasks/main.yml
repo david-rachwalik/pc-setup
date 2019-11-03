@@ -1,4 +1,14 @@
 ---
+- name: List Chocolatey packages installed
+  win_shell: >-
+    choco list
+    --local-only
+    --id-only
+  register: out_choco_installed
+
+- set_face:
+    choco_packages_to_install: "{{chocolatey_packages.install | difference(out_choco_installed.stdout_lines)}}"
+
 - block:
   - name: Install Basic Chocolatey Packages
     win_chocolatey:
@@ -7,7 +17,7 @@
     # --- Was a proven failure to pass args dynamically inline
     # win_chocolatey: "{{item | combine({state: present})}}"
     # https://docs.ansible.com/ansible/latest/user_guide/become.html#become-windows
-    loop: "{{chocolatey_packages.install}}"
+    loop: "{{choco_packages_to_install}}"
 
   # https://chocolatey.org/packages/vscode
   - name: Install Visual Studio Code
@@ -65,5 +75,6 @@
     when: "{{chocolatey_packages.uninstall | count > 0}}"
     tags: ["uninstall"]
 
-  tags: ["chocolatey", "choco"]
+  # tags: ["chocolatey", "choco"]
+  when: "{{break_dance_stew_time | default(false)}}"
 ...

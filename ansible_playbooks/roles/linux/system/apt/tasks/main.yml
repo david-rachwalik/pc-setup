@@ -19,32 +19,32 @@
 
   # - name: Query all installed packages 01
   #   command: "apt list --installed"
-  #   register: out_apt_installed_list
+  #   register: out_apt_installed
   #   changed_when: false
   #   # Using no_log here due to verbosity, not for security reasons
   #   no_log: true
   # - debug:
-  #     var: out_apt_installed_list.stdout_lines | count
+  #     var: out_apt_installed.stdout_lines | count
   
   - name: Query all installed packages
     command: "dpkg-query -f '${binary:Package}\n' -W"
-    register: out_apt_installed_list
+    register: out_apt_installed
     changed_when: false
     # Using no_log here due to verbosity, not for security reasons
     no_log: true
 
   # - name: Query all installed packages 03
   #   command: "dpkg -l"
-  #   register: out_apt_installed_list
+  #   register: out_apt_installed
   #   changed_when: false
   #   # Using no_log here due to verbosity, not for security reasons
   #   no_log: true
   # - debug:
-  #     var: out_apt_installed_list.stdout_lines | count
+  #     var: out_apt_installed.stdout_lines | count
   
   - name: Find which packages need to be installed
     set_fact:
-      apt_install_list: "{{apt_packages | difference(out_apt_installed_list.stdout_lines)}}"
+      apt_install_list: "{{apt_packages | difference(out_apt_installed.stdout_lines)}}"
   # - debug:
   #     var: apt_install_list
 
