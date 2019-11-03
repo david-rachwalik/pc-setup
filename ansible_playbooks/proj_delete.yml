@@ -1,5 +1,6 @@
 ---
 - name: Delete a .NET Core project
+  # Only for main PC
   hosts: home
   vars:
     app_solution: DMR

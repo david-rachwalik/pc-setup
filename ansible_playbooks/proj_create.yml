@@ -1,6 +1,7 @@
 ---
 # Modes: [nodb, sqlserver, identity, docker]
 - name: Create a .NET Core project
+  # Only for main PC
   hosts: home
   vars:
     app_project: DMR
