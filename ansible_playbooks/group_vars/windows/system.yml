@@ -56,9 +56,4 @@ chocolatey_uninstall:
 - gimp
 - vlc
 - spotify
-
-
-npm_packages:
-- sass
-- typescript
 ...

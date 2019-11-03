@@ -8,7 +8,6 @@
   roles:
   - linux/system/apt
   - linux/system/pip
-  # - linux/system/npm
   - linux/system/setup
   # template new Chocolatey.ps1 to start using as README example instead of group_vars
   tags: ["linux"]
@@ -42,7 +41,6 @@
   roles:
   - windows/system/chocolatey/install
   - windows/system/chocolatey/uninstall
-  - windows/system/npm
   # Install other software, such as scanner
   - windows/apps/dotnet/setup
   - windows/apps/vscode/setup
