@@ -1,45 +1,56 @@
 ---
-# ansible localhost -m include_role -a "name=windows/apps//dotnet/new" -e "app_path=~/Core3WebApp"
-
 # https://docs.microsoft.com/en-us/dotnet/core/tools/dotnet-new
-# https://docs.ansible.com/ansible/latest/modules/command_module.html
+# https://docs.ansible.com/ansible/latest/modules/win_shell_module.html
+# List available templates: dotnet new -l
 - name: Create a Razor Pages web app
-  command: >-
+  win_shell: >-
     dotnet new webapp
-    --name {{app_service}}
-    --output {{app_path}}
-    --auth Individual
+    --output {{app_location}}\\{{app_project}}
+    --name {{app_project}}
+    --auth {{app_authentication | default('None')}}
   # --dry-run
   args:
-    creates: "{{app_path}}"
+    creates: "{{app_location}}\\{{app_project}}"
   register: out_webapp_create
 
 - block:
-  - debug:
-      msg: "Change detected for {{app_path}}/{{app_service}}"
+  - name: Build the web app
+    win_shell: "dotnet build {{app_location}}\\{{app_project}}"
 
-  - name: List all package references of the project or solution
-    command: "dotnet list {{app_path}} package"
-    changed_when: false
-
-  - name: List all project-to-project references of the project
-    command: "dotnet list {{app_path}} reference"
-    changed_when: false
+  - name: Install EFCore database provider
+    win_shell: "dotnet add package Microsoft.EntityFrameworkCore.Sqlite"
+    args:
+      chdir: "{{app_location}}\\{{app_project}}"
 
   # - name: Add EFCore design package
-  #   command: "dotnet add package Microsoft.EntityFrameworkCore.Design"
+  #   win_shell: "dotnet add package Microsoft.EntityFrameworkCore.Design"
 
   # - name: Create initial database migration
-  #   command: "dotnet ef migrations add {{migration_message|default('Initial')}}"
+  #   win_shell: "dotnet ef migrations add {{migration_message|default('Initial')}}"
   
+  - name: Update database with latest migrations
+    win_shell: "dotnet ef database update"
+    args:
+      chdir: "{{app_location}}\\{{app_project}}"
+    register: out_database_update
+
   when: out_webapp_create is changed
 
 
-# --- Don't run app from command line; stay in Visual Studio ---
+# - name: List all package references of the project
+#   win_shell: "dotnet list {{app_location}} package"
+#   changed_when: false
+
+# - name: List all project-to-project references of the project
+#   win_shell: "dotnet list {{app_location}} reference"
+#   changed_when: false
+
+
+# --- Don't run app from command line; stick to Visual Studio ---
 # # https://docs.microsoft.com/en-us/dotnet/core/tools/dotnet-run
 # - name: Run the web application
-#   command: >-
+#   win_shell: >-
 #     dotnet run
-#     --project {{app_path}}
+#     --project {{app_location}}
 #     --launch-profile Development
 ...

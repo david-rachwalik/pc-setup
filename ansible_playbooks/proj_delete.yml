@@ -7,6 +7,6 @@
   # https://docs.ansible.com/ansible/latest/modules/win_file_module.html
   - name: Purge directory
     win_file:
-      name: "{{app_path}}\\DMR"
+      name: "{{app_solution}}\\DMR"
       state: absent
 ...

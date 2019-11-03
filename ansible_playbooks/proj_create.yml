@@ -3,8 +3,9 @@
 - name: Create a .NET Core project
   hosts: home
   vars:
-    app_solution: DMR
-    app_project: WebApp
+    app_project: DMR
+    app_location: D:\Repos
+    app_authentication: Individual
   roles:
   - windows/apps/dotnet/new
 ...
