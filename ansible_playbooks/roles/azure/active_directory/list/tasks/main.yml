@@ -1,0 +1,20 @@
+---
+# ansible localhost -m include_role -a "name=azure/active_directory/app_list"
+
+# https://docs.microsoft.com/en-us/cli/azure/ad/app#az-ad-app-list
+- name: List registered Azure AD applications
+  command: "az ad app list"
+  register: out_ad_apps
+  no_log: true
+# View app by name: az ad app list --display-name {{app}}
+
+# https://portal.azure.com/#blade/Microsoft_AAD_RegisteredApps/ApplicationsListBlade
+# - set_fact:
+#     az_ad_registered_app_convert: "{{out_ad_apps.stdout | from_json}}"
+# - set_fact:
+#     az_ad_registered_keys: "{{(out_ad_apps.stdout | from_json | first).keys() | list}}"
+- set_fact:
+    az_ad_registered_apps: "{{out_ad_apps.stdout | from_json | json_query('[*].displayName')}}"
+- set_fact:
+    az_ad_registered_app_count: "{{out_ad_apps.stdout | from_json | count}}"
+...
