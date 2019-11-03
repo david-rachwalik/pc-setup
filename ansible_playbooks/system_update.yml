@@ -1,39 +1,21 @@
 ---
-# ----------------------------------------------------------------
-# FROM: wsl_update.yml
-# ----------------------------------------------------------------
-- name: Upgrade all software, provision system settings, Git pull
+- name: Provision Linux system
   hosts: linux
   become: true
   roles:
   - linux/system/apt
   - linux/system/pip
+  tags: ["linux"]
+
+- name: Configure Linux environment
+  hosts: linux
+  roles:
   - linux/system/setup
   # template new Chocolatey.ps1 to start using as README example instead of group_vars
   tags: ["linux"]
 
-  # - git/config
-  # tasks:
-  # # https://docs.ansible.com/ansible/latest/modules/git_module.html
-  # - name: Pull the latest files from Git
-  #   git:
-  #     repo: "{{git_repo}}"
-  #     dest: "{{wsl_repo}}"
-  #     force: true
 
-  # ansible-playbook wsl_update.yml --tags "vscode"
-  # tasks:
-  # - name: Install VSCode
-  #   snap:
-  #     name: code
-  #     classic: true
-  #   tags: ["vscode"]
-
-
-# ----------------------------------------------------------------
-# FROM: win_update.yml
-# ----------------------------------------------------------------
-- name: Upgrade all software, provision system settings
+- name: Provision Windows system
   hosts: windows
   become: true
   become_user: david
