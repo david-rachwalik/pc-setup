@@ -35,6 +35,7 @@ chocolatey_packages:
   - typescript
   - nodejs
   - vscode
+  - sqlitebrowser
   - microsoftazurestorageexplorer
   # --- Media ---
   - geforce-experience
