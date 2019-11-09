@@ -1,4 +1,9 @@
 ---
+desktops:
+- C:\Users\Public\Desktop
+- C:\Users\david\Desktop
+
+
 file_naming_convention:
   onedrive:
   - _DMR:

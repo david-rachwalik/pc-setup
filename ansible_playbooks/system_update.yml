@@ -22,19 +22,11 @@
   become_method: runas
   roles:
   - windows/system/chocolatey
-  # Install other software, such as scanner
+  # --- TODO: Install any other software, such as scanner
   - windows/apps/dotnet/setup
   - windows/apps/vscode/setup
-  
-  - windows/system/desktop/clean
+  - windows/system/setup
   - windows/apps/ccleaner/clean
-
-  # https://docs.ansible.com/ansible/latest/modules/win_mapped_drive_module.html
-  # - H: \\HeroCamp\home
-  # - O: \\HeroCamp\OneDrive
-  # - M: \\HeroCamp\Multimedia
-  # - P: \\HeroCamp\Public
-  # - Z: \\HeroCamp\Pervy Yum Sauce
   tags: ["windows"]
 
 # - Connect to Windows and gather facts about the environment
