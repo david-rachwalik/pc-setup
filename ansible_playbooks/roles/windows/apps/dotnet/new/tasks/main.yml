@@ -9,8 +9,8 @@
     --name {{app_project}}
     --auth {{app_authentication | default('None')}}
     --client-id {{hostvars['localhost']['az_ad_app_project_id']}}
-  #   --org-read-access
-  #   --domain {{az_ad_domain}}
+    --domain {{app_domain}}
+    --org-read-access
   # --dry-run
   args:
     creates: "{{app_repo}}"

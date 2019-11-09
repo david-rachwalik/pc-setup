@@ -2,20 +2,10 @@
 # Products available by region
 # https://azure.microsoft.com/en-us/global-infrastructure/services/
 
-# app_project: CloudShell
-app_project: DMR
-app_location: D:\Repos
-app_repo: "{{app_location}}\\{{app_project}}"
-app_csproj: "{{app_repo}}\\{{app_project}}.csproj"
-# app_authentication: Individual
-app_authentication: MultiOrg
-
-app_local_port: 44304
-app_homepage: "https://localhost:{{app_local_port}}"
 az_active_directory: davidrachwalikoutlook
 az_ad_domain: "https://{{az_active_directory}}.onmicrosoft.com"
 az_ad_identifier_urls: ["{{az_ad_domain}}/{{app_project}}"]
-az_ad_reply_urls: ["{{app_homepage}}/signin-oidc"]
+az_ad_reply_urls: ["{{app_domain}}/signin-oidc"]
 
 # ------------------------------------------------
 # https://docs.microsoft.com/en-us/azure/architecture/best-practices/naming-conventions

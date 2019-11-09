@@ -1,0 +1,17 @@
+---
+# app_project: CloudShell
+# app_project: DMR-VS
+# app_project: DMR-2019-11-09--15-30
+app_project: DMR-2019-11-09--15-42
+
+# app_authentication: Individual
+app_authentication: MultiOrg
+
+# app_location: D:\Repos
+app_location: D:\Repos_Exp
+app_repo: "{{app_location}}\\{{app_project}}"
+app_csproj: "{{app_repo}}\\{{app_project}}.csproj"
+
+app_port: 44304
+app_domain: "https://localhost:{{app_port}}"
+...

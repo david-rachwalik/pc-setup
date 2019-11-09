@@ -20,7 +20,7 @@
     command: >-
       az ad app create
       --display-name {{app_project}}
-      --homepage {{app_homepage}}
+      --homepage {{app_domain}}
       --identifier-uris {{az_ad_identifier_urls | join(' ')}}
       --reply-urls {{az_ad_reply_urls | join(' ')}}
     # TODO: add --app-roles once authentication testing is further
