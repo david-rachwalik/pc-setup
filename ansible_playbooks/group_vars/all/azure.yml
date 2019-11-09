@@ -2,31 +2,43 @@
 # Products available by region
 # https://azure.microsoft.com/en-us/global-infrastructure/services/
 
+# app_project: CloudShell
+app_project: DMR
+app_location: D:\Repos
+app_repo: "{{app_location}}\\{{app_project}}"
+app_csproj: "{{app_repo}}\\{{app_project}}.csproj"
+# app_authentication: Individual
+app_authentication: MultiOrg
+
+app_local_port: 44304
+app_homepage: "https://localhost:{{app_local_port}}"
+az_active_directory: davidrachwalikoutlook
+az_ad_domain: "https://{{az_active_directory}}.onmicrosoft.com"
+az_ad_identifier_urls: ["{{az_ad_domain}}/{{app_project}}"]
+az_ad_reply_urls: ["{{app_homepage}}/signin-oidc"]
 
 # ------------------------------------------------
 # https://docs.microsoft.com/en-us/azure/architecture/best-practices/naming-conventions
 sku: FREE
-# basename: CloudShell
-# basename: DMR
-# resource_group: "rg-{{basename}}"
+resource_group: "rg-{{app_project}}"
 location: "South Central US"
 # sql_server must contain only lowercase letters, numbers, and hyphens; must be 3-50 characters long
-sql_server: "sqlsv-{{resource_group}}"
-sql_database: "sqldb-{{resource_group}}"
+sql_server: "sqlsv-{{app_project}}"
+sql_database: "sqldb-{{app_project}}"
 db_username: Rhodair
 db_password: null
 # username must be unique within Azure; must not contain the '@' symbol for local Git pushes
 deploy_username: null
 # password must contain at least 2 of the 3 elements: letters, numbers, and symbols; must be >= 8 characters long
 deploy_password: null
-storage_account: "sa-{{resource_group}}"
+storage_account: "sa-{{app_project}}"
 
 # 'az_plan' must be between 3-24 chars, only lowercase or numbers
 # TODO: replace() will use regex to strip ALL special characters
-# service_plan: "plan-{{resource_group | replace('_', '') | truncate(19) | lower}}"
-service_plan: "plan-{{resource_group}}"
+# service_plan: "plan-{{app_project | replace('_', '') | truncate(19) | lower}}"
+service_plan: "plan-{{app_project}}"
 plan_sku: F1
 # app must be globally unique with valid characters a-z, 0-9, and -
-app_service: "azapp-{{resource_group}}"
+app_service: "azapp-{{app_project}}"
 connection_string: null
 ...
