@@ -15,13 +15,16 @@
 
 - block:
   # https://docs.microsoft.com/en-us/cli/azure/ad/app#az-ad-app-create
-  # NOTE: The az command itself is idempotent; provides same output as app list
+  # NOTE: The az command is idempotent and provides the same output as app show/list
   - name: Register an AD application
     command: >-
       az ad app create
       --display-name {{app_project}}
-      --native-app
-    no_log: true
+      --homepage {{app_homepage}}
+      --identifier-uris {{az_ad_identifier_urls | join(' ')}}
+      --reply-urls {{az_ad_reply_urls | join(' ')}}
+    # TODO: add --app-roles once authentication testing is further
+    # no_log: true
     register: out_ad_app_create
     changed_when: not 'Found an existing application instance' in out_ad_app_create.stderr
 
@@ -32,6 +35,11 @@
   #     az_ad_app_convert: "{{out_ad_app_create.stdout | from_json | json_query('{appId: appId, displayName: displayName}')}}"
   - set_fact:
       az_ad_app_project_id: "{{out_ad_app_create.stdout | from_json | json_query('appId')}}"
+
+  # - name: Show AD application details
+  #   command: "az ad app show --id {{az_ad_app_project_id}}"
+  #   register: out_ad_app_show
+  #   ignore_errors: true
 
   when: app_authentication != 'None'
   tags: ["azure", "az", "active_directory", "ad", "identity"]
