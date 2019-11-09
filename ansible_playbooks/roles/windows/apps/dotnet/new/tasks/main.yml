@@ -8,19 +8,20 @@
     --output {{app_location}}\\{{app_project}}
     --name {{app_project}}
     --auth {{app_authentication | default('None')}}
+    --client-id {{hostvars['localhost']['az_ad_app_project_id']}}
+  #   --org-read-access
+  #   --domain {{az_ad_domain}}
   # --dry-run
   args:
     creates: "{{app_location}}\\{{app_project}}"
   register: out_webapp_create
+  when: hostvars['localhost']['az_ad_app_project_id']
 
 - block:
-  - name: Build the web app
-    win_shell: "dotnet build {{app_location}}\\{{app_project}}"
-
   - name: Install EFCore database provider
     win_shell: "dotnet add package Microsoft.EntityFrameworkCore.Sqlite"
-    args:
-      chdir: "{{app_location}}\\{{app_project}}"
+    # args:
+    #   chdir: "{{app_location}}\\{{app_project}}"
 
   # - name: Add EFCore design package
   #   win_shell: "dotnet add package Microsoft.EntityFrameworkCore.Design"
@@ -28,13 +29,25 @@
   # - name: Create initial database migration
   #   win_shell: "dotnet ef migrations add {{migration_message|default('Initial')}}"
   
-  - name: Update database with latest migrations
-    win_shell: "dotnet ef database update"
-    args:
-      chdir: "{{app_location}}\\{{app_project}}"
-    register: out_database_update
+  # --- Fresh app migrations already up-to-date; TODO: turn this into alias
+  # - name: Update database with latest migrations
+  #   win_shell: "dotnet ef database update"
+  #   args:
+  #     chdir: "{{app_location}}\\{{app_project}}"
+  #   register: out_database_update
 
+  - name: Install code generator (scaffold)
+    win_shell: "dotnet add package Microsoft.VisualStudio.Web.CodeGeneration.Design"
+
+  - name: Build the web app
+    win_shell: "dotnet build"
+
+  args:
+    chdir: "{{app_location}}\\{{app_project}}"
   when: out_webapp_create is changed
+  tags: ["database", "db", "identity"]
+
+
 
 
 # - name: List all package references of the project
