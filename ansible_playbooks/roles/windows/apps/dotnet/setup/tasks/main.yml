@@ -1,7 +1,14 @@
 ---
-- name: Ensure .NET Core SDK also has EFCore
+- name: Ensure .NET Core has Entity Framework Core
   win_shell: "dotnet tool install -g dotnet-ef"
   register: out_efcore_install
+  failed_when: not 'is already installed' in out_efcore_install.stderr
+  changed_when: not 'is already installed' in out_efcore_install.stderr
+
+# https://docs.microsoft.com/en-us/aspnet/core/security/authentication/scaffold-identity
+- name: Ensure .NET Core has Code Generator (Scaffold)
+  win_shell: "dotnet tool install -g dotnet-aspnet-codegenerator"
+  register: out_codegenerator_install
   failed_when: not 'is already installed' in out_efcore_install.stderr
   changed_when: not 'is already installed' in out_efcore_install.stderr
 ...
