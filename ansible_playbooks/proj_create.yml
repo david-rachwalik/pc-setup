@@ -1,12 +1,13 @@
 ---
+- name: Create a .NET Core application project
+  hosts: localhost
+  roles:
+  - azure/active_directory/create
+
+
 # Modes: [nodb, sqlserver, identity, docker]
 - name: Create a .NET Core application project
-  # Only for main PC
   hosts: home
-  vars:
-    app_project: DMR
-    app_location: D:\Repos
-    app_authentication: Individual
   roles:
   - windows/apps/dotnet/new
 ...

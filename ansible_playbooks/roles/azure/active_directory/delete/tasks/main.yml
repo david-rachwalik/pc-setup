@@ -1,0 +1,49 @@
+---
+# ansible localhost -m include_role -a "name=azure/active_directory/list"
+
+# https://docs.microsoft.com/en-us/cli/azure/ad/app#az-ad-app-list
+- name: List registered Azure AD applications
+  command: "az ad app list"
+  register: out_ad_apps
+  no_log: true
+  changed_when: false
+
+
+# https://portal.azure.com/#blade/Microsoft_AAD_RegisteredApps/ApplicationsListBlade
+- set_fact:
+    az_ad_app_convert: "{{out_ad_apps.stdout | from_json}}"
+
+- set_fact:
+    az_ad_app_first: "{{out_ad_apps.stdout | from_json | first}}"
+    az_ad_app_project_id: "{{(az_ad_app_convert | count > 0) | ternary((az_ad_app_convert | first).appId, null)}}"
+    az_ad_app_first: "{{(az_ad_app_projects | count > 0) | ternary((az_ad_app_projects | first), null)}}"
+  when: az_ad_app_convert is list
+- set_fact:
+    az_ad_app_first: "{{az_ad_app_convert}}"
+  when: az_ad_app_convert is dict
+
+
+- set_fact:
+    az_ad_app_keys: "{{(out_ad_apps.stdout | from_json | first).keys() | list}}"
+- set_fact:
+    az_ad_app_displayNames: "{{out_ad_apps.stdout | from_json | json_query('[*].displayName') | sort}}"
+- set_fact:
+    az_ad_app_count: "{{out_ad_apps.stdout | from_json | count}}"
+
+
+- set_fact:
+    az_ad_app_list: "{{out_ad_apps.stdout | from_json | json_query('[*].{appId: appId, displayName: displayName}')}}"
+- set_fact:
+    # az_ad_app_project_query: "[?displayName=='{{app_project}}']"
+    az_ad_app_project_query: "[?displayName=='{{app_project}}'].{appId: appId, displayName: displayName}"
+- set_fact:
+    az_ad_app_projects: "{{out_ad_apps.stdout | from_json | json_query(az_ad_app_project_query)}}"
+- set_fact:
+    # az_ad_app_project_id: "{{(az_ad_app_projects | default('[{ appId: null }]') | first).appId}}"
+    # az_ad_app_project_id: "{{(az_ad_app_projects | count > 0) | ternary(az_ad_app_projects | first, { 'appId':null }).appId}}"
+    az_ad_app_project_id: "{{(az_ad_app_projects | count > 0) | ternary((az_ad_app_projects | first).appId, null)}}"
+
+
+# - name: Delete registered Azure AD application
+#   command: "az ad app delete"
+...
