@@ -5,6 +5,10 @@
 # https://www.ccleaner.com/docs/ccleaner/advanced-usage/command-line-parameters
 # https://gist.github.com/theinventor/7b9f2e1f96420291db28592727ede8d3
 - name: Clean machine and shutdown
-  win_shell: Start-Process -FilePath 'C:\Program Files\CCleaner\CCleaner64.exe' -ArgumentList '/AUTO /SHUTDOWN'
+  win_shell: >-
+    Start-Process
+    -FilePath 'C:\Program Files\CCleaner\CCleaner64.exe'
+    -ArgumentList '/AUTO /SHUTDOWN'
   register: out_ccleaner_shutdown
+  when: shutdown | default(false)
 ...
