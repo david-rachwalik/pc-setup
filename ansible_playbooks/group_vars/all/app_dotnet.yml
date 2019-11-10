@@ -1,22 +1,23 @@
 ---
-# app_project: CloudShell
-# app_project: DMR-VS
-# app_project: DMR-2019-11-09--15-30
-app_project: DMR-2019-11-09--15-42
+# app_name: CloudShell
+app_name: DMR-2019-11-10--10-15
 
-# app_authentication: Individual
-app_authentication: MultiOrg
-
-# app_location: D:\Repos
-app_location: D:\Repos_Exp
-app_repo: "{{app_location}}\\{{app_project}}"
-app_csproj: "{{app_repo}}\\{{app_project}}.csproj"
-
-app_port: 44304
-app_domain: "https://localhost:{{app_port}}"
+# app_location_dir: D:\Repos
+app_location_dir: D:\Repos_Exp
+app_project: "{{app_name}}.WebApp"
+app_use_database: true
+app_authentication: Individual
+# app_authentication: MultiOrg
 
 app_projects_tracked:
 - DMR-VS
-- DMR-2019-11-09--15-42
-- DMR-2019-11-09--15-30
+# - DMR-2019-11-09--15-42
+- SexBound.WebApp
+
+app_repo_dir: "{{app_location_dir}}\\{{app_name}}"
+app_project_dir: "{{app_repo_dir}}\\{{app_project}}"
+app_port: 43234
+app_domain: "https://localhost:{{app_port}}"
+app_sln: "{{app_repo_dir}}.sln"
+app_csproj: "{{app_project_dir}}.csproj"
 ...
