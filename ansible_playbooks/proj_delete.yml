@@ -1,5 +1,11 @@
 ---
-- name: Delete .NET Core app project
+- name: Delete .NET Core application project
+  hosts: localhost
+  roles:
+  - azure/active_directory/delete
+
+
+- name: Delete .NET Core application project
   # Only for main PC
   hosts: home
   vars:
