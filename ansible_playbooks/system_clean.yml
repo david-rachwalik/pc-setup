@@ -90,5 +90,4 @@
   become_method: runas
   roles:
   - windows/apps/ccleaner/shutdown
-  when: "{{shutdown | default(false)}}"
 ...
