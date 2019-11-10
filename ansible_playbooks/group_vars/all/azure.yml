@@ -7,6 +7,11 @@ az_ad_domain: "https://{{az_active_directory}}.onmicrosoft.com"
 az_ad_identifier_urls: ["{{az_ad_domain}}/{{app_project}}"]
 az_ad_reply_urls: ["{{app_domain}}/signin-oidc"]
 
+# az_ad_app_project_query: "[?displayName=='{{app_project}}']"
+az_ad_app_project_query: "[?displayName=='{{app_project}}'].{appId: appId, displayName: displayName}"
+# http://jmespath.org/specification.html#contains
+az_ad_app_project_delete_query: "[?displayName.contains(@, '{{az_ad_app_displayName_to_delete}}')].{appId: appId, displayName: displayName}"
+
 # ------------------------------------------------
 # https://docs.microsoft.com/en-us/azure/architecture/best-practices/naming-conventions
 sku: FREE

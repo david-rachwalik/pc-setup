@@ -14,4 +14,9 @@ app_csproj: "{{app_repo}}\\{{app_project}}.csproj"
 
 app_port: 44304
 app_domain: "https://localhost:{{app_port}}"
+
+app_projects_tracked:
+- DMR-VS
+- DMR-2019-11-09--15-42
+- DMR-2019-11-09--15-30
 ...
