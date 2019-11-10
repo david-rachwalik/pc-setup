@@ -1,28 +1,78 @@
 ---
 # https://docs.microsoft.com/en-us/dotnet/core/tools/dotnet-new
 # https://docs.ansible.com/ansible/latest/modules/win_shell_module.html
-# List available templates: dotnet new -l
-- name: Create a Razor Pages web app
+- name: Create .NET Core solution
+  win_shell: >-
+    dotnet new sln
+    --output {{app_repo_dir}}
+  changed_when: false
+  args:
+    creates: "{{app_repo_dir}}"
+  register: out_webapp_create
+  tags: ["dotnet", "new", "solution"]
+
+- name: Create a .NET Core web app
   win_shell: >-
     dotnet new webapp
-    --output {{app_repo}}
-    --name {{app_project}}
-    --auth {{app_authentication | default('None')}}
-    --client-id {{hostvars['localhost']['az_ad_app_project_id']}}
+    --output {{app_project_dir}}
     --domain {{app_domain}}
     --org-read-access
-  # --dry-run
+    --auth {{app_authentication | default('None')}}
+  # --client-id {{hostvars['localhost']['az_ad_app_project_id']}}
+  changed_when: false
   args:
-    creates: "{{app_repo}}"
+    creates: "{{app_project_dir}}"
   register: out_webapp_create
-  when: hostvars['localhost']['az_ad_app_project_id']
-  tags: ["dotnet", "webapp"]
+  # when:
+  # - app_authentication == 'MultiOrg'
+  # - hostvars['localhost']['az_ad_app_project_id']
+  tags: ["dotnet", "new", "webapp"]
 
-- name: Install EFCore database provider
+# https://docs.microsoft.com/en-us/dotnet/core/tools/dotnet-sln
+- name: Add project to the solution
+  win_shell: >-
+    dotnet sln {{app_sln}} add
+  when:
+  - out_webapp_create is changed
+  register: out_sln_add
+  tags: ["dotnet", "sln", "solution"]
+
+
+# - name: Create a Razor Pages web app
+#   win_shell: >-
+#     dotnet new webapp
+#     --output {{app_project_dir}}
+#     --name {{app_project}}
+#     --auth {{app_authentication | default('None')}}
+#   args:
+#     creates: "{{app_project_dir}}"
+#   register: out_webapp_create
+#   when:
+#   - app_authentication == 'Individual'
+#   tags: ["dotnet", "webapp"]
+
+
+# - name: Create a Razor Pages web app
+#   win_shell: >-
+#     dotnet new webapp
+#     --output {{app_project_dir}}
+#     --name {{app_project}}
+#     --domain {{app_domain}}
+#   args:
+#     creates: "{{app_project_dir}}"
+#   register: out_webapp_create
+#   when: app_authentication is not defined or app_authentication == ''
+#   tags: ["dotnet", "webapp"]
+
+
+
+- name: Install EF Core database provider
   win_shell: "dotnet add package Microsoft.EntityFrameworkCore.Sqlite"
   args:
-    chdir: "{{app_repo}}"
-  when: out_webapp_create is changed
+    chdir: "{{app_project_dir}}"
+  when:
+  - app_use_database
+  - out_webapp_create is changed
   tags: ["dotnet", "package", "database", "db", "sqlite"]
 
 # - name: Add EFCore design package
@@ -35,40 +85,40 @@
 # - name: Update database with latest migrations
 #   win_shell: "dotnet ef database update"
 #   args:
-#     chdir: "{{app_repo}}"
+#     chdir: "{{app_project_dir}}"
 #   register: out_database_update
 
 - name: Install code generator (scaffold)
   win_shell: "dotnet add package Microsoft.VisualStudio.Web.CodeGeneration.Design"
   args:
-    chdir: "{{app_repo}}"
+    chdir: "{{app_project_dir}}"
   when: out_webapp_create is changed
   tags: ["dotnet", "package", "scaffold", "database", "identity"]
 
 
 # - name: List all package references of the project
-#   win_shell: "dotnet list {{app_location}} package"
+#   win_shell: "dotnet list {{app_project_dir}} package"
 #   changed_when: false
 
 # - name: List all project-to-project references of the project
-#   win_shell: "dotnet list {{app_location}} reference"
+#   win_shell: "dotnet list {{app_project_dir}} reference"
 #   changed_when: false
 
 
 # https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.management/invoke-item
-- name: Open the web app in Visual Studio
-  win_shell: "Invoke-Item -Path {{app_csproj}}"
-  tags: ["visual_studio", "vs"]
+# - name: Open the web app in Visual Studio
+#   win_shell: "Invoke-Item -Path {{app_csproj}}"
+#   tags: ["visual_studio", "vs"]
 
-- name: Build the web app
-  win_shell: "dotnet build {{app_repo}}"
-  tags: ["dotnet", "build"]
+# - name: Build the web app
+#   win_shell: "dotnet build {{app_project_dir}}"
+#   tags: ["dotnet", "build"]
 
 # --- Don't run app from command line; stick to Visual Studio ---
 # # https://docs.microsoft.com/en-us/dotnet/core/tools/dotnet-run
 # - name: Run the web application
 #   win_shell: >-
 #     dotnet run
-#     --project {{app_location}}
+#     --project {{app_location_dir}}
 #     --launch-profile Development
 ...

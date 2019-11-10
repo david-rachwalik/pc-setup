@@ -8,20 +8,17 @@
 - name: Delete .NET Core application project
   # Only for main PC
   hosts: home
-  vars:
-    app_project: DMR
-    app_location: D:\Repos
   tasks:
   # https://docs.ansible.com/ansible/latest/modules/win_stat_module.html
   - name: Obtain information about app project directory
     win_stat:
-      path: "{{app_location}}\\{{app_project}}"
+      path: "{{app_location_dir}}\\{{app_project}}"
     register: out_stat_app
 
   # https://docs.ansible.com/ansible/latest/modules/win_file_module.html
   - name: Purge directory
     win_file:
-      name: "{{app_location}}\\{{app_project}}"
+      name: "{{app_location_dir}}\\{{app_project}}"
       state: absent
     when: out_stat_app.stat.exists
 ...

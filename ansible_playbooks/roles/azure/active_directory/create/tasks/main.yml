@@ -16,18 +16,19 @@
 - block:
   # https://docs.microsoft.com/en-us/cli/azure/ad/app#az-ad-app-create
   # NOTE: The az command is idempotent and provides the same output as app show/list
-  - name: Register an AD application
+  - name: Register Azure AD application
     command: >-
       az ad app create
       --display-name {{app_project}}
       --homepage {{app_domain}}
       --identifier-uris {{az_ad_identifier_urls | join(' ')}}
+      --oauth2-allow-implicit-flow true
       --reply-urls {{az_ad_reply_urls | join(' ')}}
     # TODO: add --app-roles once authentication testing is further
     # no_log: true
     register: out_ad_app_create
     changed_when: not 'Found an existing application instance' in out_ad_app_create.stderr
-
+    
   # https://portal.azure.com/#blade/Microsoft_AAD_RegisteredApps/ApplicationsListBlade
   # - set_fact:
   #     az_ad_app_keys: "{{(out_ad_app_create.stdout | from_json).keys() | list | sort}}"
@@ -41,6 +42,8 @@
   #   register: out_ad_app_show
   #   ignore_errors: true
 
-  when: app_authentication != 'None'
+  when:
+  - app_authentication is defined
+  - app_authentication == "MultiOrg"
   tags: ["azure", "az", "active_directory", "ad", "identity"]
 ...

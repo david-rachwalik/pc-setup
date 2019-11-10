@@ -54,6 +54,7 @@
         --quiet
     when: choco_to_install_visualstudio
     tags: ["install", "visualstudio", "visualstudio2019"]
+  # TODO: https://marketplace.visualstudio.com/items?itemName=MadsKristensen.OpenCommandLine
 
   # https://chocolatey.org/packages/microsoft-office-deployment
   - name: Install MS Office 365
