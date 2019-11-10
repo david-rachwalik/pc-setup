@@ -37,4 +37,7 @@
 
 # - name: Configure VSCode settings
 #   - move json settings files for user and workspace
+
+
+# TODO: https://docs.microsoft.com/en-us/visualstudio/online/quickstarts/vscode
 ...

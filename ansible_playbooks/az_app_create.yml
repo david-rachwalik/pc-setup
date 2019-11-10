@@ -1,6 +1,7 @@
 ---
 # Modes: [nodb, sqlserver, docker] (when F1, ignore custom domain)
 
+# https://docs.microsoft.com/en-us/azure/ansible/ansible-create-configure-azure-web-apps
 # https://docs.microsoft.com/en-us/learn/paths/deploy-a-website-with-azure-app-service/
 # https://www.youtube.com/playlist?list=PLdo4fOcmZ0oW8nviYduHq7bmKode-p8Wy
 # https://docs.microsoft.com/en-us/azure/ansible/ansible-overview
