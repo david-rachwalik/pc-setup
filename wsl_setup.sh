@@ -22,13 +22,7 @@ export DEBIAN_FRONTEND=noninteractive
 apt-get update && apt-get dist-upgrade -y
 # Install Ansible dependencies (Python, Git)
 apt-get install -y python3-pip
-pip3 install -y ansible
-# apt-get install -y python-pip git libffi-dev libssl-dev
-# pip install --upgrade pip
-# apt-add-repository -y ppa:ansible/ansible
-# apt-get install -y ansible
-# pip3 install pywinrm[kerberos]
-# apt-get install -y python-dev libkrb5-dev krb5-user
+pip3 install --user ansible
 
 # Register Microsoft key and feed to prep for .NET SDK
 ubuntu_src="https://packages.microsoft.com/config/ubuntu/18.04/packages-microsoft-prod.deb"
@@ -37,10 +31,6 @@ if ! test -f ${ubuntu_tmp}; then
     wget -q ${ubuntu_src} -O ${ubuntu_tmp}
     dpkg -i ${ubuntu_tmp}
 fi
-
-# Install Azure CLI (https://docs.microsoft.com/en-us/cli/azure/install-azure-cli-apt)
-# curl -sL https://aka.ms/InstallAzureCLIDeb | bash
-# TODO: verify in Ansible before removing lines above
 
 # Run remaining commands as user
 su -c "curl -s https://raw.githubusercontent.com/david-rachwalik/pc-setup/master/wsl_user_setup.sh | bash" ${run_user}
