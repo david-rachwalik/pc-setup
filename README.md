@@ -10,13 +10,13 @@
     # Install WSL (*nix kernel) - restart system when prompted
     Enable-WindowsOptionalFeature -Online -FeatureName Microsoft-Windows-Subsystem-Linux
     # Run script to install Chocolatey, Ubuntu, and RemoteRM
-    iwr https://raw.githubusercontent.com/david-rachwalik/pc-setup/master/win_setup.ps1 -UseBasicParsing | iex
+    iwr https://raw.githubusercontent.com/david-rachwalik/pc-setup/master/win_init.ps1 -UseBasicParsing | iex
     ```
 
 2. Run script to install Ansible on Linux and call provisioning playbooks
 
     ``` bash
-    curl -s https://raw.githubusercontent.com/david-rachwalik/pc-setup/master/wsl_setup.sh | sudo -H bash
+    curl -s https://raw.githubusercontent.com/david-rachwalik/pc-setup/master/wsl_init.sh | sudo -H bash
     ```
 
 ## Development & PC Health
