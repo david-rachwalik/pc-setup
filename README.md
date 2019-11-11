@@ -46,8 +46,8 @@ code ~/pc-setup
 1. Run PowerShell (as Administrator) to [install Chocolatey](https://chocolatey.org/install)
 
     ``` powershell
-    # Run the Chocolatey install script
-    Set-ExecutionPolicy Bypass -Scope Process -Force; iex ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))
+    # Install Chocolatey
+    Set-ExecutionPolicy Bypass -Scope Process -Force; iwr https://chocolatey.org/install.ps1 -UseBasicParsing | iex
     # Set Chocolatey to skip confirmation prompts
     choco feature enable -n allowGlobalConfirmation
     ```
