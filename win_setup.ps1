@@ -1,7 +1,10 @@
 # Run with PowerShell as Administrator
-# https://docs.microsoft.com/en-us/windows/wsl/install-manual
+
+# Install Chocolatey
+Set-ExecutionPolicy Bypass -Scope Process -Force; iwr https://chocolatey.org/install.ps1 -UseBasicParsing | iex
 
 # Install WSL (*nix kernel) - restart system when prompted
+# https://docs.microsoft.com/en-us/windows/wsl/install-manual
 Enable-WindowsOptionalFeature -Online -FeatureName Microsoft-Windows-Subsystem-Linux
 
 # Install RemoteRM (leftover commands in D:\Repos\pc-setup\ansible_playbooks\roles\powershell\files\provision_pc.ps1)
