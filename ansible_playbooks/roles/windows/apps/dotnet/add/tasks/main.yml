@@ -1,13 +1,23 @@
 ---
 # https://docs.microsoft.com/en-us/dotnet/core/tools/dotnet-add
 # https://docs.ansible.com/ansible/latest/modules/win_shell_module.html
-- name: Install EF Core database provider
+# - name: Install Entity Framework Core
+#   win_shell: "dotnet add package Microsoft.EntityFrameworkCore"
+#   args:
+#     chdir: "{{app_project_dir}}"
+#   when:
+#   - app_use_database
+#   # - out_webapp_create is changed
+#   tags: ["dotnet", "package", "database", "db", "sqlite"]
+
+# Installs Microsoft.EntityFrameworkCore as dependency
+- name: Install SQLite database provider
   win_shell: "dotnet add package Microsoft.EntityFrameworkCore.Sqlite"
   args:
     chdir: "{{app_project_dir}}"
   when:
   - app_use_database
-  - out_webapp_create is changed
+  # - out_webapp_create is changed
   tags: ["dotnet", "package", "database", "db", "sqlite"]
 
 # - name: Add EFCore design package
