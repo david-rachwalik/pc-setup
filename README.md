@@ -9,9 +9,8 @@
     [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
     # Install WSL (*nix kernel) - restart system when prompted
     Enable-WindowsOptionalFeature -Online -FeatureName Microsoft-Windows-Subsystem-Linux
-    # Cache and run the latest script to install Ubuntu + RemoteRM
-    $RemoteScript = Invoke-WebRequest -Uri https://raw.githubusercontent.com/david-rachwalik/pc-setup/master/win_setup.ps1 -UseBasicParsing
-    Invoke-Expression $($RemoteScript.Content)
+    # Run script to install Chocolatey, Ubuntu, and RemoteRM
+    iwr https://raw.githubusercontent.com/david-rachwalik/pc-setup/master/win_setup.ps1 -UseBasicParsing | iex
     ```
 
 2. Run script to install Ansible on Linux and call provisioning playbooks
