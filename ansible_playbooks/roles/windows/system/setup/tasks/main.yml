@@ -24,7 +24,7 @@
   tags: ["setup", "desktop"]
 
 
-- block:
+# - block:
   # https://docs.ansible.com/ansible/latest/modules/win_mapped_drive_module.html
   # - H: \\HeroCamp\home
   # - O: \\HeroCamp\OneDrive
@@ -32,5 +32,5 @@
   # - P: \\HeroCamp\Public
   # - Z: \\HeroCamp\Pervy Yum Sauce
 
-  tags: ["setup", "drive", "mount"]
+  # tags: ["setup", "drive", "mount"]
 ...
