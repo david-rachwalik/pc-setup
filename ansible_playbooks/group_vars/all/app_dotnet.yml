@@ -1,19 +1,21 @@
 ---
 # app_name: CloudShell
-app_name: DMR-2019-11-10--14-10
-
-# app_location_dir: D:\Repos
-app_location_dir: D:\Repos_Exp
-app_project: "{{app_name}}.WebApp"
-app_use_database: true
-app_authentication: None
-# app_authentication: Individual
-# app_authentication: MultiOrg
+# app_name: DMR-2019-11-10--23-30
+app_name: RazorPagesMovie
 
 app_projects_tracked:
 - DMR-VS
 # - DMR-2019-11-09--15-42
 - SexBound.WebApp
+
+app_use_database: true
+app_authentication: None
+# app_authentication: Individual
+# app_authentication: MultiOrg
+
+# app_location_dir: D:\Repos
+app_location_dir: D:\Repos_Exp
+app_project: "{{app_name}}.WebApp"
 
 app_solution_dir: "{{app_location_dir}}\\{{app_name}}"
 app_project_dir: "{{app_solution_dir}}\\{{app_project}}"

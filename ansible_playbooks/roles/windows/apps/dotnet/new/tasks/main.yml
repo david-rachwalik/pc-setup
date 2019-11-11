@@ -67,14 +67,14 @@
 
 
 # https://docs.ansible.com/ansible/latest/modules/win_copy_module.html
-- name: Ensure latest app readme
+- name: Ensure solution has readme
   win_copy:
     src: "{{app_readme | win_basename}}"
     dest: "{{app_readme}}"
   register: out_copy_readme
   tags: ["readme"]
 
-- name: Ensure latest app license
+- name: Ensure solution has license
   win_copy:
     src: "{{app_license | win_basename}}"
     dest: "{{app_license}}"
