@@ -1,6 +1,9 @@
 #!/bin/sh
 wsl_ssh=${HOME}/.ssh
-wsl_repo=${HOME}/pc-setup
+win_project=/mnt/d/Repos/pc-setup
+wsl_project=${HOME}/pc-setup
+win_vault=${win_project}/ansible_playbooks/group_vars/windows/main_vault.yml
+wsl_vault=${wsl_project}/ansible_playbooks/group_vars/windows/main_vault.yml
 
 # --- This file only to be run as user ---
 
@@ -27,6 +30,7 @@ if ! test -d ${wsl_ssh}; then
     # Above must be run once, copy public SSH key to GitHub Settings, and run again
     echo "Copy this SSH key to your GitHub Settings:"
     cat ${wsl_ssh}/id_rsa.pub
+    ssh_response=""
     while [ "${ssh_response}" != "y" ]; do
         read -p "Enter (y) after SSH key has been added to GitHub: " ssh_response
     done
@@ -39,7 +43,7 @@ if ! test -d ${wsl_ssh}; then
     # sudo service ssh restart
 fi
 
-if ! test -d ${wsl_repo}; then
+if ! test -d ${wsl_project}; then
     # https://git-scm.com/book/en/v2/Getting-Started-First-Time-Git-Setup
     git config --global user.name "David Rachwalik"
     git config --global user.email "david.rachwalik@outlook.com"
@@ -47,24 +51,25 @@ if ! test -d ${wsl_repo}; then
     git config --global core.editor "code --wait"
     # View Git settings
     git config --list --show-origin
-    git clone git@github.com:david-rachwalik/pc-setup.git ${wsl_repo}
+    git clone git@github.com:david-rachwalik/pc-setup.git ${wsl_project}
 fi
 
-if test -d ${wsl_repo}; then
+if test -d ${wsl_project}; then
     # Fetch the vault file if it exists
     # TODO: test whether creating a file symlink with Ansible will retroactively win_ping in same playbook
-    win_vault=/mnt/d/Repos/pc-setup/ansible_playbooks/group_vars/windows/main_vault.yml
-    wsl_vault=${wsl_repo}/ansible_playbooks/group_vars/windows/main_vault.yml
     if test -f ${win_vault}; then
         cp -f ${win_vault} ${wsl_vault}
     fi
 
     # Update all systems; shutdown=false is default - prevents Windows restarts
-    cd ${wsl_repo}/ansible_playbooks
+    cd ${wsl_project}
     git pull
+
     # Ansible ignores ansible.cfg in a world-writable directory
     # https://docs.ansible.com/ansible/devel/reference_appendices/config.html#cfg-in-world-writable-dir
-    find ${wsl_repo} -type d -print0 | xargs -0 chmod 755
-    find ${wsl_repo} -type f -print0 | xargs -0 chmod 644
+    find ${wsl_project} -type d -print0 | xargs -0 chmod 755
+    find ${wsl_project} -type f -print0 | xargs -0 chmod 644
+
+    cd ${wsl_project}/ansible_playbooks
     ansible-playbook system_update.yml
 fi
