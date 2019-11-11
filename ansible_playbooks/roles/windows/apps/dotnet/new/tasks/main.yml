@@ -4,10 +4,10 @@
 - name: Create .NET Core solution
   win_shell: >-
     dotnet new sln
-    --output {{app_repo_dir}}
+    --output {{app_solution_dir}}
   changed_when: false
   args:
-    creates: "{{app_repo_dir}}"
+    creates: "{{app_solution_dir}}"
   register: out_webapp_create
   tags: ["dotnet", "new", "solution"]
 
@@ -31,10 +31,11 @@
 # https://docs.microsoft.com/en-us/dotnet/core/tools/dotnet-sln
 - name: Add project to the solution
   win_shell: >-
-    dotnet sln {{app_sln}} add
-  when:
-  - out_webapp_create is changed
+    dotnet sln {{app_sln}} add {{app_csproj}}
+  # when:
+  # - out_webapp_create is changed
   register: out_sln_add
+  changed_when: not 'already contains project' in out_sln_add.stdout
   tags: ["dotnet", "sln", "solution"]
 
 
@@ -65,60 +66,18 @@
 #   tags: ["dotnet", "webapp"]
 
 
+# https://docs.ansible.com/ansible/latest/modules/win_copy_module.html
+- name: Ensure latest app readme
+  win_copy:
+    src: "{{app_readme | win_basename}}"
+    dest: "{{app_readme}}"
+  register: out_copy_readme
+  tags: ["readme"]
 
-- name: Install EF Core database provider
-  win_shell: "dotnet add package Microsoft.EntityFrameworkCore.Sqlite"
-  args:
-    chdir: "{{app_project_dir}}"
-  when:
-  - app_use_database
-  - out_webapp_create is changed
-  tags: ["dotnet", "package", "database", "db", "sqlite"]
-
-# - name: Add EFCore design package
-#   win_shell: "dotnet add package Microsoft.EntityFrameworkCore.Design"
-
-# - name: Create initial database migration
-#   win_shell: "dotnet ef migrations add {{migration_message|default('Initial')}}"
-
-# --- Fresh app migrations already up-to-date; TODO: turn this into alias
-# - name: Update database with latest migrations
-#   win_shell: "dotnet ef database update"
-#   args:
-#     chdir: "{{app_project_dir}}"
-#   register: out_database_update
-
-- name: Install code generator (scaffold)
-  win_shell: "dotnet add package Microsoft.VisualStudio.Web.CodeGeneration.Design"
-  args:
-    chdir: "{{app_project_dir}}"
-  when: out_webapp_create is changed
-  tags: ["dotnet", "package", "scaffold", "database", "identity"]
-
-
-# - name: List all package references of the project
-#   win_shell: "dotnet list {{app_project_dir}} package"
-#   changed_when: false
-
-# - name: List all project-to-project references of the project
-#   win_shell: "dotnet list {{app_project_dir}} reference"
-#   changed_when: false
-
-
-# https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.management/invoke-item
-# - name: Open the web app in Visual Studio
-#   win_shell: "Invoke-Item -Path {{app_csproj}}"
-#   tags: ["visual_studio", "vs"]
-
-# - name: Build the web app
-#   win_shell: "dotnet build {{app_project_dir}}"
-#   tags: ["dotnet", "build"]
-
-# --- Don't run app from command line; stick to Visual Studio ---
-# # https://docs.microsoft.com/en-us/dotnet/core/tools/dotnet-run
-# - name: Run the web application
-#   win_shell: >-
-#     dotnet run
-#     --project {{app_location_dir}}
-#     --launch-profile Development
+- name: Ensure latest app license
+  win_copy:
+    src: "{{app_license | win_basename}}"
+    dest: "{{app_license}}"
+  register: out_copy_license
+  tags: ["license"]
 ...

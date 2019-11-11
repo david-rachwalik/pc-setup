@@ -10,4 +10,6 @@
   hosts: home
   roles:
   - windows/apps/dotnet/new
+  - windows/apps/git/init
+  - windows/apps/dotnet/add
 ...

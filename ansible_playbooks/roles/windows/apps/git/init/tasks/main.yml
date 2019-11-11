@@ -1,0 +1,36 @@
+---
+- name: Initialize Git in the project
+  win_shell: git init
+  args:
+    chdir: "{{app_solution_dir}}"
+    creates: "{{app_repo_dir}}"
+  register: out_git_init
+  tags: ["git", "init"]
+
+# https://raw.githubusercontent.com/github/gitignore/master/VisualStudio.gitignore
+# https://docs.ansible.com/ansible/latest/modules/win_copy_module.html
+- name: Ensure latest Git-ignore file
+  win_copy:
+    src: "{{app_gitignore | win_basename}}"
+    dest: "{{app_gitignore}}"
+  register: out_copy_gitignore
+  tags: ["git", "gitignore"]
+
+- name: Ensure latest Git-attributes file
+  win_copy:
+    src: "{{app_gitattributes | win_basename}}"
+    dest: "{{app_gitattributes}}"
+  register: out_copy_gitattributes
+  tags: ["git", "gitattributes"]
+
+# https://elanderson.net/2016/09/add-git-ignore-to-existing-visual-studio-project/
+# - name: Stop tracking files that should be ignored
+#   win_shell: >-
+#     git rm -r --cached .
+#     git add .
+#     git commit -am "Remove ignored files"
+#   args:
+#     chdir: "{{app_solution_dir}}"
+#   register: out_git_untrack
+#   tags: ["git", "rm"]
+...
