@@ -13,7 +13,8 @@
     changed_when: false
     no_log: true
 
-  # Instead of forcing a lower case list, match 'chocolatey_packages' to the installed case
+  - set_fact:
+      choco_packages_installed: "{{out_choco_installed.stdout_lines | sort}}"
   - set_fact:
       choco_packages_to_uninstall: "{{chocolatey_packages.uninstall | intersect(out_choco_installed.stdout_lines)}}"
   - set_fact:
