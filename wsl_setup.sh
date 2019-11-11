@@ -20,9 +20,9 @@ fi
 # Upgrade Linux distribution
 export DEBIAN_FRONTEND=noninteractive
 apt-get update && apt-get dist-upgrade -y
-# Install Ansible dependencies (Python, Git)
+# Install Ansible and dependencies
 apt-get install -y python3-pip
-pip3 install --user ansible
+pip3 install ansible
 
 # Register Microsoft key and feed to prep for .NET SDK
 ubuntu_src="https://packages.microsoft.com/config/ubuntu/18.04/packages-microsoft-prod.deb"
