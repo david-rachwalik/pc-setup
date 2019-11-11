@@ -12,13 +12,13 @@
   # https://docs.ansible.com/ansible/latest/modules/win_stat_module.html
   - name: Obtain information about app project directory
     win_stat:
-      path: "{{app_repo_dir}}"
+      path: "{{app_solution_dir}}"
     register: out_stat_app
 
   # https://docs.ansible.com/ansible/latest/modules/win_file_module.html
   - name: Purge directory
     win_file:
-      name: "{{app_repo_dir}}"
+      name: "{{app_solution_dir}}"
       state: absent
     when: out_stat_app.stat.exists
 ...

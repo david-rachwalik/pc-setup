@@ -1,12 +1,13 @@
 ---
 # app_name: CloudShell
-app_name: DMR-2019-11-10--10-15
+app_name: DMR-2019-11-10--14-10
 
 # app_location_dir: D:\Repos
 app_location_dir: D:\Repos_Exp
 app_project: "{{app_name}}.WebApp"
 app_use_database: true
-app_authentication: Individual
+app_authentication: None
+# app_authentication: Individual
 # app_authentication: MultiOrg
 
 app_projects_tracked:
@@ -14,10 +15,16 @@ app_projects_tracked:
 # - DMR-2019-11-09--15-42
 - SexBound.WebApp
 
-app_repo_dir: "{{app_location_dir}}\\{{app_name}}"
-app_project_dir: "{{app_repo_dir}}\\{{app_project}}"
+app_solution_dir: "{{app_location_dir}}\\{{app_name}}"
+app_project_dir: "{{app_solution_dir}}\\{{app_project}}"
 app_port: 43234
 app_domain: "https://localhost:{{app_port}}"
-app_sln: "{{app_repo_dir}}.sln"
-app_csproj: "{{app_project_dir}}.csproj"
+app_sln: "{{app_solution_dir}}\\{{app_name}}.sln"
+app_csproj: "{{app_project_dir}}\\{{app_project}}.csproj"
+app_readme: "{{app_project_dir}}\\README"
+app_license: "{{app_project_dir}}\\LICENSE"
+
+app_repo_dir: "{{app_solution_dir}}\\.git"
+app_gitignore: "{{app_solution_dir}}\\.gitignore"
+app_gitattributes: "{{app_solution_dir}}\\.gitattributes"
 ...
