@@ -37,12 +37,12 @@ explorer.exe .
 Open VSCode in Linux [using CLI](https://code.visualstudio.com/docs/editor/command-line#_core-cli-options)
 
 ``` bash
-code ~/pc-setup/
+code ~/pc-setup
 ```
 
 ## Initialization Alternative: Windows Only (No WSL+Ansible)
 
-> *Most actions are only run the first time except `upgrade all`*
+> *Most actions are only run the first time except `choco upgrade all`*
 
 1. Run PowerShell (as Administrator) to [install Chocolatey](https://chocolatey.org/install)
 
