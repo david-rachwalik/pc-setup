@@ -21,19 +21,19 @@
 
 ## Development & PC Health
 
-Review aliases to common actions
+Review aliases/functions to common actions
 
 ``` bash
 view ~/.bash_aliases
 ```
 
-Open File Explorer in Linux (only accepts . for path)
+Open File Explorer in Linux (*only . path accepted*)
 
 ``` bash
 explorer.exe .
 ```
 
-Open VSCode in Linux [using CLI](https://code.visualstudio.com/docs/editor/command-line#_core-cli-options)
+Open VSCode in Linux with [Core CLI](https://code.visualstudio.com/docs/editor/command-line#_core-cli-options)
 
 ``` bash
 code ~/pc-setup
