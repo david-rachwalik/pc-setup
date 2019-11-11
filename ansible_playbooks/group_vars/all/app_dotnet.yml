@@ -21,8 +21,8 @@ app_port: 43234
 app_domain: "https://localhost:{{app_port}}"
 app_sln: "{{app_solution_dir}}\\{{app_name}}.sln"
 app_csproj: "{{app_project_dir}}\\{{app_project}}.csproj"
-app_readme: "{{app_project_dir}}\\README"
-app_license: "{{app_project_dir}}\\LICENSE"
+app_readme: "{{app_solution_dir}}\\README.md"
+app_license: "{{app_solution_dir}}\\LICENSE"
 
 app_repo_dir: "{{app_solution_dir}}\\.git"
 app_gitignore: "{{app_solution_dir}}\\.gitignore"
