@@ -33,4 +33,4 @@ if ! test -f ${ubuntu_tmp}; then
 fi
 
 # Run remaining commands as user
-su -c "curl -s https://raw.githubusercontent.com/david-rachwalik/pc-setup/master/wsl_user_setup.sh | bash" ${run_user}
+su -c "curl -s https://raw.githubusercontent.com/david-rachwalik/pc-setup/master/wsl_su_init.sh | bash" ${run_user}
