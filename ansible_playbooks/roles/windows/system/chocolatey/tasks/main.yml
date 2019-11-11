@@ -1,5 +1,9 @@
 ---
 - block:
+  - name: Ensure Chocolatey itself is installed
+    win_chocolatey:
+      name: chocolatey
+
   - name: List Chocolatey packages installed
     win_shell: >-
       choco list
