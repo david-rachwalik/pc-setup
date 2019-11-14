@@ -72,5 +72,5 @@ if test -d ${wsl_project}; then
     find ${wsl_project} -type f -print0 | xargs -0 chmod 644
 
     cd ${wsl_project}/ansible_playbooks
-    ansible-playbook system_update.yml
+    ansible-playbook system_setup.yml
 fi

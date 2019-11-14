@@ -3,13 +3,13 @@
 # Able to pass parameters such as --tags or --skip-tags
 # Example: inline ternary operator (conditional expression); a=$([ "$b" == 5 ] && echo "$c" || echo "$d")
     # if [ -n "$1" ]; then
-    #     ansible-playbook "system_update.yml $*"
+    #     ansible-playbook "system_setup.yml $*"
     # else
-    #     ansible-playbook "system_update.yml"
+    #     ansible-playbook "system_setup.yml"
     # fi
 update () {
     cd "$HOME/pc-setup/ansible_playbooks"
-    play_run=$([ -n "$1" ] && echo "system_update.yml $*" || echo "system_update.yml")
+    play_run=$([ -n "$1" ] && echo "system_setup.yml $*" || echo "system_setup.yml")
     ansible-playbook $play_run
 }
 shutdown () {
@@ -46,12 +46,12 @@ azd () {
 }
 
 # update --tags "alias"
-# ansible-playbook system_update.yml --tags "alias"
+# ansible-playbook system_setup.yml --tags "alias"
 
-# alias update='( cd "$HOME/pc-setup/ansible_playbooks" && ansible-playbook system_update.yml )'
+# alias update='( cd "$HOME/pc-setup/ansible_playbooks" && ansible-playbook system_setup.yml )'
 # alias shutdown='( cd "$HOME/pc-setup/ansible_playbooks" && ansible-playbook system_clean.yml -e "shutdown=true" )'
 # alias clean='( cd "$HOME/pc-setup/ansible_playbooks" && ansible-playbook system_clean.yml )'
-# alias win_up='( cd "$HOME/pc-setup/ansible_playbooks" && ansible-playbook system_update.yml --tags "windows" )'
-# alias wsl_up='( cd "$HOME/pc-setup/ansible_playbooks" && ansible-playbook system_update.yml --tags "linux" )'
+# alias win_up='( cd "$HOME/pc-setup/ansible_playbooks" && ansible-playbook system_setup.yml --tags "windows" )'
+# alias wsl_up='( cd "$HOME/pc-setup/ansible_playbooks" && ansible-playbook system_setup.yml --tags "linux" )'
 # alias win_clean='( cd "$HOME/pc-setup/ansible_playbooks" && ansible-playbook system_clean.yml --tags "windows" )'
 # alias wsl_clean='( cd "$HOME/pc-setup/ansible_playbooks" && ansible-playbook system_clean.yml --tags "linux" )'
