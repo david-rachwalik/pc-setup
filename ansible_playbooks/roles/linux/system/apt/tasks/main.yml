@@ -1,7 +1,7 @@
 ---
 # https://docs.ansible.com/ansible/latest/modules/apt_module.html
 # https://stackoverflow.com/questions/41535838/how-to-run-apt-update-and-upgrade-via-ansible-shell
-# ansible-playbook system_update.yml --tags "apt"
+# ansible-playbook system_setup.yml --tags "apt"
 
 - block:
   - name: Update repositories cache

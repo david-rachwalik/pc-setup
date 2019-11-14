@@ -1,4 +1,6 @@
 ---
+# TODO: cover both install and update/upgrade
+
 - name: Ensure .NET Core has Entity Framework Core
   win_shell: "dotnet tool install -g dotnet-ef"
   register: out_efcore_install
