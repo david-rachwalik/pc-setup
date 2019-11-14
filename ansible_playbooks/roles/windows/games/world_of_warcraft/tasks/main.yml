@@ -1,0 +1,26 @@
+---
+# https://docs.ansible.com/ansible/latest/modules/include_role_module.html
+- include_role:
+    name: windows/games/world_of_warcraft
+    tasks_from: backup
+  loop: "{{world_of_warcraft_versions}}"
+  loop_control:
+    loop_var: version
+  tags: ["world_of_warcraft", "wow", "backup"]
+
+# - include_role:
+#     name: windows/games/world_of_warcraft
+#     tasks_from: cleanup
+#   loop: "{{world_of_warcraft_versions}}"
+#   loop_control:
+#     loop_var: version
+#   tags: ["world_of_warcraft", "wow", "cleanup"]
+
+# - include_role:
+#     name: windows/games/world_of_warcraft
+#     tasks_from: update
+#   loop: "{{world_of_warcraft_versions}}"
+#   loop_control:
+#     loop_var: version
+#   tags: ["world_of_warcraft", "wow", "update"]
+...
