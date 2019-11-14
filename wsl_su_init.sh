@@ -56,7 +56,8 @@ fi
 
 if test -d ${wsl_project}; then
     # Fetch the vault file if it exists
-    # TODO: test whether creating a file symlink with Ansible will retroactively win_ping in same playbook
+    # TODO: test whether creating a file symlink with Ansible will retroactively win_ping in the same playbook
+    # --- TODO: more importantly, change following to a 3-var-prompt for win connect info ---
     if test -f ${win_vault}; then
         cp -f ${win_vault} ${wsl_vault}
     fi
