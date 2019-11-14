@@ -1,0 +1,122 @@
+---
+- block:
+  # ---------------- Screenshots ----------------
+
+  - name: Ensure backup directory exists
+    win_file:
+      path: "{{world_of_warcraft_screenshot_bak}}"
+      state: directory
+
+  - name: Find World of Warcraft screenshots
+    win_find:
+      paths: "{{world_of_warcraft_screenshot_dir}}"
+    register: out_find_wow_screenshots
+    no_log: true
+
+  - set_fact:
+      world_of_warcraft_screenshots: "{{out_find_wow_screenshots | json_query('files[*].path')}}"
+  - set_fact:
+      world_of_warcraft_screenshots_to_backup: "{{(world_of_warcraft_screenshots == '') | ternary([], world_of_warcraft_screenshots | list)}}"
+
+  - name: Backup World of Warcraft screenshots
+    win_copy:
+      remote_src: true
+      src: "{{item}}"
+      dest: "{{world_of_warcraft_screenshot_bak}}\\{{item | win_basename}}"
+    loop: "{{world_of_warcraft_screenshots_to_backup}}"
+    when: world_of_warcraft_screenshots_to_backup | count > 0
+    register: out_copy_wow_screenshots
+
+  # ---------------- Settings ----------------
+
+  - name: Ensure backup directory exists
+    win_file:
+      path: "{{world_of_warcraft_setting_bak}}"
+      state: directory
+
+  - name: Find World of Warcraft settings
+    win_find:
+      paths: "{{world_of_warcraft_setting_dir}}"
+    register: out_find_wow_settings
+    no_log: true
+
+  - set_fact:
+      world_of_warcraft_settings: "{{out_find_wow_settings | json_query('files[*].path')}}"
+  - set_fact:
+      world_of_warcraft_settings_to_backup: "{{(world_of_warcraft_settings == '') | ternary([], world_of_warcraft_screenshots | list)}}"
+
+  - name: Backup World of Warcraft settings
+    win_copy:
+      remote_src: true
+      src: "{{item}}"
+      dest: "{{world_of_warcraft_setting_bak}}\\{{item | win_basename}}"
+    loop: "{{world_of_warcraft_settings_to_backup}}"
+    when: world_of_warcraft_settings_to_backup | count > 0
+    register: out_copy_wow_settings
+
+  # ---------------- Settings ----------------
+
+  - name: Ensure backup directory exists
+    win_file:
+      path: "{{world_of_warcraft_setting_bak}}"
+      state: directory
+
+  - name: Find World of Warcraft settings
+    win_find:
+      paths: "{{world_of_warcraft_setting_dir}}"
+    register: out_find_wow_settings
+    # no_log: true
+
+  - set_fact:
+      world_of_warcraft_settings: "{{out_find_wow_settings | json_query('files[*].path')}}"
+
+  - fail:
+
+
+  - name: Check for World of Warcraft screenshot directory
+    win_stat:
+      path: "{{version.value.screenshot_dir}}"
+    loop: "{{world_of_warcraft_versions}}"
+    loop_control:
+      loop_var: version
+    register: out_stat_wow_ss
+
+  - name: Backup World of Warcraft screenshots
+    win_copy:
+      remote_src: true
+      src: "{{item.version.value.screenshot_dir}}"
+      dest: "{{item.version.value.archive_dir}}"
+    loop: "{{out_stat_wow_ss.results}}"
+    when: item.stat.exists
+    register: out_copy_wow_ss
+
+
+  - name: Backup World of Warcraft settings
+    win_copy:
+      remote_src: true
+      src: "{{item.value.wtf_dir}}"
+      dest: "{{item.value.archive_dir}}"
+    loop: "{{world_of_warcraft_versions}}"
+    register: out_copy_wow_wtf
+
+
+  # ---------------- Addons ----------------
+
+  - name: Ensure backup directory exists
+    win_file:
+      path: "{{world_of_warcraft_addon_bak}}"
+      state: directory
+
+  - name: Backup World of Warcraft addons
+    win_copy:
+      remote_src: true
+      src: "{{item.value.addon_dir}}"
+      dest: "{{item.value.archive_dir}}"
+    loop: "{{world_of_warcraft_versions}}"
+    register: out_copy_wow_addon
+
+
+  # - name: Backup TradeSkillMaster settings
+
+  tags: ["world_of_warcraft", "wow", "backup"]
+...

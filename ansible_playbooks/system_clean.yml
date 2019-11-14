@@ -1,10 +1,6 @@
 ---
-# Purpose: Archive all important files, scrub temporary system files and bin, shutdown system
-
-# ----------------------------------------------------------------
-# FROM: wsl_sync.yml
-# ----------------------------------------------------------------
-- hosts: windows
+- name: Backup important files; clean and shutdown system
+  hosts: windows
   roles:
   - windows/games/world_of_warcraft
   # - windows/games/sims_iii    # [archive screenshots/settings/addons, run memory cleanup]

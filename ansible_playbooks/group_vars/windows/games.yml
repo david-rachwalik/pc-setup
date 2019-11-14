@@ -1,30 +1,16 @@
 ---
-world_of_warcraft_backups:
-  retail:
-    backup_dir: D:\OneDrive\_DMR\Videogames\Blizzard\World of Warcraft (modern)
-    screenshot_dir: E:\GameFiles\World of Warcraft\_retail_\Screenshots
-    wtf_dir: E:\GameFiles\World of Warcraft\_retail_\WTF
-    addon_dir: E:\GameFiles\World of Warcraft\_retail_\Interface\AddOns
-
-  classic:
-    backup_dir: D:\OneDrive\_DMR\Videogames\Blizzard\World of Warcraft (classic)
-    screenshot_dir: E:\GameFiles\World of Warcraft\_classic_\Screenshots
-    wtf_dir: E:\GameFiles\World of Warcraft\_classic_\WTF
-    addon_dir: E:\GameFiles\World of Warcraft\_classic_\Interface\AddOns
-    account: E:\GameFiles\World of Warcraft\_classic_\WTF\Account\RAVIN83
-    servers:
-    - Bloodsail Buccaneers
-    characters:
-    - Goof
-    - Maiti
-    - Ninfu
-    - Rhodair
-    - Skeptic
-    - Zayn
-    - Zyphire
+world_of_warcraft_versions: ["_classic_", "_retail_"]
+world_of_warcraft_dir: E:\GameFiles\World of Warcraft
+world_of_warcraft_bak: D:\OneDrive\Backups\Games\World of Warcraft
+world_of_warcraft_screenshot_dir: "{{world_of_warcraft_dir}}\\{{version}}\\Screenshots"
+world_of_warcraft_screenshot_bak: "{{world_of_warcraft_bak}}\\{{version}}\\Screenshots"
+world_of_warcraft_setting_dir: "{{world_of_warcraft_dir}}\\{{version}}\\WTF"
+world_of_warcraft_setting_bak: "{{world_of_warcraft_bak}}\\{{version}}\\WTF"
+world_of_warcraft_addon_dir: "{{world_of_warcraft_dir}}\\{{version}}\\Interface\\AddOns"
+world_of_warcraft_addon_bak: "{{world_of_warcraft_bak}}\\{{version}}\\Interface\\AddOns"
 
 
-final_fantasy_xiv_backups:
+final_fantasy_xiv:
   backup_dir: D:\OneDrive\_DMR\Videogames\Final Fantasy\Final Fantasy XIV
   screenshot_dir: C:\Users\david\Documents\My Games\FINAL FANTASY XIV - A Realm Reborn\screenshots
 ...
