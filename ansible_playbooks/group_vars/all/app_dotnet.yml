@@ -1,14 +1,35 @@
 ---
 # app_name: CloudShell
 # app_name: DMR-2019-11-10--23-30
-app_name: RazorPagesMovie
+# app_name: RazorPagesMovie
+app_name: ContosoUniversity
 
 app_projects_tracked:
 - DMR-VS
 # - DMR-2019-11-09--15-42
 - SexBound.WebApp
 
+app_database_tools:
+# https://docs.microsoft.com/en-us/aspnet/core/data/ef-rp
+- dotnet-ef                               # Install Entity Framework Core
+# https://docs.microsoft.com/en-us/aspnet/core/security/authentication/scaffold-identity
+- dotnet-aspnet-codegenerator             # Install Code Generator (Scaffold)
+
+# https://docs.microsoft.com/en-us/aspnet/core/data/ef-rp/intro#scaffold-student-pages
+# The Microsoft.VisualStudio.Web.CodeGeneration.Design package is required for scaffolding.
+# Although the app won't use SQL Server, the scaffolding tool needs the SQL Server package.
+app_database_packages:
+# Automatically includes Microsoft.EntityFrameworkCore as dependency
+- Microsoft.EntityFrameworkCore.Sqlite    # Install SQLite database provider
+- Microsoft.EntityFrameworkCore.SqlServer # Install SQL Server database provider
+- Microsoft.EntityFrameworkCore.Design    # Install EF Core design package
+- Microsoft.EntityFrameworkCore.Tools
+- Microsoft.VisualStudio.Web.CodeGeneration.Design
+- Microsoft.Extensions.Logging.Debug
+
+app_use_extras: true
 app_use_database: true
+app_database_context: SchoolContext
 app_authentication: None
 # app_authentication: Individual
 # app_authentication: MultiOrg

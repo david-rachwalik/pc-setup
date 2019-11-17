@@ -65,19 +65,21 @@
 #   when: app_authentication is not defined or app_authentication == ''
 #   tags: ["dotnet", "webapp"]
 
+- block:
+  # https://docs.ansible.com/ansible/latest/modules/win_copy_module.html
+  - name: Ensure solution has readme
+    win_copy:
+      src: "{{app_readme | win_basename}}"
+      dest: "{{app_readme}}"
+    register: out_copy_readme
+    tags: ["readme"]
 
-# https://docs.ansible.com/ansible/latest/modules/win_copy_module.html
-- name: Ensure solution has readme
-  win_copy:
-    src: "{{app_readme | win_basename}}"
-    dest: "{{app_readme}}"
-  register: out_copy_readme
-  tags: ["readme"]
+  - name: Ensure solution has license
+    win_copy:
+      src: "{{app_license | win_basename}}"
+      dest: "{{app_license}}"
+    register: out_copy_license
+    tags: ["license"]
 
-- name: Ensure solution has license
-  win_copy:
-    src: "{{app_license | win_basename}}"
-    dest: "{{app_license}}"
-  register: out_copy_license
-  tags: ["license"]
+  when: app_use_extras
 ...

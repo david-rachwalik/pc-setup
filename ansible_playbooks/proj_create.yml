@@ -12,4 +12,5 @@
   - windows/apps/dotnet/new
   - windows/apps/git/init
   - windows/apps/dotnet/add
+  - windows/apps/dotnet/ef
 ...

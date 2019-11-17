@@ -1,27 +1,17 @@
 ---
 # https://docs.microsoft.com/en-us/dotnet/core/tools/dotnet-add
 # https://docs.ansible.com/ansible/latest/modules/win_shell_module.html
-# - name: Install Entity Framework Core
-#   win_shell: "dotnet add package Microsoft.EntityFrameworkCore"
-#   args:
-#     chdir: "{{app_project_dir}}"
-#   when:
-#   - app_use_database
-#   # - out_webapp_create is changed
-#   tags: ["dotnet", "package", "database", "db", "sqlite"]
-
-# Installs Microsoft.EntityFrameworkCore as dependency
+# https://docs.microsoft.com/en-us/ef/core/miscellaneous/cli/dotnet
 - name: Install SQLite database provider
-  win_shell: "dotnet add package Microsoft.EntityFrameworkCore.Sqlite"
+  win_shell: "dotnet add package {{item}}"
   args:
     chdir: "{{app_project_dir}}"
+  loop: "{{app_database_packages}}"
   when:
   - app_use_database
   # - out_webapp_create is changed
-  tags: ["dotnet", "package", "database", "db", "sqlite"]
+  tags: ["dotnet", "package", "database", "db"]
 
-# - name: Add EFCore design package
-#   win_shell: "dotnet add package Microsoft.EntityFrameworkCore.Design"
 
 # - name: Create initial database migration
 #   win_shell: "dotnet ef migrations add {{migration_message|default('Initial')}}"

@@ -1,16 +1,28 @@
 ---
-# TODO: cover both install and update/upgrade
+# ansible home -m include_role -a windows/apps/dotnet/setup
+# https://docs.microsoft.com/en-us/aspnet/core/data/ef-rp
 
-- name: Ensure .NET Core has Entity Framework Core
-  win_shell: "dotnet tool install -g dotnet-ef"
-  register: out_efcore_install
-  failed_when: not 'is already installed' in out_efcore_install.stderr
-  changed_when: not 'is already installed' in out_efcore_install.stderr
+- name: List .NET Core tools installed
+  win_shell: "dotnet tool list --global"
+  loop: "{{app_database_tools}}"
+  when: app_use_database
+  register: out_tool_install
+  failed_when: not 'is already installed' in out_tool_install.stderr
+  changed_when: not 'is already installed' in out_tool_install.stderr
 
-# https://docs.microsoft.com/en-us/aspnet/core/security/authentication/scaffold-identity
-- name: Ensure .NET Core has Code Generator (Scaffold)
-  win_shell: "dotnet tool install -g dotnet-aspnet-codegenerator"
-  register: out_codegenerator_install
-  failed_when: not 'is already installed' in out_efcore_install.stderr
-  changed_when: not 'is already installed' in out_efcore_install.stderr
+# - name: Install .NET Core tool
+#   win_shell: "dotnet tool install --global {{item}}"
+#   loop: "{{app_database_tools}}"
+#   when: app_use_database
+#   register: out_tool_install
+#   failed_when: not 'is already installed' in out_tool_install.stderr
+#   changed_when: not 'is already installed' in out_tool_install.stderr
+
+# - name: Ensure .NET Core tools are updated
+#   win_shell: "dotnet tool update --global {{item}}"
+#   loop: "{{app_database_tools}}"
+#   when: app_use_database
+#   register: out_tool_install
+#   failed_when: not 'is already installed' in out_tool_install.stderr
+#   changed_when: not 'is already installed' in out_tool_install.stderr
 ...
