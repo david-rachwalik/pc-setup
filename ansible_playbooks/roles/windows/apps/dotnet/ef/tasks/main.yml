@@ -1,0 +1,11 @@
+---
+# https://docs.microsoft.com/en-us/aspnet/core/data/ef-rp
+# https://docs.ansible.com/ansible/latest/modules/win_shell_module.html
+- name: Update database
+  win_shell: dotnet ef database update
+  args:
+    chdir: "{{app_project_dir}}"
+  when: app_use_database
+  register: out_database_update
+  tags: ["dotnet", "ef", "database", "db"]
+...
