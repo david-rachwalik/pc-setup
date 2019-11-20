@@ -12,5 +12,6 @@
   - windows/apps/dotnet/new
   - windows/apps/git/init
   - windows/apps/dotnet/add
-  - windows/apps/dotnet/ef
+  # - windows/apps/dotnet/ef
+  # - { role: windows/apps/dotnet/build, app_open_vs: true }
 ...
