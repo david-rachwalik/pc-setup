@@ -5,12 +5,12 @@
   win_shell: >-
     dotnet new sln
     --output {{app_solution_dir}}
-  changed_when: false
   args:
     creates: "{{app_solution_dir}}"
   register: out_webapp_create
   tags: ["dotnet", "new", "solution"]
 
+# Automatically performs restore
 - name: Create a .NET Core web app
   win_shell: >-
     dotnet new webapp
@@ -19,7 +19,6 @@
     --org-read-access
     --auth {{app_authentication | default('None')}}
   # --client-id {{hostvars['localhost']['az_ad_app_project_id']}}
-  changed_when: false
   args:
     creates: "{{app_project_dir}}"
   register: out_webapp_create

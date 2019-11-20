@@ -1,8 +1,11 @@
 ---
 # app_name: CloudShell
 # app_name: DMR-2019-11-10--23-30
-# app_name: RazorPagesMovie
-app_name: ContosoUniversity
+# https://docs.microsoft.com/en-us/aspnet/core/tutorials/razor-pages
+app_name: RazorPagesMovie
+# https://docs.microsoft.com/en-us/aspnet/core/razor-pages/index
+# app_name: RazorPagesContacts
+# app_name: ContosoUniversity
 
 app_projects_tracked:
 - DMR-VS
@@ -27,8 +30,12 @@ app_database_packages:
 - Microsoft.VisualStudio.Web.CodeGeneration.Design
 - Microsoft.Extensions.Logging.Debug
 
-app_use_extras: true
+app_development_packages:
+- Microsoft.CodeAnalysis.FxCopAnalyzers
+
+app_use_extras: false
 app_use_database: true
+app_open_vs: false
 app_database_context: SchoolContext
 app_authentication: None
 # app_authentication: Individual

@@ -1,0 +1,24 @@
+---
+# TODO: need to find a command that works; just does nothing
+
+# https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.management/invoke-item
+- name: Open the web app in Visual Studio
+  win_shell: "Invoke-Item -Path {{app_sln}}"
+  when: app_open_vs
+  tags: ["visual_studio", "vs"]
+
+- name: Build the web app
+  win_shell: "dotnet build {{app_project_dir}}"
+  tags: ["dotnet", "build"]
+
+
+# --------------------------------------------------------
+# --- Don't run app from shell; stick to Visual Studio ---
+# --------------------------------------------------------
+# https://docs.microsoft.com/en-us/dotnet/core/tools/dotnet-run
+# - name: Run the web application
+#   win_shell: >-
+#     dotnet run
+#     --project {{app_location_dir}}
+#     --launch-profile Development
+...

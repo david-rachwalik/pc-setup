@@ -1,4 +1,6 @@
 ---
+# TODO: requires DbContext to be templated before
+
 # https://docs.microsoft.com/en-us/aspnet/core/data/ef-rp
 # https://docs.ansible.com/ansible/latest/modules/win_shell_module.html
 - name: Update database
@@ -7,5 +9,6 @@
     chdir: "{{app_project_dir}}"
   when: app_use_database
   register: out_database_update
+  ignore_errors: true
   tags: ["dotnet", "ef", "database", "db"]
 ...
