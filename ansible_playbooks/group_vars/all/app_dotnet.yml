@@ -1,6 +1,4 @@
 ---
-# app_name: CloudShell
-# app_name: DMR-2019-11-10--23-30
 # https://docs.microsoft.com/en-us/aspnet/core/tutorials/razor-pages
 app_name: RazorPagesMovie
 # https://docs.microsoft.com/en-us/aspnet/core/razor-pages/index
@@ -9,7 +7,6 @@ app_name: RazorPagesMovie
 
 app_projects_tracked:
 - DMR-VS
-# - DMR-2019-11-09--15-42
 - SexBound.WebApp
 
 app_database_tools:
@@ -17,6 +14,11 @@ app_database_tools:
 - dotnet-ef                               # Install Entity Framework Core
 # https://docs.microsoft.com/en-us/aspnet/core/security/authentication/scaffold-identity
 - dotnet-aspnet-codegenerator             # Install Code Generator (Scaffold)
+
+# https://www.nuget.org/packages/*
+app_development_packages:
+- Microsoft.VisualStudio.Web.BrowserLink
+- Microsoft.CodeAnalysis.FxCopAnalyzers
 
 # https://docs.microsoft.com/en-us/aspnet/core/data/ef-rp/intro#scaffold-student-pages
 # The Microsoft.VisualStudio.Web.CodeGeneration.Design package is required for scaffolding.
@@ -30,16 +32,12 @@ app_database_packages:
 - Microsoft.VisualStudio.Web.CodeGeneration.Design
 - Microsoft.Extensions.Logging.Debug
 
-app_development_packages:
-- Microsoft.CodeAnalysis.FxCopAnalyzers
-
 app_use_extras: false
 app_use_database: true
 app_open_vs: false
 app_database_context: SchoolContext
+# app_authentication choices: [None, Individual, MultiOrg]
 app_authentication: None
-# app_authentication: Individual
-# app_authentication: MultiOrg
 
 # app_location_dir: D:\Repos
 app_location_dir: D:\Repos_Exp
