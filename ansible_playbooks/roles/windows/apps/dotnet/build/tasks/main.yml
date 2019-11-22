@@ -1,15 +1,15 @@
 ---
 # TODO: need to find a command that works; just does nothing
 
+- name: Build the web app
+  win_shell: "dotnet build {{app_project_dir}}"
+  tags: ["dotnet", "build"]
+
 # https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.management/invoke-item
 - name: Open the web app in Visual Studio
   win_shell: "Invoke-Item -Path {{app_sln}}"
   when: app_open_vs
   tags: ["visual_studio", "vs"]
-
-- name: Build the web app
-  win_shell: "dotnet build {{app_project_dir}}"
-  tags: ["dotnet", "build"]
 
 
 # --------------------------------------------------------
