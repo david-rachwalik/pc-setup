@@ -9,6 +9,7 @@ app_projects_tracked:
 - DMR-VS
 - SexBound.WebApp
 
+
 app_database_tools:
 # https://docs.microsoft.com/en-us/aspnet/core/data/ef-rp
 - dotnet-ef                               # Install Entity Framework Core
@@ -31,6 +32,10 @@ app_database_packages:
 - Microsoft.EntityFrameworkCore.Tools
 - Microsoft.VisualStudio.Web.CodeGeneration.Design
 - Microsoft.Extensions.Logging.Debug
+- NSwag.AspNetCore                        # Swagger / OpenAPI
+
+dotnet_packages: "{{app_development_packages | union(app_database_packages)}}"
+
 
 app_use_extras: false
 app_use_database: true
