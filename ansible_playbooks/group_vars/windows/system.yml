@@ -32,9 +32,10 @@ chocolatey_packages:
   - dotnetcore-sdk
   - azure-cli
   # - sass
-  - typescript
+  # - typescript
   - nodejs
   - vscode
+  - postman
   - sqlitebrowser
   - microsoftazurestorageexplorer
   # --- Media ---
