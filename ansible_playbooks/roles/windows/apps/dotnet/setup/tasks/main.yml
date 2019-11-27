@@ -1,5 +1,4 @@
 ---
-# ansible home -m include_role -a windows/apps/dotnet/setup
 # https://docs.microsoft.com/en-us/aspnet/core/data/ef-rp
 
 - name: List .NET Core tools installed
@@ -7,8 +6,8 @@
   loop: "{{app_database_tools}}"
   when: app_use_database
   register: out_tool_install
-  failed_when: not 'is already installed' in out_tool_install.stderr
-  changed_when: not 'is already installed' in out_tool_install.stderr
+  changed_when: false
+  tags: ["dotnet", "tool"]
 
 # - name: Install .NET Core tool
 #   win_shell: "dotnet tool install --global {{item}}"
