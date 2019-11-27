@@ -1,9 +1,24 @@
 ---
-- name: List all package references of the project
+- name: List all package references for project
   win_shell: "dotnet list {{app_project_dir}} package"
+  register: out_dotnet_installed
   changed_when: false
+  tags: [dotnet, package, list]
 
-# - name: List all project-to-project references of the project
+
+- set_fact:
+    # dotnet_packages_installed: "{{(out_dotnet_installed.stdout_lines | count > 3) | ternary(out_dotnet_installed.stdout_lines[3:], [])}}"
+    dotnet_packages_installed: "{{out_dotnet_installed.stdout_lines[3:] | list | regex_replace('^   > (.*) .*$', '\\1')}}"
+  tags: [dotnet, package, list]
+- set_fact:
+    dotnet_packages_to_install: "{{dotnet_packages | difference(out_dotnet_installed.stdout_lines)}}"
+  tags: [dotnet, package, list]
+# - set_fact:
+#     dotnet_packages_to_uninstall: "{{dotnet_packages | intersect(out_dotnet_installed.stdout_lines)}}"
+#   tags: [dotnet, package, list]
+
+
+# - name: List all project-to-project references for project
 #   win_shell: "dotnet list {{app_project_dir}} reference"
 #   changed_when: false
 
@@ -11,12 +26,10 @@
 # https://docs.microsoft.com/en-us/dotnet/core/tools/dotnet-add
 # https://docs.ansible.com/ansible/latest/modules/win_shell_module.html
 # https://docs.microsoft.com/en-us/ef/core/miscellaneous/cli/dotnet
-- name: Install SQLite database provider
+- name: Install .NET Core package to project
   win_shell: "dotnet add package {{item}}"
   args:
     chdir: "{{app_project_dir}}"
-  loop: "{{app_development_packages | union(app_database_packages)}}"
-  # when: app_use_database
-  when: false
-  tags: ["dotnet", "package", "database", "db"]
+  loop: "{{dotnet_packages}}"
+  tags: [dotnet, package]
 ...
