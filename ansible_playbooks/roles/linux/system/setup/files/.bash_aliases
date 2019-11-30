@@ -7,7 +7,12 @@
     # else
     #     ansible-playbook "system_setup.yml"
     # fi
-update () {
+clean () {
+    cd "$HOME/pc-setup/ansible_playbooks"
+    play_run=$([ -n "$1" ] && echo "system_clean.yml $*" || echo "system_clean.yml")
+    ansible-playbook $play_run
+}
+setup () {
     cd "$HOME/pc-setup/ansible_playbooks"
     play_run=$([ -n "$1" ] && echo "system_setup.yml $*" || echo "system_setup.yml")
     ansible-playbook $play_run
@@ -15,11 +20,6 @@ update () {
 shutdown () {
     cd "$HOME/pc-setup/ansible_playbooks"
     play_run=$([ -n "$1" ] && echo "system_clean.yml -e shutdown=true $*" || echo "system_clean.yml -e shutdown=true")
-    ansible-playbook $play_run
-}
-clean () {
-    cd "$HOME/pc-setup/ansible_playbooks"
-    play_run=$([ -n "$1" ] && echo "system_clean.yml $*" || echo "system_clean.yml")
     ansible-playbook $play_run
 }
 
