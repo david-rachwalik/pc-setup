@@ -5,14 +5,14 @@
   roles:
   - linux/system/apt
   - linux/system/pip
-  tags: ["linux"]
+  tags: [linux]
 
 - name: Configure Linux environment
   hosts: linux
   roles:
   - linux/system/setup
   # template new Chocolatey.ps1 to start using as README example instead of group_vars
-  tags: ["linux"]
+  tags: [linux]
 
 
 - name: Provision Windows system
@@ -27,7 +27,7 @@
   - windows/apps/vscode/setup
   - windows/system/setup
   - windows/apps/ccleaner/clean
-  tags: ["windows"]
+  tags: [windows]
 
 # - Connect to Windows and gather facts about the environment
 # - Backup Windows application settings & data
