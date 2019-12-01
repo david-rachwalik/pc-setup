@@ -2,7 +2,10 @@
 - name: Backup important files; clean and shutdown system
   hosts: windows
   roles:
-  - windows/games/world_of_warcraft
+  - windows/games/screenshots
+
+  # - windows/games/world_of_warcraft
+  
   # - windows/games/sims_iii    # [archive screenshots/settings/addons, run memory cleanup]
   # - windows/games/diablo_iii
   # - windows/games/skyrim_se

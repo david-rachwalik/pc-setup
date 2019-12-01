@@ -1,16 +1,31 @@
 ---
-world_of_warcraft_versions: ["_classic_", "_retail_"]
-world_of_warcraft_dir: E:\GameFiles\World of Warcraft
-world_of_warcraft_bak: D:\OneDrive\Backups\Games\World of Warcraft
-world_of_warcraft_screenshot_dir: "{{world_of_warcraft_dir}}\\{{version}}\\Screenshots"
-world_of_warcraft_screenshot_bak: "{{world_of_warcraft_bak}}\\{{version}}\\Screenshots"
-world_of_warcraft_setting_dir: "{{world_of_warcraft_dir}}\\{{version}}\\WTF"
-world_of_warcraft_setting_bak: "{{world_of_warcraft_bak}}\\{{version}}\\WTF"
-world_of_warcraft_addon_dir: "{{world_of_warcraft_dir}}\\{{version}}\\Interface\\AddOns"
-world_of_warcraft_addon_bak: "{{world_of_warcraft_bak}}\\{{version}}\\Interface\\AddOns"
+games: "{{game_root_dir.keys() | list}}"
+
+game_root_dir:
+  final_fantasy_xiv: C:\Users\david\Documents\My Games
+  world_of_warcraft: E:\GameFiles
+
+game_root_bak: D:\OneDrive\Backups\Games
+
+game_version:
+  world_of_warcraft: ["_classic_", "_retail_"]
 
 
-final_fantasy_xiv:
-  backup_dir: D:\OneDrive\_DMR\Videogames\Final Fantasy\Final Fantasy XIV
-  screenshot_dir: C:\Users\david\Documents\My Games\FINAL FANTASY XIV - A Realm Reborn\screenshots
+game_suffix:
+  final_fantasy_xiv: FINAL FANTASY XIV - A Realm Reborn
+  world_of_warcraft_classic: World of Warcraft\_classic_
+  world_of_warcraft_retail: World of Warcraft\_retail_
+
+game_screenshot_suffix:
+  final_fantasy_xiv: "{{game_suffix.final_fantasy_xiv}}\\screenshots"
+  world_of_warcraft_classic: "{{game_suffix.world_of_warcraft_classic}}\\Screenshots"
+  world_of_warcraft_retail: "{{game_suffix.world_of_warcraft_retail}}\\Screenshots"
+
+game_setting_suffix:
+  world_of_warcraft_classic: "{{game_suffix.world_of_warcraft_classic}}\\WTF"
+  world_of_warcraft_retail: "{{game_suffix.world_of_warcraft_retail}}\\WTF"
+
+game_addon_suffix:
+  world_of_warcraft_classic: "{{game_suffix.world_of_warcraft_classic}}\\Interface\\AddOns"
+  world_of_warcraft_retail: "{{game_suffix.world_of_warcraft_retail}}\\Interface\\AddOns"
 ...

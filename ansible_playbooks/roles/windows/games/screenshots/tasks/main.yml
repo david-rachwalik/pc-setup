@@ -1,0 +1,31 @@
+---
+- name: Ensure backup directory exists
+  win_file:
+    path: "{{game_root_bak}}\\{{item.value}}"
+    state: directory
+  loop: "{{game_screenshot_suffix | dict2items}}"
+  register: out_copy_game_screenshots
+
+
+- name: Find game screenshots
+  win_find:
+    # paths: "{{game_screenshot_dir.keys() | list}}"
+    paths: "{{game_root_dir}}\\{{item.value}}"
+  loop: "{{game_screenshot_suffix | dict2items}}"
+  register: out_find_game_screenshots
+  # no_log: true
+
+- set_fact:
+    game_screenshots: "{{out_find_game_screenshots | json_query('results[*].files[*].path')}}"
+- set_fact:
+    game_screenshots_to_backup: "{{(game_screenshots != '') | ternary(game_screenshots | list, [])}}"
+
+# - name: Backup game screenshots
+#   win_copy:
+#     remote_src: true
+#     src: "{{item}}"
+#     dest: "{{game_screenshot_bak.keys() | list}}\\{{item | win_basename}}"
+#   loop: "{{game_screenshots_to_backup}}"
+#   when: game_screenshots_to_backup | count > 0
+#   register: out_copy_game_screenshots
+...
