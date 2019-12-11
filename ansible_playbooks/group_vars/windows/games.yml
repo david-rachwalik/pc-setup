@@ -3,7 +3,8 @@ games: "{{game_root_dir.keys() | list}}"
 
 game_root_dir:
   final_fantasy_xiv: C:\Users\david\Documents\My Games
-  world_of_warcraft: E:\GameFiles
+  world_of_warcraft_classic: E:\GameFiles
+  world_of_warcraft_retail: E:\GameFiles
 
 game_root_bak: D:\OneDrive\Backups\Games
 
