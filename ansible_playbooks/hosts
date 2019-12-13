@@ -4,4 +4,6 @@ localhost
 localhost
 
 [windows]
-home
+# Find with 'hostname' command
+DESKTOP-U8ATCTC
+; LAPTOP-EHHA0PI7
