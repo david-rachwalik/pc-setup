@@ -4,11 +4,13 @@
 # https://docs.ansible.com/ansible/latest/user_guide/intro_inventory.html
 # -------- Host Connection Settings --------
 ansible_connection: winrm
+# ansible_connection: ssh
+# ansible_shell_type: powershell
 # -------- General Connection Settings --------
 ansible_user: "{{vault_ansible_user}}"
 ansible_password: "{{vault_ansible_password}}"
-# Find host IP address command: ifconfig
-ansible_host: "{{vault_ansible_host}}"
+# Find host IP address with 'ifconfig' command
+# ansible_host: "{{vault_ansible_host}}"
 ansible_port: 5986
 # -------- WinRM Connection Settings --------
 ansible_winrm_transport: basic
