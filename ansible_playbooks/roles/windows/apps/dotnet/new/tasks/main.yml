@@ -2,16 +2,14 @@
 # https://docs.microsoft.com/en-us/dotnet/core/tools/dotnet-new
 # https://docs.ansible.com/ansible/latest/modules/win_shell_module.html
 - name: Create .NET Core solution
-  win_shell: >-
-    dotnet new sln
-    --output {{app_solution_dir}}
+  win_shell: "dotnet new sln --output {{app_solution_dir}}"
   args:
     creates: "{{app_solution_dir}}"
   register: out_webapp_create
   tags: ["dotnet", "new", "solution"]
 
-# Automatically performs restore
-- name: Create a .NET Core web app
+# 'dotnet new' automatically performs restore
+- name: Create .NET Core web app
   win_shell: >-
     dotnet new webapp
     --output {{app_project_dir}}
@@ -29,40 +27,11 @@
 
 # https://docs.microsoft.com/en-us/dotnet/core/tools/dotnet-sln
 - name: Add project to the solution
-  win_shell: >-
-    dotnet sln {{app_sln}} add {{app_csproj}}
-  # when:
-  # - out_webapp_create is changed
+  win_shell: "dotnet sln {{app_sln}} add {{app_csproj}}"
   register: out_sln_add
   changed_when: not 'already contains project' in out_sln_add.stdout
   tags: ["dotnet", "sln", "solution"]
 
-
-# - name: Create a Razor Pages web app
-#   win_shell: >-
-#     dotnet new webapp
-#     --output {{app_project_dir}}
-#     --name {{app_project}}
-#     --auth {{app_authentication | default('None')}}
-#   args:
-#     creates: "{{app_project_dir}}"
-#   register: out_webapp_create
-#   when:
-#   - app_authentication == 'Individual'
-#   tags: ["dotnet", "webapp"]
-
-
-# - name: Create a Razor Pages web app
-#   win_shell: >-
-#     dotnet new webapp
-#     --output {{app_project_dir}}
-#     --name {{app_project}}
-#     --domain {{app_domain}}
-#   args:
-#     creates: "{{app_project_dir}}"
-#   register: out_webapp_create
-#   when: app_authentication is not defined or app_authentication == ''
-#   tags: ["dotnet", "webapp"]
 
 - block:
   # https://docs.ansible.com/ansible/latest/modules/win_copy_module.html
