@@ -4,7 +4,8 @@
 # https://docs.microsoft.com/en-us/aspnet/core/razor-pages/index
 # app_name: RazorPagesContacts
 # app_name: ContosoUniversity
-app_name: DMR
+# app_name: DMR
+app_name: Tutorials_WebApps_RazorPages
 
 app_projects_tracked:
 - DMR-VS
