@@ -45,6 +45,10 @@ azd () {
     ansible-playbook $play_run
 }
 
+test_args () {
+    echo "$?"
+}
+
 # update --tags "alias"
 # ansible-playbook system_setup.yml --tags "alias"
 
