@@ -1,5 +1,8 @@
 ---
 apt_packages:
+- python3
+- python3-pip
+- python3-winrm
 - git
 # - libffi-dev
 # - libssl-dev
@@ -23,8 +26,9 @@ apt_packages:
 pip_packages:
 # --- Ansible ---
 - ansible
-- pywinrm
 - jmespath        # for 'json_query' filter
+- pytz
+# - pywinrm
 # - packaging       # for Azure (maybe)
 # - msrestazure     # for Azure (maybe)
 # - azure           # for Azure (maybe)
