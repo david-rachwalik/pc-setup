@@ -1,61 +1,88 @@
 ---
+# https://stackoverflow.com/questions/3790454/how-do-i-break-a-string-over-multiple-lines
+
+# --- Microsoft Visual Studio 2019 ---
+# https://chocolatey.org/packages/visualstudio2019community
+# https://docs.microsoft.com/en-us/visualstudio/install/use-command-line-parameters-to-install-visual-studio
+# https://docs.microsoft.com/en-us/visualstudio/install/workload-component-id-vs-community
+# TODO: https://marketplace.visualstudio.com/items?itemName=MadsKristensen.OpenCommandLine
+# --- Microsoft Office 365 ---
+# https://chocolatey.org/packages/microsoft-office-deployment
+
 powershell_uninstall_appx_packages:
 - CanonicalGroupLimited.Ubuntu18.04onWindows
 
 
 # https://chocolatey.org/packages/*
 chocolatey_packages:
-  uninstall:
-  - python2
-  - mitkerberos
-  - docker-desktop
-  - unity
-  # - obs-studio
-  - gimp
-  - vlc
-  - passkey
-  # - visualstudio2017community
-
   install:
   # --- Productivity ---
-  - ccleaner
-  - 7zip
-  - nordvpn
-  - GoogleChrome
-  - qbittorrent
-  - speccy
-  # - recuva
-  # - defraggler
+  - name: ccleaner
+  - name: 7zip
+  - name: nordvpn
+  - name: GoogleChrome
+  - name: microsoft-office-deployment
+    pseudo_name: Office365HomePremium
+    package_params: >-
+      /64bit
+      /Product O365HomePremRetail
+      /Exclude Publisher,Lync,Groove
+  - name: qbittorrent
+  - name: speccy
+  # - name: recuva
+  # - name: defraggler
+
   # --- Development ---
-  - git
-  - python3
-  - dotnetcore-sdk
-  - azure-cli
-  # - sass
-  # - typescript
-  - nodejs
-  - vscode
-  - postman
-  - sqlitebrowser
-  - microsoftazurestorageexplorer
+  - name: visualstudio2019community
+    package_params: >-
+      --locale en-US
+      --add Microsoft.VisualStudio.Workload.NetWeb;includeRecommended
+      --add Microsoft.VisualStudio.Workload.Azure;includeRecommended
+      --quiet
+  - name: git
+  - name: python3
+  - name: dotnetcore-sdk
+  - name: azure-cli
+  - name: dart-sdk # sass dependency
+  - name: sass
+  # - name: typescript
+  - name: nodejs
+  - name: vscode
+  - name: postman
+  - name: sqlitebrowser
+  - name: microsoftazurestorageexplorer
+  
   # --- Media ---
-  - geforce-experience
-  - adobereader
-  - AdobeAIR
-  - adobeshockwaveplayer
-  - spotify
-  - paint.net
+  - name: geforce-experience
+  - name: adobereader
+  - name: AdobeAIR
+  - name: adobeshockwaveplayer
+  - name: spotify
+  - name: paint.net
+
   # --- Video Editing ---
-  - MakeMKV
-  - handbrake
-  - k-litecodecpackmega
-  - 4k-video-downloader
-  - streamlabs-obs
+  - name: MakeMKV
+  - name: handbrake
+  - name: k-litecodecpackmega
+  - name: 4k-video-downloader
+  - name: streamlabs-obs
+
   # --- Videogames ---
-  - autohotkey
-  - discord
-  - steam
-  - twitch
+  - name: autohotkey
+  - name: discord
+  - name: steam
+  - name: twitch
+
+  uninstall:
+  # - name: python2
+  - name: mitkerberos
+  - name: docker-desktop
+  # - name: unity
+  # - name: obs-studio
+  - name: gimp
+  - name: vlc
+  - name: passkey
+  # - name: visualstudio2017community
 
 
 vscode_extensions:
