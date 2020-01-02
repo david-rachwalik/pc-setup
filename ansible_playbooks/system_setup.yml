@@ -18,8 +18,6 @@
 - name: Provision Windows system
   hosts: windows
   become: true
-  become_user: david
-  become_method: runas
   roles:
   - windows/system/chocolatey
   # --- TODO: Install any other software, such as scanner
@@ -29,6 +27,8 @@
   - windows/apps/ccleaner/clean
   tags: [windows]
 
+
+# TODO:
 # - Connect to Windows and gather facts about the environment
 # - Backup Windows application settings & data
 #   - backup game saves, screenshots, addons
