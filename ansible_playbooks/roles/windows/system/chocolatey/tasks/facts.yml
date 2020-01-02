@@ -1,0 +1,29 @@
+---
+# List Chocolatey packages installed: choco list --local-only --id-only
+# https://chocolatey.org/docs/chocolatey-configuration
+# https://docs.ansible.com/ansible/latest/modules/win_chocolatey_facts_module.html
+
+- block:
+  - name: Gather facts from chocolatey
+    win_chocolatey_facts:
+    register: out_chocolatey_facts
+    no_log: true
+
+  # - name: Displays the Configuration
+  #   debug:
+  #     var: out_chocolatey_facts.ansible_facts.ansible_chocolatey.config
+
+  # - name: Displays the Feature
+  #   debug:
+  #     var: out_chocolatey_facts.ansible_facts.ansible_chocolatey.feature
+
+  # - name: Displays the Sources
+  #   debug:
+  #     var: out_chocolatey_facts.ansible_facts.ansible_chocolatey.sources
+
+  # - name: Displays the Packages
+  #   debug:
+  #     var: out_chocolatey_facts.ansible_facts.ansible_chocolatey.packages
+
+  tags: [chocolatey, choco]
+...
