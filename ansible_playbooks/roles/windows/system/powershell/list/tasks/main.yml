@@ -1,8 +1,0 @@
----
-- name: Get list of appx packages
-  # Get-AppxPackage -AllUsers | Select Name, PackageFullName
-  # Get-AppxPackage –User {{User}} | Select Name, PackageFullName
-  # Get-AppxPackage –User {{DomainName}}\{{User}} | Select Name, PackageFullName
-  command: "Get-AppxPackage –AllUsers"
-  register: out_appx_packages
-...
