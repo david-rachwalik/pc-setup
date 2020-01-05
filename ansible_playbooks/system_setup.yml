@@ -11,21 +11,27 @@
   hosts: linux
   roles:
   - linux/system/setup
-  # template new Chocolatey.ps1 to start using as README example instead of group_vars
+  - python/user_modules
+  # template Chocolatey .ps1 file and swap for README example instead of group_vars
   tags: [linux]
 
 
-- name: Provision Windows system
+- name: Provision & configure Windows
   hosts: windows
   become: true
   roles:
   - windows/system/chocolatey
-  # --- TODO: Install any other software, such as scanner
+  - windows/system/pip
+  # --- Configuration Steps ---
+  - windows/system/setup
+  - python/user_modules
   - windows/apps/dotnet/setup
   - windows/apps/vscode/setup
-  - windows/system/setup
-  - windows/apps/ccleaner/clean
+  # TODO: Install scanner software
   tags: [windows]
+
+
+# TODO: call system_clean.yml playbook (only clean, not shutdown)
 
 
 # TODO:
