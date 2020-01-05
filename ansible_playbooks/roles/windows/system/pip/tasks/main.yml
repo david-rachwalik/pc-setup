@@ -3,11 +3,19 @@
 # ansible localhost -m pip -a "name=pip state=latest"
 # ansible windows -m include_role -a "name=windows/system/pip"
 
-- name: Update pip package
-  pip:
-    name: "{{item}}"
-    state: latest
+# https://docs.ansible.com/ansible/latest/modules/win_shell_module.html
+- name: Upgrade pip (package manager)
+  win_shell: python -m pip install --upgrade pip
+
+- name: Upgrade pip package
+  win_shell: "pip install --upgrade {{item}}"
   loop: "{{pip_packages}}"
-  register: out_pip_latest
-  tags: [pip]
+
+# - name: Update pip package
+#   pip:
+#     name: "{{item}}"
+#     state: latest
+#   loop: "{{pip_packages}}"
+#   register: out_pip_latest
+#   tags: [pip]
 ...
