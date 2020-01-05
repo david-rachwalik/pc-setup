@@ -1,0 +1,13 @@
+---
+# https://docs.ansible.com/ansible/latest/modules/pip_module.html
+# ansible localhost -m pip -a "name=pip state=latest"
+# ansible windows -m include_role -a "name=windows/system/pip"
+
+- name: Update pip package
+  pip:
+    name: "{{item}}"
+    state: latest
+  loop: "{{pip_packages}}"
+  register: out_pip_latest
+  tags: [pip]
+...

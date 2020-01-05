@@ -1,0 +1,13 @@
+---
+# Find with command: python3 -m site
+python_user_base_dir: $HOME/.local
+python_user_site_dir: "{{python_user_base_dir}}/lib/python3.6/site-packages"
+
+python_boilerplate_modules:
+- logging_boilerplate.py
+- shell_boilerplate.py
+
+python_user_modules:
+- file_backup.py
+- mytest.py
+...

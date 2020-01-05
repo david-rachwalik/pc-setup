@@ -1,0 +1,8 @@
+---
+# https://docs.ansible.com/ansible/latest/modules/copy_module.html
+- name: Deploy Python module
+  copy:
+    src: "{{item}}"
+    dest: "{{python_user_site_dir}}/{{item}}"
+  loop: "{{python_user_modules}}"
+...

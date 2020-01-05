@@ -85,6 +85,10 @@ chocolatey_packages:
   # - name: visualstudio2017community
 
 
+pip_packages:
+- pytz
+
+
 vscode_extensions:
 - DavidAnson.vscode-markdownlint
 - donjayamanne.githistory
