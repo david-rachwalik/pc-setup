@@ -1,4 +1,6 @@
 ---
+os_family: Windows
+
 # https://stackoverflow.com/questions/3790454/how-do-i-break-a-string-over-multiple-lines
 
 # --- Microsoft Visual Studio 2019 ---
