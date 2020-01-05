@@ -2,89 +2,87 @@
 # Check servers: https://status.chocolatey.org
 # https://docs.ansible.com/ansible/latest/modules/win_chocolatey_module.html
 
-- block:
-  - set_fact:
-      chocolatey_packages_installed: "{{out_chocolatey_facts | json_query('ansible_facts.ansible_chocolatey.packages[*].package')}}"
+- set_fact:
+    chocolatey_packages_installed: "{{out_chocolatey_facts | json_query('ansible_facts.ansible_chocolatey.packages[*].package')}}"
 
 
-  - set_fact:
-      chocolatey_packages_to_uninstall: "{{chocolatey_packages.uninstall | from_package | difference(chocolatey_packages_installed) | sort}}"
-  
-  - name: Uninstall Basic Chocolatey Packages
-    win_chocolatey:
-      name: "{{item.name}}"
-      # package_params: "{{item.package_params | default(omit)}}"
-      state: absent
-    loop: "{{chocolatey_packages.uninstall | diff_package(chocolatey_packages_installed)}}"
-    # when: chocolatey_packages_to_uninstall | count > 0
-    tags: [uninstall]
+- set_fact:
+    chocolatey_packages_to_uninstall: "{{chocolatey_packages.uninstall | from_package | difference(chocolatey_packages_installed) | sort}}"
+
+- name: Uninstall Basic Chocolatey Packages
+  win_chocolatey:
+    name: "{{item.name}}"
+    # package_params: "{{item.package_params | default(omit)}}"
+    state: absent
+  loop: "{{chocolatey_packages.uninstall | diff_package(chocolatey_packages_installed)}}"
+  # when: chocolatey_packages_to_uninstall | count > 0
+  tags: [uninstall]
 
 
-  - set_fact:
-      chocolatey_packages_to_install: "{{chocolatey_packages.install | from_package | difference(chocolatey_packages_installed) | sort}}"
+- set_fact:
+    chocolatey_packages_to_install: "{{chocolatey_packages.install | from_package | difference(chocolatey_packages_installed) | sort}}"
 
-  - name: Install Basic Chocolatey Packages
-    win_chocolatey:
-      name: "{{item.name}}"
-      package_params: "{{item.package_params | default(omit)}}"
-      state: present
-    loop: "{{chocolatey_packages.install | diff_package(chocolatey_packages_installed)}}"
-    # when: chocolatey_packages_to_install | count > 0
-    tags: [install]
-
-
-  # # https://chocolatey.org/packages/visualstudio2019community
-  # # https://docs.microsoft.com/en-us/visualstudio/install/use-command-line-parameters-to-install-visual-studio
-  # # https://docs.microsoft.com/en-us/visualstudio/install/workload-component-id-vs-community
-  # - name: Install Visual Studio Community 2019
-  #   win_chocolatey:
-  #     name: visualstudio2019community
-  #     # state: present
-  #     state: latest
-  #     # https://stackoverflow.com/questions/3790454/how-do-i-break-a-string-over-multiple-lines
-  #     package_params: >-
-  #       --locale en-US
-  #       # https://docs.microsoft.com/en-us/visualstudio/install/workload-component-id-vs-community
-  #       --add Microsoft.VisualStudio.Workload.NetWeb;includeRecommended
-  #       --add Microsoft.VisualStudio.Workload.Azure;includeRecommended
-  #       --quiet
-  #   when: "'visualstudio2019community' not in chocolatey_packages_installed"
-  #   tags: ["install", "visualstudio", "visualstudio2019"]
-  # # TODO: https://marketplace.visualstudio.com/items?itemName=MadsKristensen.OpenCommandLine
-
-  # # https://chocolatey.org/packages/microsoft-office-deployment
-  # - name: Install MS Office 365
-  #   win_chocolatey:
-  #     name: microsoft-office-deployment
-  #     # state: present
-  #     state: latest
-  #     package_params: >-
-  #       /64bit
-  #       /DisableUpdate TRUE
-  #       /Product O365HomePremRetail
-  #       /Exclude Publisher,Lync,Groove
-  #   when: "'Office365HomePremium' not in chocolatey_packages_installed"
-  #   tags: [install, office365]
+- name: Install Basic Chocolatey Packages
+  win_chocolatey:
+    name: "{{item.name}}"
+    package_params: "{{item.package_params | default(omit)}}"
+    state: present
+  loop: "{{chocolatey_packages.install | diff_package(chocolatey_packages_installed)}}"
+  # when: chocolatey_packages_to_install | count > 0
+  tags: [install]
 
 
-  - set_fact:
-      chocolatey_packages_to_upgrade: "{{chocolatey_packages.install | from_package | difference(chocolatey_packages_to_install) | sort}}"
+# # https://chocolatey.org/packages/visualstudio2019community
+# # https://docs.microsoft.com/en-us/visualstudio/install/use-command-line-parameters-to-install-visual-studio
+# # https://docs.microsoft.com/en-us/visualstudio/install/workload-component-id-vs-community
+# - name: Install Visual Studio Community 2019
+#   win_chocolatey:
+#     name: visualstudio2019community
+#     # state: present
+#     state: latest
+#     # https://stackoverflow.com/questions/3790454/how-do-i-break-a-string-over-multiple-lines
+#     package_params: >-
+#       --locale en-US
+#       # https://docs.microsoft.com/en-us/visualstudio/install/workload-component-id-vs-community
+#       --add Microsoft.VisualStudio.Workload.NetWeb;includeRecommended
+#       --add Microsoft.VisualStudio.Workload.Azure;includeRecommended
+#       --quiet
+#   when: "'visualstudio2019community' not in chocolatey_packages_installed"
+#   tags: ["install", "visualstudio", "visualstudio2019"]
+# # TODO: https://marketplace.visualstudio.com/items?itemName=MadsKristensen.OpenCommandLine
 
-  - name: Upgrade Chocolatey packages
-    win_chocolatey:
-      name: "{{item.name}}"
-      package_params: "{{item.package_params | default(omit)}}"
-      state: latest
-    loop: "{{chocolatey_packages.install | diff_package(chocolatey_packages_to_install)}}"
-    # when: chocolatey_packages_to_upgrade | count > 0
-    tags: [upgrade]
+# # https://chocolatey.org/packages/microsoft-office-deployment
+# - name: Install MS Office 365
+#   win_chocolatey:
+#     name: microsoft-office-deployment
+#     # state: present
+#     state: latest
+#     package_params: >-
+#       /64bit
+#       /DisableUpdate TRUE
+#       /Product O365HomePremRetail
+#       /Exclude Publisher,Lync,Groove
+#   when: "'Office365HomePremium' not in chocolatey_packages_installed"
+#   tags: [install, office365]
 
-  # # TODO: Confirm upgrade all doesn't require 'package_params'
-  # - name: Upgrade Chocolatey packages
-  #   win_chocolatey:
-  #     name: all
-  #     state: latest
-  #   tags: [upgrade]
 
-  tags: [chocolatey, choco]
+- set_fact:
+    chocolatey_packages_to_upgrade: "{{chocolatey_packages.install | from_package | difference(chocolatey_packages_to_install) | sort}}"
+
+- name: Upgrade Chocolatey packages
+  win_chocolatey:
+    name: "{{item.name}}"
+    package_params: "{{item.package_params | default(omit)}}"
+    state: latest
+  loop: "{{chocolatey_packages.install | diff_package(chocolatey_packages_to_install)}}"
+  # when: chocolatey_packages_to_upgrade | count > 0
+  ignore_errors: true
+  tags: [upgrade]
+
+# # TODO: Confirm upgrade all doesn't require 'package_params'
+# - name: Upgrade Chocolatey packages
+#   win_chocolatey:
+#     name: all
+#     state: latest
+#   tags: [upgrade]
 ...

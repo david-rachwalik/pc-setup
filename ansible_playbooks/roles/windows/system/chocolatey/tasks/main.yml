@@ -6,8 +6,10 @@
 - include_role:
     name: windows/system/chocolatey
     tasks_from: facts
+  tags: [chocolatey, choco]
 
 - include_role:
     name: windows/system/chocolatey
     tasks_from: packages
+  tags: [chocolatey, choco]
 ...
