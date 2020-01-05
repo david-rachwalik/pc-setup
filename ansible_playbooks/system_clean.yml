@@ -85,8 +85,7 @@
 - name: Clean and shutdown Windows
   hosts: windows
   become: true
-  become_user: david
-  become_method: runas
   roles:
-  - windows/apps/ccleaner/shutdown
+  - windows/apps/ccleaner/clean
+  # - windows/apps/ccleaner/shutdown
 ...
