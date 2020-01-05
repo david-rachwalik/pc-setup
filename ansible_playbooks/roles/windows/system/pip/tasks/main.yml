@@ -1,15 +1,17 @@
 ---
-# https://docs.ansible.com/ansible/latest/modules/pip_module.html
-# ansible localhost -m pip -a "name=pip state=latest"
 # ansible windows -m include_role -a "name=windows/system/pip"
 
 # https://docs.ansible.com/ansible/latest/modules/win_shell_module.html
 - name: Upgrade pip (package manager)
   win_shell: python -m pip install --upgrade pip
+  register: pip_manager_facts
+  changed_when: "'already up-to-date' not in pip_manager_facts.stdout"
 
 - name: Upgrade pip package
   win_shell: "pip install --upgrade {{item}}"
   loop: "{{pip_packages}}"
+  register: pip_package_facts
+  changed_when: "'already up-to-date' not in pip_package_facts.stdout"
 
 # - name: Update pip package
 #   pip:
