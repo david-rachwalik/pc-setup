@@ -1,4 +1,6 @@
 ---
+# TODO: call system_clean.yml playbook (for shutdown, not clean)
+
 - name: Backup important files; clean and shutdown system
   hosts: windows
   roles:

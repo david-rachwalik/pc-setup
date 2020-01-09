@@ -1,9 +1,12 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 
 # Basename: mytest
 # Description: Backup a directory of files
 # Version: 1.0
 # VersionDate: 04 Jan 2020
+
+# Example: python $ENV:UserProfile\AppData\Roaming\Python\Python38\site-packages\mytest.py
+# Example: python C:\Users\david\AppData\Roaming\Python\Python38\site-packages\mytest.py
 
 #                   *** Options ***
 # src:          Path to source files                    default=(current directory)
@@ -54,6 +57,14 @@ class MyTest(ShellManager):
         # self.DirectoryCreate(self.args.dest)
         # # Perform backup copy of directory files
         # self.DirectoryCopy(self.args.src, self.args.dest, self.args.deep, self.args.cut, self.args.extension)
+
+        command = "ls"
+        process = self.ProcessAsync(command)
+        (rc, stdout, stderr) = self.ProcessAwaitAsync(process)
+        self.log.info("(MyTest:__init__) rc: {0}".format(rc))
+        self.log.info("(MyTest:__init__) stdout: {0}".format(stdout))
+        self.log.info("(MyTest:__init__) stderr: {0}".format(stderr))
+
 
 
     def ParseCommandLineArguments(self):

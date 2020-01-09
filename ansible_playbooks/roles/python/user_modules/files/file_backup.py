@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 
 # Basename: file_backup
 # Description: Backup a directory of files

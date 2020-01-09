@@ -1,0 +1,37 @@
+---
+app_projects:
+- name: DMR
+  source: GitHub
+  host: Azure
+
+- name: pc-setup
+  source: GitHub
+
+- name: SexBound
+  source: Azure
+  host: Azure
+
+- name: CorruptionOfChampions
+  source: Azure
+
+- name: WorldOfWarcraftAddonDev
+  source: Azure
+
+# https://docs.microsoft.com/en-us/aspnet/core/tutorials/razor-pages
+- name: Tutorials-WebApps-RazorPages
+  repo: RazorPagesMovie
+  source: GitHub
+
+- name: Tutorials-WebApiApps
+  source: GitHub
+  database: MainContext
+  # authentication choices: [None, Individual, MultiOrg]
+  authentication: MultiOrg
+
+- name: Tutorials-DataAccess-RazorPages
+  source: GitHub
+
+- name: david-rachwalik.github.io
+  source: GitHub
+  host: GitHub
+...

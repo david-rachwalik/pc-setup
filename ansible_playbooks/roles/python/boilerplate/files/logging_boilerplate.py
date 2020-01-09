@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 
 # Basename: logging_boilerplate
 # Description: Common logic to generate log handlers as needed
@@ -12,7 +12,7 @@ import logging, datetime, pytz
 class LogManager(object):
     def __init__(self, logLevel=logging.INFO, logFile=""):
         # Minimum level of message to log: DEBUG(10)|INFO(20)|WARN|ERROR|FATAL
-        self.logLevl = logLevel
+        self.logLevel = logLevel
         # Create formatter to attach to handlers
         # logMessageFormat = "/%(asctime)s/ [%(levelname)s] %(message)s"
         # logMessageFormat = "[%(levelname)s] %(asctime)s # %(message)s"
@@ -20,7 +20,7 @@ class LogManager(object):
         # logTimeFormat = "%Y%b%d %H:%M:%S"
         logTimeFormat = "%Y-%m-%d %H:%M:%S"
         self.logFormatter = logging.Formatter(fmt=logMessageFormat, datefmt=logTimeFormat)
-        logging.Formatter.converter = self.DisplayTime
+        logging.Formatter.converter = self.DisplayTime()
         # Create logger with file basename (no extension)
         self.log = logging.getLogger(__name__)
         self.log.setLevel(self.logLevel)
@@ -30,8 +30,7 @@ class LogManager(object):
     # ciectld-1.1 used logging.basicConfig to create a root logger with default StreamHandler
     # LogManager generates handlers as needed
     def AddHandler(self, _logFile=""):
-        logFile = str(_logFile="")
-        if logFile != "":
+        if isinstance(logFile, str) and len(logFile) > 0:
             # Setup a file handler for writing to a log file
             handler = logging.FileHandler(filename=logFile)
         else:
@@ -44,8 +43,15 @@ class LogManager(object):
 
 
     # Convert the timezone for log output
-    def DisplayTime(*args):
+    def DisplayTime(self, *args):
         utc_date = pytz.utc.localize(datetime.datetime.utcnow())
         timezone = pytz.timezone("US/Central")
         converted = utc_date.astimezone(timezone)
         return converted.timetuple()
+
+
+# ------------------------ Main Program ------------------------
+
+if __name__ == '__main__':
+    boilerplate = ShellManager()
+    boilerplate.Exit()

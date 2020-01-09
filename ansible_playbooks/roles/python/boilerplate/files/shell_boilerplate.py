@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 
 # Basename: shell_boilerplate
 # Description: Common logic for *nix shell interactions
@@ -184,3 +184,10 @@ class ShellManager(object):
                 if result[1]: destination_paths.append(result[0]) # Note changes
 
         self.log.debug("(ShellManager:DirectoryCopy) Files copied: {0}".format(destination_paths))
+
+
+# ------------------------ Main Program ------------------------
+
+if __name__ == '__main__':
+    boilerplate = ShellManager()
+    boilerplate.Exit()

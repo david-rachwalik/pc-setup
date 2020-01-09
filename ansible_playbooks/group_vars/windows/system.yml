@@ -23,12 +23,12 @@ chocolatey_packages:
   - name: 7zip
   - name: nordvpn
   - name: GoogleChrome
-  - name: microsoft-office-deployment
-    pseudo_name: Office365HomePremium
-    package_params: >-
-      /64bit
-      /Product O365HomePremRetail
-      /Exclude Publisher,Lync,Groove
+  # - name: microsoft-office-deployment
+  #   pseudo_name: Office365HomePremium
+  #   package_params: >-
+  #     /64bit
+  #     /Product O365HomePremRetail
+  #     /Exclude Publisher,Lync,Groove
   - name: qbittorrent
   - name: speccy
   # - name: recuva
