@@ -31,9 +31,6 @@
   tags: [windows]
 
 
-# TODO: call system_clean.yml playbook (only clean, not shutdown)
-
-
 # TODO:
 # - Connect to Windows and gather facts about the environment
 # - Backup Windows application settings & data
