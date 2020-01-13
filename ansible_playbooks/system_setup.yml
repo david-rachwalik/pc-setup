@@ -3,15 +3,19 @@
   hosts: linux
   become: true
   roles:
-  - linux/system/apt
-  - linux/system/pip
+  - name: linux/system/apt
+    tags: [apt]
+  - name: linux/system/pip
+    tags: [pip]
   tags: [linux]
 
 - name: Configure Linux environment
   hosts: linux
   roles:
-  - linux/system/setup
-  - python/user_modules
+  - name: linux/system/setup
+    tags: [setup]
+  - name: python/user_modules
+    tags: [python, py]
   # template Chocolatey .ps1 file and swap for README example instead of group_vars
   tags: [linux]
 
@@ -20,13 +24,19 @@
   hosts: windows
   become: true
   roles:
-  - windows/system/chocolatey
-  - windows/system/pip
+  - name: windows/system/chocolatey
+    tags: [chocolatey, choco]
+  - name: windows/system/pip
+    tags: [pip]
   # --- Configuration Steps ---
-  - windows/system/setup
-  - python/user_modules
-  - windows/apps/dotnet/setup
-  - windows/apps/vscode/setup
+  - name: windows/system/setup
+    tags: [setup]
+  - name: python/user_modules
+    tags: [python, py]
+  - name: windows/apps/dotnet/setup
+    tags: [setup, dotnet]
+  - name: windows/apps/vscode/setup
+    tags: [setup, vscode]
   # TODO: Install scanner software
   tags: [windows]
 
