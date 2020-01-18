@@ -2,16 +2,19 @@
 - name: Create .NET Core application project
   hosts: localhost
   roles:
-  - azure/active_directory/create
+  - name: azure/active_directory/create
+    tags: [azure, ad]
 
 
-# Modes: [nodb, sqlserver, identity, docker]
 - name: Create .NET Core application project
-  hosts: home
+  hosts: windows
   roles:
-  - windows/apps/dotnet/new
-  - windows/apps/git/init
-  - windows/apps/dotnet/add
+  - name: windows/apps/dotnet/new
+    tags: [dotnet, new]
+  - name: windows/apps/git/init
+    tags: [git]
+  - name: windows/apps/dotnet/add
+    tags: [dotnet, add]
   # - windows/apps/dotnet/ef
   # - { role: windows/apps/dotnet/build, app_open_vs: true }
 ...
