@@ -1,5 +1,7 @@
 ---
 os_family: Windows
+user_dir: C:\Users\david
+backup_dir: D:\OneDrive\Backups
 
 # https://stackoverflow.com/questions/3790454/how-do-i-break-a-string-over-multiple-lines
 
@@ -52,7 +54,7 @@ chocolatey_packages:
   - name: vscode
   - name: postman
   - name: sqlitebrowser
-  - name: microsoftazurestorageexplorer
+  # - name: microsoftazurestorageexplorer
   
   # --- Media ---
   - name: geforce-experience
