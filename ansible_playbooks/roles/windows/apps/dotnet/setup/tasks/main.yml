@@ -1,5 +1,6 @@
 ---
 # https://docs.microsoft.com/en-us/aspnet/core/data/ef-rp
+# ansible windows -m include_role -a name=windows/apps/dotnet/setup
 
 - name: List .NET Core tools installed
   win_shell: "dotnet tool list --global"
@@ -7,7 +8,7 @@
   when: app_use_database
   register: out_tool_install
   changed_when: false
-  tags: ["dotnet", "tool"]
+  tags: [dotnet, tool]
 
 # - name: Install .NET Core tool
 #   win_shell: "dotnet tool install --global {{item}}"
