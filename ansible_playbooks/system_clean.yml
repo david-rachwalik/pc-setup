@@ -1,10 +1,15 @@
 ---
-# TODO: call system_clean.yml playbook (for shutdown, not clean)
-
-- name: Backup important files; clean and shutdown system
+- name: Backup important system files
   hosts: windows
   roles:
-  - windows/games/screenshots
+  # - windows/apps/discord
+  # - windows/apps/obs
+  # - windows/apps/vscode
+  - name: windows/apps/handbrake
+    tags: [handbrake]
+
+  - name: windows/games/screenshots
+    tags: [games, screenshots]
 
   # - windows/games/world_of_warcraft
   
@@ -31,17 +36,11 @@
   # - windows/games/corruption_of_champions
   # ----------------------------------------------------------------
 
-  # - windows/apps/discord
-  # - windows/apps/obs
-  # - windows/apps/vscode
-  # - windows/apps/handbrake
-
-# - Rip DVD|BluRay disks using MakeMKV
-# - Set default action to rip disks when inserted in any optical drive
-# - Compress a directory of videos using HandBrake
-
-# ::: maybe :::
-# - connect to QNAP + Linux Station + automate Plex
+# TODO:
+# - Connect to Windows and gather facts about the environment
+# - Backup Windows application settings & data
+#   - backup game saves, screenshots, addons
+#   - backup preferences for productivity programs
 
 
 # ----------------------------------------------------------------
@@ -84,7 +83,7 @@
 # ----------------------------------------------------------------
 # FROM: shutdown.yml
 # ----------------------------------------------------------------
-- name: Clean and shutdown Windows
+- name: Clean and shutdown system
   hosts: windows
   become: true
   roles:
