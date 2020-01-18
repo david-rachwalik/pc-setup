@@ -1,37 +1,66 @@
 ---
+# https://docs.microsoft.com/en-us/dotnet/core/tools/dotnet-new
+# solution, source, host, projects (name, template, authentication)
+# template choices: [console, xunit, webapp, webapi, sln]
+# authentication choices: [None, Individual, MultiOrg]
+
+# possible modes: [nodb, sqlserver, identity, docker]
+
 app_projects:
-- name: DMR
+- solution: DMR
   source: GitHub
   host: Azure
+  projects:
+  - name: DMR.WebApp
+    template: webapp
+    authentication: MultiOrg
+  - name: DMR.UnitTests
+    template: xunit
 
-- name: pc-setup
+- solution: pc-setup
   source: GitHub
 
-- name: SexBound
+- solution: SexBound
   source: Azure
   host: Azure
+  projects:
+  - name: SexBound.WebApp
+    template: webapp
 
-- name: CorruptionOfChampions
+- solution: CorruptionOfChampions
+  source: Azure
+  projects:
+  - name: CorruptionOfChampions.Conversion
+    template: webapp
+  - name: CorruptionOfChampions.WebApp
+    template: webapp
+
+- solution: WorldOfWarcraftAddonDev
   source: Azure
 
-- name: WorldOfWarcraftAddonDev
-  source: Azure
+- solution: Tutorials-WebApiApps
+  source: GitHub
+  projects:
+  - name: WebApiApps.WebApp
+    template: webapp
+    authentication: MultiOrg
+  - name: WebApiApps.UnitTests
+    template: xunit
 
 # https://docs.microsoft.com/en-us/aspnet/core/tutorials/razor-pages
-- name: Tutorials-WebApps-RazorPages
-  repo: RazorPagesMovie
+- solution: Tutorials-WebApps-RazorPages
   source: GitHub
+  projects:
+  - name: RazorPagesMovie
+    template: webapp
 
-- name: Tutorials-WebApiApps
+- solution: Tutorials-DataAccess-RazorPages
   source: GitHub
-  database: MainContext
-  # authentication choices: [None, Individual, MultiOrg]
-  authentication: MultiOrg
+  projects:
+  - name: ContosoUniversity
+    template: webapp
 
-- name: Tutorials-DataAccess-RazorPages
-  source: GitHub
-
-- name: david-rachwalik.github.io
+- solution: david-rachwalik.github.io
   source: GitHub
   host: GitHub
 ...
