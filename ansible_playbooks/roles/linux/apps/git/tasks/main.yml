@@ -1,23 +1,5 @@
 ---
 - block:
-  - name: Update shell aliases
-    copy:
-      src: "{{shell_alias | basename}}"
-      dest: "{{shell_alias}}"
-      mode: '0644'
-    tags: ["alias"]
-
-  - name: Verify script directory
-    file:
-      path: ~/bin
-      state: directory
-      mode: '0755'
-    tags: ["bin"]
-
-  tags: ["setup", "scripts"]
-
-
-- block:
   # https://git-scm.com/book/en/v2/Getting-Started-First-Time-Git-Setup
   # https://www.atlassian.com/git/tutorials/setting-up-a-repository/git-config
   - name: Set Git configuration
@@ -25,7 +7,7 @@
       src: "{{git_config | basename}}"
       dest: "{{git_config}}"
       mode: '0644'
-    tags: ["config"]
+    tags: [config]
 
   - name: Check Git repo for changes
     command: "git diff --name-only"
@@ -46,7 +28,7 @@
       dest: "{{git_work_repo}}"
       # force: true
     when: git_repo_is_safe
-    tags: ["pull"]
+    tags: [pull]
   
-  tags: ["setup", "git"]
+  tags: [setup, git]
 ...

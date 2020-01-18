@@ -12,11 +12,12 @@
 - name: Configure Linux environment
   hosts: linux
   roles:
-  - name: linux/system/setup
-    tags: [setup]
+  - name: linux/system/bash
+    tags: [bash]
+  - name: linux/apps/git
+    tags: [git]
   - name: python/user_modules
     tags: [python, py]
-  # template Chocolatey .ps1 file and swap for README example instead of group_vars
   tags: [linux]
 
 
@@ -24,6 +25,7 @@
   hosts: windows
   become: true
   roles:
+  # TODO: template Chocolatey .ps1 file and swap README example in place of group_vars yml
   - name: windows/system/chocolatey
     tags: [chocolatey, choco]
   - name: windows/system/pip
@@ -43,9 +45,6 @@
 
 # TODO:
 # - Connect to Windows and gather facts about the environment
-# - Backup Windows application settings & data
-#   - backup game saves, screenshots, addons
-#   - backup preferences for productivity programs
 # - Uninstall Windows features and applications
 # - Install Windows features and applications
 #   - update windows features, install patches, chocolatey upgrade, etc.
@@ -54,4 +53,11 @@
 # https://docs.microsoft.com/en-us/powershell/windows/get-started?view=win10-ps
 # https://docs.microsoft.com/en-us/windows/configuration/configure-windows-10-taskbar
 # https://www.winsysadminblog.com/2019/03/change-windows-10-taskbar-icons-script-deploying-a-custom-taskbar-for-windows-10/
+
+# ::: Media Library :::
+# - Rip DVD|BluRay disks using MakeMKV
+# - Set default action to rip disks when inserted in any optical drive
+# - Compress a directory of videos using HandBrake
+# ::: QNAP :::
+# - connect to QNAP + Linux Station + automate Plex
 ...

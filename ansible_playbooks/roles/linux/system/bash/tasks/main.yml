@@ -1,0 +1,18 @@
+---
+- block:
+  - name: Update bash shell aliases
+    copy:
+      src: "{{shell_alias | basename}}"
+      dest: "{{shell_alias}}"
+      mode: '0644'
+    tags: [alias]
+
+  - name: Verify script directory
+    file:
+      path: ~/bin
+      state: directory
+      mode: '0755'
+    tags: [bin]
+
+  tags: [setup, scripts]
+...
