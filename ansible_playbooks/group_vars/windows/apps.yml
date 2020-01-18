@@ -1,9 +1,10 @@
 ---
-handbrake_deploy_dir: C:\Program Files\HandBrake
-handbrake_deploy_config: C:\Program Files\HandBrake\Handbrake-config.json
-handbrake_backup_dir: D:\OneDrive\Backups
-handbrake_backup_config: D:\OneDrive\Backups\Handbrake-config.json
-
+# handbrake_install_dir: C:\Program Files\HandBrake
+handbrake_user_dir: "{{user_dir}}\\AppData\\Roaming\\HandBrake"
+handbrake_user_files:
+- presets.json
+- settings.json
+handbrake_backup_dir: "{{backup_dir}}\\Apps\\HandBrake"
 
 # List the installed extensions: code --list-extensions
 # Install an extension: code --install-extension (<extension-id> | <extension-vsix-path>)
