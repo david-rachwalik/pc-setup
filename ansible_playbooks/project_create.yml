@@ -1,0 +1,28 @@
+---
+- name: Create .NET Core application project
+  hosts: localhost
+  tasks:
+  # https://docs.ansible.com/ansible/latest/modules/include_role_module.html
+  - include_role:
+      name: azure/active_directory/create
+    tags: [azure, ad]
+
+
+- name: Create .NET Core application project
+  hosts: windows
+  tasks:
+  - include_role:
+      name: windows/apps/dotnet/new
+    tags: [dotnet, new]
+    
+  - include_role:
+      name: windows/apps/git/init
+    tags: [git]
+    
+  - include_role:
+      name: windows/apps/dotnet/add
+    tags: [dotnet, add]
+
+  # - windows/apps/dotnet/ef
+  # - { role: windows/apps/dotnet/build, app_open_vs: true }
+...

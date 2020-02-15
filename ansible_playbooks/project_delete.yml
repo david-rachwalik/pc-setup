@@ -1,13 +1,16 @@
 ---
 - name: Delete .NET Core application project
   hosts: localhost
-  roles:
-  - azure/active_directory/delete
+  tasks:
+  # https://docs.ansible.com/ansible/latest/modules/include_role_module.html
+  - include_role:
+      name: azure/active_directory/delete
+    tags: [azure, ad]
 
 
 - name: Delete .NET Core application project
   # Only for main PC
-  hosts: home
+  hosts: windows
   tasks:
   # https://docs.ansible.com/ansible/latest/modules/win_stat_module.html
   - name: Obtain information about app project directory
