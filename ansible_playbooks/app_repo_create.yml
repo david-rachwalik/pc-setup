@@ -1,4 +1,6 @@
 ---
+# ansible-playbook project_create.yml -e "app_name=DMR"
+
 - name: Create .NET Core application project
   hosts: localhost
   tasks:
@@ -13,8 +15,14 @@
   tasks:
   - include_role:
       name: windows/apps/dotnet/new
+    loop: "{{app_names}}"
+    loop_control:
+      loop_var: app_name
     tags: [dotnet, new]
     
+  - fail:
+      msg: break point
+
   - include_role:
       name: windows/apps/git/init
     tags: [git]
