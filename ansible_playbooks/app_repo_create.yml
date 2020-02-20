@@ -1,5 +1,5 @@
 ---
-# ansible-playbook project_create.yml -e "app_name=DMR"
+# ansible-playbook app_repo_create.yml -e "app_name=DMR"
 
 - name: Create .NET Core application project
   hosts: localhost

@@ -25,12 +25,12 @@ shutdown () {
 
 appc () {
     cd "$HOME/pc-setup/ansible_playbooks"
-    play_run=$([ -n "$1" ] && echo "proj_create.yml $*" || echo "proj_create.yml")
+    play_run=$([ -n "$1" ] && echo "app_repo_create.yml $*" || echo "app_repo_create.yml")
     ansible-playbook $play_run
 }
 appd () {
     cd "$HOME/pc-setup/ansible_playbooks"
-    play_run=$([ -n "$1" ] && echo "proj_delete.yml $*" || echo "proj_delete.yml")
+    play_run=$([ -n "$1" ] && echo "app_repo_delete.yml $*" || echo "app_repo_delete.yml")
     ansible-playbook $play_run
 }
 
