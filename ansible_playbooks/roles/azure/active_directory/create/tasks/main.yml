@@ -13,6 +13,12 @@
 # Install-Package Microsoft.Owin.Security.Cookies
 # Install-Package Microsoft.Owin.Host.SystemWeb
 
+# - debug:
+#     var: app_repo
+
+- debug:
+    var: app_authentication
+
 - block:
   # https://docs.microsoft.com/en-us/cli/azure/ad/app#az-ad-app-create
   # NOTE: The az command is idempotent and provides the same output as app show/list

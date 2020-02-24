@@ -1,18 +1,33 @@
 ---
 - name: Backup important system files
   hosts: windows
-  roles:
+  tasks:
+  # ------------------------ Applications ------------------------
+  - include_role:
+      name: windows/apps/handbrake
+      tasks_from: backup
+    tags: [handbrake]
   # - windows/apps/discord
   # - windows/apps/obs
   # - windows/apps/vscode
-  - name: windows/apps/handbrake
-    tags: [handbrake]
+    tags: [applications, apps]
 
-  - name: windows/games/screenshots
-    tags: [games, screenshots]
+  # ------------------------ Games ------------------------
+  - block:
+    - include_role:
+        name: windows/games/screenshots
+        # tasks_from: backup
+      tags: [screenshots, ss]
+    # - include_role:
+    #     name: windows/games/settings
+    #   tags: [settings]
+    # - include_role:
+    #     name: windows/games/addons
+    #   tags: [addons]
+    tags: [games]
 
   # - windows/games/world_of_warcraft
-  
+
   # - windows/games/sims_iii    # [archive screenshots/settings/addons, run memory cleanup]
   # - windows/games/diablo_iii
   # - windows/games/skyrim_se
@@ -36,6 +51,7 @@
   # - windows/games/corruption_of_champions
   # ----------------------------------------------------------------
 
+
 # TODO:
 # - Connect to Windows and gather facts about the environment
 # - Backup Windows application settings & data
@@ -58,35 +74,21 @@
 #     command: "dos2unix {{wsl_repo}}"
 #     register: out_dos2unix
 
-# --- Previous ad-hoc commands used:
+# --- Previous ad-hoc commands used (prior to Git):
 # sudo cp /mnt/d/Repos_Exp/pc-setup/etc/ansible/wsl_playbook_copy.yml /etc/ansible/wsl_playbook_copy.yml
 # dos2unix /etc/ansible/wsl_playbook_copy.yml
 # cd /etc/ansible/
 # ansible-playbook wsl_playbook_copy.yml
 
 
-# ----------------------------------------------------------------
-# FROM: win_via_laptop.yml
-# ----------------------------------------------------------------
-# - name: Provision Windows desktop from laptop
-#   hosts: home
-#   become: true
-#   become_user: david
-#   become_method: runas
-#   tasks:
-#   # --- Test laptop updating the desktop
-#   # - ping, 'hello world', restart, wait for connection, 'hello world' again
-#   - name: Test Windows desktop connection
-#     win_ping:
-
-
-# ----------------------------------------------------------------
-# FROM: shutdown.yml
-# ----------------------------------------------------------------
-- name: Clean and shutdown system
+- name: Clean system health
   hosts: windows
   become: true
-  roles:
-  - windows/apps/ccleaner/clean
-  # - windows/apps/ccleaner/shutdown
+  tasks:
+  - include_role:
+      name: windows/apps/ccleaner/clean
+    tags: [ccleaner, clean]
+  # - include_role:
+  #     name: windows/apps/ccleaner/shutdown
+  #   tags: [ccleaner, shutdown]
 ...
