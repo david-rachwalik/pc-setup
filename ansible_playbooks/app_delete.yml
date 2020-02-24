@@ -1,0 +1,57 @@
+---
+- name: Delete Azure Active Directory application
+  hosts: localhost
+  tasks:
+  # https://docs.ansible.com/ansible/latest/modules/include_role_module.html
+  - include_role:
+      name: azure/active_directory/delete
+  tags: [azure, ad]
+
+
+- name: Delete .NET Core application repository
+  # Only for main PC
+  hosts: windows
+  tasks:
+  # https://docs.ansible.com/ansible/latest/modules/win_stat_module.html
+  - name: Obtain information about app project directory
+    win_stat:
+      path: "{{app_solution_dir}}"
+    register: out_stat_app
+
+  # https://docs.ansible.com/ansible/latest/modules/win_file_module.html
+  - name: Purge directory
+    win_file:
+      name: "{{app_solution_dir}}"
+      state: absent
+    when: out_stat_app.stat.exists
+  
+  tags: [dotnet]
+
+
+# Use purge=True to remove [resource group, service plan]
+
+- name: Delete Azure App Service
+  hosts: localhost
+  vars:
+    resource_group_names:
+    - ansible_test_rg
+    - ansible_test_rg2nd
+    - myTestPlan
+    - myResourceGroupWebapp
+    - myResourceGroup
+  tasks:
+  - name: Get facts for resource group
+    azure_rm_resourcegroup_facts:
+      name: "{{ item }}"
+    loop: "{{ resource_group_names }}"
+    register: az_resourcegroup_facts
+
+  - name: Delete resource group
+    azure_rm_resourcegroup:
+      name: "{{ item.resourcegroups[0].name }}"
+      state: absent
+      force: true
+    when: "{{ item | json_query('resourcegroups[*]') | list | count > 0 }}"
+    loop: "{{ az_resourcegroup_facts.results }}"
+  tags: [azure, ad]
+...
