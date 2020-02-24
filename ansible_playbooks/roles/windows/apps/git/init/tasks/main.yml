@@ -3,7 +3,7 @@
   win_shell: git init
   args:
     chdir: "{{app_solution_dir}}"
-    creates: "{{app_repo_dir}}"
+    creates: "{{app_git_repo_dir}}"
   register: out_git_init
   tags: ["git", "init"]
 
