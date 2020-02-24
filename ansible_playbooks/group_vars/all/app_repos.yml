@@ -1,0 +1,100 @@
+---
+# https://docs.microsoft.com/en-us/dotnet/core/tools/dotnet-new
+# Application Repository Options:   [solution, source, host, projects]
+# Application Project Options:      [name, template, authentication, port]
+# - template choices:               [web, webapp, webapi, xunit, console]
+# - authentication choices:         [None, Individual, MultiOrg]
+
+# possible modes: [nodb, sqlserver, identity, docker]
+
+# app_name = app_repositories[*].solution
+app_repositories:
+- solution: DMR
+  source: GitHub
+  host: Azure
+  projects:
+  - name: DMR.WebApp
+    template: webapp
+    authentication: MultiOrg
+  - name: DMR.UnitTests
+    template: xunit
+
+- solution: pc-setup
+  source: GitHub
+
+- solution: SexBound
+  source: Azure
+  host: Azure
+  projects:
+  - name: SexBound.WebApp
+    template: webapp
+
+- solution: CorruptionOfChampions
+  source: Azure
+  projects:
+  - name: CorruptionOfChampions.Conversion
+    template: webapp
+  - name: CorruptionOfChampions.WebApp
+    template: webapp
+
+- solution: WorldOfWarcraftAddonDev
+  source: Azure
+
+- solution: Tutorials-WebApiApps
+  source: GitHub
+  projects:
+  - name: WebApiApps.WebApp
+    template: webapp
+    authentication: MultiOrg
+  - name: WebApiApps.UnitTests
+    template: xunit
+
+# https://docs.microsoft.com/en-us/aspnet/core/tutorials/razor-pages
+- solution: Tutorials-WebApps-RazorPages
+  source: GitHub
+  projects:
+  - name: RazorPagesMovie
+    template: webapp
+
+- solution: Tutorials-DataAccess-RazorPages
+  source: GitHub
+  projects:
+  - name: ContosoUniversity
+    template: webapp
+
+# https://docs.microsoft.com/en-us/aspnet/core/razor-pages/index
+
+- solution: david-rachwalik.github.io
+  source: GitHub
+  host: GitHub
+
+
+
+# ------------------------ Application Repository Parsing ------------------------
+
+app_names: "{{app_repositories | json_query('[*].solution')}}"
+app_repo_query: "[?solution=='{{app_name}}']"
+app_repo: "{{app_repositories | json_query(app_repo_query) | first}}"
+
+# NOTE: all project names must be unique across all solutions
+app_project_names: "{{app_repositories | json_query('[*].projects[*].name')}}"
+app_project_query: "[*].projects[?name=='{{app_project_name}}']"
+app_project: "{{app_repositories | json_query(app_project_query) | flatten | first}}"
+
+app_location_dir: D:\Repos
+app_solution_dir: "{{app_location_dir}}\\{{app_repo.solution}}"
+app_sln: "{{app_solution_dir}}\\{{app_repo.solution}}.sln"
+app_readme: "{{app_solution_dir}}\\README.md"
+app_license: "{{app_solution_dir}}\\LICENSE"
+app_project_dir: "{{app_solution_dir}}\\{{app_project.name}}"
+app_csproj: "{{app_project_dir}}\\{{app_project.name}}.csproj"
+app_authentication: "{{app_project.authentication | default('None')}}"
+app_domain: "https://localhost:{{app_project.port | default(5001)}}"
+app_use_extras: "{{app_project.use_extras | default(false)}}"
+app_use_database: "{{app_project.use_database | default(false)}}"
+app_database_context: MainContext
+
+app_git_repo_dir: "{{app_solution_dir}}\\.git"
+app_gitignore: "{{app_solution_dir}}\\.gitignore"
+app_gitattributes: "{{app_solution_dir}}\\.gitattributes"
+...

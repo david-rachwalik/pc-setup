@@ -32,13 +32,12 @@
     tags: [pip]
   # --- Configuration Steps ---
   - name: windows/system/setup
-    tags: [setup]
   - name: python/user_modules
     tags: [python, py]
   - name: windows/apps/dotnet/setup
-    tags: [setup, dotnet]
+    tags: [dotnet, tool]
   - name: windows/apps/vscode/setup
-    tags: [setup, vscode]
+    tags: [vscode]
   # TODO: Install scanner software
   tags: [windows]
 

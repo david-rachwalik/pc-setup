@@ -33,42 +33,57 @@ shutdown () {
 
 repoc () {
     cd "$HOME/pc-setup/ansible_playbooks"
-    play_run=$([ -n "$1" ] && echo "app_create.yml --tags 'repo' $*" || echo "app_create.yml --tags 'repo'")
-    ansible-playbook $play_run
+    # play_run=$([ -n "$1" ] && echo "app_create.yml --tags 'repo' $*" || echo "app_create.yml --tags 'repo'")
+    # ansible-playbook $play_run
+    ansible-playbook app_create.yml --tags 'repo' $*
 }
 repod () {
     cd "$HOME/pc-setup/ansible_playbooks"
-    play_run=$([ -n "$1" ] && echo "app_delete.yml --tags 'repo' $*" || echo "app_delete.yml --tags 'repo'")
-    ansible-playbook $play_run
+    # play_run=$([ -n "$1" ] && echo "app_delete.yml --tags 'repo' $*" || echo "app_delete.yml --tags 'repo'")
+    # ansible-playbook $play_run
+    ansible-playbook app_delete.yml --tags 'repo' $*
 }
 azc () {
     cd "$HOME/pc-setup/ansible_playbooks"
-    play_run=$([ -n "$1" ] && echo "app_create.yml --tags 'azure' $*" || echo "app_create.yml --tags 'azure'")
-    ansible-playbook $play_run
+    # play_run=$([ -n "$1" ] && echo "app_create.yml --tags 'azure' $*" || echo "app_create.yml --tags 'azure'")
+    # ansible-playbook $play_run
+    ansible-playbook app_create.yml --tags 'azure' $*
 }
 azd () {
     cd "$HOME/pc-setup/ansible_playbooks"
-    play_run=$([ -n "$1" ] && echo "app_delete.yml --tags 'azure' $*" || echo "app_delete.yml --tags 'azure'")
-    ansible-playbook $play_run
+    # play_run=$([ -n "$1" ] && echo "app_delete.yml --tags 'azure' $*" || echo "app_delete.yml --tags 'azure'")
+    # ansible-playbook $play_run
+    ansible-playbook app_delete.yml --tags 'azure' $*
 }
 appc () {
     cd "$HOME/pc-setup/ansible_playbooks"
-    play_run=$([ -n "$1" ] && echo "app_repo_create.yml $*" || echo "app_repo_create.yml")
-    ansible-playbook $play_run
+    # play_run=$([ -n "$1" ] && echo "app_repo_create.yml $*" || echo "app_repo_create.yml")
+    # ansible-playbook $play_run
+    ansible-playbook app_create.yml $*
 }
 appd () {
     cd "$HOME/pc-setup/ansible_playbooks"
-    play_run=$([ -n "$1" ] && echo "app_repo_delete.yml $*" || echo "app_repo_delete.yml")
-    ansible-playbook $play_run
+    # play_run=$([ -n "$1" ] && echo "app_repo_delete.yml $*" || echo "app_repo_delete.yml")
+    # ansible-playbook $play_run
+    ansible-playbook app_delete.yml $*
 }
 
 test_args () {
     # echo "$?"
-    echo "$?"
-}
+    # echo "$*"
+    # echo "$0"
+    # echo "$1"
+    echo $*
 
-# update --tags "alias"
-# ansible-playbook system_setup.yml --tags "alias"
+    # if [ "$seconds" -eq 0 ]; then
+    #     $timezone_string="Z"
+    #     elif[ "$seconds" -gt 0 ]
+    # then
+    #     $timezone_string=`printf "%02d:%02d" $seconds/3600 ($seconds/60)%60`
+    # else
+    #     echo "Unknown parameter"
+    # fi
+}
 
 # alias update='( cd "$HOME/pc-setup/ansible_playbooks" && ansible-playbook system_setup.yml )'
 # alias shutdown='( cd "$HOME/pc-setup/ansible_playbooks" && ansible-playbook system_clean.yml -e "shutdown=true" )'
@@ -77,3 +92,6 @@ test_args () {
 # alias wsl_up='( cd "$HOME/pc-setup/ansible_playbooks" && ansible-playbook system_setup.yml --tags "linux" )'
 # alias win_clean='( cd "$HOME/pc-setup/ansible_playbooks" && ansible-playbook system_clean.yml --tags "windows" )'
 # alias wsl_clean='( cd "$HOME/pc-setup/ansible_playbooks" && ansible-playbook system_clean.yml --tags "linux" )'
+
+# ansible-playbook system_setup.yml --tags "alias"
+# setup --tags alias

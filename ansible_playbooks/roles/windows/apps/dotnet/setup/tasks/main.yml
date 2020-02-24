@@ -4,8 +4,8 @@
 
 - name: List .NET Core tools installed
   win_shell: "dotnet tool list --global"
-  loop: "{{app_database_tools}}"
-  when: app_use_database
+  # loop: "{{app_database_tools}}"
+  # when: app_use_database
   register: out_tool_install
   changed_when: false
   tags: [dotnet, tool]

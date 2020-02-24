@@ -22,13 +22,13 @@
 
 
 - set_fact:
-    az_ad_app_displayNames_to_delete: "{{az_ad_app_displayNames | difference(app_projects_tracked)}}"
+    az_ad_app_displayNames_to_delete: "{{az_ad_app_displayNames | difference(app_names)}}"
 
-- name: Cleanup untracked app registration
-  command: >
-    az ad app delete
-    --id {{(out_ad_app_list.stdout | from_json | json_query(az_ad_app_project_delete_query) | first).appId}}
-  loop: "{{az_ad_app_displayNames_to_delete}}"
-  loop_control:
-    loop_var: az_ad_app_displayName_to_delete
+# - name: Cleanup untracked app registration
+#   command: >
+#     az ad app delete
+#     --id {{(out_ad_app_list.stdout | from_json | json_query(az_ad_app_project_delete_query) | first).appId}}
+#   loop: "{{az_ad_app_displayNames_to_delete}}"
+#   loop_control:
+#     loop_var: az_ad_app_displayName_to_delete
 ...

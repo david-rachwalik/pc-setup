@@ -14,5 +14,5 @@
       mode: '0755'
     tags: [bin]
 
-  tags: [setup, scripts]
+  tags: [setup, bash, scripts]
 ...

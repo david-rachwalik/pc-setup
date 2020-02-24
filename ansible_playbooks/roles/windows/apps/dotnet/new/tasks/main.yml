@@ -1,56 +1,41 @@
 ---
-# ansible windows -m include_role -a name="windows/apps/dotnet/new"
+# ansible windows -m include_role -a name="windows/apps/dotnet/new" -e "app_name=DMR"
+
+# - debug:
+#     var: app_repo
 
 # https://docs.microsoft.com/en-us/dotnet/core/tools/dotnet-new
 # https://docs.ansible.com/ansible/latest/modules/win_shell_module.html
 - name: Create .NET Core solution
   win_shell: "dotnet new sln --output {{app_solution_dir}}"
   args:
-    creates: "{{app_solution_dir}}"
+    creates: "{{app_sln}}"
   register: out_webapp_create
-  tags: [solution, sln]
+  tags: [dotnet, new, solution, sln]
 
-# 'dotnet new' automatically performs restore
-- name: Create .NET Core web app
-  win_shell: >-
-    dotnet new webapp
-    --output {{app_project_dir}}
-    --domain {{app_domain}}
-    --org-read-access
-    --auth {{app_authentication | default('None')}}
-  # --client-id {{hostvars['localhost']['az_ad_app_project_id']}}
-  args:
-    creates: "{{app_project_dir}}"
-  register: out_webapp_create
-  # when:
-  # - app_authentication == 'MultiOrg'
-  # - hostvars['localhost']['az_ad_app_project_id']
-  tags: [webapp]
+- include_role:
+    name: windows/apps/dotnet/new
+    tasks_from: webapp
+  # Target 'app_repo' projects, not 'app_repositories'
+  loop: "{{app_repo.projects | json_query('[*].name')}}"
+  loop_control:
+    loop_var: app_project_name
+  tags: [dotnet, new, webapp]
 
-# https://docs.microsoft.com/en-us/dotnet/core/tools/dotnet-sln
-- name: Add project to the solution
-  win_shell: "dotnet sln {{app_sln}} add {{app_csproj}}"
-  register: out_sln_add
-  changed_when: not 'already contains project' in out_sln_add.stdout
-  tags: [solution, sln, webapp]
-
-
-- block:
-  # https://docs.ansible.com/ansible/latest/modules/win_copy_module.html
-  - name: Ensure solution has readme
-    win_copy:
-      src: "{{app_readme | win_basename}}"
-      dest: "{{app_readme}}"
-    register: out_copy_readme
-    tags: [readme]
-
-  - name: Ensure solution has license
-    win_copy:
-      src: "{{app_license | win_basename}}"
-      dest: "{{app_license}}"
-    register: out_copy_license
-    tags: [license]
-
+# https://docs.ansible.com/ansible/latest/modules/win_copy_module.html
+- name: Ensure solution has readme
+  win_copy:
+    src: "{{app_readme | win_basename}}"
+    dest: "{{app_readme}}"
+  register: out_copy_readme
   when: app_use_extras
-  tags: [extras]
+  tags: [dotnet, new, extras, readme]
+
+- name: Ensure solution has license
+  win_copy:
+    src: "{{app_license | win_basename}}"
+    dest: "{{app_license}}"
+  register: out_copy_license
+  when: app_use_extras
+  tags: [dotnet, new, extras, license]
 ...
