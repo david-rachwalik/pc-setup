@@ -7,14 +7,14 @@
     # else
     #     ansible-playbook "system_setup.yml"
     # fi
-clean () {
-    cd "$HOME/pc-setup/ansible_playbooks"
-    play_run=$([ -n "$1" ] && echo "system_clean.yml $*" || echo "system_clean.yml")
-    ansible-playbook $play_run
-}
 setup () {
     cd "$HOME/pc-setup/ansible_playbooks"
     play_run=$([ -n "$1" ] && echo "system_setup.yml $*" || echo "system_setup.yml")
+    ansible-playbook $play_run
+}
+clean () {
+    cd "$HOME/pc-setup/ansible_playbooks"
+    play_run=$([ -n "$1" ] && echo "system_clean.yml $*" || echo "system_clean.yml")
     ansible-playbook $play_run
 }
 shutdown () {
@@ -23,6 +23,34 @@ shutdown () {
     ansible-playbook $play_run
 }
 
+# --- Alias Actions Required ---
+# repoc         app repository create
+# repod         app repository delete
+# azc           azure webapp create
+# azd           azure webapp delete
+# appc          full app create
+# appd          full app delete
+
+repoc () {
+    cd "$HOME/pc-setup/ansible_playbooks"
+    play_run=$([ -n "$1" ] && echo "app_create.yml --tags 'repo' $*" || echo "app_create.yml --tags 'repo'")
+    ansible-playbook $play_run
+}
+repod () {
+    cd "$HOME/pc-setup/ansible_playbooks"
+    play_run=$([ -n "$1" ] && echo "app_delete.yml --tags 'repo' $*" || echo "app_delete.yml --tags 'repo'")
+    ansible-playbook $play_run
+}
+azc () {
+    cd "$HOME/pc-setup/ansible_playbooks"
+    play_run=$([ -n "$1" ] && echo "app_create.yml --tags 'azure' $*" || echo "app_create.yml --tags 'azure'")
+    ansible-playbook $play_run
+}
+azd () {
+    cd "$HOME/pc-setup/ansible_playbooks"
+    play_run=$([ -n "$1" ] && echo "app_delete.yml --tags 'azure' $*" || echo "app_delete.yml --tags 'azure'")
+    ansible-playbook $play_run
+}
 appc () {
     cd "$HOME/pc-setup/ansible_playbooks"
     play_run=$([ -n "$1" ] && echo "app_repo_create.yml $*" || echo "app_repo_create.yml")
@@ -34,18 +62,8 @@ appd () {
     ansible-playbook $play_run
 }
 
-azc () {
-    cd "$HOME/pc-setup/ansible_playbooks"
-    play_run=$([ -n "$1" ] && echo "az_app_create.yml $*" || echo "az_app_create.yml")
-    ansible-playbook $play_run
-}
-azd () {
-    cd "$HOME/pc-setup/ansible_playbooks"
-    play_run=$([ -n "$1" ] && echo "az_app_delete.yml $*" || echo "az_app_delete.yml")
-    ansible-playbook $play_run
-}
-
 test_args () {
+    # echo "$?"
     echo "$?"
 }
 
