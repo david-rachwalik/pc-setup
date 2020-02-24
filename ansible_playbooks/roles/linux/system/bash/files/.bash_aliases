@@ -1,3 +1,17 @@
+# --- Alias: Main Actions ---
+# setup         provision system install and configuration
+# clean         backup files and scrub system
+# shutdown      perform system clean and shutdown
+
+# --- Alias: App Projects ---
+# repoc         app repository create
+# repod         app repository delete
+# azc           azure webapp create
+# azd           azure webapp delete
+# appc          full app create
+# appd          full app delete
+
+
 # Anytime the aliases are updated, be sure to restart your shell; source (.) has permission errors
 # https://linuxize.com/post/bash-functions/
 # Able to pass parameters such as --tags or --skip-tags
@@ -9,27 +23,16 @@
     # fi
 setup () {
     cd "$HOME/pc-setup/ansible_playbooks"
-    play_run=$([ -n "$1" ] && echo "system_setup.yml $*" || echo "system_setup.yml")
-    ansible-playbook $play_run
+    ansible-playbook system_setup.yml $*
 }
 clean () {
     cd "$HOME/pc-setup/ansible_playbooks"
-    play_run=$([ -n "$1" ] && echo "system_clean.yml $*" || echo "system_clean.yml")
-    ansible-playbook $play_run
+    ansible-playbook system_clean.yml $*
 }
 shutdown () {
     cd "$HOME/pc-setup/ansible_playbooks"
-    play_run=$([ -n "$1" ] && echo "system_clean.yml -e shutdown=true $*" || echo "system_clean.yml -e shutdown=true")
-    ansible-playbook $play_run
+    ansible-playbook system_clean.yml -e 'shutdown=true' $*
 }
-
-# --- Alias Actions Required ---
-# repoc         app repository create
-# repod         app repository delete
-# azc           azure webapp create
-# azd           azure webapp delete
-# appc          full app create
-# appd          full app delete
 
 repoc () {
     cd "$HOME/pc-setup/ansible_playbooks"
@@ -39,50 +42,30 @@ repoc () {
 }
 repod () {
     cd "$HOME/pc-setup/ansible_playbooks"
-    # play_run=$([ -n "$1" ] && echo "app_delete.yml --tags 'repo' $*" || echo "app_delete.yml --tags 'repo'")
-    # ansible-playbook $play_run
     ansible-playbook app_delete.yml --tags 'repo' $*
 }
 azc () {
     cd "$HOME/pc-setup/ansible_playbooks"
-    # play_run=$([ -n "$1" ] && echo "app_create.yml --tags 'azure' $*" || echo "app_create.yml --tags 'azure'")
-    # ansible-playbook $play_run
     ansible-playbook app_create.yml --tags 'azure' $*
 }
 azd () {
     cd "$HOME/pc-setup/ansible_playbooks"
-    # play_run=$([ -n "$1" ] && echo "app_delete.yml --tags 'azure' $*" || echo "app_delete.yml --tags 'azure'")
-    # ansible-playbook $play_run
     ansible-playbook app_delete.yml --tags 'azure' $*
 }
 appc () {
     cd "$HOME/pc-setup/ansible_playbooks"
-    # play_run=$([ -n "$1" ] && echo "app_repo_create.yml $*" || echo "app_repo_create.yml")
-    # ansible-playbook $play_run
     ansible-playbook app_create.yml $*
 }
 appd () {
     cd "$HOME/pc-setup/ansible_playbooks"
-    # play_run=$([ -n "$1" ] && echo "app_repo_delete.yml $*" || echo "app_repo_delete.yml")
-    # ansible-playbook $play_run
     ansible-playbook app_delete.yml $*
 }
 
 test_args () {
-    # echo "$?"
-    # echo "$*"
-    # echo "$0"
-    # echo "$1"
+    echo $?
     echo $*
-
-    # if [ "$seconds" -eq 0 ]; then
-    #     $timezone_string="Z"
-    #     elif[ "$seconds" -gt 0 ]
-    # then
-    #     $timezone_string=`printf "%02d:%02d" $seconds/3600 ($seconds/60)%60`
-    # else
-    #     echo "Unknown parameter"
-    # fi
+    echo $0
+    echo $1
 }
 
 # alias update='( cd "$HOME/pc-setup/ansible_playbooks" && ansible-playbook system_setup.yml )'
