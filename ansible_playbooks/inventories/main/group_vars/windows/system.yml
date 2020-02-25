@@ -2,6 +2,7 @@
 os_family: Windows
 user_dir: C:\Users\david
 backup_dir: D:\OneDrive\Backups
+boot_task_dir: C:\Windows\System32\Tasks   # %WINDIR%\System32\Tasks
 
 # https://docs.microsoft.com/en-us/windows/deployment/usmt/usmt-recognized-environment-variables
 # http://www.powershellcookbook.com/recipe/ZVHx/view-and-modify-environment-variables
@@ -58,7 +59,7 @@ chocolatey_packages:
   - name: postman
   - name: sqlitebrowser
   # - name: microsoftazurestorageexplorer
-  - name: jekyll
+  # - name: jekyll
   
   # --- Media ---
   - name: geforce-experience
@@ -76,13 +77,14 @@ chocolatey_packages:
   - name: streamlabs-obs
 
   # --- Videogames ---
-  - name: autohotkey
-  - name: discord
+  - name: directx
   - name: steam
+  - name: discord
   - name: twitch
+  - name: autohotkey
 
   uninstall:
-  # - name: python2
+  - name: python2
   - name: mitkerberos
   - name: docker-desktop
   # - name: unity
@@ -90,7 +92,6 @@ chocolatey_packages:
   - name: gimp
   - name: vlc
   - name: passkey
-  # - name: visualstudio2017community
 
 
 pip_packages:

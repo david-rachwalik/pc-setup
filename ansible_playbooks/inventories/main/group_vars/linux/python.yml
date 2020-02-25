@@ -10,4 +10,5 @@ python_boilerplate_modules:
 python_user_modules:
 - file_backup.py
 - mytest.py
+- test_process.py
 ...
