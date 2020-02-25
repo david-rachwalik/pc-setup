@@ -18,27 +18,12 @@
   hosts: windows
   tasks:
   - include_role:
-      name: windows/apps/dotnet/new
+      name: windows/apps/dotnet/create
     loop: "{{app_names}}"
     loop_control:
       loop_var: app_name
-    tags: [new]
-    
-  - fail:
-      msg: break point
-
-  - include_role:
-      name: windows/apps/git/init
-    tags: [git]
-    
-  - include_role:
-      name: windows/apps/dotnet/add
-    tags: [add]
-  
-  tags: [repo, dotnet]
-
-  # - windows/apps/dotnet/ef
-  # - { role: windows/apps/dotnet/build, app_open_vs: true }
+    tags: [new, git, add, entity_framework, ef]
+  tags: [repository, repo, dotnet]
 
 
 # Modes: [nodb, sqlserver, docker] (when F1, ignore custom domain)
@@ -51,12 +36,13 @@
 
 - name: Create Azure WebApp Service
   hosts: localhost
-  vars:
-    resource_group: DMR
-  roles:
-  - azure/app_service/create
+  tasks:
+  - include_role:
+      name: azure/app_service/create
+    loop: "{{app_names}}"
+    loop_control:
+      loop_var: app_name
   tags: [azure, az, app_service, publish]
-
 
 
 # Modes: [blob, website] (when F1, ignore custom domain)
