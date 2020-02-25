@@ -14,8 +14,8 @@
   tags: [dotnet, new, solution, sln]
 
 - include_role:
-    name: windows/apps/dotnet/new
-    tasks_from: webapp
+    name: windows/apps/dotnet/create
+    tasks_from: new_webapp
   # Target 'app_repo' projects, not 'app_repositories'
   loop: "{{app_repo.projects | json_query('[*].name')}}"
   loop_control:

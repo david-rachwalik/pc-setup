@@ -1,0 +1,23 @@
+---
+- include_role:
+    name: windows/apps/dotnet/create
+    tasks_from: new
+  tags: [new]
+  
+- fail:
+    msg: break point
+
+- include_role:
+    name: windows/apps/git/init
+  tags: [git]
+  
+- include_role:
+    name: windows/apps/dotnet/create
+    tasks_from: add
+  tags: [add]
+
+# - include_role:
+#     name: windows/apps/dotnet/create
+#     tasks_from: ef
+#   tags: [entity_framework, ef]
+...
