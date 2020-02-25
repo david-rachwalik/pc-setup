@@ -2,42 +2,66 @@
 - name: Provision Linux system
   hosts: linux
   become: true
-  roles:
-  - name: linux/system/apt
+  tasks:
+  # https://docs.ansible.com/ansible/latest/modules/include_role_module.html
+  - include_role:
+      name: linux/system/apt
     tags: [apt]
-  - name: linux/system/pip
+  
+  - include_role:
+      name: linux/system/pip
     tags: [pip]
+  
   tags: [linux]
+
 
 - name: Configure Linux environment
   hosts: linux
-  roles:
-  - name: linux/system/bash
+  tasks:
+  - include_role:
+      name: linux/system/bash
     tags: [bash]
-  - name: linux/apps/git
+
+  - include_role:
+      name: linux/apps/git
     tags: [git]
-  - name: python/user_modules
+
+  - include_role:
+      name: python/user_modules
     tags: [python, py]
+
   tags: [linux]
 
 
 - name: Provision & configure Windows
   hosts: windows
   become: true
-  roles:
+  tasks:
   # TODO: template Chocolatey .ps1 file and swap README example in place of group_vars yml
-  - name: windows/system/chocolatey
+  - include_role:
+      name: windows/system/chocolatey
     tags: [chocolatey, choco]
-  - name: windows/system/pip
+
+  - include_role:
+      name: windows/system/pip
     tags: [pip]
+
   # --- Configuration Steps ---
-  - name: windows/system/setup
-  - name: python/user_modules
+  - include_role:
+      name: windows/system/setup
+
+  - include_role:
+      name: python/user_modules
     tags: [python, py]
-  - name: windows/apps/dotnet/setup
+
+  - include_role:
+      name: windows/apps/dotnet/setup
     tags: [dotnet, tool]
-  - name: windows/apps/vscode/setup
+
+  - include_role:
+      name: windows/apps/vscode/setup
     tags: [vscode]
+
   # TODO: Install scanner software
   tags: [windows]
 
