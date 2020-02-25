@@ -14,15 +14,22 @@ game_version:
 
 game_suffix:
   final_fantasy_xiv: FINAL FANTASY XIV - A Realm Reborn
+  skyrim_vr: Skyrim VR
   world_of_warcraft_classic: World of Warcraft\_classic_
   world_of_warcraft_retail: World of Warcraft\_retail_
 
+# game_screenshot_suffix:
+#   final_fantasy_xiv: "{{game_suffix.final_fantasy_xiv}}\\screenshots"
+#   world_of_warcraft_classic: "{{game_suffix.world_of_warcraft_classic}}\\Screenshots"
+#   world_of_warcraft_retail: "{{game_suffix.world_of_warcraft_retail}}\\Screenshots"
+
 game_screenshot_suffix:
-  final_fantasy_xiv: "{{game_suffix.final_fantasy_xiv}}\\screenshots"
-  world_of_warcraft_classic: "{{game_suffix.world_of_warcraft_classic}}\\Screenshots"
-  world_of_warcraft_retail: "{{game_suffix.world_of_warcraft_retail}}\\Screenshots"
+  final_fantasy_xiv: screenshots
+  world_of_warcraft_classic: Screenshots
+  world_of_warcraft_retail: Screenshots
 
 game_setting_suffix:
+  skyrim_vr: "{{game_suffix.skyrim_vr}}\\Saves"
   world_of_warcraft_classic: "{{game_suffix.world_of_warcraft_classic}}\\WTF"
   world_of_warcraft_retail: "{{game_suffix.world_of_warcraft_retail}}\\WTF"
 
