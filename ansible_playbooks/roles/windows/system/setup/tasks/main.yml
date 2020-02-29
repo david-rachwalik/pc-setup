@@ -1,5 +1,11 @@
 ---
 # https://docs.ansible.com/ansible/latest/modules/include_role_module.html
+
+- include_role:
+    name: windows/system/setup
+    tasks_from: scheduled_task
+  tags: [scheduled_task, sched]
+
 - include_role:
     name: windows/system/setup
     tasks_from: desktop

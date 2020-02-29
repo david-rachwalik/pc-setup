@@ -1,0 +1,25 @@
+---
+# https://docs.microsoft.com/en-us/windows/win32/taskschd/trigger-types
+# types: boot, logon, daily, weekly, monthly, monthlydow, time
+# start_boundary required when type is daily, weekly, monthly, monthlydow, time
+# triggers.days_of_month required when type is monthly
+# triggers.days_of_week required when type is weekly, monthlydow (optional)
+scheduled_tasks:
+- name: AutoHotkey World of Warcraft
+  actions:
+  - path: D:\OneDrive\Documents\WorldOfWarcraft_SpamButton.ahk
+  triggers:
+  - type: boot
+
+# - name: AnsibleSetup
+#   description: "Ansible playbook that installs, updates, and provisions Windows 10 + WSL"
+#   actions:
+#   - path: wsl cd ~/pc-setup/ansible_playbooks && ansible-playbook system_setup.yml
+#   # path: C:\Windows\System32\wsl.exe
+#   # arguments: -c ansible-playbook system_setup.yml
+#   # working_directory: /home/david/pc-setup/ansible_playbooks
+#   triggers:
+#   - type: daily
+#     start_boundary: "2020-01-01T06:00:00-06:00"
+#   - type: boot
+...
