@@ -1,0 +1,11 @@
+---
+# https://docs.ansible.com/ansible/latest/modules/list_of_cloud_modules.html
+# https://docs.ansible.com/ansible/latest/modules/azure_rm_deployment_module.html
+- name: Deploy Azure Resource Manager Template
+  azure_rm_deployment:
+    resource_group_name: "{{ resource_group }}"
+    name: "{{ app_service }}"
+    template_link: "{{ template_url }}"
+    parameters_link: "{{ parameter_url }}"
+    state: present
+...
