@@ -1,4 +1,0 @@
----
-dependencies:
-- { role: azure/sql_server/create }
-...
