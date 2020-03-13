@@ -25,8 +25,8 @@ game_backups:
     root: /mnt/c/Users/david/Documents
     name: Diablo III
     screenshot: Screenshots
-    setting: " " # primarily want ./D3Prefs.txt
-    setting_opts: ["--exclude=*/"]
+    setting: " "
+    setting_opts: ["--include=D3Prefs.txt", "--exclude=*"]
 
   # - id: dragonball_fighter_z
 
@@ -34,9 +34,19 @@ game_backups:
     root: /mnt/c/Users/david/Documents/My Games
     name: FINAL FANTASY XIV - A Realm Reborn
     screenshot: screenshots
-    setting: " " # primarily want ./D3Prefs.txt
-    setting_opts: ["--dry-run", "--exclude=*/", "--include=*.cfg"]
+    setting: " "
+    setting_opts: ["--include=*.cfg", "--exclude=*"]
 
+  - id: hotline_miami
+    root: /mnt/c/Users/david/Documents/My Games
+    name: HotlineMiami
+    setting: " "
+    setting_opts: ["--include=*.sav", "--exclude=*"]
+
+  - id: killing_floor_2
+    root: /mnt/c/Users/david/Documents/My Games
+    name: KillingFloor2
+    setting: KFGame/Config
 
   # - id: left_4_dead
 
@@ -44,17 +54,27 @@ game_backups:
 
   # - id: magicka
 
-  # - id: rocket_league
+  - id: rocket_league
+    root: /mnt/c/Users/david/Documents/My Games
+    name: Rocket League
+    setting: TAGame/Config
 
   # - id: senran_kagura_peach_beach_splash
 
   # Sims 3 [archive screenshots/settings/addons, run memory cleanup]
   # - id: sims_iii
 
-  # - id: skyrim_se
+  - id: skyrim_se
+    root: /mnt/c/Users/david/Documents/My Games
+    name: Skyrim Special Edition
+    setting: " "
+    setting_opts: ["--include=Saves/", "--include=Saves/*", "--exclude=*/", "--include=*.ini", "--exclude=*"]
 
-  # - id: Skyrim VR
-  #   setting: Saves
+  - id: skyrim_vr
+    root: /mnt/c/Users/david/Documents/My Games
+    name: Skyrim VR
+    setting: " "
+    setting_opts: ["--include=Saves/", "--include=Saves/*", "--exclude=*/", "--include=*.ini", "--exclude=*"]
 
   # - id: star_wars_knights_of_the_old_republic
 
