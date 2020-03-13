@@ -25,7 +25,7 @@ game_backups:
     root: /mnt/c/Users/david/Documents
     name: Diablo III
     screenshot: Screenshots
-    setting: / # primarily want ./D3Prefs.txt
+    setting: " " # primarily want ./D3Prefs.txt
     setting_opts: ["--exclude=*/"]
 
   # - id: dragonball_fighter_z
@@ -34,6 +34,9 @@ game_backups:
     root: /mnt/c/Users/david/Documents/My Games
     name: FINAL FANTASY XIV - A Realm Reborn
     screenshot: screenshots
+    setting: " " # primarily want ./D3Prefs.txt
+    setting_opts: ["--dry-run", "--exclude=*/", "--include=*.cfg"]
+
 
   # - id: left_4_dead
 
