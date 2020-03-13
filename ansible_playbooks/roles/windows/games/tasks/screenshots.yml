@@ -1,0 +1,110 @@
+---
+# clean --tags ss
+
+- block:
+  - debug:
+      var: game_backup
+
+  # https://docs.ansible.com/ansible/latest/modules/synchronize_module.html
+  - name: Sync game directory contents
+    synchronize:
+      src: "{{game_backup.root_dir}}/{{game_backup.name}}/{{game_backup.screenshot}}"
+      dest: "{{game_root_bak}}/{{game_backup.name}}/{{game_backup.screenshot}}"
+      rsync_opts: /E /PURGE /L
+
+  # # https://docs.ansible.com/ansible/latest/modules/win_robocopy_module.html
+  # - name: Sync game directory contents
+  #   win_robocopy:
+  #     src: "{{game_backup.root_dir}}\\{{game_backup.name}}\\{{game_backup.screenshot}}"
+  #     dest: "{{game_root_bak}}\\{{game_backup.name}}\\{{game_backup.screenshot}}"
+  #     flags: /E /PURGE /L
+
+  - fail:
+      msg: break point
+
+
+  # - name: Ensure backup directory exists
+  #   win_file:
+  #     path: "{{game_root_bak}}"
+  #     state: directory
+
+  - name: Find game screenshots
+    win_find:
+      # paths: "{{game_root_dir[item.key]}}\\{{item.value}}"
+      paths: "{{game_root_dir[item.key]}}\\{{game_suffix[item.key]}}\\{{item.value}}"
+    loop: "{{game_screenshot_suffix | dict2items}}"
+    register: find_screenshot_facts
+    # no_log: true
+
+  - set_fact:
+      game_screenshots: "{{out_find_game_screenshots | json_query('results[*].files[*].path')}}"
+  - set_fact:
+      game_screenshots_to_backup: "{{(game_screenshots != '') | ternary(game_screenshots | list, [])}}"
+
+
+  # Robocopy will create any necessary folders
+  # https://docs.ansible.com/ansible/latest/modules/win_robocopy_module.html
+  # - name: Backup game screenshot
+  #   win_robocopy:
+  #     src: "{{game_root_dir[item.key]}}\\{{game_suffix[item.key]}}\\{{item.value}}"
+  #     dest: "{{game_root_bak}}\\{{game_suffix[item.key]}}\\{{item.value}}"
+  #   loop: "{{game_screenshot_suffix | dict2items}}"
+  #   register: screenshot_sync_facts
+
+  # - name: Clear game screenshot directory
+  #   win_file:
+  #     path: "{{game_root_dir[item.key]}}\\{{game_suffix[item.key]}}\\{{item.value}}"
+  #     state: absent
+  #   loop: "{{game_screenshot_suffix | dict2items}}"
+
+
+  # # Robocopy will create any necessary folders
+  # # https://docs.ansible.com/ansible/latest/modules/win_robocopy_module.html
+  # - name: Backup game screenshot
+  #   win_robocopy:
+  #     src: "{{game_root_dir[item.key]}}\\{{item.value}}"
+  #     dest: "{{game_root_bak}}\\{{item.value}}"
+  #   loop: "{{game_screenshot_suffix | dict2items}}"
+  #   register: screenshot_sync_facts
+
+  # - name: Clear game screenshot directory
+  #   win_file:
+  #     path: "{{game_root_dir[item.key]}}\\{{item.value}}"
+  #     state: absent
+  #   loop: "{{game_screenshot_suffix | dict2items}}"
+
+  tags: [games, backup, screenshots, ss]
+
+
+# - name: Backup game screenshots
+#   win_copy:
+#     remote_src: true
+#     src: "{{game_root_dir[item.key]}}\\{{item.value}}"
+#     dest: "{{game_root_bak}}\\{{item.value}}"
+#     # src: "{{item}}"
+#     # dest: "{{game_screenshot_bak.keys() | list}}\\{{item | win_basename}}"
+#   loop: "{{game_screenshot_suffix | dict2items}}"
+#   register: out_copy_game_screenshots
+
+
+# - name: Find game screenshots
+#   win_find:
+#     paths: "{{game_root_dir[item.key]}}\\{{item.value}}"
+#   loop: "{{game_screenshot_suffix | dict2items}}"
+#   register: out_find_game_screenshots
+#   # no_log: true
+
+# - set_fact:
+#     game_screenshots: "{{out_find_game_screenshots | json_query('results[*].files[*].path')}}"
+# - set_fact:
+#     game_screenshots_to_backup: "{{(game_screenshots != '') | ternary(game_screenshots | list, [])}}"
+
+# - name: Clear tmp game screenshots
+#   win_copy:
+#     remote_src: true
+#     src: "{{item}}"
+#     dest: "{{game_screenshot_bak.keys() | list}}\\{{item | win_basename}}"
+#   loop: "{{game_screenshots_to_backup}}"
+#   when: game_screenshots_to_backup | count > 0
+#   register: out_copy_game_screenshots
+...

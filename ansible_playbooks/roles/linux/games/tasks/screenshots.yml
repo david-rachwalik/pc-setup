@@ -1,0 +1,30 @@
+---
+# clean --tags screenshots
+# clean --tags screenshots -e "game_screenshot_ids=['world_of_warcraft']"
+# clean --tags screenshots -e "game_ids=['diablo_iii']"
+
+- block:
+  # https://docs.ansible.com/ansible/latest/modules/stat_module.html
+  - name: Verify game screenshots directory
+    stat:
+      path: "{{game_backup.root | path_join(game_backup.name, game_backup.screenshot)}}"
+    register: screenshot_dir_facts
+
+  # https://docs.ansible.com/ansible/latest/modules/file_module.html
+  - name: Verify game screenshots backup directory exists
+    file:
+      path: "{{game_backup_root_dir | path_join(game_backup.name, game_backup.screenshot)}}"
+      state: directory
+    when: screenshot_dir_facts.stat.exists
+
+  # https://docs.ansible.com/ansible/latest/modules/synchronize_module.html
+  # End 'src' with a '/' to mirror its content, not the directory itself
+  - name: Sync game screenshots directory content
+    synchronize:
+      src: "{{game_backup.root | path_join(game_backup.name, game_backup.screenshot)}}/"
+      dest: "{{game_backup_root_dir | path_join(game_backup.name, game_backup.screenshot)}}"
+      rsync_opts: "{{game_screenshot_default_opts + game_backup.screenshot_opts | default([])}}"
+    when: screenshot_dir_facts.stat.exists
+
+  tags: [games, backup, screenshots, ss]
+...
