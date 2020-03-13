@@ -1,0 +1,106 @@
+---
+# -------- Required Parameters --------
+# - id:             Arbitrary 'game_id' given for ad hoc commands
+# - root:           Install directory path without game title
+# - name:           Directory for the game title (mirrored by backup)
+# -------- Optionals Parameters --------
+# - addon:          Directory for addons
+# - screenshot:     Directory for screenshots
+# - setting:        Directory for settings
+
+
+game_backups:
+  # - id: age_of_empires_ii
+
+  # - id: age_of_empires_iii
+
+  # - id: bayonetta
+
+  # - id: blade_and_soul
+  #   root: /mnt/c/Users/david/Documents/My Games
+  #   name: BnS
+  #   setting: NCWEST
+
+  - id: diablo_iii
+    root: /mnt/c/Users/david/Documents
+    name: Diablo III
+    screenshot: Screenshots
+    setting: / # primarily want ./D3Prefs.txt
+    setting_opts: ["--exclude=*/"]
+
+  # - id: dragonball_fighter_z
+
+  - id: final_fantasy_xiv
+    root: /mnt/c/Users/david/Documents/My Games
+    name: FINAL FANTASY XIV - A Realm Reborn
+    screenshot: screenshots
+
+  # - id: left_4_dead
+
+  # - id: left_4_dead_2
+
+  # - id: magicka
+
+  # - id: rocket_league
+
+  # - id: senran_kagura_peach_beach_splash
+
+  # Sims 3 [archive screenshots/settings/addons, run memory cleanup]
+  # - id: sims_iii
+
+  # - id: skyrim_se
+
+  # - id: Skyrim VR
+  #   setting: Saves
+
+  # - id: star_wars_knights_of_the_old_republic
+
+  # - id: terraria
+
+  # - id: vrchat
+
+  - id: world_of_warcraft
+    root: /mnt/e/GameFiles
+    name: World of Warcraft/_retail_
+    addon: Interface/AddOns
+    addon_opts: ["--exclude=DataStore*"]
+    screenshot: Screenshots
+    setting: WTF
+    setting_opts: ["--exclude=*.bak", "--exclude=*.old"]
+
+  - id: world_of_warcraft_classic
+    root: /mnt/e/GameFiles
+    name: World of Warcraft/_classic_
+    addon: Interface/AddOns
+    addon_opts: ["--exclude=DataStore*"]
+    screenshot: Screenshots
+    setting: WTF
+    setting_opts: ["--exclude=*.bak", "--exclude=*.old"]
+
+
+# Already covered by OneDrive
+# - windows/games/overwatch
+# - windows/games/corruption_of_champions
+
+
+# ------------------------ Game Application Parsing ------------------------
+
+game_backup_root_dir: /mnt/d/OneDrive/Backups/Games
+game_backup_query: "[?id=='{{game_id}}']"
+game_backup: "{{game_backups | json_query(game_backup_query) | first}}"
+
+game_ids: "{{game_backups | json_query('[*].id') | list}}"
+game_addon_ids: "{{game_backups | json_query('[?addon].id') | list}}"
+game_screenshot_ids: "{{game_backups | json_query('[?screenshot].id') | list}}"
+game_setting_ids: "{{game_backups | json_query('[?setting].id') | list}}"
+
+game_addon_default_opts:
+# - "--dry-run"
+- "--delete"                # Unique to addons
+- "--prune-empty-dirs"
+game_screenshot_default_opts:
+- "--remove-source-files"   # Unique to screenshots
+- "--exclude=*/"
+game_setting_default_opts:
+- "--prune-empty-dirs"
+...

@@ -11,7 +11,8 @@ class FilterModule(object):
       # Chocolatey packages
       'to_package': self.ChocolateyPackages,
       'from_package': self.ChocolateyPackageNames,
-      'diff_package': self.ChocolateyPackageDifference
+      'diff_package': self.ChocolateyPackageDifference,
+      'path_join': self.path_join
     }
 
 
@@ -74,3 +75,10 @@ class FilterModule(object):
         results.append(package)
 
     return results
+
+
+  def path_join(self, *args):
+    import os
+    path = os.path.join(*args)
+    result = path.rstrip("/")
+    return result

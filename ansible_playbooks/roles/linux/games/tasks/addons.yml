@@ -1,0 +1,29 @@
+---
+# clean --tags addons
+# clean --tags addons -e "game_addon_ids=['world_of_warcraft']"
+
+- block:
+  # https://docs.ansible.com/ansible/latest/modules/stat_module.html
+  - name: Verify game addons directory
+    stat:
+      path: "{{game_backup.root | path_join(game_backup.name, game_backup.addon)}}"
+    register: addon_dir_facts
+
+  # https://docs.ansible.com/ansible/latest/modules/file_module.html
+  - name: Verify game addons backup directory exists
+    file:
+      path: "{{game_backup_root_dir | path_join(game_backup.name, game_backup.addon)}}"
+      state: directory
+    when: addon_dir_facts.stat.exists
+
+  # https://docs.ansible.com/ansible/latest/modules/synchronize_module.html
+  # End 'src' with a '/' to mirror its content, not the directory itself
+  - name: Sync game addons directory content
+    synchronize:
+      src: "{{game_backup.root | path_join(game_backup.name, game_backup.addon)}}/"
+      dest: "{{game_backup_root_dir | path_join(game_backup.name, game_backup.addon)}}"
+      rsync_opts: "{{game_addon_default_opts + game_backup.addon_opts | default([])}}"
+    when: addon_dir_facts.stat.exists
+
+  tags: [games, backup, addons]
+...

@@ -1,55 +1,39 @@
 ---
 - name: Backup important system files
-  hosts: windows
+  hosts: linux
   tasks:
-  # ------------------------ Applications ------------------------
   - include_role:
-      name: windows/apps/handbrake
-      tasks_from: backup
-    tags: [handbrake]
-  # - windows/apps/discord
-  # - windows/apps/obs
-  # - windows/apps/vscode
-    tags: [applications, apps]
+      name: linux/games
+    loop: "{{game_ids}}"
+    loop_control:
+      loop_var: game_id
+    tags: [games, backup, screenshots, ss, settings, addons]
+    
 
-  # ------------------------ Games ------------------------
-  - block:
-    - include_role:
-        name: windows/games/screenshots
-        # tasks_from: backup
-      tags: [screenshots, ss]
-    # - include_role:
-    #     name: windows/games/settings
-    #   tags: [settings]
-    # - include_role:
-    #     name: windows/games/addons
-    #   tags: [addons]
-    tags: [games]
+# - name: Backup important system files
+#   hosts: windows
+#   tasks:
+#   # ------------------------ Applications ------------------------
+#   - include_role:
+#       name: windows/apps/handbrake
+#       tasks_from: backup
+#     tags: [handbrake]
+#   # - windows/apps/discord
+#   # - windows/apps/obs
+#   # - windows/apps/vscode
+  
+#     # - include_role:
+#     #     name: windows/apps/settings
+#     #   tags: [settings]
+#     # tags: [applications, apps]
 
-  # - windows/games/world_of_warcraft
-
-  # - windows/games/sims_iii    # [archive screenshots/settings/addons, run memory cleanup]
-  # - windows/games/diablo_iii
-  # - windows/games/skyrim_se
-  # - windows/games/skyrim_vr
-  # - windows/games/rocket_league
-  # - windows/games/terraria
-  # - windows/games/vrchat
-  # - windows/games/age_of_empires_ii
-  # - windows/games/age_of_empires_iii
-  # - windows/games/bayonetta
-  # - windows/games/dragonball_fighter_z
-  # - windows/games/left_4_dead
-  # - windows/games/left_4_dead_2
-  # - windows/games/magicka
-  # - windows/games/senran_kagura_peach_beach_splash
-  # - windows/games/star_wars_knights_of_the_old_republic
-
-  # ----------------------------------------------------------------
-  # --- Games already covered by OneDrive ---
-  # - windows/games/overwatch
-  # - windows/games/corruption_of_champions
-  # ----------------------------------------------------------------
+#   # ------------------------ Games ------------------------
+#   - include_role:
+#       name: windows/games
+#     loop: "{{game_names}}"
+#     loop_control:
+#       loop_var: game_name
+#     tags: [games, screenshots, ss]
 
 
 # TODO:

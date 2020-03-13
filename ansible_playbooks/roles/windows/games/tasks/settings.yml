@@ -1,0 +1,20 @@
+---
+# clean --tags settings
+
+- block:
+  # https://docs.ansible.com/ansible/latest/modules/win_robocopy_module.html
+  - name: Backup game setting
+    win_robocopy:
+      src: "{{game_root_dir[item.key]}}\\{{item.value}}"
+      dest: "{{game_root_bak}}\\{{item.value}}"
+    loop: "{{game_setting_suffix | dict2items}}"
+    register: screenshot_sync_facts
+
+  - name: Clear game setting directory
+    win_file:
+      path: "{{game_root_dir[item.key]}}\\{{item.value}}"
+      state: absent
+    loop: "{{game_setting_suffix | dict2items}}"
+
+  tags: [games, backup, settings]
+...

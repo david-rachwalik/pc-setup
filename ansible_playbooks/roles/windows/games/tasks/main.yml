@@ -1,0 +1,20 @@
+---
+- block:
+  - include_role:
+      name: windows/games
+      tasks_from: screenshots
+    loop: "{{game_names}}"
+    loop_control:
+      loop_var: game_name
+    tags: [screenshots, ss]
+
+  # - include_role:
+  #     name: windows/games/settings
+  #   tags: [settings]
+
+  # - include_role:
+  #     name: windows/games/addons
+  #   tags: [addons]
+  
+  tags: [games]
+...
