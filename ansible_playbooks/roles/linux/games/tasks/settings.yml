@@ -1,7 +1,7 @@
 ---
 # clean --tags settings
-# clean --tags settings -e "game_setting_ids=['world_of_warcraft']"
-# clean --tags settings -e "game_setting_ids=['diablo_iii']"
+# clean --tags settings -e "game_ids=['world_of_warcraft']"
+# clean --tags settings -e "game_ids=['final_fantasy_xiv']"
 
 - block:
   # https://docs.ansible.com/ansible/latest/modules/stat_module.html

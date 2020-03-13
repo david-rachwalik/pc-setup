@@ -80,5 +80,5 @@ class FilterModule(object):
   def path_join(self, *args):
     import os
     path = os.path.join(*args)
-    result = path.rstrip("/")
+    result = path.rstrip().rstrip("/")
     return result

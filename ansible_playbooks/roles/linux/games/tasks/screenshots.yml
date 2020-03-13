@@ -1,6 +1,6 @@
 ---
 # clean --tags screenshots
-# clean --tags screenshots -e "game_screenshot_ids=['world_of_warcraft']"
+# clean --tags screenshots -e "game_ids=['world_of_warcraft']"
 # clean --tags screenshots -e "game_ids=['diablo_iii']"
 
 - block:

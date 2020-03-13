@@ -1,6 +1,6 @@
 ---
 # clean --tags addons
-# clean --tags addons -e "game_addon_ids=['world_of_warcraft']"
+# clean --tags addons -e "game_ids=['world_of_warcraft']"
 
 - block:
   # https://docs.ansible.com/ansible/latest/modules/stat_module.html

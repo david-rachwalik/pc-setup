@@ -4,6 +4,7 @@
 - block:
   - debug:
       msg: "Backing up game: {{game_backup.name}}"
+    tags: [screenshots, ss, settings, addons]
 
   - name: Include tasks to backup game screenshots
     include_role:
