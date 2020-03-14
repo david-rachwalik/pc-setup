@@ -10,12 +10,6 @@
 
 
 game_backups:
-  # - id: age_of_empires_ii
-
-  # - id: age_of_empires_iii
-
-  # - id: bayonetta
-
   # - id: blade_and_soul
   #   root: /mnt/c/Users/david/Documents/My Games
   #   name: BnS
@@ -28,7 +22,13 @@ game_backups:
     setting: " "
     setting_opts: ["--include=D3Prefs.txt", "--exclude=*"]
 
-  # - id: dragonball_fighter_z
+  - id: elder_scrolls_online
+    root: /mnt/c/Users/david/Documents
+    name: Elder Scrolls Online/live
+    addon: AddOns
+    screenshot: Screenshots
+    setting: " "
+    setting_opts: ["--include=SavedVariables/", "--include=SavedVariables/*", "--exclude=*/", "--include=*.txt", "--exclude=*"]
 
   - id: final_fantasy_xiv
     root: /mnt/c/Users/david/Documents/My Games
@@ -48,18 +48,10 @@ game_backups:
     name: KillingFloor2
     setting: KFGame/Config
 
-  # - id: left_4_dead
-
-  # - id: left_4_dead_2
-
-  # - id: magicka
-
   - id: rocket_league
     root: /mnt/c/Users/david/Documents/My Games
     name: Rocket League
     setting: TAGame/Config
-
-  # - id: senran_kagura_peach_beach_splash
 
   # Sims 3 [archive screenshots/settings/addons, run memory cleanup]
   # - id: sims_iii
@@ -75,12 +67,6 @@ game_backups:
     name: Skyrim VR
     setting: " "
     setting_opts: ["--include=Saves/", "--include=Saves/*", "--exclude=*/", "--include=*.ini", "--exclude=*"]
-
-  # - id: star_wars_knights_of_the_old_republic
-
-  # - id: terraria
-
-  # - id: vrchat
 
   - id: world_of_warcraft
     root: /mnt/e/GameFiles
@@ -101,10 +87,10 @@ game_backups:
     setting_opts: ["--exclude=*.bak", "--exclude=*.old"]
 
 
-# Already covered by OneDrive
-# - windows/games/overwatch
-# - windows/games/corruption_of_champions
-
+# --- Covered by OneDrive ---
+# overwatch
+# --- Covered by Steam ---
+# *most other games
 
 # ------------------------ Game Application Parsing ------------------------
 
