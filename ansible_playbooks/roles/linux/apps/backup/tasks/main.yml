@@ -1,0 +1,32 @@
+---
+# clean --tags app
+# clean --tags app -e "app_ids=['handbrake']"
+
+- block:
+  - debug:
+      msg: "Backing up app: {{app_backup.name}}"
+
+  # https://docs.ansible.com/ansible/latest/modules/stat_module.html
+  - name: Verify app setting directory
+    stat:
+      path: "{{app_backup.root | path_join(app_backup.name, app_backup.setting)}}"
+    register: setting_dir_facts
+
+  # https://docs.ansible.com/ansible/latest/modules/file_module.html
+  - name: Verify app setting backup directory exists
+    file:
+      path: "{{app_backup_root_dir | path_join(app_backup.name, app_backup.setting)}}"
+      state: directory
+    when: setting_dir_facts.stat.exists
+
+  # https://docs.ansible.com/ansible/latest/modules/synchronize_module.html
+  # End 'src' with a '/' to mirror its content, not the directory itself
+  - name: Backup application directory content
+    synchronize:
+      src: "{{app_backup.root | path_join(app_backup.name, app_backup.setting)}}/"
+      dest: "{{app_backup_root_dir | path_join(app_backup.name, app_backup.setting)}}"
+      rsync_opts: "{{app_setting_default_opts + app_backup.setting_opts | default([])}}"
+    when: setting_dir_facts.stat.exists
+
+  tags: [app, backup]
+...
