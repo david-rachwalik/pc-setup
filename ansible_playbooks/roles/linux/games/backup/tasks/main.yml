@@ -1,36 +1,36 @@
 ---
-# clean --tags games -e "game_ids=['world_of_warcraft']"
+# clean --tags game -e "game_ids=['world_of_warcraft']"
 
 - block:
   - debug:
       msg: "Backing up game: {{game_backup.name}}"
-    tags: [screenshots, ss, settings, addons]
+    tags: [screenshot, ss, setting, addon]
 
   - name: Include tasks to backup game screenshots
     include_role:
-      name: linux/games
+      name: linux/games/backup
       tasks_from: screenshots
     when: game_id in game_screenshot_ids
-    tags: [screenshots, ss]
+    tags: [screenshot, ss]
 
   - name: Include tasks to backup game settings
     include_role:
-      name: linux/games
+      name: linux/games/backup
       tasks_from: settings
     when: game_id in game_setting_ids
-    tags: [settings]
+    tags: [setting]
 
   - name: Include tasks to backup game addons
     include_role:
-      name: linux/games
+      name: linux/games/backup
       tasks_from: addons
     when: game_id in game_addon_ids
-    tags: [addons]
+    tags: [addon]
 
   # NOTE: Must target 'game_ids' with --extra-vars
   # Using 'game_id' will not prevent duplicate looping
   # module_defaults:
   #   include_role:
   #     allow_duplicates: false
-  tags: [games, backup]
+  tags: [game, backup]
 ...

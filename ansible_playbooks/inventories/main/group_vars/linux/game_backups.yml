@@ -1,0 +1,115 @@
+---
+# -------- Required Parameters --------
+# - id:             Arbitrary 'game_id' given for ad hoc commands
+# - root:           Install directory path without game title
+# - name:           Directory for the game title (mirrored by backup)
+# -------- Optionals Parameters --------
+# - addon:          Directory for addons
+# - screenshot:     Directory for screenshots
+# - setting:        Directory for settings
+
+
+game_backups:
+# - id: blade_and_soul
+#   root: /mnt/c/Users/david/Documents/My Games
+#   name: BnS
+#   setting: NCWEST
+
+- id: diablo_iii
+  root: /mnt/c/Users/david/Documents
+  name: Diablo III
+  screenshot: Screenshots
+  setting: " "
+  setting_opts: ["--include=D3Prefs.txt", "--exclude=*"]
+
+- id: elder_scrolls_online
+  root: /mnt/c/Users/david/Documents
+  name: Elder Scrolls Online/live
+  addon: AddOns
+  screenshot: Screenshots
+  setting: " "
+  setting_opts: ["--include=SavedVariables/", "--include=SavedVariables/*", "--exclude=*/", "--include=*.txt", "--exclude=*"]
+
+- id: final_fantasy_xiv
+  root: /mnt/c/Users/david/Documents/My Games
+  name: FINAL FANTASY XIV - A Realm Reborn
+  screenshot: screenshots
+  setting: " "
+  setting_opts: ["--include=*.cfg", "--exclude=*"]
+
+- id: hotline_miami
+  root: /mnt/c/Users/david/Documents/My Games
+  name: HotlineMiami
+  setting: " "
+  setting_opts: ["--include=*.sav", "--exclude=*"]
+
+- id: killing_floor_2
+  root: /mnt/c/Users/david/Documents/My Games
+  name: KillingFloor2
+  setting: KFGame/Config
+
+- id: rocket_league
+  root: /mnt/c/Users/david/Documents/My Games
+  name: Rocket League
+  setting: TAGame/Config
+
+# Sims 3 [archive screenshots/settings/addons, run memory cleanup]
+# - id: sims_iii
+
+- id: skyrim_se
+  root: /mnt/c/Users/david/Documents/My Games
+  name: Skyrim Special Edition
+  setting: " "
+  setting_opts: ["--include=Saves/", "--include=Saves/*", "--exclude=*/", "--include=*.ini", "--exclude=*"]
+
+- id: skyrim_vr
+  root: /mnt/c/Users/david/Documents/My Games
+  name: Skyrim VR
+  setting: " "
+  setting_opts: ["--include=Saves/", "--include=Saves/*", "--exclude=*/", "--include=*.ini", "--exclude=*"]
+
+- id: world_of_warcraft
+  root: /mnt/e/GameFiles
+  name: World of Warcraft/_retail_
+  addon: Interface/AddOns
+  addon_opts: ["--exclude=DataStore*/", "--exclude=TradeSkillMaster_AppHelper/"]
+  screenshot: Screenshots
+  setting: WTF
+  setting_opts: ["--exclude=*.bak", "--exclude=*.old"]
+
+- id: world_of_warcraft_classic
+  root: /mnt/e/GameFiles
+  name: World of Warcraft/_classic_
+  addon: Interface/AddOns
+  addon_opts: ["--exclude=DataStore*/", "--exclude=TradeSkillMaster_AppHelper/"]
+  screenshot: Screenshots
+  setting: WTF
+  setting_opts: ["--exclude=*.bak", "--exclude=*.old"]
+
+
+# --- Covered by OneDrive ---
+# overwatch
+# --- Covered by Steam ---
+# *most other games
+
+# ------------------------ Game Application Parsing ------------------------
+
+game_backup_root_dir: /mnt/d/OneDrive/Backups/Games
+game_backup_query: "[?id=='{{game_id}}']"
+game_backup: "{{game_backups | json_query(game_backup_query) | first}}"
+
+game_ids: "{{game_backups | json_query('[*].id') | list}}"
+game_addon_ids: "{{game_backups | json_query('[?addon].id') | list}}"
+game_screenshot_ids: "{{game_backups | json_query('[?screenshot].id') | list}}"
+game_setting_ids: "{{game_backups | json_query('[?setting].id') | list}}"
+
+game_addon_default_opts:
+# - "--dry-run"
+- "--delete"                # Unique to addons
+- "--prune-empty-dirs"
+game_screenshot_default_opts:
+- "--remove-source-files"   # Unique to screenshots
+- "--exclude=*/"
+game_setting_default_opts:
+- "--prune-empty-dirs"
+...
