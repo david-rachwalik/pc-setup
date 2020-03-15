@@ -3,66 +3,18 @@
   hosts: linux
   tasks:
   - include_role:
-      name: linux/games
+      name: linux/apps/backup
+    loop: "{{app_ids}}"
+    loop_control:
+      loop_var: app_id
+    tags: [app, backup, setting]
+
+  - include_role:
+      name: linux/games/backup
     loop: "{{game_ids}}"
     loop_control:
       loop_var: game_id
-    tags: [games, backup, screenshots, ss, settings, addons]
-    
-
-# - name: Backup important system files
-#   hosts: windows
-#   tasks:
-#   # ------------------------ Applications ------------------------
-#   - include_role:
-#       name: windows/apps/handbrake
-#       tasks_from: backup
-#     tags: [handbrake]
-#   # - windows/apps/discord
-#   # - windows/apps/obs
-#   # - windows/apps/vscode
-  
-#     # - include_role:
-#     #     name: windows/apps/settings
-#     #   tags: [settings]
-#     # tags: [applications, apps]
-
-#   # ------------------------ Games ------------------------
-#   - include_role:
-#       name: windows/games
-#     loop: "{{game_names}}"
-#     loop_control:
-#       loop_var: game_name
-#     tags: [games, screenshots, ss]
-
-
-# TODO:
-# - Connect to Windows and gather facts about the environment
-# - Backup Windows application settings & data
-#   - backup game saves, screenshots, addons
-#   - backup preferences for productivity programs
-
-
-# ----------------------------------------------------------------
-# FROM: win_sync.yml
-# ----------------------------------------------------------------
-# - name: Transfer files from Windows to WLS
-#   hosts: localhost
-#   tasks:
-#   - name: Transfer playbooks from Windows to WSL
-#     copy:
-#       src: "{{win_repo}}"
-#       dest: "{{wsl_repo}}"
-      
-#   - name: Convert Windows files to *nix
-#     command: "dos2unix {{wsl_repo}}"
-#     register: out_dos2unix
-
-# --- Previous ad-hoc commands used (prior to Git):
-# sudo cp /mnt/d/Repos_Exp/pc-setup/etc/ansible/wsl_playbook_copy.yml /etc/ansible/wsl_playbook_copy.yml
-# dos2unix /etc/ansible/wsl_playbook_copy.yml
-# cd /etc/ansible/
-# ansible-playbook wsl_playbook_copy.yml
+    tags: [game, backup, screenshot, ss, setting, addon]
 
 
 - name: Clean system health
