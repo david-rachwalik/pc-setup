@@ -1,14 +1,4 @@
 ---
-os_family: Windows
-user_dir: C:\Users\david
-backup_dir: D:\OneDrive\Backups
-boot_task_dir: C:\Windows\System32\Tasks   # %WINDIR%\System32\Tasks
-
-# https://docs.microsoft.com/en-us/windows/deployment/usmt/usmt-recognized-environment-variables
-# http://www.powershellcookbook.com/recipe/ZVHx/view-and-modify-environment-variables
-
-# https://stackoverflow.com/questions/3790454/how-do-i-break-a-string-over-multiple-lines
-
 # --- Microsoft Visual Studio 2019 ---
 # https://chocolatey.org/packages/visualstudio2019community
 # https://docs.microsoft.com/en-us/visualstudio/install/use-command-line-parameters-to-install-visual-studio
@@ -16,6 +6,7 @@ boot_task_dir: C:\Windows\System32\Tasks   # %WINDIR%\System32\Tasks
 # TODO: https://marketplace.visualstudio.com/items?itemName=MadsKristensen.OpenCommandLine
 # --- Microsoft Office 365 ---
 # https://chocolatey.org/packages/microsoft-office-deployment
+
 
 powershell_uninstall_appx_packages:
 - CanonicalGroupLimited.Ubuntu18.04onWindows
