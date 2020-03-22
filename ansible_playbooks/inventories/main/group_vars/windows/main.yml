@@ -1,24 +1,14 @@
 ---
+os_family: Windows
 # Windows username is the basename of 'echo $HOME'
+user_dir: C:\Users\david
+backup_dir: D:\OneDrive\Backups
+boot_task_dir: C:\Windows\System32\Tasks   # %WINDIR%\System32\Tasks
+# %APPDATA%
 
-# https://docs.ansible.com/ansible/latest/user_guide/intro_inventory.html
-# -------- Host Connection Settings --------
-ansible_connection: winrm
-# ansible_connection: ssh
-# ansible_shell_type: powershell
-# -------- General Connection Settings --------
-ansible_user: "{{vault_ansible_user}}"
-ansible_password: "{{vault_ansible_password}}"
-# Find host IP address with 'ifconfig' command
-# ansible_host: "{{vault_ansible_host}}"
-ansible_port: 5986
-# -------- WinRM Connection Settings --------
-ansible_winrm_transport: basic
-# ansible_winrm_message_encryption: auto
-ansible_winrm_server_cert_validation: ignore
 
-# https://docs.ansible.com/ansible/latest/user_guide/become.html
-# -------- Privilege Escalation Settings --------
-ansible_become_user: david
-ansible_become_method: runas
+# https://docs.microsoft.com/en-us/windows/deployment/usmt/usmt-recognized-environment-variables
+# http://www.powershellcookbook.com/recipe/ZVHx/view-and-modify-environment-variables
+
+# https://stackoverflow.com/questions/3790454/how-do-i-break-a-string-over-multiple-lines
 ...
