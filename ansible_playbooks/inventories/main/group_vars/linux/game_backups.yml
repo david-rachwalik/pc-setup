@@ -19,6 +19,7 @@ game_backups:
   root: /mnt/c/Users/david/Documents
   name: Diablo III
   screenshot: Screenshots
+  screenshot_opts: ["--backup", "--backup-dir=backup_{{ lookup('pipe','date +%Y-%m-%d') }}"]
   setting: " "
   setting_opts: ["--include=D3Prefs.txt", "--exclude=*"]
 
@@ -29,6 +30,17 @@ game_backups:
   screenshot: Screenshots
   setting: " "
   setting_opts: ["--include=SavedVariables/", "--include=SavedVariables/*", "--exclude=*/", "--include=*.txt", "--exclude=*"]
+
+- id: elite_dangerous
+  root: /mnt/c/Users/david/AppData/Local
+  name: Frontier Developments/Elite Dangerous
+  setting: Options/Bindings
+  setting_opts: ["--exclude=*.log"]
+
+# - id: elite_dangerous_screenshot
+#   root: /mnt/c/Users/david/Pictures
+#   name: Frontier Developments/Elite Dangerous
+#   screenshot: " "
 
 - id: final_fantasy_xiv
   root: /mnt/c/Users/david/Documents/My Games
@@ -68,6 +80,11 @@ game_backups:
   setting: " "
   setting_opts: ["--include=Saves/", "--include=Saves/*", "--exclude=*/", "--include=*.ini", "--exclude=*"]
 
+- id: stardew_valley
+  root: /mnt/c/Users/david/AppData/Roaming
+  name: StardewValley
+  setting: " "
+
 - id: world_of_warcraft
   root: /mnt/e/GameFiles
   name: World of Warcraft/_retail_
@@ -85,6 +102,18 @@ game_backups:
   screenshot: Screenshots
   setting: WTF
   setting_opts: ["--exclude=*.bak", "--exclude=*.old"]
+
+- id: world_of_warcraft_weakauras_companion
+  root: /mnt/c/Users/david/AppData/Roaming
+  name: weakauras-companion
+  setting: " "
+  setting_opts: ["--include=config.json", "--exclude=*"]
+
+- id: yiffalicious
+  root: /mnt/c/Users/david/AppData/Roaming
+  name: yiffalicious
+  screenshot: screenshots
+  setting: interactions/favorites
 
 
 # --- Covered by OneDrive ---
