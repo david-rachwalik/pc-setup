@@ -1,0 +1,16 @@
+---
+# view /etc/logrotate.conf
+# https://linux.die.net/man/8/logrotate
+# https://www.digitalocean.com/community/tutorials/how-to-manage-logfiles-with-logrotate-on-ubuntu-16-04
+
+# ansible-playbook system_setup.yml --tags logrotate
+
+- name: Update log rotate
+  copy:
+    src: "{{item}}"
+    dest: "/etc/logrotate.d/{{item}}"
+    mode: '0644'
+  loop:
+  - ansible_scheduled_task
+  tags: [logrotate]
+...
