@@ -1,0 +1,10 @@
+~/log/ansible_scheduled_task.log {
+    create 0664 david david
+    # keep 30 days of log files
+    rotate 30
+    daily
+    # skip error message when log file is missing
+    missingok
+    # skip log rotate when file is empty
+    notifempty
+}

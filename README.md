@@ -39,6 +39,12 @@ Open VSCode in Linux with [Core CLI](https://code.visualstudio.com/docs/editor/c
 code ~/pc-setup
 ```
 
+Review latest logs (*rotated daily*)
+
+``` bash
+view ~/log/ansible_scheduled_task.log
+```
+
 ## Initialization Alternative: Windows Only (No WSL+Ansible)
 
 > *Most actions are only run the first time except `choco upgrade all`*

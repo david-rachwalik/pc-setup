@@ -12,6 +12,10 @@
       name: linux/system/pip
     tags: [pip]
   
+  - include_role:
+      name: linux/system/setup
+    tags: [logrotate]
+  
   tags: [linux]
 
 
