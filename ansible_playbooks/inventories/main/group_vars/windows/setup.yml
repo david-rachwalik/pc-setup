@@ -43,34 +43,32 @@ file_naming_convention:
 # start_boundary required when type is daily, weekly, monthly, monthlydow, time
 # triggers.days_of_month required when type is monthly
 # triggers.days_of_week required when type is weekly, monthlydow (optional)
+# NOTE: 'working_directory' parameter for Windows directory
 scheduled_tasks:
-- name: AutoHotkey World of Warcraft
-  actions:
-  # - path: D:\OneDrive\Documents\WorldOfWarcraft_SpamButton.ahk
-  - path: C:\Program Files\AutoHotkey\AutoHotkey.exe
-    arguments: D:\OneDrive\Documents\WorldOfWarcraft_SpamButton.ahk
-  triggers:
-  - type: boot
-
-# - name: Ansible Daily Setup
-#   description: "Ansible playbook that installs, updates, and provisions Windows 10 + WSL"
-#   actions:
-#   - path: C:\Windows\System32\bash.exe
-#     arguments: -c ansible-playbook system_setup.yml
-#     working_directory: ~/pc-setup/ansible_playbooks
-#   triggers:
-#   - type: daily
-#     start_boundary: "2020-01-01T06:00:00-06:00"
-#   - type: boot
-
 # https://dev.to/ironfroggy/wsl-tips-starting-linux-background-services-on-windows-login-3o98
 - name: Ansible Daily Backup
   description: Ansible playbook to back up app & game files
   actions:
   - path: C:\Windows\System32\bash.exe
-    arguments: -c ansible-playbook system_setup.yml
-    working_directory: ~/pc-setup/ansible_playbooks
+    arguments: -c "script -q -c 'cd ~/pc-setup/ansible_playbooks && ansible-playbook system_clean.yml --tags backup' -a ~/log/ansible_scheduled_task.log"
   triggers:
   - type: daily
     start_boundary: "2020-01-01T04:00:00-06:00"
+
+# - name: Ansible Daily Update
+#   description: Ansible playbook that provisions Windows and WSL
+#   actions:
+#   - path: C:\Windows\System32\bash.exe
+#     arguments: -c ansible-playbook system_setup.yml
+#   triggers:
+#   - type: daily
+#     start_boundary: "2020-01-01T06:00:00-06:00"
+#   - type: boot
+
+- name: AutoHotkey World of Warcraft
+  actions:
+  - path: C:\Program Files\AutoHotkey\AutoHotkey.exe
+    arguments: D:\OneDrive\Documents\WorldOfWarcraft_SpamButton.ahk
+  triggers:
+  - type: boot
 ...
