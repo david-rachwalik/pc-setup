@@ -1,10 +1,13 @@
 ---
+# NOTE: Never pass 'app_repo_names' to --extra-vars
+
 - name: Delete Azure Active Directory application
   hosts: localhost
   tasks:
   # https://docs.ansible.com/ansible/latest/modules/include_role_module.html
   - include_role:
-      name: azure/active_directory/delete
+      name: azure/active_directory
+      tasks_from: delete
   tags: [azure, ad]
 
 

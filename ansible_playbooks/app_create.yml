@@ -1,6 +1,6 @@
 ---
-# ansible-playbook app_create.yml -e "app_name=DMR"
-# repoc -e "app_name=DMR"
+# ansible-playbook app_create.yml -e "app_repo_name=DMR"
+# repoc -e "app_repo_name=DMR"
 
 - name: Create Azure Active Directory application
   hosts: localhost
@@ -8,9 +8,11 @@
   # https://docs.ansible.com/ansible/latest/modules/include_role_module.html
   - include_role:
       name: azure/active_directory/create
-    loop: "{{app_names}}"
+      # name: azure/active_directory
+      # tasks_from: create
+    loop: "{{app_repo_names}}"
     loop_control:
-      loop_var: app_name
+      loop_var: app_repo_name
   tags: [azure, az, active_directory, ad]
 
 
@@ -19,9 +21,9 @@
   tasks:
   - include_role:
       name: windows/apps/dotnet/create
-    loop: "{{app_names}}"
+    loop: "{{app_repo_names}}"
     loop_control:
-      loop_var: app_name
+      loop_var: app_repo_name
     tags: [new, git, add, entity_framework, ef]
   tags: [repository, repo, dotnet]
 
@@ -39,10 +41,10 @@
   tasks:
   - include_role:
       name: azure/app_service/create
-    loop: "{{app_names}}"
+    loop: "{{app_repo_names}}"
     loop_control:
-      loop_var: app_name
-  tags: [azure, az, app_service, publish]
+      loop_var: app_repo_name
+  tags: [azure, az, app_service, publish, host]
 
 
 # Modes: [blob, website] (when F1, ignore custom domain)
