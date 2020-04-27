@@ -121,16 +121,7 @@ game_backups:
 # --- Covered by Steam ---
 # *most other games
 
-# ------------------------ Game Application Parsing ------------------------
-
-game_backup_root_dir: /mnt/d/OneDrive/Backups/Games
-game_backup_query: "[?id=='{{game_id}}']"
-game_backup: "{{game_backups | json_query(game_backup_query) | first}}"
-
-game_ids: "{{game_backups | json_query('[*].id') | list}}"
-game_addon_ids: "{{game_backups | json_query('[?addon].id') | list}}"
-game_screenshot_ids: "{{game_backups | json_query('[?screenshot].id') | list}}"
-game_setting_ids: "{{game_backups | json_query('[?setting].id') | list}}"
+# ------------------------ Default Options ------------------------
 
 game_addon_default_opts:
 # - "--dry-run"
@@ -141,4 +132,16 @@ game_screenshot_default_opts:
 - "--exclude=*/"
 game_setting_default_opts:
 - "--prune-empty-dirs"
+
+# ------------------------ Game Backup Parsing ------------------------
+
+game_backup_root_dir: /mnt/d/OneDrive/Backups/Games
+
+game_backup_query: "[?id=='{{game_id}}']"
+game_backup: "{{game_backups | json_query(game_backup_query) | first}}"
+
+game_ids: "{{game_backups | json_query('[*].id') | list}}"
+game_addon_ids: "{{game_backups | json_query('[?addon].id') | list}}"
+game_screenshot_ids: "{{game_backups | json_query('[?screenshot].id') | list}}"
+game_setting_ids: "{{game_backups | json_query('[?setting].id') | list}}"
 ...

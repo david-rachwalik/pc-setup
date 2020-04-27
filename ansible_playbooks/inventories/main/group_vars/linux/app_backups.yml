@@ -27,15 +27,18 @@ app_backups:
   setting_opts: ["--include=settings.json", "--include=snippets/", "--exclude=*"]
 
 
-# ------------------------ Application Parsing ------------------------
+# ------------------------ Default Options ------------------------
+
+app_setting_default_opts:
+- "--prune-empty-dirs"
+
+# ------------------------ Application Backup Parsing ------------------------
 
 app_backup_root_dir: /mnt/d/OneDrive/Backups/Apps
+
 app_backup_query: "[?id=='{{app_id}}']"
 app_backup: "{{app_backups | json_query(app_backup_query) | first}}"
 
 app_ids: "{{app_backups | json_query('[*].id') | list}}"
 app_setting_ids: "{{app_backups | json_query('[?setting].id') | list}}"
-
-app_setting_default_opts:
-- "--prune-empty-dirs"
 ...
