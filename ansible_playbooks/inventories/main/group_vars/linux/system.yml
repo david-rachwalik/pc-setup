@@ -16,6 +16,8 @@ apt_packages:
 # --- NPM ---
 # - nodejs
 # - npm
+# https://docs.microsoft.com/en-us/cli/azure/install-azure-cli-apt
+- azure-cli
 
 
 # npm_packages:

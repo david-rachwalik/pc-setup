@@ -25,6 +25,9 @@ dotnet_database_packages:
 
 dotnet_identity_packages:
 - Microsoft.AspNetCore.Authentication.AzureAD.UI
+# Install-Package Microsoft.Owin.Security.OpenIdConnect
+# Install-Package Microsoft.Owin.Security.Cookies
+# Install-Package Microsoft.Owin.Host.SystemWeb
 
 dotnet_packages: "{{dotnet_development_packages | union(dotnet_database_packages) | union(dotnet_identity_packages)}}"
 ...
