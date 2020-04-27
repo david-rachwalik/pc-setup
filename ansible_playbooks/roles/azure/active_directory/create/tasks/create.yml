@@ -1,0 +1,67 @@
+---
+# active directory (1):(many) app subscriptions / app limited to 1 directory at a time
+# Using Microsoft Identity platform (v2.0), not Azure Active Directory (v1.0) endpoints
+# https://docs.microsoft.com/en-us/azure/active-directory/develop/azure-ad-endpoint-comparison
+# --- Accounts in any Azure AD directory and personal Microsoft accounts - Multi-tenant
+# https://docs.microsoft.com/en-us/azure/active-directory/develop/single-and-multi-tenant-apps
+# https://docs.microsoft.com/en-us/azure/active-directory/develop/quickstart-v2-aspnet-core-webapp
+
+- block:
+  - debug:
+      msg: "Active Directory app: {{app_project.name}}"
+
+  - name: Check Azure AD application registration
+    command: >-
+      az ad app show
+      --id {{az_ad_identifier_urls | first}}
+    register: out_ad_app_show
+    changed_when: false # query only
+    ignore_errors: true
+    no_log: true
+
+
+  # https://docs.microsoft.com/en-us/cli/azure/ad/app#az-ad-app-create
+  # NOTE: The az command is idempotent and provides the same output as app show/list
+  - name: Create Azure AD application registration
+    command: >-
+      az ad app create
+      --display-name {{app_project.name}}
+      --homepage {{app_domain}}
+      --identifier-uris {{az_ad_identifier_urls | join(' ')}}
+      --reply-urls {{az_ad_reply_urls | join(' ')}}
+    # --oauth2-allow-implicit-flow true
+    # TODO: add --app-roles once authentication testing is further
+    when: out_ad_app_show.rc != 0
+    register: out_ad_app_create
+
+
+  # - debug:
+  #     var: az_ad_app_project_id
+  #   when: out_ad_app_show.rc == 0
+
+  # - debug:
+  #     var: az_ad_app_show_parse
+  #   when: out_ad_app_show.rc == 0
+
+  # https://docs.microsoft.com/en-us/cli/azure/ad/app#az-ad-app-update
+  # NOTE: The az command is idempotent and provides the same output as app show/list
+  - name: Update Azure AD application registration
+    command: >-
+      az ad app update
+      --id {{az_ad_identifier_urls | first}}
+      --display-name {{app_project.name}}
+      --homepage {{app_domain}}
+      --identifier-uris {{az_ad_identifier_urls | join(' ')}}
+      --reply-urls {{az_ad_reply_urls | join(' ')}}
+    # --oauth2-allow-implicit-flow true
+    # TODO: add --app-roles once authentication testing is further
+    when: out_ad_app_show.rc == 0
+    register: out_ad_app_update
+    changed_when: out_ad_app_update.stdout != ""
+
+
+  when:
+  - app_authentication is defined
+  - app_authentication != 'None'
+  tags: [azure, az, active_directory, ad, identity, create]
+...

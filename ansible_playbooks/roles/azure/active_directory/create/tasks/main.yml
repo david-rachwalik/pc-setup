@@ -1,0 +1,13 @@
+---
+# ansible-playbook app_create.yml --tags ad -e "app_repo_names=['DMR']"
+# appc --tags ad -e "app_repo_names=['DMR']"
+
+# https://docs.ansible.com/ansible/latest/modules/include_role_module.html
+- include_role:
+    name: azure/active_directory/create
+    tasks_from: create
+  loop: "{{app_project_names}}"
+  loop_control:
+    loop_var: app_project_name
+  tags: [azure, az, active_directory, ad, identity, create]
+...
