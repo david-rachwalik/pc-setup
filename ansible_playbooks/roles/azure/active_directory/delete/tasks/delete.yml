@@ -1,4 +1,11 @@
 ---
+- debug:
+    var: app_repo
+
+- fail:
+    msg: break point
+
+
 # ansible localhost -m include_role -a "name=azure/active_directory/delete"
 # NOTE: Needs to be run multiple times to delete apps sharing the same name
 #       This is acceptable because the create role only allows unique names
@@ -22,7 +29,7 @@
 
 
 - set_fact:
-    az_ad_app_displayNames_to_delete: "{{az_ad_app_displayNames | difference(app_names)}}"
+    az_ad_app_displayNames_to_delete: "{{az_ad_app_displayNames | difference(app_repo_names)}}"
 
 # - name: Cleanup untracked app registration
 #   command: >
