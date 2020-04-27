@@ -2,25 +2,25 @@
 # https://docs.microsoft.com/en-us/dotnet/core/tools/dotnet-new
 # Application Repository Options:   [solution, source, host, projects]
 # Application Project Options:      [name, template, authentication, port]
-# - template choices:               [web, webapp, webapi, xunit, console]
-# - authentication choices:         [None, Individual, MultiOrg]
+# - template choices:               [webapp, webapi, xunit, console]
+# - authentication choices:         [Individual, SingleOrg]
 
 # possible modes: [nodb, sqlserver, identity, docker]
 
-# app_name = app_repositories[*].solution
+# app_repo_name = app_repositories[*].solution
 app_repositories:
+- solution: pc-setup
+  source: GitHub
+
 - solution: DMR
   source: GitHub
   host: Azure
   projects:
   - name: DMR.WebApp
     template: webapp
-    authentication: MultiOrg
+    authentication: SingleOrg
   - name: DMR.UnitTests
     template: xunit
-
-- solution: pc-setup
-  source: GitHub
 
 - solution: SexBound
   source: Azure
@@ -45,7 +45,7 @@ app_repositories:
   projects:
   - name: WebApiApps.WebApp
     template: webapp
-    authentication: MultiOrg
+    authentication: SingleOrg
   - name: WebApiApps.UnitTests
     template: xunit
 
@@ -68,33 +68,37 @@ app_repositories:
   source: GitHub
   host: GitHub
 
+- solution: Tester
+  source: GitHub
+  host: Azure
+  projects:
+  - name: Tester.Api
+    template: webapi
+    authentication: SingleOrg
+  # - name: Tester.WebApp
+  #   template: webapp
+  #   authentication: SingleOrg
+  # - name: Tester.UnitTests
+  #   template: xunit
+  use_extras: true
 
 
-# ------------------------ Application Repository Parsing ------------------------
+# ------------------------ Application Repository/Project Parsing ------------------------
 
-app_names: "{{app_repositories | json_query('[*].solution')}}"
-app_repo_query: "[?solution=='{{app_name}}']"
-app_repo: "{{app_repositories | json_query(app_repo_query) | first}}"
+# Application repository/project names must be unique
+app_repo_names: "{{app_repositories | json_query('[*].solution')}}"
+app_project_names: "{{app_repo | json_query('projects[*].name')}}"
 
-# NOTE: all project names must be unique across all solutions
-app_project_names: "{{app_repositories | json_query('[*].projects[*].name')}}"
+app_repo_query: "[?solution=='{{app_repo_name}}']"
 app_project_query: "[*].projects[?name=='{{app_project_name}}']"
+
+app_repo: "{{app_repositories | json_query(app_repo_query) | first}}"
 app_project: "{{app_repositories | json_query(app_project_query) | flatten | first}}"
 
-app_location_dir: D:\Repos
-app_solution_dir: "{{app_location_dir}}\\{{app_repo.solution}}"
-app_sln: "{{app_solution_dir}}\\{{app_repo.solution}}.sln"
-app_readme: "{{app_solution_dir}}\\README.md"
-app_license: "{{app_solution_dir}}\\LICENSE"
-app_project_dir: "{{app_solution_dir}}\\{{app_project.name}}"
-app_csproj: "{{app_project_dir}}\\{{app_project.name}}.csproj"
+
 app_authentication: "{{app_project.authentication | default('None')}}"
 app_domain: "https://localhost:{{app_project.port | default(5001)}}"
-app_use_extras: "{{app_project.use_extras | default(false)}}"
-app_use_database: "{{app_project.use_database | default(false)}}"
-app_database_context: MainContext
-
-app_git_repo_dir: "{{app_solution_dir}}\\.git"
-app_gitignore: "{{app_solution_dir}}\\.gitignore"
-app_gitattributes: "{{app_solution_dir}}\\.gitattributes"
+app_use_extras: "{{app_repo.use_extras | default(false)}}"
+# app_use_database: "{{app_project.use_database | default(false)}}"
+# app_database_context: MainContext
 ...
