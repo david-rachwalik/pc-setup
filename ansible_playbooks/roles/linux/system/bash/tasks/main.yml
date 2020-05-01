@@ -14,5 +14,14 @@
       mode: '0755'
     tags: [bin]
 
+  # - name: Update bash script
+  #   copy:
+  #     src: "~/bin/{{shell_alias | basename}}"
+  #     dest: "{{shell_alias}}"
+  #     mode: '0644'
+  #   loop:
+  #   - backup_test.sh
+  #   tags: [bin]
+
   tags: [setup, bash, scripts]
 ...

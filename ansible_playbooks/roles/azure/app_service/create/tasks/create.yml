@@ -1,0 +1,29 @@
+---
+- block:
+  - include_role:
+      name: azure/service_plan/create
+      tasks_from: create
+
+  - debug:
+      var: resource_group
+  - debug:
+      var: service_plan
+  - debug:
+      var: app_service
+  - debug:
+      var: az_appserviceplan_id
+
+  # https://docs.ansible.com/ansible/latest/modules/azure_rm_webapp_module.html
+  - name: Create a windows web app
+    azure_rm_webapp:
+      name: "{{ app_service }}"
+      resource_group: "{{ resource_group }}"
+      # plan: "{{ service_plan }}"
+      plan: "{{ az_appserviceplan_id }}"
+      state: present
+  
+  - fail:
+      msg: break point
+  
+  tags: [azure, az, app_service, publish, host]
+...

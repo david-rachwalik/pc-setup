@@ -1,0 +1,6 @@
+---
+# https://docs.ansible.com/ansible/latest/modules/azure_rm_resourcegroup_info_module.html
+- name: Get facts for resource group
+  azure_rm_resourcegroup_facts:
+    name: "{{ resource_group }}"
+...

@@ -1,0 +1,44 @@
+---
+# https://docs.microsoft.com/en-us/azure/azure-resource-manager/templates/template-tutorial-create-first-template?tabs=azure-cli
+
+
+#   - include_role:
+#       name: azure/key_vault/create
+#       tasks_from: create
+
+#   - debug:
+#       var: key_vault
+#   - debug:
+#       var: service_plan
+#   - debug:
+#       var: az_appserviceplan_id
+
+- block:
+  - include_role:
+      name: azure/resource_group/create
+      tasks_from: create
+
+
+  - debug:
+      var: resource_group
+  - debug:
+      var: app_service
+  - debug:
+      var: template_url
+  - debug:
+      var: parameter_url
+#   - fail:
+#       msg: break point
+
+  # https://docs.ansible.com/ansible/latest/modules/azure_rm_deployment_module.html
+  - name: Deploy Azure Resource Manager Template
+    azure_rm_deployment:
+      name: "{{app_service}}"
+      resource_group_name: "{{resource_group}}"
+      location: "{{ location }}"
+      template_link: "{{template_url}}"
+      parameters_link: "{{parameter_url}}"
+      state: present
+  
+  tags: [azure, az, deploy, resource_manager, arm]
+...
