@@ -18,29 +18,33 @@ az_ad_app_show_parse: "{{ out_ad_app_show.stdout | from_json }}"
 # az_ad_app_convert: "{{out_ad_app_create.stdout | from_json | json_query('{appId: appId, displayName: displayName}')}}"
 az_ad_app_project_id: "{{out_ad_app_show.stdout | from_json | json_query('appId')}}"
 
+az_appserviceplan_id: "{{az_appserviceplan_facts | json_query('appserviceplans[0].id')}}"
+
 
 # ------------------------------------------------
 # https://docs.microsoft.com/en-us/azure/architecture/best-practices/naming-conventions
-sku: FREE
-resource_group: "rg-{{app_project.name}}"
 location: "South Central US"
+plan_sku: F1
+sku: FREE
+
+resource_group: "rg-{{app_project.name}}"
+service_plan: "plan-{{app_project.name}}"
+app_service: "app-{{app_project.name}}"
 # sql_server must contain only lowercase letters, numbers, and hyphens; must be 3-50 characters long
-sql_server: "sqlsv-{{app_project.name}}"
+sql_server: "sql-{{app_project.name}}"
 sql_database: "sqldb-{{app_project.name}}"
+storage_account: "sa-{{app_project.name}}"
+
 db_username: Rhodair
 db_password: null
 # username must be unique within Azure; must not contain the '@' symbol for local Git pushes
 deploy_username: null
 # password must contain at least 2 of the 3 elements: letters, numbers, and symbols; must be >= 8 characters long
 deploy_password: null
-storage_account: "sa-{{app_project.name}}"
 
 # 'az_plan' must be between 3-24 chars, only lowercase or numbers
 # TODO: replace() will use regex to strip ALL special characters
 # service_plan: "plan-{{app_project.name | replace('_', '') | truncate(19) | lower}}"
-service_plan: "plan-{{app_project.name}}"
-plan_sku: F1
 # app must be globally unique with valid characters a-z, 0-9, and -
-app_service: "azapp-{{app_project.name}}"
 connection_string: null
 ...

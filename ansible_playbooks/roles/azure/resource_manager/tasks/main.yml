@@ -1,0 +1,14 @@
+---
+# ansible-playbook app_create.yml --tags deploy -e "app_repo_names=['DMR']"
+# appc --tags deploy -e "app_repo_names=['DMR']"
+# appc --tags deploy -e "app_repo_names=['Tester']"
+
+# https://docs.ansible.com/ansible/latest/modules/include_role_module.html
+- include_role:
+    name: azure/resource_manager
+    tasks_from: create
+  loop: "{{app_project_names}}"
+  loop_control:
+    loop_var: app_project_name
+  tags: [azure, az, deploy, resource_manager, arm]
+...

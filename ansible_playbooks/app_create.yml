@@ -2,6 +2,10 @@
 # ansible-playbook app_create.yml -e "app_repo_name=DMR"
 # repoc -e "app_repo_name=DMR"
 
+# https://docs.microsoft.com/en-us/cli/azure/account#az-account-show
+# az login | az account show
+
+
 - name: Create Azure Active Directory application
   hosts: localhost
   tasks:
@@ -36,15 +40,15 @@
 # https://docs.microsoft.com/en-us/azure/ansible/ansible-overview
 # https://docs.ansible.com/ansible/latest/modules/list_of_cloud_modules.html#azure
 
-- name: Create Azure WebApp Service
-  hosts: localhost
-  tasks:
-  - include_role:
-      name: azure/app_service/create
-    loop: "{{app_repo_names}}"
-    loop_control:
-      loop_var: app_repo_name
-  tags: [azure, az, app_service, publish, host]
+# - name: Create Azure WebApp Service
+#   hosts: localhost
+#   tasks:
+#   - include_role:
+#       name: azure/app_service/create
+#     loop: "{{app_repo_names}}"
+#     loop_control:
+#       loop_var: app_repo_name
+#   tags: [azure, az, app_service, publish, host]
 
 
 # Modes: [blob, website] (when F1, ignore custom domain)
@@ -61,4 +65,15 @@
 #     storage_account: superfancysitename
 #   roles:
 #   - azure/storage_account/create
+
+
+- name: Deploy Azure Resource Manager Template
+  hosts: localhost
+  tasks:
+  - include_role:
+      name: azure/resource_manager
+    loop: "{{app_repo_names}}"
+    loop_control:
+      loop_var: app_repo_name
+  tags: [azure, az, deploy, resource_manager, arm]
 ...

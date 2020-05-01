@@ -1,5 +1,0 @@
----
-# https://docs.ansible.com/ansible/latest/modules/azure_rm_keyvaultsecret_module.html
-# https://docs.ansible.com/ansible/latest/modules/azure_rm_keyvault_info_module.html
-# https://docs.ansible.com/ansible/latest/modules/azure_rm_keyvault_module.html
-...
