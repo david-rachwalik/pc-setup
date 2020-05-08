@@ -1,0 +1,24 @@
+---
+# setup --tags sched
+
+# https://docs.ansible.com/ansible/latest/modules/win_scheduled_task_stat_module.html
+# - name: Get information about a folder
+#   win_scheduled_task_stat:
+#     name: "{{item.name}}"
+#   loop: "{{scheduled_tasks}}"
+#   register: task_stat_data
+
+# https://docs.ansible.com/ansible/latest/modules/win_scheduled_task_module.html
+- name: Update scheduled task
+  win_scheduled_task:
+    name: "{{item.name}}"
+    actions: "{{item.actions}}"
+    triggers: "{{item.triggers}}"
+  loop: "{{scheduled_tasks}}"
+  register: scheduled_task_results
+  tags: [scheduled_task, sched]
+
+# %LOCALAPPDATA%\Packages\CanonicalGroupLimited.UbuntuonWindows_79rhkp1fndgsc\LocalState\rootfs
+# %LOCALAPPDATA%\Packages\CanonicalGroupLimited.Ubuntu18.04onWindows_79rhkp1fndgsc\LocalState\rootfs
+# C:\Users\david\AppData\Local\Packages\CanonicalGroupLimited.Ubuntu18.04onWindows_79rhkp1fndgsc\LocalState\rootfs
+...

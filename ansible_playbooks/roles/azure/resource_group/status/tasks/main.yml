@@ -1,7 +1,0 @@
----
-# ansible localhost -m include_role -a "name=azure/resource_group/status"
-
-# https://docs.ansible.com/ansible/latest/modules/azure_rm_resourcegroup_facts_module.html
-- name: Get facts for all resource groups
-  azure_rm_resourcegroup_facts:
-...

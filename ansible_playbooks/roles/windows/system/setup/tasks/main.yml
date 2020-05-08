@@ -1,36 +1,12 @@
 ---
-- block:
-  # https://docs.ansible.com/ansible/latest/modules/win_find_module.html
-  - name: Find Desktop Shortcuts
-    win_find:
-      paths: "{{desktops}}"
-      patterns: ["*.lnk"]
-    no_log: true
-    register: out_find_desktop
-  
-  # https://docs.ansible.com/ansible/latest/modules/win_file_module.html
-  - name: Delete Desktop Shortcuts
-    win_file:
-      path: "{{item.path}}"
-      state: absent
-    loop: "{{out_find_desktop.files}}"
-    register: file_result
-    
-  - name: Display Remaining Files
-    win_find:
-      paths: "{{desktops}}"
-    register: out_find_desktop
-  
-  tags: ["setup", "desktop"]
+# https://docs.ansible.com/ansible/latest/modules/include_role_module.html
 
+- include_role:
+    name: windows/system/setup
+    tasks_from: scheduled_task
+  tags: [scheduled_task, sched]
 
-# - block:
-  # https://docs.ansible.com/ansible/latest/modules/win_mapped_drive_module.html
-  # - H: \\HeroCamp\home
-  # - O: \\HeroCamp\OneDrive
-  # - M: \\HeroCamp\Multimedia
-  # - P: \\HeroCamp\Public
-  # - Z: \\HeroCamp\Pervy Yum Sauce
-
-  # tags: ["setup", "drive", "mount"]
+- include_role:
+    name: windows/system/setup
+    tasks_from: desktop
 ...

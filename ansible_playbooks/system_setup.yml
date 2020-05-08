@@ -2,37 +2,77 @@
 - name: Provision Linux system
   hosts: linux
   become: true
-  roles:
-  - linux/system/apt
-  - linux/system/pip
+  tasks:
+  # https://docs.ansible.com/ansible/latest/modules/include_role_module.html
+  - include_role:
+      name: linux/system/apt
+    tags: [apt]
+  
+  - include_role:
+      name: linux/system/pip
+    tags: [pip]
+  
+  - include_role:
+      name: linux/system/setup
+    tags: [logrotate]
+  
   tags: [linux]
+
 
 - name: Configure Linux environment
   hosts: linux
-  roles:
-  - linux/system/setup
-  # template new Chocolatey.ps1 to start using as README example instead of group_vars
+  tasks:
+  - include_role:
+      name: linux/system/bash
+    tags: [bash]
+
+  - include_role:
+      name: linux/apps/git
+    tags: [git]
+
+  - include_role:
+      name: python/user_modules
+    tags: [python, py]
+
   tags: [linux]
 
 
-- name: Provision Windows system
+- name: Provision & configure Windows
   hosts: windows
   become: true
-  become_user: david
-  become_method: runas
-  roles:
-  - windows/system/chocolatey
-  # --- TODO: Install any other software, such as scanner
-  - windows/apps/dotnet/setup
-  - windows/apps/vscode/setup
-  - windows/system/setup
-  - windows/apps/ccleaner/clean
+  tasks:
+  # TODO: template Chocolatey .ps1 file and swap README example in place of group_vars yml
+  - include_role:
+      name: windows/system/chocolatey
+    tags: [chocolatey, choco]
+
+  - include_role:
+      name: windows/system/pip
+    tags: [pip]
+
+  # --- Configuration Steps ---
+  - include_role:
+      name: windows/system/setup
+    tags: [scheduled_task, sched]
+
+  - include_role:
+      name: python/user_modules
+    tags: [python, py]
+
+  - include_role:
+      name: windows/apps/dotnet/setup
+    tags: [dotnet, tool]
+
+  - include_role:
+      name: windows/apps/vscode/setup
+    tags: [vscode]
+
+  # TODO: Install scanner software
   tags: [windows]
 
+
+# TODO:
 # - Connect to Windows and gather facts about the environment
-# - Backup Windows application settings & data
-#   - backup game saves, screenshots, addons
-#   - backup preferences for productivity programs
 # - Uninstall Windows features and applications
 # - Install Windows features and applications
 #   - update windows features, install patches, chocolatey upgrade, etc.
@@ -41,4 +81,11 @@
 # https://docs.microsoft.com/en-us/powershell/windows/get-started?view=win10-ps
 # https://docs.microsoft.com/en-us/windows/configuration/configure-windows-10-taskbar
 # https://www.winsysadminblog.com/2019/03/change-windows-10-taskbar-icons-script-deploying-a-custom-taskbar-for-windows-10/
+
+# ::: Media Library :::
+# - Rip DVD|BluRay disks using MakeMKV
+# - Set default action to rip disks when inserted in any optical drive
+# - Compress a directory of videos using HandBrake
+# ::: QNAP :::
+# - connect to QNAP + Linux Station + automate Plex
 ...

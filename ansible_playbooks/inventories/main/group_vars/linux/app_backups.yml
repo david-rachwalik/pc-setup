@@ -1,0 +1,44 @@
+---
+# -------- Required Parameters --------
+# - id:             Arbitrary 'app_id' given for ad hoc commands
+# - root:           Install directory path without app title
+# - name:           Directory for the app title (mirrored by backup)
+# -------- Optionals Parameters --------
+# - setting:        Directory for settings
+
+
+app_backups:
+- id: handbrake
+  root: /mnt/c/Users/david/AppData/Roaming
+  name: HandBrake
+  setting: " "
+  setting_opts: ["--include=presets.json", "--include=settings.json", "--exclude=*"]
+
+- id: obs
+  root: /mnt/c/Users/david/AppData/Roaming
+  name: obs-studio
+  setting: " "
+  setting_opts: ["--include=global.ini", "--include=basic/", "--exclude=*"]
+
+- id: vscode
+  root: /mnt/c/Users/david/AppData/Roaming
+  name: Code/User
+  setting: " "
+  setting_opts: ["--include=settings.json", "--include=snippets/", "--exclude=*"]
+
+
+# ------------------------ Default Options ------------------------
+
+app_setting_default_opts:
+- "--prune-empty-dirs"
+
+# ------------------------ Application Backup Parsing ------------------------
+
+app_backup_root_dir: /mnt/d/OneDrive/Backups/Apps
+
+app_backup_query: "[?id=='{{app_id}}']"
+app_backup: "{{app_backups | json_query(app_backup_query) | first}}"
+
+app_ids: "{{app_backups | json_query('[*].id') | list}}"
+app_setting_ids: "{{app_backups | json_query('[?setting].id') | list}}"
+...

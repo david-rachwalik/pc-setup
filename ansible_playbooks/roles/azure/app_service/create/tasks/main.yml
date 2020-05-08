@@ -1,11 +1,14 @@
 ---
-# ansible localhost -m include_role -a "name=azure/app_service/create"
+# ansible-playbook app_create.yml --tags host -e "app_repo_names=['DMR']"
+# appc --tags host -e "app_repo_names=['DMR']"
+# appc --tags host -e "app_repo_names=['Tester']"
 
-# https://docs.ansible.com/ansible/latest/modules/azure_rm_webapp_module.html
-- name: Create a windows web app
-  azure_rm_webapp:
-    name: "{{ app_service }}"
-    resource_group: "{{ resource_group }}"
-    plan: "{{ service_plan }}"
-    state: present
+# https://docs.ansible.com/ansible/latest/modules/include_role_module.html
+- include_role:
+    name: azure/app_service/create
+    tasks_from: create
+  loop: "{{app_project_names}}"
+  loop_control:
+    loop_var: app_project_name
+  tags: [azure, az, app_service, publish, host]
 ...

@@ -1,0 +1,50 @@
+---
+# Products available by region
+# https://azure.microsoft.com/en-us/global-infrastructure/services/
+
+az_active_directory: davidrachwalikoutlook
+az_ad_domain: "https://{{az_active_directory}}.onmicrosoft.com"
+az_ad_identifier_urls: ["{{az_ad_domain}}/{{app_project.name | lower}}"]
+az_ad_reply_urls: ["{{app_domain}}/signin-oidc"]
+
+# az_ad_app_project_query: "[?displayName=='{{app_project.name}}']"
+az_ad_app_project_query: "[?displayName=='{{app_project.name}}'].{appId: appId, displayName: displayName}"
+# http://jmespath.org/specification.html#contains
+az_ad_app_project_delete_query: "[?displayName.contains(@, '{{az_ad_app_displayName_to_delete}}')].{appId: appId, displayName: displayName}"
+
+# https://portal.azure.com/#blade/Microsoft_AAD_RegisteredApps/ApplicationsListBlade
+az_ad_app_show_parse: "{{ out_ad_app_show.stdout | from_json }}"
+# az_ad_app_keys: "{{(out_ad_app_create.stdout | from_json).keys() | list | sort}}"
+# az_ad_app_convert: "{{out_ad_app_create.stdout | from_json | json_query('{appId: appId, displayName: displayName}')}}"
+az_ad_app_project_id: "{{out_ad_app_show.stdout | from_json | json_query('appId')}}"
+
+az_appserviceplan_id: "{{az_appserviceplan_facts | json_query('appserviceplans[0].id')}}"
+
+
+# ------------------------------------------------
+# https://docs.microsoft.com/en-us/azure/architecture/best-practices/naming-conventions
+location: "South Central US"
+plan_sku: F1
+sku: FREE
+
+resource_group: "rg-{{app_project.name}}"
+service_plan: "plan-{{app_project.name}}"
+app_service: "app-{{app_project.name}}"
+# sql_server must contain only lowercase letters, numbers, and hyphens; must be 3-50 characters long
+sql_server: "sql-{{app_project.name}}"
+sql_database: "sqldb-{{app_project.name}}"
+storage_account: "sa-{{app_project.name}}"
+
+db_username: Rhodair
+db_password: null
+# username must be unique within Azure; must not contain the '@' symbol for local Git pushes
+deploy_username: null
+# password must contain at least 2 of the 3 elements: letters, numbers, and symbols; must be >= 8 characters long
+deploy_password: null
+
+# 'az_plan' must be between 3-24 chars, only lowercase or numbers
+# TODO: replace() will use regex to strip ALL special characters
+# service_plan: "plan-{{app_project.name | replace('_', '') | truncate(19) | lower}}"
+# app must be globally unique with valid characters a-z, 0-9, and -
+connection_string: null
+...

@@ -21,7 +21,9 @@ fi
 export DEBIAN_FRONTEND=noninteractive
 apt-get update && apt-get dist-upgrade -y
 # Install Ansible and dependencies
+apt-get install -y python3
 apt-get install -y python3-pip
+apt-get install -y python3-winrm
 pip3 install ansible
 
 # Register Microsoft key and feed to prep for .NET SDK

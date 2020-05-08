@@ -1,0 +1,34 @@
+---
+- block:
+  # https://git-scm.com/book/en/v2/Getting-Started-First-Time-Git-Setup
+  # https://www.atlassian.com/git/tutorials/setting-up-a-repository/git-config
+  - name: Set Git configuration
+    copy:
+      src: "{{git_config | basename}}"
+      dest: "{{git_config}}"
+      mode: '0644'
+    tags: [config]
+
+  - name: Check Git repo for changes
+    command: "git diff --name-only"
+    args:
+      chdir: "{{git_work_repo}}"
+    register: out_git_status
+    changed_when: false
+
+  - set_fact:
+      git_repo_changed_files: "{{out_git_status.stdout_lines}}"
+  - set_fact:
+      git_repo_is_safe: "{{git_repo_changed_files | count == 0}}"
+
+  # https://docs.ansible.com/ansible/latest/modules/git_module.html
+  - name: Pull the latest files from Git
+    git:
+      repo: "{{git_bare_repo}}"
+      dest: "{{git_work_repo}}"
+      # force: true
+    when: git_repo_is_safe
+    tags: [pull]
+  
+  tags: [setup, git]
+...

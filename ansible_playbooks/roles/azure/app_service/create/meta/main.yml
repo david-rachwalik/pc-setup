@@ -1,4 +1,0 @@
----
-dependencies:
-- { role: azure/service_plan/create }
-...
