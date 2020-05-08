@@ -1,0 +1,7 @@
+---
+# template_url: "https://github.com/Rhodair/DevOps_AzureResourceGroup/blob/master/WebApp/WebSite.json"
+# parameter_url: "https://github.com/Rhodair/DevOps_AzureResourceGroup/blob/master/WebApp/WebSite.parameters.json"
+
+template_url: blank.json
+parameter_url: blank.parameters.dev.json
+...

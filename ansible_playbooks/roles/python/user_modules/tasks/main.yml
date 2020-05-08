@@ -1,0 +1,17 @@
+---
+# ansible windows -m include_role -a "name=python/user_modules"
+
+# https://docs.ansible.com/ansible/latest/modules/include_role_module.html
+- include_role:
+    name: python/boilerplate
+
+- include_role:
+    name: python/user_modules
+    tasks_from: windows
+  when: os_family == 'Windows'
+
+- include_role:
+    name: python/user_modules
+    tasks_from: linux
+  when: os_family == 'Linux'
+...

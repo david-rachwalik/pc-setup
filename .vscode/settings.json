@@ -1,8 +1,8 @@
 {
     // "git.path": "C:\\Git\\cmd\\git.exe",
     "git.enabled": true,
-    // "python.pythonPath": "/usr/bin/python3",
-    "python.pythonPath": "C:\\Python38\\python.exe",
+    // "python.pythonPath": "C:\\Python38\\python.exe",
+    "python.pythonPath": "/usr/bin/python3",
     "update.channel": "none",
     "update.enableWindowsBackgroundUpdates": false,
     "workbench.editor.labelFormat": "short",

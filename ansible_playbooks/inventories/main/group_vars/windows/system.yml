@@ -1,0 +1,107 @@
+---
+# --- Microsoft Visual Studio 2019 ---
+# https://chocolatey.org/packages/visualstudio2019community
+# https://docs.microsoft.com/en-us/visualstudio/install/use-command-line-parameters-to-install-visual-studio
+# https://docs.microsoft.com/en-us/visualstudio/install/workload-component-id-vs-community
+# TODO: https://marketplace.visualstudio.com/items?itemName=MadsKristensen.OpenCommandLine
+# --- Microsoft Office 365 ---
+# https://chocolatey.org/packages/microsoft-office-deployment
+
+
+powershell_uninstall_appx_packages:
+- CanonicalGroupLimited.Ubuntu18.04onWindows
+
+
+# https://chocolatey.org/packages/*
+chocolatey_packages:
+  install:
+  # --- Productivity ---
+  - name: ccleaner
+  - name: 7zip
+  - name: nordvpn
+  - name: GoogleChrome
+  # - name: microsoft-office-deployment
+  #   pseudo_name: Office365HomePremium
+  #   package_params: >-
+  #     /64bit
+  #     /Product O365HomePremRetail
+  #     /Exclude Publisher,Lync,Groove
+  - name: qbittorrent
+  - name: speccy
+  # - name: recuva
+  # - name: defraggler
+
+  # --- Development ---
+  - name: visualstudio2019community
+    package_params: >-
+      --locale en-US
+      --add Microsoft.VisualStudio.Workload.NetWeb;includeRecommended
+      --add Microsoft.VisualStudio.Workload.Azure;includeRecommended
+      --quiet
+  - name: git
+  - name: python3
+  - name: dotnetcore-sdk
+  - name: azure-cli
+  - name: dart-sdk # sass dependency
+  - name: sass
+  # - name: typescript
+  - name: nodejs
+  - name: vscode
+  - name: postman
+  - name: sqlitebrowser
+  # - name: microsoftazurestorageexplorer
+  # - name: jekyll
+  
+  # --- Media ---
+  - name: geforce-experience
+  - name: adobereader
+  - name: AdobeAIR
+  - name: adobeshockwaveplayer
+  - name: spotify
+  - name: paint.net
+
+  # --- Video Editing ---
+  - name: MakeMKV
+  - name: handbrake
+  - name: k-litecodecpackmega
+  - name: 4k-video-downloader
+  - name: streamlabs-obs
+
+  # --- Videogames ---
+  - name: directx
+  - name: steam
+  - name: discord
+  - name: twitch
+  - name: autohotkey
+
+  uninstall:
+  - name: python2
+  - name: mitkerberos
+  - name: docker-desktop
+  # - name: unity
+  # - name: obs-studio
+  - name: gimp
+  - name: vlc
+  - name: passkey
+
+
+pip_packages:
+- pytz
+
+
+vscode_extensions:
+- DavidAnson.vscode-markdownlint
+- donjayamanne.githistory
+- ms-azure-devops.azure-pipelines
+- ms-python.python
+- ms-vscode-remote.remote-ssh
+- ms-vscode-remote.remote-ssh-edit
+- ms-vscode-remote.remote-wsl
+- ms-vscode.azure-account
+- ms-vscode.csharp
+- ms-vscode.powershell
+- ms-vscode.vscode-typescript-tslint-plugin
+- rog2.luacheck
+- tangzx.emmylua
+- vscode-icons-team.vscode-icons
+...

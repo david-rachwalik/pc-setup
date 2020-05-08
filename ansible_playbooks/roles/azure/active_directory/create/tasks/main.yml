@@ -1,49 +1,13 @@
 ---
-# ansible localhost -m include_role -a "name=azure/active_directory/create"
+# ansible-playbook app_create.yml --tags ad -e "app_repo_names=['DMR']"
+# appc --tags ad -e "app_repo_names=['DMR']"
 
-
-# active directory (1):(many) app subscriptions / app limited to 1 directory at a time
-# Using Microsoft Identity platform (v2.0), not Azure Active Directory (v1.0) endpoints
-# https://docs.microsoft.com/en-us/azure/active-directory/develop/azure-ad-endpoint-comparison
-# --- Accounts in any Azure AD directory and personal Microsoft accounts - Multi-tenant
-# https://docs.microsoft.com/en-us/azure/active-directory/develop/single-and-multi-tenant-apps
-# https://docs.microsoft.com/en-us/azure/active-directory/develop/quickstart-v2-aspnet-core-webapp
-
-# Install-Package Microsoft.Owin.Security.OpenIdConnect
-# Install-Package Microsoft.Owin.Security.Cookies
-# Install-Package Microsoft.Owin.Host.SystemWeb
-
-- block:
-  # https://docs.microsoft.com/en-us/cli/azure/ad/app#az-ad-app-create
-  # NOTE: The az command is idempotent and provides the same output as app show/list
-  - name: Register Azure AD application
-    command: >-
-      az ad app create
-      --display-name {{app_project}}
-      --homepage {{app_domain}}
-      --identifier-uris {{az_ad_identifier_urls | join(' ')}}
-      --oauth2-allow-implicit-flow true
-      --reply-urls {{az_ad_reply_urls | join(' ')}}
-    # TODO: add --app-roles once authentication testing is further
-    # no_log: true
-    register: out_ad_app_create
-    changed_when: not 'Found an existing application instance' in out_ad_app_create.stderr
-    
-  # https://portal.azure.com/#blade/Microsoft_AAD_RegisteredApps/ApplicationsListBlade
-  # - set_fact:
-  #     az_ad_app_keys: "{{(out_ad_app_create.stdout | from_json).keys() | list | sort}}"
-  # - set_fact:
-  #     az_ad_app_convert: "{{out_ad_app_create.stdout | from_json | json_query('{appId: appId, displayName: displayName}')}}"
-  - set_fact:
-      az_ad_app_project_id: "{{out_ad_app_create.stdout | from_json | json_query('appId')}}"
-
-  # - name: Show AD application details
-  #   command: "az ad app show --id {{az_ad_app_project_id}}"
-  #   register: out_ad_app_show
-  #   ignore_errors: true
-
-  when:
-  - app_authentication is defined
-  - app_authentication == "MultiOrg"
-  tags: ["azure", "az", "active_directory", "ad", "identity"]
+# https://docs.ansible.com/ansible/latest/modules/include_role_module.html
+- include_role:
+    name: azure/active_directory/create
+    tasks_from: create
+  loop: "{{app_project_names}}"
+  loop_control:
+    loop_var: app_project_name
+  tags: [azure, az, active_directory, ad, identity, create]
 ...

@@ -1,0 +1,41 @@
+---
+- debug:
+    var: app_repo
+
+- fail:
+    msg: break point
+
+
+# ansible localhost -m include_role -a "name=azure/active_directory/delete"
+# NOTE: Needs to be run multiple times to delete apps sharing the same name
+#       This is acceptable because the create role only allows unique names
+
+# https://portal.azure.com/#blade/Microsoft_AAD_RegisteredApps/ApplicationsListBlade
+# https://docs.microsoft.com/en-us/cli/azure/ad/app#az-ad-app-list
+- name: List registered Azure AD applications
+  command: "az ad app list"
+  register: out_ad_app_list
+  no_log: true
+  changed_when: false
+
+# - set_fact:
+#     az_ad_app_keys: "{{(out_ad_app_list.stdout | from_json | first).keys() | list | sort}}"
+- set_fact:
+    az_ad_app_displayNames: "{{out_ad_app_list.stdout | from_json | json_query('[*].displayName') | unique | sort}}"
+# - set_fact:
+#     az_ad_app_appIds: "{{out_ad_app_list.stdout | from_json | json_query('[*].appId')}}"
+- set_fact:
+    az_ad_app_count: "{{out_ad_app_list.stdout | from_json | count}}"
+
+
+- set_fact:
+    az_ad_app_displayNames_to_delete: "{{az_ad_app_displayNames | difference(app_repo_names)}}"
+
+# - name: Cleanup untracked app registration
+#   command: >
+#     az ad app delete
+#     --id {{(out_ad_app_list.stdout | from_json | json_query(az_ad_app_project_delete_query) | first).appId}}
+#   loop: "{{az_ad_app_displayNames_to_delete}}"
+#   loop_control:
+#     loop_var: az_ad_app_displayName_to_delete
+...

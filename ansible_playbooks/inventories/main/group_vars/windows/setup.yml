@@ -1,0 +1,74 @@
+---
+desktops:
+- C:\Users\Public\Desktop
+- C:\Users\david\Desktop
+
+
+file_naming_convention:
+  onedrive:
+  - _DMR:
+    - Audio
+    - Development
+    - Documents
+    - Friends
+      - Ashee
+      - Ben
+      - Philip
+    - Pictures
+    - Videogames
+    - Videos
+      - Anime
+      - Programming
+      - Science
+      - Superheroes
+    - Writings
+
+  nas:
+  - Container           # QNAP Container Station data
+  - Download
+  - home                # user home (admin)
+  - homes               # admin and Public homes
+  - Multimedia          # Plex source data
+  - OneDrive            # system update sync
+  - Pervy Yum Sauce
+  - Public              # empty
+  - Web                 # empty
+
+  plex: null
+
+
+# ------------------------ Scheduled Tasks ------------------------
+# https://docs.microsoft.com/en-us/windows/win32/taskschd/trigger-types
+# types: boot, logon, daily, weekly, monthly, monthlydow, time
+# start_boundary required when type is daily, weekly, monthly, monthlydow, time
+# triggers.days_of_month required when type is monthly
+# triggers.days_of_week required when type is weekly, monthlydow (optional)
+# NOTE: 'working_directory' parameter for Windows directory
+scheduled_tasks:
+# https://dev.to/ironfroggy/wsl-tips-starting-linux-background-services-on-windows-login-3o98
+- name: Ansible Daily Backup
+  description: Ansible playbook to back up app & game files
+  actions:
+  - path: C:\Windows\System32\bash.exe
+    arguments: -c "script -q -c 'cd ~/pc-setup/ansible_playbooks && ansible-playbook system_clean.yml --tags backup' -a ~/log/ansible_scheduled_task.log"
+  triggers:
+  - type: daily
+    start_boundary: "2020-01-01T04:00:00-06:00"
+
+# - name: Ansible Daily Update
+#   description: Ansible playbook that provisions Windows and WSL
+#   actions:
+#   - path: C:\Windows\System32\bash.exe
+#     arguments: -c ansible-playbook system_setup.yml
+#   triggers:
+#   - type: daily
+#     start_boundary: "2020-01-01T06:00:00-06:00"
+#   - type: boot
+
+- name: AutoHotkey World of Warcraft
+  actions:
+  - path: C:\Program Files\AutoHotkey\AutoHotkey.exe
+    arguments: D:\OneDrive\Documents\WorldOfWarcraft_SpamButton.ahk
+  triggers:
+  - type: boot
+...

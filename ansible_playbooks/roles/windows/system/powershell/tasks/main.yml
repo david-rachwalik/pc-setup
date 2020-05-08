@@ -1,0 +1,20 @@
+---
+# ansible windows -m include_role -a "name=windows/system/powershell"
+
+- name: Gather list of appx packages installed
+  # Get-AppxPackage -AllUsers | Select Name, PackageFullName
+  # Get-AppxPackage –User {{User}} | Select Name, PackageFullName
+  # Get-AppxPackage –User {{DomainName}}\{{User}} | Select Name, PackageFullName
+  win_shell: "Get-AppxPackage –AllUsers"
+  register: out_appx_packages
+
+
+# - name: Install Appx Packages
+#   win_shell: "Add-AppxPackage {{item}}"
+#   loop: "{{out_appx_packages.stdout|list}}"
+
+
+# - name: Remove Appx Packages
+#   win_shell: "Remove-AppxPackage {{item}}"
+#   loop: "{{}}"
+...

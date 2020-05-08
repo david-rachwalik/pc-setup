@@ -1,0 +1,22 @@
+---
+# ansible-playbook app_create.yml --tags repo -e "app_repo_names=['DMR']"
+# appc --tags repo -e "app_repo_names=['DMR']"
+# appc --tags repo -e "app_repo_names=['Tester']"
+
+- block:
+  # https://docs.ansible.com/ansible/latest/modules/include_role_module.html
+  - include_role:
+      name: windows/apps/dotnet/create
+      tasks_from: solution
+    tags: [solution, sln]
+
+  - include_role:
+      name: windows/apps/dotnet/create
+      tasks_from: project
+    loop: "{{app_project_names}}"
+    loop_control:
+      loop_var: app_project_name
+    tags: [project]
+
+  tags: [repository, repo, dotnet]
+...

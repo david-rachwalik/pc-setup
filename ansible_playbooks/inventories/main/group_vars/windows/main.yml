@@ -1,0 +1,14 @@
+---
+os_family: Windows
+# Windows username is the basename of 'echo $HOME'
+user_dir: C:\Users\david
+backup_dir: D:\OneDrive\Backups
+boot_task_dir: C:\Windows\System32\Tasks   # %WINDIR%\System32\Tasks
+# %APPDATA%
+
+
+# https://docs.microsoft.com/en-us/windows/deployment/usmt/usmt-recognized-environment-variables
+# http://www.powershellcookbook.com/recipe/ZVHx/view-and-modify-environment-variables
+
+# https://stackoverflow.com/questions/3790454/how-do-i-break-a-string-over-multiple-lines
+...

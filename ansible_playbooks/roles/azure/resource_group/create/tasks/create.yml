@@ -1,0 +1,8 @@
+---
+# https://docs.ansible.com/ansible/latest/modules/azure_rm_resourcegroup_module.html
+- name: Create resource group
+  azure_rm_resourcegroup:
+    name: "{{ resource_group }}"
+    location: "{{ location }}"
+  tags: [azure, az, app_service, publish, host]
+...

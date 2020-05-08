@@ -72,5 +72,5 @@
   module_defaults:
     apt:
       force_apt_get: true
-  tags: ["apt"]
+  tags: [apt]
 ...

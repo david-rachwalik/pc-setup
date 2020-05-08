@@ -1,87 +1,15 @@
 ---
-- block:
-  - name: Ensure Chocolatey itself is installed
-    win_chocolatey:
-      name: chocolatey
+# ansible windows -m include_role -a "name=windows/system/chocolatey" -e "ansible_become=yes ansible_become_user=david ansible_become_method=runas"
+# ansible david -m include_role -a "name=windows/system/chocolatey"
+# setup --tags windows
 
-  - name: List Chocolatey packages installed
-    win_shell: >-
-      choco list
-      --local-only
-      --id-only
-    register: out_choco_installed
-    changed_when: false
-    no_log: true
+- include_role:
+    name: windows/system/chocolatey
+    tasks_from: facts
+  tags: [chocolatey, choco]
 
-  - set_fact:
-      choco_packages_installed: "{{out_choco_installed.stdout_lines | sort}}"
-  - set_fact:
-      choco_packages_to_uninstall: "{{chocolatey_packages.uninstall | intersect(out_choco_installed.stdout_lines)}}"
-  - set_fact:
-      choco_packages_to_install: "{{chocolatey_packages.install | difference(out_choco_installed.stdout_lines)}}"
-  - set_fact:
-      choco_to_install_visualstudio: "{{'visualstudio2019community' not in out_choco_installed.stdout_lines}}"
-  - set_fact:
-      choco_to_install_office365: "{{'Office365HomePremium' not in out_choco_installed.stdout_lines}}"
-
-
-  - name: Uninstall Basic Chocolatey Packages
-    win_chocolatey:
-      name: "{{item}}"
-      state: absent
-    loop: "{{choco_packages_to_uninstall}}"
-    when: choco_packages_to_uninstall | count > 0
-    tags: ["uninstall"]
-
-
-  # https://docs.ansible.com/ansible/latest/modules/win_chocolatey_module.html
-  - name: Install Basic Chocolatey Packages
-    win_chocolatey:
-      name: "{{item}}"
-      state: present
-    loop: "{{choco_packages_to_install}}"
-    when: choco_packages_to_install | count > 0
-    tags: ["install"]
-
-  # https://chocolatey.org/packages/visualstudio2019community
-  # https://docs.microsoft.com/en-us/visualstudio/install/use-command-line-parameters-to-install-visual-studio
-  # https://docs.microsoft.com/en-us/visualstudio/install/workload-component-id-vs-community
-  - name: Install Visual Studio Community 2019
-    win_chocolatey:
-      name: visualstudio2019community
-      state: present
-      # https://stackoverflow.com/questions/3790454/how-do-i-break-a-string-over-multiple-lines
-      package_params: >-
-        --locale en-US
-        # https://docs.microsoft.com/en-us/visualstudio/install/workload-component-id-vs-community
-        --add Microsoft.VisualStudio.Workload.NetWeb;includeRecommended
-        --add Microsoft.VisualStudio.Workload.Azure;includeRecommended
-        --quiet
-    when: choco_to_install_visualstudio
-    tags: ["install", "visualstudio", "visualstudio2019"]
-  # TODO: https://marketplace.visualstudio.com/items?itemName=MadsKristensen.OpenCommandLine
-
-  # https://chocolatey.org/packages/microsoft-office-deployment
-  - name: Install MS Office 365
-    win_chocolatey:
-      name: microsoft-office-deployment
-      state: present
-      package_params: >-
-        /64bit
-        /DisableUpdate TRUE
-        /Product O365HomePremRetail
-        /Exclude Publisher,Lync,Groove
-    when: choco_to_install_office365
-    tags: ["install", "office365"]
-
-
-  - name: Upgrade all installed Chocolatey Packages
-    win_chocolatey:
-      name: all
-      state: latest
-    # Sometimes dependencies can't be met
-    ignore_errors: true
-    tags: ["upgrade"]
-
-  tags: ["chocolatey", "choco"]
+- include_role:
+    name: windows/system/chocolatey
+    tasks_from: packages
+  tags: [chocolatey, choco]
 ...
