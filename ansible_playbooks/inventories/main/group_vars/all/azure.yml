@@ -23,17 +23,17 @@ az_appserviceplan_id: "{{az_appserviceplan_facts | json_query('appserviceplans[0
 
 # ------------------------------------------------
 # https://docs.microsoft.com/en-us/azure/architecture/best-practices/naming-conventions
-location: "South Central US"
-plan_sku: F1
-sku: FREE
+location: "{{app_repo.arm_location | default('South Central US')}}"
+rm_deployment: "{{app_repo.solution | lower | replace('.', '-')}}"
 
-resource_group: "rg-{{app_project.name}}"
-service_plan: "plan-{{app_project.name}}"
-app_service: "app-{{app_project.name}}"
+az_project_name: "{{app_repo.solution | lower}}"
+resource_group: "{{az_project_name}}-rg"
+service_plan: "{{az_project_name}}-plan"
+app_service: "{{az_project_name}}-app"
 # sql_server must contain only lowercase letters, numbers, and hyphens; must be 3-50 characters long
-sql_server: "sql-{{app_project.name}}"
-sql_database: "sqldb-{{app_project.name}}"
-storage_account: "sa-{{app_project.name}}"
+sql_server: "{{az_project_name}}-sql"
+sql_database: "{{az_project_name}}-sqldb"
+storage_account: "{{az_project_name}}-sa"
 
 db_username: Rhodair
 db_password: null
@@ -47,4 +47,10 @@ deploy_password: null
 # service_plan: "plan-{{app_project.name | replace('_', '') | truncate(19) | lower}}"
 # app must be globally unique with valid characters a-z, 0-9, and -
 connection_string: null
+
+app_authentication: "{{app_project.authentication | default('None')}}"
+app_domain: "https://localhost:{{app_project.port | default(5001)}}"
+app_use_extras: "{{app_repo.use_extras | default(false)}}"
+# app_use_database: "{{app_project.use_database | default(false)}}"
+# app_database_context: MainContext
 ...

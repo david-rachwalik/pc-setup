@@ -75,6 +75,32 @@ app_repositories:
   - name: Tester.Api
     template: webapi
     authentication: SingleOrg
+  
+  # arm_template_url: https://raw.githubusercontent.com/Azure/azure-quickstart-templates/master/201-web-app-github-deploy/azuredeploy.json
+  arm_template: "201-web-app-github-deploy/azuredeploy.json"
+  arm_parameters:
+    location:
+      value: "South Central US"
+    # siteName:
+    #   # value: "Tester"
+    #   # value: "GEN-UNIQUE"
+    #   value: "{{app_service}}"
+
+  # template_url: "https://github.com/Rhodair/DevOps_AzureResourceGroup/blob/master/WebApp/WebSite.json"
+  # parameter_url: "https://github.com/Rhodair/DevOps_AzureResourceGroup/blob/master/WebApp/WebSite.parameters.json"
+
+  # template_url: blank.json
+  # parameter_url: blank.parameters.dev.json
+
+  # template_url: https://raw.githubusercontent.com/david-rachwalik/pc-setup/master/ansible_playbooks/roles/azure/resource_manager/files/blank.json
+  # parameter_url: https://raw.githubusercontent.com/david-rachwalik/pc-setup/master/ansible_playbooks/roles/azure/resource_manager/files/blank.parameters.dev.json
+
+  # template_url: https://github.com/Azure/azure-quickstart-templates/blob/master/201-web-app-github-deploy/azuredeploy.json
+  # parameter_url: https://github.com/Azure/azure-quickstart-templates/blob/master/201-web-app-github-deploy/azuredeploy.parameters.json
+
+  # template_url: 201-web-app-github-deploy/azuredeploy.json
+  # parameters: 201-web-app-github-deploy/azuredeploy.parameters.json
+
   # - name: Tester.WebApp
   #   template: webapp
   #   authentication: SingleOrg
@@ -94,11 +120,4 @@ app_project_query: "[*].projects[?name=='{{app_project_name}}']"
 
 app_repo: "{{app_repositories | json_query(app_repo_query) | first}}"
 app_project: "{{app_repositories | json_query(app_project_query) | flatten | first}}"
-
-
-app_authentication: "{{app_project.authentication | default('None')}}"
-app_domain: "https://localhost:{{app_project.port | default(5001)}}"
-app_use_extras: "{{app_repo.use_extras | default(false)}}"
-# app_use_database: "{{app_project.use_database | default(false)}}"
-# app_database_context: MainContext
 ...
