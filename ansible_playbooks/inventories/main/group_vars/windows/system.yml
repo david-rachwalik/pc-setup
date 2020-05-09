@@ -42,9 +42,6 @@ chocolatey_packages:
   - name: python3
   - name: dotnetcore-sdk
   - name: azure-cli
-  - name: dart-sdk # sass dependency
-  - name: sass
-  # - name: typescript
   - name: nodejs
   - name: vscode
   - name: postman
@@ -83,6 +80,9 @@ chocolatey_packages:
   - name: gimp
   - name: vlc
   - name: passkey
+  - name: typescript
+  - name: sass
+  - name: dart-sdk # sass dependency
 
 
 pip_packages:
