@@ -7,9 +7,9 @@
 # https://docs.ansible.com/ansible/latest/modules/azure_rm_sqldatabase_module.html
 - name: Create SQL database instance
   azure_rm_sqldatabase:
-    resource_group: "{{ az_resource_group }}"
-    server_name: "{{ sql_server }}"
-    name: "{{ sql_database }}"
+    name: "{{az_sql_database}}"
+    resource_group: "{{az_resource_group}}"
+    server_name: "{{az_sql_server}}"
 
 # https://github.com/Azure-Samples/ansible-playbooks/blob/master/sql_create.yml
 ...

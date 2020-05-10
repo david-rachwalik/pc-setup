@@ -17,11 +17,11 @@
   - name: Create app service plan
     azure_rm_appserviceplan:
       resource_group: "{{az_resource_group}}"
-      name: "{{service_plan}}"
+      name: "{{az_service_plan}}"
       is_linux: true
       sku: F1
       state: present
-    when: az_appserviceplan_id is defined
+    when: az_service_plan_id is defined
 
   tags: [azure, az, app_service, publish, host]
 ...
