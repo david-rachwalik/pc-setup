@@ -25,9 +25,11 @@
       resource_group: "{{az_resource_group}}"
       location: "{{az_location}}"
       state: present
-      template: "{{(app_repo.arm_template is defined) | ternary(lookup('file', app_repo.arm_template), omit)}}"
+      # template: "{{(app_repo.arm_template is defined) | ternary(lookup('file', app_repo.arm_template), omit)}}"
+      template: "{{ az_rm_template | default(omit) }}"
       template_link: "{{app_repo.arm_template_url | default(omit)}}"
-      parameters: "{{app_repo.arm_parameters | default(omit)}}"
+      # parameters: "{{app_repo.arm_parameters | default(omit)}}"
+      parameters: "{{ az_rm_parameters | default(omit) }}"
       parameters_link: "{{app_repo.arm_parameters_url | default(omit)}}"
   
   tags: [azure, az, deploy, resource_manager, arm]
