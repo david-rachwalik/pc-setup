@@ -4,12 +4,12 @@
 # https://docs.ansible.com/ansible/latest/modules/azure_rm_storageaccount_facts_module.html
 - name: Get facts for resource group accounts
   azure_rm_storageaccount_facts:
-    resource_group: "{{ az_resource_group }}"
+    resource_group: "{{az_resource_group}}"
 
 # - name: Get facts for specific account
 #   azure_rm_storageaccount_facts:
-#     resource_group: "{{ az_resource_group }}"
-#     name: "{{ storage_account }}"
+#     name: "{{az_storage_account}}"
+#     resource_group: "{{az_resource_group}}"
 
 # - name: Get facts for all accounts by tags
 #   azure_rm_storageaccount_facts:

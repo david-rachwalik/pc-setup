@@ -7,19 +7,19 @@
   - debug:
       var: az_resource_group
   - debug:
-      var: service_plan
+      var: az_service_plan
   - debug:
-      var: app_service
+      var: az_app_service
   - debug:
-      var: az_appserviceplan_id
+      var: az_service_plan_id
 
   # https://docs.ansible.com/ansible/latest/modules/azure_rm_webapp_module.html
   - name: Create a windows web app
     azure_rm_webapp:
-      name: "{{ app_service }}"
-      resource_group: "{{ az_resource_group }}"
-      # plan: "{{ service_plan }}"
-      plan: "{{ az_appserviceplan_id }}"
+      name: "{{az_app_service}}"
+      resource_group: "{{az_resource_group}}"
+      # plan: "{{az_service_plan}}"
+      plan: "{{az_service_plan_id}}"
       state: present
   
   - fail:

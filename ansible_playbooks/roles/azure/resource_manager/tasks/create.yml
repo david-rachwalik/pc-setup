@@ -9,9 +9,9 @@
 #   - debug:
 #       var: key_vault
 #   - debug:
-#       var: service_plan
+#       var: az_service_plan
 #   - debug:
-#       var: az_appserviceplan_id
+#       var: az_service_plan_id
 
 - block:
   - include_role:

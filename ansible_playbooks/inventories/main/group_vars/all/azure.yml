@@ -18,20 +18,25 @@ az_ad_app_show_parse: "{{ out_ad_app_show.stdout | from_json }}"
 # az_ad_app_convert: "{{out_ad_app_create.stdout | from_json | json_query('{appId: appId, displayName: displayName}')}}"
 az_ad_app_project_id: "{{out_ad_app_show.stdout | from_json | json_query('appId')}}"
 
-az_appserviceplan_id: "{{az_appserviceplan_facts | json_query('appserviceplans[0].id')}}"
 
 
 # ------------------------------------------------
 # https://docs.microsoft.com/en-us/azure/architecture/best-practices/naming-conventions
+az_project: "{{app_repo.solution | lower}}"
 az_location: "{{app_repo.arm_location | default('South Central US')}}"
 az_resource_group: "{{az_project}}-rg"
-az_project: "{{app_repo.solution | lower}}"
-service_plan: "{{az_project}}-plan"
-app_service: "{{az_project}}-app"
+
+# 'az_plan' must be between 3-24 chars, only lowercase or numbers
+# TODO: replace() will use regex to strip ALL special characters
+# az_service_plan: "plan-{{app_project.name | replace('_', '') | truncate(19) | lower}}"
+# app must be globally unique with valid characters a-z, 0-9, and -
+az_service_plan: "{{az_project}}-plan"
+az_service_plan_id: "{{az_appserviceplan_facts | json_query('appserviceplans[0].id')}}"
+az_app_service: "{{az_project}}-app"
 # sql_server must contain only lowercase letters, numbers, and hyphens; must be 3-50 characters long
-sql_server: "{{az_project}}-sql"
-sql_database: "{{az_project}}-sqldb"
-storage_account: "{{az_project}}-sa"
+az_sql_server: "{{az_project}}-sql"
+az_sql_database: "{{az_project}}-sqldb"
+az_storage_account: "{{az_project}}-sa"
 
 db_username: Rhodair
 db_password: null
@@ -39,11 +44,6 @@ db_password: null
 deploy_username: null
 # password must contain at least 2 of the 3 elements: letters, numbers, and symbols; must be >= 8 characters long
 deploy_password: null
-
-# 'az_plan' must be between 3-24 chars, only lowercase or numbers
-# TODO: replace() will use regex to strip ALL special characters
-# service_plan: "plan-{{app_project.name | replace('_', '') | truncate(19) | lower}}"
-# app must be globally unique with valid characters a-z, 0-9, and -
 connection_string: null
 
 app_authentication: "{{app_project.authentication | default('None')}}"

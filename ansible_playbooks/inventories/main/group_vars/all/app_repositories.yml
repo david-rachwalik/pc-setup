@@ -84,7 +84,7 @@ app_repositories:
     # siteName:
     #   # value: "Tester"
     #   # value: "GEN-UNIQUE"
-    #   value: "{{app_service}}"
+    #   value: "{{az_app_service}}"
 
   # template_url: "https://github.com/Rhodair/DevOps_AzureResourceGroup/blob/master/WebApp/WebSite.json"
   # parameter_url: "https://github.com/Rhodair/DevOps_AzureResourceGroup/blob/master/WebApp/WebSite.parameters.json"

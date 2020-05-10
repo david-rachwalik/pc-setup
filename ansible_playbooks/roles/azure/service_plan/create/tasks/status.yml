@@ -3,9 +3,9 @@
 - name: Get facts for app service plan
   azure_rm_appserviceplan_info:
     resource_group:  "{{az_resource_group}}"
-    name:  "{{service_plan}}"
+    name:  "{{az_service_plan}}"
   register: az_appserviceplan_facts
 
 - debug:
-    var: az_appserviceplan_id
+    var: az_service_plan_id
 ...
