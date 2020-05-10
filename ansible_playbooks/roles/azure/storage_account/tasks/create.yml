@@ -8,7 +8,7 @@
 - name: Create a storage account
   azure_rm_storageaccount:
     name: "{{ storage_account }}"
-    resource_group: "{{ resource_group }}"
+    resource_group: "{{ az_resource_group }}"
     account_type: Standard_LRS
     https_only: true
     kind: StorageV2

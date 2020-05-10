@@ -3,14 +3,14 @@
 
 - name: Get web app facts
   azure_rm_webapp_facts:
-    resource_group: "{{ resource_group_name }}"
+    resource_group: "{{ az_resource_group }}"
     name: "{{ webapp_name }}"
     return_publish_profile: true
   register: webapp
 
 - name: Create Traffic Manager Profile
   azure_rm_trafficmanagerprofile:
-    resource_group: "{{ resource_group }}"
+    resource_group: "{{ az_resource_group }}"
     name: "{{ traffic_manager_profile }}"
     location: global
     routing_method: performance
@@ -24,10 +24,10 @@
 
 - name: Add endpoint to traffic manager profile, using created web site
   azure_rm_trafficmanagerendpoint:
-    resource_group: "{{ resource_group }}"
+    resource_group: "{{ az_resource_group }}"
     profile_name: "{{ traffic_manager_profile }}"
     name: "{{ traffic_manager_endpoint }}"
     type: azure_endpoints
-    location: "{{ location }}"
+    location: "{{ az_location }}"
     target_resource_id: "{{ webapp.webapps[0].id }}"
 ...

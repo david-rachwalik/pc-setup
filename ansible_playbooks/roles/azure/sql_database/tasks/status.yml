@@ -2,12 +2,12 @@
 # https://docs.ansible.com/ansible/latest/modules/azure_rm_sqldatabase_facts_module.html
 - name: List instances of SQL Database
   azure_rm_sqldatabase_facts:
-    resource_group: "{{ resource_group }}"
+    resource_group: "{{ az_resource_group }}"
     server_name: "{{ sql_server }}"
 
 # - name: Get instance of SQL Database
 #   azure_rm_sqldatabase_facts:
-#     resource_group: "{{ resource_group }}"
+#     resource_group: "{{ az_resource_group }}"
 #     server_name: "{{ sql_server }}"
 #     name: "{{ sql_database }}"
 ...

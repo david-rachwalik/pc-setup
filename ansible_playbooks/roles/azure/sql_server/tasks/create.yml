@@ -6,7 +6,7 @@
 - name: Create SQL server
   azure_rm_sqlserver:
     name: "{{ sql_server }}"
-    resource_group: "{{ resource_group }}"
+    resource_group: "{{ az_resource_group }}"
     admin_username: "{{ db_username }}"
     admin_password: "{{ db_password }}"
 ...

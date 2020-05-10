@@ -4,7 +4,7 @@
 # https://docs.ansible.com/ansible/latest/modules/azure_rm_resourcegroup_module.html
 - name: Delete resource group
   azure_rm_resourcegroup:
-    name: "{{ resource_group }}"
+    name: "{{ az_resource_group }}"
     force_delete_nonempty: yes
     state: absent
 ...

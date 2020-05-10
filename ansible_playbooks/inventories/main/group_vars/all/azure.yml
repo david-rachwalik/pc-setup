@@ -23,17 +23,15 @@ az_appserviceplan_id: "{{az_appserviceplan_facts | json_query('appserviceplans[0
 
 # ------------------------------------------------
 # https://docs.microsoft.com/en-us/azure/architecture/best-practices/naming-conventions
-location: "{{app_repo.arm_location | default('South Central US')}}"
-rm_deployment: "{{app_repo.solution | lower | replace('.', '-')}}"
-
-az_project_name: "{{app_repo.solution | lower}}"
-resource_group: "{{az_project_name}}-rg"
-service_plan: "{{az_project_name}}-plan"
-app_service: "{{az_project_name}}-app"
+az_location: "{{app_repo.arm_location | default('South Central US')}}"
+az_resource_group: "{{az_project}}-rg"
+az_project: "{{app_repo.solution | lower}}"
+service_plan: "{{az_project}}-plan"
+app_service: "{{az_project}}-app"
 # sql_server must contain only lowercase letters, numbers, and hyphens; must be 3-50 characters long
-sql_server: "{{az_project_name}}-sql"
-sql_database: "{{az_project_name}}-sqldb"
-storage_account: "{{az_project_name}}-sa"
+sql_server: "{{az_project}}-sql"
+sql_database: "{{az_project}}-sqldb"
+storage_account: "{{az_project}}-sa"
 
 db_username: Rhodair
 db_password: null

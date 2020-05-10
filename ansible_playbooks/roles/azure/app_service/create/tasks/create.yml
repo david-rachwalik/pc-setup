@@ -5,7 +5,7 @@
       tasks_from: create
 
   - debug:
-      var: resource_group
+      var: az_resource_group
   - debug:
       var: service_plan
   - debug:
@@ -17,7 +17,7 @@
   - name: Create a windows web app
     azure_rm_webapp:
       name: "{{ app_service }}"
-      resource_group: "{{ resource_group }}"
+      resource_group: "{{ az_resource_group }}"
       # plan: "{{ service_plan }}"
       plan: "{{ az_appserviceplan_id }}"
       state: present
