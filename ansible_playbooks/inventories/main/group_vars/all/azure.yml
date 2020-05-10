@@ -19,7 +19,6 @@ az_ad_app_show_parse: "{{ out_ad_app_show.stdout | from_json }}"
 az_ad_app_project_id: "{{out_ad_app_show.stdout | from_json | json_query('appId')}}"
 
 
-
 # ------------------------------------------------
 # https://docs.microsoft.com/en-us/azure/architecture/best-practices/naming-conventions
 az_project: "{{app_repo.solution | lower}}"
@@ -33,18 +32,12 @@ az_resource_group: "{{az_project}}-rg"
 az_service_plan: "{{az_project}}-plan"
 az_service_plan_id: "{{az_appserviceplan_facts | json_query('appserviceplans[0].id')}}"
 az_app_service: "{{az_project}}-app"
-# sql_server must contain only lowercase letters, numbers, and hyphens; must be 3-50 characters long
+# sql_server name must contain only lowercase letters, numbers, and hyphens; must be 3-50 characters long
 az_sql_server: "{{az_project}}-sql"
 az_sql_database: "{{az_project}}-sqldb"
 az_storage_account: "{{az_project}}-sa"
-
-db_username: Rhodair
-db_password: null
-# username must be unique within Azure; must not contain the '@' symbol for local Git pushes
-deploy_username: null
-# password must contain at least 2 of the 3 elements: letters, numbers, and symbols; must be >= 8 characters long
-deploy_password: null
-connection_string: null
+# database username must be unique within Azure; must not contain the '@' symbol for local Git pushes
+# database password must contain at least 2 of the 3 elements: letters, numbers, and symbols; must be >= 8 characters long
 
 app_authentication: "{{app_project.authentication | default('None')}}"
 app_domain: "https://localhost:{{app_project.port | default(5001)}}"
