@@ -40,4 +40,10 @@ pip_packages:
 # pip install ansible[azure]
 # ansible-galaxy install azure.azure_preview_modules
 # pip install -r ~/.ansible/roles/azure.azure_preview_modules/files/requirements-azure.txt
+
+
+# ------------------------ System Package Parsing ------------------------
+
+apt_packages_installed: "{{out_apt_installed.stdout_lines}}"
+apt_packages_to_install: "{{apt_packages | difference(out_apt_installed.stdout_lines)}}"
 ...

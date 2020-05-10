@@ -1,65 +1,42 @@
 ---
-# https://docs.ansible.com/ansible/latest/modules/apt_module.html
-# https://stackoverflow.com/questions/41535838/how-to-run-apt-update-and-upgrade-via-ansible-shell
 # ansible-playbook system_setup.yml --tags "apt"
+# setup --tags apt --step
+
+# https://stackoverflow.com/questions/41535838/how-to-run-apt-update-and-upgrade-via-ansible-shell
 
 - block:
-  - name: Update repositories cache
-    apt:
-      update_cache: true
-      # cache_valid_time: 3600 #One hour
-      cache_valid_time: 86400 #One day
-    register: out_apt_update
-
-  - name: Upgrade distro packages to latest version
+  # https://docs.ansible.com/ansible/latest/modules/include_role_module.html
+  - include_role:
+      name: linux/system/apt
+      tasks_from: status
+  
+  # https://docs.ansible.com/ansible/latest/modules/apt_module.html
+  - name: Upgrade distro packages
     apt:
       upgrade: dist
-    register: out_apt_dist
+      force_apt_get: true
 
-
-  # - name: Query all installed packages 01
-  #   command: "apt list --installed"
-  #   register: out_apt_installed
-  #   changed_when: false
-  #   # Using no_log here due to verbosity, not for security reasons
-  #   no_log: true
-  # - debug:
-  #     var: out_apt_installed.stdout_lines | count
-  
-  - name: Query all installed packages
-    command: "dpkg-query -f '${binary:Package}\n' -W"
-    register: out_apt_installed
-    changed_when: false
-    # Using no_log here due to verbosity, not for security reasons
-    no_log: true
-
-  # - name: Query all installed packages 03
-  #   command: "dpkg -l"
-  #   register: out_apt_installed
-  #   changed_when: false
-  #   # Using no_log here due to verbosity, not for security reasons
-  #   no_log: true
-  # - debug:
-  #     var: out_apt_installed.stdout_lines | count
-  
-  - name: Find which packages need to be installed
-    set_fact:
-      apt_install_list: "{{apt_packages | difference(out_apt_installed.stdout_lines)}}"
-  # - debug:
-  #     var: apt_install_list
-
+  # https://docs.ansible.com/ansible/latest/modules/apt_repository_module.html
+  - name: Add repository from PPA and install its signing key
+    apt_repository:
+      # https://git-scm.com/download/linux
+      repo: ppa:git-core/ppa
+      state: present
 
   - name: Install missing apt packages
     apt:
-      name: "{{apt_install_list}}"
-      state: latest
-    register: out_apt_latest
+      name: "{{apt_packages_to_install}}"
+      state: present
 
   - name: Upgrade all packages to the latest version
     apt:
-      name: "*"
+      # name: "*"
+      name: "{{apt_packages_installed}}"
       state: latest
-
+      update_cache: yes
+      # cache_valid_time: 3600 #One hour
+      cache_valid_time: 86400 #One day
+      force_apt_get: true
 
   - name: Remove useless packages from the cache
     apt:
@@ -68,9 +45,6 @@
   - name: Remove dependencies no longer required
     apt:
       autoremove: true
-  
-  module_defaults:
-    apt:
-      force_apt_get: true
+
   tags: [apt]
 ...

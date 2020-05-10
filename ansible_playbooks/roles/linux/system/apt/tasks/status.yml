@@ -1,0 +1,16 @@
+---
+- block:
+  # - name: Query all installed packages 01
+  #   command: "apt list --installed"
+  #   register: out_apt_installed
+  #   changed_when: false
+  #   no_log: true
+  
+  - name: Gather packages installed
+    command: "dpkg-query -f '${binary:Package}\n' -W"
+    register: out_apt_installed
+    changed_when: false
+    no_log: true # due to verbosity
+
+  tags: [apt]
+...
