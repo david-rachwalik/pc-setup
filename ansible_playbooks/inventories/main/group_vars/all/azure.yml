@@ -25,6 +25,10 @@ az_project: "{{app_repo.solution | lower}}"
 az_location: "{{app_repo.arm_location | default('South Central US')}}"
 az_resource_group: "{{az_project}}-rg"
 
+az_rm_template: "{{ lookup('file', app_repo.arm_template) }}"
+az_rm_parameters_file: "{{ lookup('template', app_repo.arm_parameters) }}"
+az_rm_parameters: "{{ (az_rm_parameters_file is defined) | ternary(az_rm_parameters_file.parameters, {}) }}"
+
 # 'az_plan' must be between 3-24 chars, only lowercase or numbers
 # TODO: replace() will use regex to strip ALL special characters
 # az_service_plan: "plan-{{app_project.name | replace('_', '') | truncate(19) | lower}}"
