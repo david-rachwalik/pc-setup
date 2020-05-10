@@ -16,8 +16,8 @@
   # https://azure.microsoft.com/en-us/pricing/details/app-service/linux/
   - name: Create app service plan
     azure_rm_appserviceplan:
-      resource_group: "{{ resource_group }}"
-      name: "{{ service_plan }}"
+      resource_group: "{{az_resource_group}}"
+      name: "{{service_plan}}"
       is_linux: true
       sku: F1
       state: present

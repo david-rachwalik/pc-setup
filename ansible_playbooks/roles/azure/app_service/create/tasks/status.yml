@@ -4,7 +4,7 @@
 # https://docs.ansible.com/ansible/latest/modules/azure_rm_webapp_facts_module.html
 - name: Get app service facts
   azure_rm_webapp_facts:
-    resource_group: "{{ resource_group }}"
+    resource_group: "{{ az_resource_group }}"
     name: "{{ webapp_name }}"
   register: out_app_facts
 

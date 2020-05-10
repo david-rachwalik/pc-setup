@@ -21,15 +21,13 @@
   # https://docs.ansible.com/ansible/latest/modules/azure_rm_deployment_module.html
   - name: Deploy Azure Resource Manager Template
     azure_rm_deployment:
-      resource_group_name: "{{resource_group}}"
-      location: "{{location}}"
+      name: "{{app_repo.arm_name | default(omit)}}"
+      resource_group: "{{az_resource_group}}"
+      location: "{{az_location}}"
       state: present
-      template: "{{ (app_repo.arm_template is defined) | ternary(lookup('file', app_repo.arm_template), omit) }}"
+      template: "{{(app_repo.arm_template is defined) | ternary(lookup('file', app_repo.arm_template), omit)}}"
       template_link: "{{app_repo.arm_template_url | default(omit)}}"
       parameters: "{{app_repo.arm_parameters | default(omit)}}"
-      # https://stackoverflow.com/questions/46545902/ansible-azure-rm-deployment-referencing-parameters-from-2-locations
-      # parameters: "{{ (lookup('template', app_repo.parameters)).parameters }}"
-      # parameters: "{{ (app_repo.parameters is defined) | ternary((lookup('template', app_repo.parameters)).parameters, omit) }}"
       parameters_link: "{{app_repo.arm_parameters_url | default(omit)}}"
   
   tags: [azure, az, deploy, resource_manager, arm]
