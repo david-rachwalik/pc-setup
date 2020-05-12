@@ -34,5 +34,9 @@ if ! test -f ${ubuntu_tmp}; then
     dpkg -i ${ubuntu_tmp}
 fi
 
+# --- Azure CLI Steps ---
+# https://docs.microsoft.com/en-us/cli/azure/install-azure-cli-apt
+curl -sL https://aka.ms/InstallAzureCLIDeb | bash
+
 # Run remaining commands as user
 su -c "curl -s https://raw.githubusercontent.com/david-rachwalik/pc-setup/master/wsl_su_init.sh | bash" ${run_user}
