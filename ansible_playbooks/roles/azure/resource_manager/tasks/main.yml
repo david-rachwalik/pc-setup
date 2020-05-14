@@ -6,7 +6,7 @@
 # https://docs.ansible.com/ansible/latest/modules/include_role_module.html
 - include_role:
     name: azure/resource_manager
-    tasks_from: create
+    tasks_from: deploy
   loop: "{{app_project_names}}"
   loop_control:
     loop_var: app_project_name
