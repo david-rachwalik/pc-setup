@@ -20,8 +20,9 @@
   - name: Add repository from PPA and install its signing key
     apt_repository:
       # https://git-scm.com/download/linux
-      repo: ppa:git-core/ppa
+      repo: "{{item}}"
       state: present
+    loop: "{{apt_repository_packages}}"
 
   - name: Install missing apt packages
     apt:
