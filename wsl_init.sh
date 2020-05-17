@@ -20,13 +20,15 @@ fi
 # Upgrade Linux distribution
 export DEBIAN_FRONTEND=noninteractive
 apt-get update && apt-get dist-upgrade -y
+
 # Install Ansible and dependencies
 apt-get install -y python3
 apt-get install -y python3-pip
 apt-get install -y python3-winrm
 pip3 install ansible
 
-# Register Microsoft key and feed to prep for .NET SDK
+# Register Microsoft repository key and feed (prep for .NET SDK and Azure CLI)
+# https://docs.microsoft.com/en-us/dotnet/core/install/linux-package-manager-ubuntu-1804
 ubuntu_src="https://packages.microsoft.com/config/ubuntu/18.04/packages-microsoft-prod.deb"
 ubuntu_tmp="/var/cache/apt/archives/packages-microsoft-prod.deb"
 if ! test -f ${ubuntu_tmp}; then
@@ -34,7 +36,7 @@ if ! test -f ${ubuntu_tmp}; then
     dpkg -i ${ubuntu_tmp}
 fi
 
-# --- Azure CLI Steps ---
+# Install Azure CLI
 # https://docs.microsoft.com/en-us/cli/azure/install-azure-cli-apt
 curl -sL https://aka.ms/InstallAzureCLIDeb | bash
 
