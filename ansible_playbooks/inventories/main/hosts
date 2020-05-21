@@ -7,3 +7,6 @@ localhost
 # Find with 'hostname' command
 DESKTOP-U8ATCTC
 ; LAPTOP-EHHA0PI7
+
+[azure]
+localhost
