@@ -1,18 +1,7 @@
 ---
+# appc --tags deploy
+
 # https://docs.microsoft.com/en-us/azure/azure-resource-manager/templates/template-tutorial-create-first-template?tabs=azure-cli
-
-
-#   - include_role:
-#       name: azure/key_vault/create
-#       tasks_from: create
-
-#   - debug:
-#       var: key_vault
-#   - debug:
-#       var: az_service_plan
-#   - debug:
-#       var: az_service_plan_id
-
 - block:
   - include_role:
       name: azure/resource_group/create

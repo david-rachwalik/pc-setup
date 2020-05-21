@@ -2,7 +2,7 @@
 # NOTE: Never pass 'app_repo_names' to --extra-vars
 
 - name: Delete Azure Active Directory application
-  hosts: localhost
+  hosts: azure
   tasks:
   # https://docs.ansible.com/ansible/latest/modules/include_role_module.html
   - include_role:
@@ -34,7 +34,7 @@
 # Use purge=True to remove [resource group, service plan]
 
 - name: Delete Azure App Service
-  hosts: localhost
+  hosts: azure
   vars:
     resource_group_names:
     - ansible_test_rg

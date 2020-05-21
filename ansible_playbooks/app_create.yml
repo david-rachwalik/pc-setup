@@ -1,23 +1,32 @@
 ---
 # ansible-playbook app_create.yml -e "app_repo_name=DMR"
 # repoc -e "app_repo_name=DMR"
+# appc --tags ad
 
-# https://docs.microsoft.com/en-us/cli/azure/account#az-account-show
-# az login | az account show
+- name: Configure Azure Active Directory account
+  hosts: azure
+  tasks:
+  - include_role:
+      name: azure/active_directory/subscription
+  # - include_role:
+  #     name: azure/active_directory/managed_identity
+  # - include_role:
+  #     name: azure/active_directory/service_principal
+  # - include_role:
+  #     name: azure/resource_manager/deploy
+
+  tags: [azure, az, active_directory, ad, account, login, identity, configure]
 
 
 - name: Create Azure Active Directory application
-  hosts: localhost
+  hosts: azure
   tasks:
-  # https://docs.ansible.com/ansible/latest/modules/include_role_module.html
   - include_role:
-      name: azure/active_directory/create
-      # name: azure/active_directory
-      # tasks_from: create
+      name: azure/active_directory/application/create
     loop: "{{app_repo_names}}"
     loop_control:
       loop_var: app_repo_name
-  tags: [azure, az, active_directory, ad]
+  tags: [azure, az, active_directory, ad, application]
 
 
 - name: Create .NET Core application repository
@@ -41,7 +50,7 @@
 # https://docs.ansible.com/ansible/latest/modules/list_of_cloud_modules.html#azure
 
 # - name: Create Azure WebApp Service
-#   hosts: localhost
+#   hosts: azure
 #   tasks:
 #   - include_role:
 #       name: azure/app_service/create
@@ -59,7 +68,7 @@
 # https://www.youtube.com/watch?v=G_gDYlRBAZw
 # https://docs.microsoft.com/en-us/azure/storage/blobs/storage-blob-static-website
 # - name: Create Azure Static App Service (blog storage)
-#   hosts: localhost
+#   hosts: azure
 #   vars:
 #     resource_group: StaticWebsite
 #     storage_account: superfancysitename
@@ -68,12 +77,10 @@
 
 
 - name: Deploy Azure Resource Manager Template
-  hosts: localhost
+  hosts: azure
   tasks:
   - include_role:
-      name: azure/resource_manager
-    loop: "{{app_repo_names}}"
-    loop_control:
-      loop_var: app_repo_name
+      name: azure/resource_manager/deploy
+      tasks_from: loop_app_repo
   tags: [azure, az, deploy, resource_manager, arm]
 ...
