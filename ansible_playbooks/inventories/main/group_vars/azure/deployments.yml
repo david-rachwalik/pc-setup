@@ -1,11 +1,7 @@
 ---
+# --- Active Directory Application ---
 # Products available by region
 # https://azure.microsoft.com/en-us/global-infrastructure/services/
-
-az_active_directory: davidrachwalikoutlook
-az_ad_domain: "https://{{az_active_directory}}.onmicrosoft.com"
-az_ad_identifier_urls: ["{{az_ad_domain}}/{{app_project.name | lower}}"]
-az_ad_reply_urls: ["{{app_domain}}/signin-oidc"]
 
 # az_ad_app_project_query: "[?displayName=='{{app_project.name}}']"
 az_ad_app_project_query: "[?displayName=='{{app_project.name}}'].{appId: appId, displayName: displayName}"
@@ -22,8 +18,9 @@ az_ad_app_project_id: "{{out_ad_app_show.stdout | from_json | json_query('appId'
 # ------------------------------------------------
 # https://docs.microsoft.com/en-us/azure/architecture/best-practices/naming-conventions
 az_project: "{{app_repo.solution | lower}}"
-az_location: "{{app_repo.arm_location | default('South Central US')}}"
-az_resource_group: "{{az_project}}-rg"
+az_location: "{{app_repo.arm_location | default(az_default_location)}}"
+# az_resource_group: "{{az_project}}-rg"
+az_resource_group: "{{app_repo.solution}}"
 
 az_rm_template: "{{ lookup('template', app_repo.arm_template) }}"
 az_rm_parameters_file: "{{ lookup('template', app_repo.arm_parameters) }}"

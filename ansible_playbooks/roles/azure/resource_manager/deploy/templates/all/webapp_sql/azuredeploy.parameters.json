@@ -3,10 +3,10 @@
   "contentVersion": "1.0.0.0",
   "parameters": {
     "sqlAdministratorLogin": {
-      "value": "GEN-UNIQUE-8"
+      "value": "{{sql_administrator_login}}"
     },
-    "sqlAdministratorLoginPassword": {		
-      "value": "GEN-PASSWORD"		
-    }		
+    "sqlAdministratorLoginPassword": {
+      "value": "{{sql_administrator_login_password}}"
+    }
   }
 }

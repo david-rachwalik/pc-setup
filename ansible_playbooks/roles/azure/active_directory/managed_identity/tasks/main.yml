@@ -1,0 +1,39 @@
+---
+# ansible-playbook app_create.yml --tags identity
+# appc --tags identity
+
+# managed identity:   Automatically rotates and manages service principals
+# service principal:  Authentication token to access Azure resources
+
+# https://docs.microsoft.com/en-us/azure/active-directory/managed-identities-azure-resources/how-to-manage-ua-identity-cli
+# https://medium.com/@vunvulear/demystifying-system-assigned-managed-identity-and-user-assigned-managed-identity-for-azure-3ed812dfb1d7
+- block:
+  - name: Show default managed identity
+    command: >-
+      az identity show
+      --name {{az_default_managed_identity}}
+      --resource-group {{az_default_resource_group}}
+    register: az_managed_identity_facts
+    changed_when: false # query only
+    no_log: true
+
+  - include_role:
+      name: azure/active_directory/managed_identity
+      tasks_from: create
+    when: az_managed_identity_facts.rc != 0
+
+  - name: List managed identities
+    command: >-
+      az identity list
+      --subscription {{az_default_subscription}}
+    register: az_managed_identity_list_facts
+    changed_when: false # query only
+    no_log: true
+
+  # - include_role:
+  #     name: azure/active_directory/managed_identity
+  #     tasks_from: delete
+  #   when: az_managed_identity_list_to_delete | count > 0
+
+  tags: [azure, az, active_directory, ad, account, identity]
+...
