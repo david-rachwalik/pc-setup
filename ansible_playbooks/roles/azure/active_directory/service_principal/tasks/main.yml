@@ -1,0 +1,66 @@
+---
+# ansible-playbook app_create.yml --tags ad
+# appc --tags ad
+
+# managed identity:   Automatically rotates and manages service principals
+# service principal:  Authentication token to access Azure resources
+
+# https://docs.microsoft.com/en-us/cli/azure/create-an-azure-service-principal-azure-cli
+# The key vault can exist in a different subscription than the resource group you're deploying to
+
+# https://docs.microsoft.com/en-us/cli/azure/ad/sp
+- block:
+  - name: Show default service principal
+    command: >-
+      az ad sp show
+      --id {{az_managed_identity_principal_id}}
+    register: az_service_principal_facts
+    changed_when: false # query only
+    no_log: true
+
+  - debug:
+      var: az_service_principal_facts
+
+  # - include_role:
+  #     name: azure/active_directory/managed_identity
+  #     tasks_from: create # update
+  #   when: az_managed_identity_facts.rc != 0
+
+
+  - name: List existing service principals
+    command: az ad sp list
+    register: az_service_principal_list_facts
+    changed_when: false # query only
+    no_log: true
+
+  # # https://docs.microsoft.com/en-us/cli/azure/create-an-azure-service-principal-azure-cli
+  # - name: List existing service principals
+  #   command: >-
+  #     az ad sp list
+  #     --show-mine
+  #     --query '[].{id:appId, tenant:appOwnerTenantId}'
+  #   register: az_service_principal_list_facts
+  #   changed_when: false # query only
+  #   # no_log: true
+
+
+  - debug:
+      var: az_service_principal_names
+  - debug:
+      var: az_service_principal_apps
+  - fail:
+      msg: break point
+
+  # https://docs.microsoft.com/en-us/cli/azure/create-an-azure-service-principal-azure-cli
+  - name: Create a service principal
+    command: >-
+      az ad sp create-for-rbac
+      --name {{az_service_principal}}
+    # TODO: use further options to customize the create
+    # - store certificate in key vault
+    register: az_service_principal_facts
+    changed_when: "'Found an existing application instance' not in az_service_principal_facts.stderr"
+    no_log: true
+
+  tags: [azure, az, active_directory, ad, service_principal, sp]
+...

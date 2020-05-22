@@ -3,7 +3,8 @@
 # Application Repository Options:   [solution, source, host, projects]
 # Application Project Options:      [name, template, authentication, port]
 # - template choices:               [webapp, webapi, xunit, console]
-# - authentication choices:         [Individual, SingleOrg]
+# - authentication choices:         [Individual, SingleOrg, MultiOrg]
+# * always prefer MultiOrg for most and SingleOrg for APIs
 
 # possible modes: [nodb, sqlserver, identity, docker]
 
@@ -18,7 +19,7 @@ app_repositories:
   projects:
   - name: DMR.WebApp
     template: webapp
-    authentication: SingleOrg
+    authentication: MultiOrg
   - name: DMR.UnitTests
     template: xunit
 
@@ -76,34 +77,38 @@ app_repositories:
     template: webapi
     authentication: SingleOrg
   
-  arm_template: 201-web-app-github-deploy/azuredeploy.json
-  arm_parameters: 201-web-app-github-deploy/azuredeploy.parameters.json
-
-  # arm_template: "201-web-app-github-deploy/azuredeploy.json"
-  # arm_parameters:
-  #   location:
-  #     value: "South Central US"
+  # arm_template: 201-web-app-github-deploy/azuredeploy.json
+  # arm_parameters: 201-web-app-github-deploy/azuredeploy.parameters.json
   
+  arm_template: linux/webapp_blank/azuredeploy.json
+  arm_parameters: linux/webapp_blank/azuredeploy.parameters.json
+
   # arm_template_url: https://raw.githubusercontent.com/Azure/azure-quickstart-templates/master/201-web-app-github-deploy/azuredeploy.json
-  
-  # template_url: "https://github.com/Rhodair/DevOps_AzureResourceGroup/blob/master/WebApp/WebSite.json"
-  # parameter_url: "https://github.com/Rhodair/DevOps_AzureResourceGroup/blob/master/WebApp/WebSite.parameters.json"
-
-  # template_url: blank.json
-  # parameter_url: blank.parameters.dev.json
-
-  # template_url: https://raw.githubusercontent.com/david-rachwalik/pc-setup/master/ansible_playbooks/roles/azure/resource_manager/files/blank.json
-  # parameter_url: https://raw.githubusercontent.com/david-rachwalik/pc-setup/master/ansible_playbooks/roles/azure/resource_manager/files/blank.parameters.dev.json
 
   # template_url: https://github.com/Azure/azure-quickstart-templates/blob/master/201-web-app-github-deploy/azuredeploy.json
   # parameter_url: https://github.com/Azure/azure-quickstart-templates/blob/master/201-web-app-github-deploy/azuredeploy.parameters.json
 
   # - name: Tester.WebApp
   #   template: webapp
-  #   authentication: SingleOrg
+  #   authentication: MultiOrg
   # - name: Tester.UnitTests
   #   template: xunit
   use_extras: true
+
+- solution: Main
+  host: Azure
+  arm_template: all/managed_identity/azuredeploy.json
+  arm_parameters: all/managed_identity/azuredeploy.parameters.json
+
+- solution: WebAppTest
+  host: Azure
+  arm_template: all/webapp_sql/azuredeploy.json
+  arm_parameters: all/webapp_sql/azuredeploy.parameters.json
+  arm_parameter_inputs:
+  - name: sql_administrator_login
+    prompt: "What is the database administrator username?"
+  - name: sql_administrator_login_password
+    prompt: "What is the database administrator password?"
 
 
 # ------------------------ Application Repository/Project Parsing ------------------------
@@ -113,8 +118,8 @@ app_repo_names: "{{app_repositories | json_query('[*].solution')}}"
 app_project_names: "{{app_repo | json_query('projects[*].name')}}"
 
 app_repo_query: "[?solution=='{{app_repo_name}}']"
-app_project_query: "[*].projects[?name=='{{app_project_name}}']"
-
 app_repo: "{{app_repositories | json_query(app_repo_query) | first}}"
+
+app_project_query: "[*].projects[?name=='{{app_project_name}}']"
 app_project: "{{app_repositories | json_query(app_project_query) | flatten | first}}"
 ...

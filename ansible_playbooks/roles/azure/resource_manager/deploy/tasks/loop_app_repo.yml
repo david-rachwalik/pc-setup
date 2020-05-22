@@ -3,6 +3,7 @@
 # appc --tags deploy -e "app_repo_names=['DMR']"
 # appc --tags deploy -e "app_repo_names=['Tester']"
 # appc --tags deploy -e "app_repo_names=['Main']"
+# appc --tags deploy -e "app_repo_names=['WebAppTest']" -e "@inventories/main/group_vars/azure/extra_vars_vault.yml"
 
 - include_role:
     name: azure/resource_manager/deploy

@@ -1,0 +1,34 @@
+---
+
+  - debug:
+      var: az_default_subscription
+  - debug:
+      var: az_default_location
+  - debug:
+      var: az_default_resource_group
+  - debug:
+      var: az_default_managed_identity
+
+  # TODO: Find difference of existing and expected identities, if >0 then delete
+
+  - debug:
+      var: az_managed_identity_list_names
+  - debug:
+      var: az_managed_identity_list_to_delete
+
+  - fail:
+      msg: break point
+
+
+- name: List managed identities
+  command: >-
+      az identity list
+      --subscription {{az_default_subscription}}
+  loop: "{{az_managed_identity_list_to_delete}}"
+  loop_control:
+    loop_var: az_managed_identity_list_name
+
+  # register: az_managed_identity_list_facts
+  # no_log: true
+  tags: [azure, az, active_directory, ad, account, identity]
+...

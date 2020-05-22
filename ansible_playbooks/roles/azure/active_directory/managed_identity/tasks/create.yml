@@ -1,0 +1,18 @@
+---
+- block:
+  # https://docs.ansible.com/ansible/latest/modules/azure_rm_resourcegroup_module.html
+  - name: Create resource group
+    azure_rm_resourcegroup:
+      name: "{{az_default_resource_group}}"
+      location: "{{az_default_location}}"
+
+  - name: Create a user-assigned managed identity
+    command: >-
+      az identity create
+      --name {{az_default_managed_identity}}
+      --resource-group {{az_default_resource_group}}
+    register: az_managed_identity_facts
+    no_log: true
+
+  tags: [azure, az, active_directory, ad, account, identity]
+...

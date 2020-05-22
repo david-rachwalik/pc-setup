@@ -1,6 +1,4 @@
 ---
-# appc --tags deploy
-
 # https://docs.microsoft.com/en-us/azure/azure-resource-manager/templates/template-tutorial-create-first-template?tabs=azure-cli
 - block:
   - include_role:
@@ -20,6 +18,6 @@
       # parameters: "{{app_repo.arm_parameters | default(omit)}}"
       parameters: "{{ az_rm_parameters | default(omit) }}"
       parameters_link: "{{app_repo.arm_parameters_url | default(omit)}}"
-  
+
   tags: [azure, az, deploy, resource_manager, arm]
 ...

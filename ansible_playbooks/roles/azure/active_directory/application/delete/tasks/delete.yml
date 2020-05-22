@@ -6,7 +6,7 @@
     msg: break point
 
 
-# ansible localhost -m include_role -a "name=azure/active_directory/delete"
+# ansible localhost -m include_role -a "name=azure/active_directory/application/delete"
 # NOTE: Needs to be run multiple times to delete apps sharing the same name
 #       This is acceptable because the create role only allows unique names
 

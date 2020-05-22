@@ -1,0 +1,46 @@
+---
+# ansible-playbook app_create.yml --tags account
+# appc --tags account
+
+# https://docs.microsoft.com/en-us/cli/azure/manage-azure-subscriptions-azure-cli
+# tenant:         Azure Active Directory entity for an organization (has subscriptions and users)
+# user:           Individual account to manage resources - associated with only one tenant
+# subscription:   Agreement to use cloud services; every resource is associated with a subscription
+
+# managed identity:   Automatically rotates and manages service principals
+# service principal:  Authentication token to access Azure resources
+
+# https://docs.microsoft.com/en-us/cli/azure/account
+# Account subscriptions not deleted by CLI
+- block:
+  # - name: Get account subscription details
+  #   command: >-
+  #     az account show
+  #     --subscription {{az_default_subscription}}
+  #   register: az_subscription_facts
+  #   changed_when: false # query only
+  #   failed_when: false  # query only
+  #   no_log: true
+
+  # Using list (not show) since 'az login' returns a list
+  - name: List Azure account subscriptions
+    command: az account list --all
+    # NOTE: Both 'az_subscription_list_facts' show identical output (default subscription)
+    register: az_subscription_list_facts
+    changed_when: false # query only
+    no_log: true
+
+  # Include prevents 'az_subscription_list_facts' from overriding on skip
+  - include_role:
+      name: azure/active_directory/subscription
+      tasks_from: login
+    # when: az_subscription_facts.rc != 0
+    when: az_subscription_list_facts.stdout == '[]'
+
+  # TODO: configure automatic login
+  # - include_role:
+  #     name: azure/active_directory/subscription
+  #     tasks_from: configure
+
+  tags: [azure, az, active_directory, ad, account, login, configure]
+...
