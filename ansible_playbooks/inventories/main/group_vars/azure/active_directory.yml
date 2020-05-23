@@ -4,10 +4,11 @@ az_active_directory: davidrachwalikoutlook
 az_ad_domain: "https://{{az_active_directory}}.onmicrosoft.com"
 az_ad_identifier_urls: ["{{az_ad_domain}}/{{app_project.name | lower}}"]
 az_ad_reply_urls: ["{{app_domain}}/signin-oidc"]
+az_devops_organization: https://dev.azure.com/david-rachwalik
 
 # --- Configuration Defaults ---
 az_default_subscription: "{{az_subscriptions | first}}"
-az_default_location: South Central US
+az_default_location: southcentralus # South Central US     # az account list-locations
 az_default_resource_group: Main
 az_default_managed_identity: "{{az_managed_identities | first}}"
 

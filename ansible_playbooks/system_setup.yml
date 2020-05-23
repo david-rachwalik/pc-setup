@@ -32,13 +32,23 @@
 
   - include_role:
       name: azure/extension
-    tags: [azure, az]
+    tags: [azure, az, extension]
 
   - include_role:
       name: python/user_modules
     tags: [python, py]
 
   tags: [linux]
+
+
+- name: Configure Azure environment
+  hosts: azure
+  tasks:
+  - include_role:
+      name: azure/configure
+    tags: [active_directory, ad, configure]
+
+  tags: [azure, az]
 
 
 - name: Provision & configure Windows

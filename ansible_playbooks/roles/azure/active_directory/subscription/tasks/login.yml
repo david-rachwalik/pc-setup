@@ -1,9 +1,9 @@
 ---
 # https://docs.microsoft.com/en-us/cli/azure/reference-index?view=azure-cli-latest#az-login
-- name: Login Azure account
+- name: Login Azure subscription
   command: az login
   # NOTE: Both 'az_subscription_list_facts' show identical output (default subscription)
   register: az_subscription_list_facts
   no_log: true
-  tags: [azure, az, active_directory, ad, account, login]
+  tags: [azure, az, active_directory, ad, subscription, login]
 ...
