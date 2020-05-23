@@ -15,7 +15,10 @@
   # - include_role:
   #     name: azure/resource_manager/deploy
 
-  tags: [azure, az, active_directory, ad, account, login, identity, configure]
+  # create key vault to store service principals, passwords, connection strings, etc.
+  # create credential file if missing
+  
+  tags: [azure, az, active_directory, ad, subscription, login]
 
 
 - name: Create Azure Active Directory application

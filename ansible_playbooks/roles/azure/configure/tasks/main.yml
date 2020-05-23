@@ -1,0 +1,36 @@
+---
+# setup --tags configure
+
+# https://docs.microsoft.com/en-us/cli/azure/identity
+# Configure default subscription:         az account set -s NAME_OR_ID
+# Configure default organization:         az devops configure -d organization=ORG_URL
+# Configure default location:             az configure --defaults location=<location>
+# Configure default resource group:       az configure --defaults group=<name>
+
+# https://docs.microsoft.com/en-us/cli/azure/authenticate-azure-cli
+- block:
+  # https://docs.microsoft.com/en-us/cli/azure/account#az-account-set
+  - name: Set current active Azure subscription
+    command: >-
+      az account set
+      --subscription {{az_default_subscription}}
+
+  # https://docs.microsoft.com/en-us/cli/azure/devops#az-devops-configure
+  - name: Set default Azure organization
+    command: >-
+      az devops configure
+      --defaults organization='{{az_devops_organization}}'
+
+  # https://docs.microsoft.com/en-us/cli/azure/reference-index#az-configure
+  - name: Set default Azure location
+    command: >-
+      az configure
+      --defaults location='{{az_default_location}}'
+
+  - name: Set default Azure resource group
+    command: >-
+      az configure
+      --defaults group='{{az_default_resource_group}}'
+
+  tags: [azure, az, active_directory, ad, configure]
+...
