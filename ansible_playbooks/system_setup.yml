@@ -31,6 +31,10 @@
     tags: [git]
 
   - include_role:
+      name: azure/extension
+    tags: [azure, az]
+
+  - include_role:
       name: python/user_modules
     tags: [python, py]
 
@@ -54,6 +58,10 @@
   - include_role:
       name: windows/system/setup
     tags: [scheduled_task, sched]
+
+  - include_role:
+      name: azure/extension
+    tags: [azure, az]
 
   - include_role:
       name: python/user_modules
