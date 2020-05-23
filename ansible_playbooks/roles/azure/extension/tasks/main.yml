@@ -1,0 +1,21 @@
+---
+# setup --tags az
+
+- include_role:
+    name: azure/extension
+    tasks_from: wsl_setup
+  loop: "{{az_extensions}}"
+  loop_control:
+    loop_var: az_extension
+  when: os_family == 'Linux'
+  tags: [linux, azure, az]
+
+- include_role:
+    name: azure/extension
+    tasks_from: win_setup
+  loop: "{{az_extensions}}"
+  loop_control:
+    loop_var: az_extension
+  when: os_family == 'Windows'
+  tags: [windows, azure, az]
+...

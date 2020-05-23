@@ -1,0 +1,33 @@
+---
+# https://docs.microsoft.com/en-us/cli/azure/extension
+- block:
+  - name: Show Azure extension
+    win_shell: >-
+      az extension show
+      --name {{az_extension}}
+    register: az_extension_facts
+    changed_when: false # query only
+    failed_when: false  # query only
+    no_log: true
+
+  - name: Install Azure extension
+    win_shell: >-
+      az extension add
+      --name {{az_extension}}
+    when: "'is not installed' in az_extension_facts.stderr"
+
+  - name: Install Azure extension
+    win_shell: >-
+      az extension update
+      --name {{az_extension}}
+    when: az_extension_facts.rc == 0
+    register: az_extension_update_facts
+    changed_when:
+    - az_extension_update_facts is failed
+    - "'No updates available' not in az_extension_update_facts.stderr"
+    failed_when:
+    - az_extension_update_facts is failed
+    - "'No updates available' not in az_extension_update_facts.stderr"
+
+  tags: [windows, azure, az]
+...
