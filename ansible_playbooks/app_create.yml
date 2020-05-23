@@ -8,16 +8,8 @@
   tasks:
   - include_role:
       name: azure/active_directory/subscription
-  # - include_role:
-  #     name: azure/active_directory/managed_identity
-  # - include_role:
-  #     name: azure/active_directory/service_principal
-  # - include_role:
-  #     name: azure/resource_manager/deploy
-
   # create key vault to store service principals, passwords, connection strings, etc.
   # create credential file if missing
-  
   tags: [azure, az, active_directory, ad, subscription, login]
 
 
@@ -82,6 +74,10 @@
 - name: Deploy Azure Resource Manager Template
   hosts: azure
   tasks:
+  # - include_role:
+  #     name: azure/resources/managed_identity
+  # - include_role:
+  #     name: azure/resources/service_principal
   - include_role:
       name: azure/resource_manager/deploy
       tasks_from: loop_app_repo
