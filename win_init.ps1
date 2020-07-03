@@ -9,9 +9,11 @@
 # Install Chocolatey
 Set-ExecutionPolicy Bypass -Scope Process -Force; iwr https://chocolatey.org/install.ps1 -UseBasicParsing | iex
 
-# Install WSL (*nix kernel) - restart system when prompted
+# Install WSL (*nix kernel) - restart system when prompted - update to WSL 2
 # https://docs.microsoft.com/en-us/windows/wsl/install-manual
 Enable-WindowsOptionalFeature -Online -FeatureName Microsoft-Windows-Subsystem-Linux
+Enable-WindowsOptionalFeature -Online -FeatureName VirtualMachinePlatform
+wsl --set-default-version 2
 
 # Install RemoteRM (leftover commands in D:\Repos\pc-setup\ansible_playbooks\roles\powershell\files\provision_pc.ps1)
 $url = "https://raw.githubusercontent.com/ansible/ansible/devel/examples/scripts/ConfigureRemotingForAnsible.ps1"
@@ -46,8 +48,8 @@ Set-ExecutionPolicy -ExecutionPolicy Unrestricted -Force
 # Get-AppxPackage *CanonicalGroupLimited.UbuntuonWindows* | Remove-AppxPackage
 
 # Download and install Ubuntu LTS - the preferred, stable release
-Invoke-WebRequest -Uri https://aka.ms/wsl-ubuntu-1804 -OutFile $env:temp\wsl-ubuntu-1804.appx -UseBasicParsing
-Add-AppxPackage $env:temp\wsl-ubuntu-1804.appx
+Invoke-WebRequest -Uri https://aka.ms/wsl-ubuntu-2004 -OutFile $env:temp\wsl-ubuntu-2004.appx -UseBasicParsing
+Add-AppxPackage $env:temp\wsl-ubuntu-2004.appx
 # Note: If you reset/uninstall the app, be sure to fix the registry with CCleaner before installing again
 
 # Launch Ubuntu (uses WSL)
