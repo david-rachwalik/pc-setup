@@ -1,4 +1,6 @@
 ---
+# setup --tags desktop
+
 - block:
   # https://docs.ansible.com/ansible/latest/modules/win_find_module.html
   - name: Find Desktop Shortcuts
@@ -21,7 +23,7 @@
       paths: "{{desktops}}"
     register: out_find_desktop
   
-  tags: [setup, desktop]
+  tags: [desktop]
 
 
 # - block:
@@ -32,5 +34,5 @@
   # - P: \\HeroCamp\Public
   # - Z: \\HeroCamp\Pervy Yum Sauce
 
-  # tags: ["setup", "drive", "mount"]
+  # tags: [mount]
 ...

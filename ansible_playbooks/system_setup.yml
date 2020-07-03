@@ -67,7 +67,7 @@
   # --- Configuration Steps ---
   - include_role:
       name: windows/system/setup
-    tags: [scheduled_task, sched]
+    tags: [scheduled_task, sched, desktop]
 
   - include_role:
       name: azure/extension
