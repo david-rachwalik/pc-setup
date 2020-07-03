@@ -47,8 +47,6 @@ chocolatey_packages:
   - name: vscode
   - name: postman
   - name: sqlitebrowser
-  # - name: microsoftazurestorageexplorer
-  # - name: jekyll
   
   # --- Media ---
   - name: geforce-experience
@@ -84,6 +82,8 @@ chocolatey_packages:
   - name: typescript
   - name: sass
   - name: dart-sdk # sass dependency
+  # - name: jekyll
+  # - name: microsoftazurestorageexplorer
 
 
 pip_packages:

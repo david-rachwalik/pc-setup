@@ -1,7 +1,6 @@
 ---
 apt_repository_packages:
 - ppa:git-core/ppa
-# - universe
 
 
 apt_packages:
@@ -9,11 +8,6 @@ apt_packages:
 - python3-pip
 - python3-winrm
 - git
-# - libffi-dev
-# - libssl-dev
-# --- Miscellaneous ---
-# Tool to convert Windows files to Linux format
-# - dos2unix
 # --- .NET Core SDK ---
 # https://docs.microsoft.com/en-us/dotnet/core/install/linux-package-manager-ubuntu-1804
 - apt-transport-https
@@ -36,16 +30,8 @@ pip_packages:
 - ansible
 - jmespath        # for 'json_query' filter
 - pytz
-# - pywinrm
-# - packaging       # for Azure (maybe)
-# - msrestazure     # for Azure (maybe)
-# - azure           # for Azure (maybe)
-- ansible[azure]  # for Azure
-
 # https://azure.microsoft.com/en-us/resources/samples/ansible-playbooks/
-# pip install ansible[azure]
-# ansible-galaxy install azure.azure_preview_modules
-# pip install -r ~/.ansible/roles/azure.azure_preview_modules/files/requirements-azure.txt
+- ansible[azure]  # for Azure
 
 
 # ------------------------ System Package Parsing ------------------------
