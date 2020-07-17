@@ -3,12 +3,15 @@
 # appc --tags host -e "app_repo_names=['DMR']"
 # appc --tags host -e "app_repo_names=['Tester']"
 
+# https://docs.ansible.com/ansible/latest/modules/azure_rm_keyvaultsecret_module.html
+# https://docs.ansible.com/ansible/latest/modules/azure_rm_keyvault_info_module.html
+# https://docs.ansible.com/ansible/latest/modules/azure_rm_keyvault_module.html
+
 # https://docs.ansible.com/ansible/latest/modules/include_role_module.html
 - include_role:
-    name: azure/app_service/create
-    tasks_from: create
+    name: azure/resources/key_vault/create
   loop: "{{app_project_names}}"
   loop_control:
     loop_var: app_project
-  tags: [azure, az, app_service, publish, host]
+  tags: [azure, az, deploy, key_vault, kv]
 ...

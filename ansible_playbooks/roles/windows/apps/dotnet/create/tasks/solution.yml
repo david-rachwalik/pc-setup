@@ -1,10 +1,10 @@
 ---
 - block:
   - debug:
-      msg: "App .NET solution: {{app_repo.solution}}"
+      msg: "App .NET solution: {{app_repo_item.solution}}"
 
   # - debug:
-  #     var: app_repo
+  #     var: app_repo_item
 
   # https://docs.microsoft.com/en-us/dotnet/core/tools/dotnet-new
   # https://docs.ansible.com/ansible/latest/modules/win_shell_module.html

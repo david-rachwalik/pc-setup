@@ -1,13 +1,76 @@
 ---
-# ansible-playbook app_create.yml --tags ad -e "app_repo_names=['DMR']"
-# appc --tags ad -e "app_repo_names=['DMR']"
+# active directory (1):(many) app subscriptions / app limited to 1 directory at a time
+# Using Microsoft Identity platform (v2.0), not Azure Active Directory (v1.0) endpoints
+# https://docs.microsoft.com/en-us/azure/active-directory/develop/azure-ad-endpoint-comparison
+# --- Accounts in any Azure AD directory and personal Microsoft accounts - Multi-tenant
+# https://docs.microsoft.com/en-us/azure/active-directory/develop/quickstart-v2-aspnet-core-webapp
+# https://docs.microsoft.com/en-us/azure/active-directory/develop/app-objects-and-service-principals
 
-# https://docs.ansible.com/ansible/latest/modules/include_role_module.html
-- include_role:
-    name: azure/active_directory/application/create
-    tasks_from: create
-  loop: "{{app_project_names}}"
-  loop_control:
-    loop_var: app_project_name
-  tags: [azure, az, active_directory, ad, identity, create]
+- block:
+  - debug:
+      msg: "Azure AD application: {{app_repo_item.name}}"
+
+
+  - name: Check Azure AD application object registration
+    command: >-
+      az ad app show
+      --id {{az_ad_identifier_urls | first}}
+    register: az_ad_app_show_facts
+    changed_when: false # query only
+    failed_when:  false # query only
+    ignore_errors: true
+    no_log: true
+
+  # - set_fact:
+  #     az_ad_app_show_parse: "{{ az_ad_app_show_facts.stdout | from_json }}"
+  # - debug:
+  #     var: az_ad_app_client_id
+
+
+  # https://docs.microsoft.com/en-us/cli/azure/ad/app#az-ad-app-create
+  # NOTE: The az command is idempotent and provides the same output as app show/list
+  - name: Create Azure AD application object registration
+    command: >-
+      az ad app create
+      --display-name {{app_repo_item.name}}
+      --homepage {{app_domain}}
+      --identifier-uris {{az_ad_identifier_urls | join(' ')}}
+      --reply-urls {{az_ad_reply_urls | join(' ')}}
+    # --oauth2-allow-implicit-flow true
+    # TODO: add --app-roles once authentication testing is further
+    when: az_ad_app_show_facts.rc != 0
+    register: az_ad_app_facts
+    no_log: true
+
+
+  # https://docs.microsoft.com/en-us/cli/azure/ad/app#az-ad-app-update
+  # NOTE: The az command is idempotent and provides the same output as app show/list
+  - name: Update Azure AD application object registration
+    command: >-
+      az ad app update
+      --id {{az_ad_identifier_urls | first}}
+      --display-name {{app_repo_item.name}}
+      --homepage {{app_domain}}
+      --identifier-uris {{az_ad_identifier_urls | join(' ')}}
+      --reply-urls {{az_ad_reply_urls | join(' ')}}
+    # --oauth2-allow-implicit-flow true
+    # TODO: add --app-roles once authentication testing is further
+    when: az_ad_app_show_facts.rc == 0
+    register: az_ad_app_facts
+    changed_when: az_ad_app_facts.stdout != ""
+    no_log: true
+
+
+  # - debug:
+  #     var: az_ad_app_facts
+  # - set_fact:
+  #     az_ad_app_keys: "{{(az_ad_app_facts.stdout | from_json).keys() | list | sort}}"
+  # - set_fact:
+  #     az_ad_app_convert: "{{az_ad_app_facts.stdout | from_json | json_query('{appId: appId, displayName: displayName}')}}"
+  
+  when:
+  # - app_authentication is defined
+  # - app_authentication != 'None'
+  - az_app_registration
+  tags: [azure, az, active_directory, ad, application, identity]
 ...
