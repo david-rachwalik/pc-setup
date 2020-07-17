@@ -3,16 +3,16 @@
   "contentVersion": "1.0.0.0",
   "parameters": {
     "keyVaultName": {
-      "value": "key-vault-main"
+      "value": "{{az_default_key_vault}}"
     },
     "objectId": {
       "value": "GEN-AZUREAD-OBJECTID"
     },
     "secretName": {
-      "value": "GEN-UNIQUE"
+      "value": "{{az_secret_name}}"
     },
     "secretValue": {
-      "value": "GEN-UNIQUE"
+      "value": "{{az_secret_value}}"
     }
   }
 }

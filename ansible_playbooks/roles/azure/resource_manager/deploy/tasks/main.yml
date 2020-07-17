@@ -8,16 +8,16 @@
   # https://docs.ansible.com/ansible/latest/modules/azure_rm_deployment_module.html
   - name: Deploy Azure Resource Manager Template
     azure_rm_deployment:
-      name: "{{app_repo.arm_name | default(omit)}}"
+      name: "{{app_repo_item.arm_name | default(omit)}}"
       resource_group: "{{az_resource_group}}"
       location: "{{az_location}}"
       state: present
-      # template: "{{(app_repo.arm_template is defined) | ternary(lookup('file', app_repo.arm_template), omit)}}"
+      # template: "{{(app_repo_item.az_rm_template is defined) | ternary(lookup('file', app_repo_item.az_rm_template), omit)}}"
       template: "{{ az_rm_template | default(omit) }}"
-      template_link: "{{app_repo.arm_template_url | default(omit)}}"
-      # parameters: "{{app_repo.arm_parameters | default(omit)}}"
+      template_link: "{{app_repo_item.arm_template_url | default(omit)}}"
+      # parameters: "{{app_repo_item.az_rm_parameters | default(omit)}}"
       parameters: "{{ az_rm_parameters | default(omit) }}"
-      parameters_link: "{{app_repo.arm_parameters_url | default(omit)}}"
+      parameters_link: "{{app_repo_item.arm_parameters_url | default(omit)}}"
 
   tags: [azure, az, deploy, resource_manager, arm]
 ...

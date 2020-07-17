@@ -1,0 +1,9 @@
+---
+# https://docs.ansible.com/ansible/latest/modules/include_role_module.html
+- include_role:
+    name: windows/apps/dotnet/create
+  loop: "{{app_repo_names}}"
+  loop_control:
+    loop_var: app_repo
+  tags: [repository, repo, dotnet, new, git]
+...

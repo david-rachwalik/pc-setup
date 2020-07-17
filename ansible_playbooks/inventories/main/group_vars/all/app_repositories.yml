@@ -1,49 +1,71 @@
 ---
-# https://docs.microsoft.com/en-us/dotnet/core/tools/dotnet-new
-# Application Repository Options:   [solution, source, host, projects]
-# Application Project Options:      [name, template, authentication, port]
-# - template choices:               [webapp, webapi, xunit, console]
-# - authentication choices:         [Individual, SingleOrg, MultiOrg]
-# * always prefer MultiOrg for most and SingleOrg for APIs
+# -------- Application Repository Options --------
+# --- requires 'dotnet_projects' to create solution directory ---
+# ------------------------------------------------
+# name:               repository directory, solution
+# source:             [GitHub, Azure]
+# dotnet_projects:    list of .NET project configurations
+# -------- ASP.NET Core Project Options --------
+# name:               dotnet project name within solution
+# template:           [webapp, webapi, xunit, console]
+# authentication:     [Individual, SingleOrg, MultiOrg]
+# port:               5001 default
+# -------- Host Options --------
+# az_rm_template:     path to Azure Resource Manager (ARM) template file
+# az_rm_parameters:   path to Azure Resource Manager (ARM) parameter file
+# az_pipeline:        path to Azure Pipelines file
 
-# possible modes: [nodb, sqlserver, identity, docker]
+# * authentication typically MultiOrg (SingleOrg for APIs)
+# * ARM template modes: [nodb, sqlserver, identity, docker]
 
-# app_repo_name = app_repositories[*].solution
-app_repositories:
-- solution: pc-setup
+
+application_environments: [Development, Staging, Production]
+
+# app_repo = application_repositories[*].name
+application_repositories:
+# - name: Main
+#   host: Azure
+#   azure_devops_projects:
+#   - host: Azure
+#   # az_rm_template: all/managed_identity/azuredeploy.json
+#   # az_rm_parameters: all/managed_identity/azuredeploy.parameters.json
+
+- name: pc-setup
   source: GitHub
 
-- solution: DMR
+- name: DMR
   source: GitHub
-  host: Azure
-  projects:
+  dotnet_projects:
   - name: DMR.WebApp
     template: webapp
     authentication: MultiOrg
   - name: DMR.UnitTests
     template: xunit
+  # az_rm_template: all/webapp_sql/azuredeploy.json
+  # az_rm_parameters: all/webapp_sql/azuredeploy.parameters.json
 
-- solution: SexBound
+- name: SexBound
   source: Azure
-  host: Azure
-  projects:
+  dotnet_projects:
   - name: SexBound.WebApp
     template: webapp
+  # az_rm_template: all/webapp_sql/azuredeploy.json
+  # az_rm_parameters: all/webapp_sql/azuredeploy.parameters.json
 
-- solution: CorruptionOfChampions
+- name: CorruptionOfChampions
   source: Azure
-  projects:
+  dotnet_projects:
   - name: CorruptionOfChampions.Conversion
     template: webapp
   - name: CorruptionOfChampions.WebApp
     template: webapp
 
-- solution: WorldOfWarcraftAddonDev
+- name: WorldOfWarcraftAddonDev
   source: Azure
 
-- solution: Tutorials-WebApiApps
+- name: Tutorials-WebApiApps
   source: GitHub
-  projects:
+  dotnet_projects:
   - name: WebApiApps.WebApp
     template: webapp
     authentication: SingleOrg
@@ -51,37 +73,37 @@ app_repositories:
     template: xunit
 
 # https://docs.microsoft.com/en-us/aspnet/core/tutorials/razor-pages
-- solution: Tutorials-WebApps-RazorPages
+- name: Tutorials-WebApps-RazorPages
   source: GitHub
-  projects:
+  dotnet_projects:
   - name: RazorPagesMovie
     template: webapp
 
-- solution: Tutorials-DataAccess-RazorPages
+- name: Tutorials-DataAccess-RazorPages
   source: GitHub
-  projects:
+  dotnet_projects:
   - name: ContosoUniversity
     template: webapp
 
 # https://docs.microsoft.com/en-us/aspnet/core/razor-pages/index
 
-- solution: david-rachwalik.github.io
+- name: david-rachwalik.github.io
   source: GitHub
-  host: GitHub
 
-- solution: Tester
+- name: Tester
   source: GitHub
-  host: Azure
-  projects:
+  dotnet_projects:
   - name: Tester.Api
     template: webapi
     authentication: SingleOrg
+  # az_rm_template: all/webapp_sql/azuredeploy.json
+  # az_rm_parameters: all/webapp_sql/azuredeploy.parameters.json
   
-  # arm_template: 201-web-app-github-deploy/azuredeploy.json
-  # arm_parameters: 201-web-app-github-deploy/azuredeploy.parameters.json
+  # az_rm_template: 201-web-app-github-deploy/azuredeploy.json
+  # az_rm_parameters: 201-web-app-github-deploy/azuredeploy.parameters.json
   
-  arm_template: linux/webapp_blank/azuredeploy.json
-  arm_parameters: linux/webapp_blank/azuredeploy.parameters.json
+  az_rm_template: linux/webapp_blank/azuredeploy.json
+  az_rm_parameters: linux/webapp_blank/azuredeploy.parameters.json
 
   # arm_template_url: https://raw.githubusercontent.com/Azure/azure-quickstart-templates/master/201-web-app-github-deploy/azuredeploy.json
 
@@ -95,31 +117,20 @@ app_repositories:
   #   template: xunit
   use_extras: true
 
-- solution: Main
-  host: Azure
-  arm_template: all/managed_identity/azuredeploy.json
-  arm_parameters: all/managed_identity/azuredeploy.parameters.json
-
-- solution: WebAppTest
-  host: Azure
-  arm_template: all/webapp_sql/azuredeploy.json
-  arm_parameters: all/webapp_sql/azuredeploy.parameters.json
-  arm_parameter_inputs:
-  - name: sql_administrator_login
-    prompt: "What is the database administrator username?"
-  - name: sql_administrator_login_password
-    prompt: "What is the database administrator password?"
+- name: WebAppTest
+  az_rm_template: all/webapp_sql/azuredeploy.json
+  az_rm_parameters: all/webapp_sql/azuredeploy.parameters.json
 
 
 # ------------------------ Application Repository/Project Parsing ------------------------
 
 # Application repository/project names must be unique
-app_repo_names: "{{app_repositories | json_query('[*].solution')}}"
-app_project_names: "{{app_repo | json_query('projects[*].name')}}"
+app_repo_names: "{{application_repositories | json_query('[*].name')}}"
+app_project_names: "{{app_repo_item | json_query('dotnet_projects[*].name')}}"
 
-app_repo_query: "[?solution=='{{app_repo_name}}']"
-app_repo: "{{app_repositories | json_query(app_repo_query) | first}}"
+app_repo_query: "[?name=='{{app_repo}}']"
+app_repo_item: "{{application_repositories | json_query(app_repo_query) | first}}"
 
-app_project_query: "[*].projects[?name=='{{app_project_name}}']"
-app_project: "{{app_repositories | json_query(app_project_query) | flatten | first}}"
+app_project_query: "[*].dotnet_projects[?name=='{{app_project}}']"
+app_project_item: "{{application_repositories | json_query(app_project_query) | flatten | first}}"
 ...

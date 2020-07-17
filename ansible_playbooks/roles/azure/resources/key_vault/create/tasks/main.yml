@@ -1,18 +1,70 @@
 ---
-# ansible-playbook app_create.yml --tags host -e "app_repo_names=['DMR']"
-# appc --tags host -e "app_repo_names=['DMR']"
-# appc --tags host -e "app_repo_names=['Tester']"
+# https://docs.microsoft.com/en-us/azure/azure-resource-manager/templates/template-tutorial-create-first-template?tabs=azure-cli
 
-# https://docs.ansible.com/ansible/latest/modules/azure_rm_keyvaultsecret_module.html
-# https://docs.ansible.com/ansible/latest/modules/azure_rm_keyvault_info_module.html
-# https://docs.ansible.com/ansible/latest/modules/azure_rm_keyvault_module.html
+# ---------------- Variables Required ----------------
+# az_tenant_id, az_client_id
+# az_resource_group, az_key_vault
+# kv_key, kv_value
 
-# https://docs.ansible.com/ansible/latest/modules/include_role_module.html
-- include_role:
-    name: azure/key_vault/create
-    tasks_from: create
-  loop: "{{app_project_names}}"
-  loop_control:
-    loop_var: app_project_name
-  tags: [azure, az, deploy, key_vault, kv]
+- block:
+#   - include_role:
+#       name: azure/resource_group/create
+
+  - name: Verify Key Vault key was provided
+    fail:
+      msg: Vault key must be provided as 'kv_key'
+    when: kv_key is not defined
+  
+  - name: Verify Key Vault value was provided
+    fail:
+      msg: Vault value must be provided as 'kv_value'
+    when: kv_value is not defined
+  
+  - debug:
+      var: az_resource_group
+  - debug:
+      var: az_key_vault
+  
+  - debug:
+      var: kv_key
+  - debug:
+      var: kv_value
+
+  - debug:
+      var: az_tenant_id
+  # - debug:
+  #     var: az_user_id
+  - debug:
+      var: az_client_id
+  
+  - fail:
+      msg: break point
+
+  # https://docs.ansible.com/ansible/latest/modules/azure_rm_keyvault_info_module.html
+  - name: Get Key Vault by name
+    azure_rm_keyvault_info:
+      name: "{{az_key_vault}}"
+      resource_group: "{{az_resource_group}}"
+    register: key_vault_facts
+
+  # https://docs.ansible.com/ansible/latest/modules/azure_rm_keyvault_module.html
+  - name: Create instance of Key Vault
+    azure_rm_keyvault:
+      vault_name: "{{az_key_vault}}"
+      resource_group: "{{az_resource_group}}"
+      # Define false because default is null
+      enabled_for_deployment: false
+      enabled_for_disk_encryption: false
+      enabled_for_template_deployment: true
+      vault_tenant: "{{az_tenant_id}}"
+      sku:
+        name: standard
+      access_policies:
+      - tenant_id: "{{az_tenant_id}}"
+        object_id: "{{az_user_id}}"
+        certificates : [get, list, update, create, import, delete, recover, backup, restore, managecontacts, manageissuers, getissuers, listissuers, setissuers, deleteissuers]
+        keys: [get, list, update, create, import, delete, recover, backup, restore]
+    when: key_vault_facts.keyvaults | count == 0
+
+  tags: [azure, az, key_vault, kv]
 ...

@@ -1,6 +1,6 @@
 ---
 - debug:
-    var: app_repo
+    var: app_repo_item
 
 - fail:
     msg: break point

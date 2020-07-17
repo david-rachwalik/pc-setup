@@ -1,16 +1,25 @@
 ---
+# --- Configuration Defaults ---
+az_default_subscription: "{{az_subscriptions | first}}"
+az_default_repository: "{{application_repositories | first}}"
+az_default_location: southcentralus # South Central US     # az account list-locations
+az_default_resource_group: Main
+az_default_key_vault: main-keyvault
+az_default_managed_identity: "{{az_managed_identities | first}}"
+# --------------------------------------------------------
+
+
 # --- Active Directory (tenant/directory to store resources) ---
 az_active_directory: davidrachwalikoutlook
+az_app_registration: "{{app_repo_item | json_query('dotnet_projects[*].authentication') | count > 0}}"
 az_ad_domain: "https://{{az_active_directory}}.onmicrosoft.com"
-az_ad_identifier_urls: ["{{az_ad_domain}}/{{app_project.name | lower}}"]
+az_ad_identifier_urls: ["{{az_ad_domain}}/{{app_repo_item.name | lower}}"]
 az_ad_reply_urls: ["{{app_domain}}/signin-oidc"]
 az_devops_organization: https://dev.azure.com/david-rachwalik
 
-# --- Configuration Defaults ---
-az_default_subscription: "{{az_subscriptions | first}}"
-az_default_location: southcentralus # South Central US     # az account list-locations
-az_default_resource_group: Main
-az_default_managed_identity: "{{az_managed_identities | first}}"
+# --- User ---
+az_user: "{{az_user_facts.stdout | from_json}}"
+az_user_id: "{{az_user.objectId}}"
 
 # --- Account Subscription (payment contract for resources) ---
 az_subscriptions:
@@ -21,6 +30,8 @@ az_tenant_id: "{{az_subscription_item.tenantId}}"
 az_subscription_id: "{{az_subscription_item.id}}"
 az_subscription: "{{az_subscription_item.name}}"
 az_subscription_user: "{{az_subscription_item.user.name}}"
+
+
 
 # --- User-Assigned Managed Identity ---
 az_managed_identities:
@@ -49,4 +60,17 @@ az_service_principal_list_apps: "{{az_service_principal_facts.stdout | from_json
 az_service_principal_count: "{{az_service_principal_list_names | count}}"
 az_service_principal_item_query: "[?name=='{{az_default_service_principal}}']"
 az_service_principal_item: "{{az_service_principal_list_facts.stdout | from_json | json_query(az_service_principal_item_query) | list | first}}"
+
+
+# --- Application Object ---
+# Products available by region
+# https://azure.microsoft.com/en-us/global-infrastructure/services/
+
+# az_ad_app_project_query: "[?displayName=='{{app_project_item.name}}']"
+az_ad_app_project_query: "[?displayName=='{{app_project_item.name}}'].{appId: appId, displayName: displayName}"
+# http://jmespath.org/specification.html#contains
+az_ad_app_project_delete_query: "[?displayName.contains(@, '{{az_ad_app_displayName_to_delete}}')].{appId: appId, displayName: displayName}"
+
+# https://portal.azure.com/#blade/Microsoft_AAD_RegisteredApps/ApplicationsListBlade
+az_ad_app_client_id: "{{az_ad_app_show_facts.stdout | from_json | json_query('appId')}}"
 ...

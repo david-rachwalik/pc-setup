@@ -1,10 +1,10 @@
 ---
 - block:
   - debug:
-      msg: "App .NET project: {{app_project.name}}"
+      msg: "App .NET project: {{app_project_item.name}}"
 
   # - debug:
-  #     var: app_project
+  #     var: app_project_item
 
 
   # https://docs.microsoft.com/en-us/cli/azure/ad/signed-in-user
@@ -21,13 +21,13 @@
   # https://docs.microsoft.com/en-us/dotnet/core/tools/dotnet-new
   - name: Create .NET Core project
     win_shell: >-
-      dotnet new {{app_project.template}}
+      dotnet new {{app_project_item.template}}
       --output {{app_project_dir}}
       --domain {{app_domain}}
       --org-read-access
       --auth {{app_authentication}}
-      --framework netcoreapp3.1
-    # --client-id {{hostvars['localhost']['az_ad_app_project_id']}}
+      --framework {{app_project_item.framework | default('netcoreapp3.1')}}
+    # --client-id {{hostvars['localhost']['az_ad_app_client_id']}}
     args:
       creates: "{{app_csproj}}"
     tags: [new, webapp]

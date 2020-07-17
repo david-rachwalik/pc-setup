@@ -1,0 +1,16 @@
+---
+# ansible-playbook app_create.yml --tags ad
+# appc --tags ad
+
+# --- Login action is handled by subscription role ---
+# https://docs.microsoft.com/en-us/cli/azure/ad/user
+- block:
+  # https://docs.microsoft.com/en-us/cli/azure/ad/signed-in-user#az-ad-signed-in-user-show
+  - name: Gather details about the currently logged-in user
+    command: az ad signed-in-user show
+    register: az_user_facts
+    changed_when: false # query only
+    no_log: true
+
+  tags: [azure, az, active_directory, ad, subscription, login]
+...

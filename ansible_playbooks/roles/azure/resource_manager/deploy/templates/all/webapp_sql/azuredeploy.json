@@ -76,19 +76,22 @@
         {
           "name": "[variables('databaseName')]",
           "type": "databases",
+          "apiVersion": "2019-06-01-preview",
           "location": "[parameters('location')]",
-          "tags": {
-            "displayName": "Database"
-          },
-          "apiVersion": "2018-06-01-preview",
           "dependsOn": [
             "[variables('sqlserverName')]"
           ],
+          "sku": {
+            "name": "Basic",
+            "tier": "Basic",
+            "capacity": 5
+          },
           "properties": {
-            "edition": "Basic",
             "collation": "SQL_Latin1_General_CP1_CI_AS",
-            "maxSizeBytes": "1073741824",
-            "requestedServiceObjectiveName": "Basic"
+            "maxSizeBytes": "1073741824"
+          },
+          "tags": {
+            "displayName": "Database"
           }
         },
         {

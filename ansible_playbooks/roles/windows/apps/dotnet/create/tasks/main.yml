@@ -15,7 +15,7 @@
       tasks_from: project
     loop: "{{app_project_names}}"
     loop_control:
-      loop_var: app_project_name
+      loop_var: app_project
     tags: [project]
 
   tags: [repository, repo, dotnet]
