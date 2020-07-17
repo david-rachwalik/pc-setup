@@ -31,7 +31,7 @@
     args:
       creates: "{{app_csproj}}"
     tags: [new, webapp]
-    register: out_webapp_create
+    register: dotnet_new_facts
 
 
   # https://docs.microsoft.com/en-us/dotnet/core/tools/dotnet-sln

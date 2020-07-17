@@ -1,9 +1,9 @@
 ---
 app_repo_root_dir: D:\Repos
-app_solution_dir: "{{app_repo_root_dir}}\\{{app_repo_item.solution}}"
+app_solution_dir: "{{app_repo_root_dir}}\\{{app_repo_item.name}}"
 app_project_dir: "{{app_solution_dir}}\\{{app_project_item.name}}"
 
-app_sln: "{{app_solution_dir}}\\{{app_repo_item.solution}}.sln"
+app_sln: "{{app_solution_dir}}\\{{app_repo_item.name}}.sln"
 app_readme: "{{app_solution_dir}}\\README.md"
 app_license: "{{app_solution_dir}}\\LICENSE"
 app_csproj: "{{app_project_dir}}\\{{app_project_item.name}}.csproj"

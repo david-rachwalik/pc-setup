@@ -1,7 +1,7 @@
 ---
 - block:
   - debug:
-      msg: "App .NET solution: {{app_repo_item.solution}}"
+      msg: "ASP.NET solution: {{app_repo_item.name}}"
 
   # - debug:
   #     var: app_repo_item
@@ -12,7 +12,7 @@
     win_shell: "dotnet new sln --output {{app_solution_dir}}"
     args:
       creates: "{{app_sln}}"
-    register: out_webapp_create
+    register: dotnet_new_facts
 
   # https://docs.ansible.com/ansible/latest/modules/win_copy_module.html
   - name: Ensure solution has readme
