@@ -51,8 +51,8 @@ Set-ExecutionPolicy -ExecutionPolicy Unrestricted -Force
 # $wsl_distro = https://aka.ms/wsl-ubuntu-1804
 $wsl_distro = "https://aka.ms/wslubuntu2004"
 $wsl_package = "${env:temp}\wsl-ubuntu-2004.appx"
-Invoke-WebRequest -Uri $wsl_distro -OutFile $wsl_package -UseBasicParsing
-Add-AppxPackage $wsl_package
+Invoke-WebRequest -Uri "${wsl_distro}" -OutFile "${wsl_package}" -UseBasicParsing
+Add-AppxPackage "${wsl_package}"
 # Note: If you reset/uninstall the app, be sure to fix the registry with CCleaner before installing again
 
 # Launch Ubuntu (using WSL)
