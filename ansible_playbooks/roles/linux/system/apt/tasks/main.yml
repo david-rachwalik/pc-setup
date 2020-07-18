@@ -38,6 +38,7 @@
       # cache_valid_time: 3600 #One hour
       cache_valid_time: 86400 #One day
       force_apt_get: true
+    ignore_errors: true
 
   - name: Remove useless packages from the cache
     apt:
