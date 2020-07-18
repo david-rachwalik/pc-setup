@@ -21,7 +21,7 @@ $file = "${env:temp}\ConfigureRemotingForAnsible.ps1"
 (New-Object -TypeName System.Net.WebClient).DownloadFile($url, $file)
 powershell.exe -ExecutionPolicy ByPass -File $file
 # Verify existing WinRM listeners
-winrm enumerate winrm/config/Listener
+# winrm enumerate winrm/config/Listener           # displays IP address and port for HTTP(S)
 # Toggle WinRM authentications
 # Set-Item -Path WSMan:\localhost\Service\Auth\Basic -Value true
 # Set-Item -Path WSMan:\localhost\Service\Auth\Kerberos -Value false
