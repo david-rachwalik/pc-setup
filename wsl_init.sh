@@ -27,14 +27,19 @@ apt-get install -y python3-pip
 apt-get install -y python3-winrm
 pip3 install ansible
 
+# # Register Microsoft repository key and feed (prep for .NET SDK and Azure CLI)
+# # https://docs.microsoft.com/en-us/dotnet/core/install/linux-ubuntu#2004-
+# ubuntu_src="https://packages.microsoft.com/config/ubuntu/20.04/packages-microsoft-prod.deb"
+# ubuntu_tmp="/var/cache/apt/archives/packages-microsoft-prod.deb"
+# if ! test -f ${ubuntu_tmp}; then
+#     wget -q ${ubuntu_src} -O ${ubuntu_tmp}
+#     dpkg -i ${ubuntu_tmp}
+# fi
+
 # Register Microsoft repository key and feed (prep for .NET SDK and Azure CLI)
-# https://docs.microsoft.com/en-us/dotnet/core/install/linux-package-manager-ubuntu-1804
-ubuntu_src="https://packages.microsoft.com/config/ubuntu/18.04/packages-microsoft-prod.deb"
-ubuntu_tmp="/var/cache/apt/archives/packages-microsoft-prod.deb"
-if ! test -f ${ubuntu_tmp}; then
-    wget -q ${ubuntu_src} -O ${ubuntu_tmp}
-    dpkg -i ${ubuntu_tmp}
-fi
+# https://docs.microsoft.com/en-us/dotnet/core/install/linux-ubuntu#scripted-install
+version="3.1" # default is 'Current'
+curl -sSL https://dot.net/v1/dotnet-install.sh | bash /dev/stdin -c $version
 
 # Install Azure CLI
 # https://docs.microsoft.com/en-us/cli/azure/install-azure-cli-apt
