@@ -17,7 +17,7 @@ wsl --set-default-version 2
 
 # Install RemoteRM (leftover commands in D:\Repos\pc-setup\ansible_playbooks\roles\powershell\files\provision_pc.ps1)
 $url = "https://raw.githubusercontent.com/ansible/ansible/devel/examples/scripts/ConfigureRemotingForAnsible.ps1"
-$file = "$env:temp\ConfigureRemotingForAnsible.ps1"
+$file = "${env:temp}\ConfigureRemotingForAnsible.ps1"
 (New-Object -TypeName System.Net.WebClient).DownloadFile($url, $file)
 powershell.exe -ExecutionPolicy ByPass -File $file
 # Verify existing WinRM listeners
@@ -50,7 +50,7 @@ Set-ExecutionPolicy -ExecutionPolicy Unrestricted -Force
 # Download and install Ubuntu LTS - the preferred, stable release
 # $wsl_distro = https://aka.ms/wsl-ubuntu-1804
 $wsl_distro = "https://aka.ms/wslubuntu2004"
-$wsl_package = "$env:temp\wsl-ubuntu-2004.appx"
+$wsl_package = "${env:temp}\wsl-ubuntu-2004.appx"
 Invoke-WebRequest -Uri $wsl_distro -OutFile $wsl_package -UseBasicParsing
 Add-AppxPackage $wsl_package
 # Note: If you reset/uninstall the app, be sure to fix the registry with CCleaner before installing again
