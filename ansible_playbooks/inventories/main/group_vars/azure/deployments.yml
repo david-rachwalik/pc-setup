@@ -24,7 +24,6 @@ az_storage_account: "{{az_project}}-sa"
 # database password must contain at least 2 of the 3 elements: letters, numbers, and symbols; must be >= 8 characters long
 
 app_authentication: "{{app_project_item.authentication | default('None')}}"
-# app_domain: "https://localhost:{{app_project_item.port | default(5001)}}"
 app_domain: "https://localhost:5001"
 app_use_extras: "{{app_repo_item.use_extras | default(false)}}"
 # app_use_database: "{{app_project_item.use_database | default(false)}}"
