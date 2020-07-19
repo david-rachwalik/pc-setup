@@ -8,15 +8,15 @@
 # -------- ASP.NET Core Project Options --------
 # name:               dotnet project name within solution
 # template:           [webapp, webapi, xunit, console]
+# sql_database:       false by default, automatically true with authentication
 # authentication:     [Individual, SingleOrg, MultiOrg]
-# port:               5001 default
 # -------- Host Options --------
 # az_rm_template:     path to Azure Resource Manager (ARM) template file
 # az_rm_parameters:   path to Azure Resource Manager (ARM) parameter file
 # az_pipeline:        path to Azure Pipelines file
 
-# * authentication typically MultiOrg (SingleOrg for APIs)
-# * ARM template modes: [nodb, sqlserver, identity, docker]
+# 'authentication' typically MultiOrg (SingleOrg for APIs)
+# ARM template mode plans: [nodb, sqlserver, identity, docker]
 
 
 application_environments: [Development, Staging, Production]
