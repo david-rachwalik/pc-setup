@@ -14,12 +14,19 @@
 # az_rm_template:     path to Azure Resource Manager (ARM) template file
 # az_rm_parameters:   path to Azure Resource Manager (ARM) parameter file
 # az_pipeline:        path to Azure Pipelines file
+# ------------------------------------------------
 
-# 'authentication' typically MultiOrg (SingleOrg for APIs)
+# .NET project 'name':
+# - *.WebApp          triggers pipeline task Deploy App Service 
+# - *.UnitTests       triggers pipeline task Run Tests
+# - *.API             triggers pipeline task Deploy SQL Database
+
+# .NET project 'authentication' is typically MultiOrg (SingleOrg for APIs)
 # ARM template mode plans: [nodb, sqlserver, identity, docker]
 
 
 application_environments: [Development, Staging, Production]
+application_authentication_whitelist: [Individual, SingleOrg, MultiOrg]
 
 # app_repo = application_repositories[*].name
 application_repositories:
@@ -39,6 +46,7 @@ application_repositories:
   - name: DMR.WebApp
     template: webapp
     authentication: MultiOrg
+    az_pipelines: true
   - name: DMR.UnitTests
     template: xunit
   # az_rm_template: all/webapp_sql/azuredeploy.json
