@@ -5,10 +5,11 @@
 
 # https://docs.ansible.com/ansible/latest/modules/include_role_module.html
 - include_role:
-    name: windows/apps/dotnet/create
-    tasks_from: loop_app_project
+    name: windows/apps/git/init
   loop: "{{app_repo_names}}"
   loop_control:
     loop_var: app_repo
-  tags: [dotnet, new]
+  vars:
+    path: "{{app_solution_dir}}"
+  tags: [repository, repo, git]
 ...

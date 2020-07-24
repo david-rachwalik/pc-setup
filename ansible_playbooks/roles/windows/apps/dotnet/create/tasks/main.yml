@@ -3,9 +3,6 @@
   - debug:
       msg: "App .NET project: {{app_project_item.name}}"
 
-  # - debug:
-  #     var: app_project_item
-
 
   # https://docs.microsoft.com/en-us/cli/azure/ad/signed-in-user
   - name: Verify Azure login
@@ -30,22 +27,16 @@
     # --client-id {{hostvars['localhost']['az_ad_app_client_id']}}
     args:
       creates: "{{app_csproj}}"
-    tags: [new, webapp]
     register: dotnet_new_facts
 
 
   # https://docs.microsoft.com/en-us/dotnet/core/tools/dotnet-sln
   - name: Add project to the solution
     win_shell: "dotnet sln {{app_sln}} add {{app_csproj}}"
-    tags: [new, solution, sln, webapp]
+    tags: [solution, sln]
     register: out_sln_add
     changed_when: not 'already contains project' in out_sln_add.stdout
 
-
-  - include_role:
-      name: windows/apps/git/init
-    tags: [git]
-  
 
   - include_role:
       name: windows/apps/dotnet/create
@@ -53,16 +44,10 @@
     tags: [add, package]
 
 
-  # - fail:
-  #     msg: break point
-
-  # # https://docs.ansible.com/ansible/latest/modules/pause_module.html
-  # - pause:
-
   # - include_role:
   #     name: windows/apps/dotnet/create
   #     tasks_from: ef
   #   tags: [entity_framework, ef]
 
-  tags: [repository, repo, dotnet]
+  tags: [dotnet, new]
 ...
