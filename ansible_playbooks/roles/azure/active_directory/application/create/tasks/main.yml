@@ -8,7 +8,7 @@
 
 - block:
   - debug:
-      msg: "Azure AD application: {{app_repo_item.name}}"
+      msg: "Azure AD application: {{app_project_item.name}}"
 
 
   - name: Check Azure AD application object registration
@@ -32,7 +32,7 @@
   - name: Create Azure AD application object registration
     command: >-
       az ad app create
-      --display-name {{app_repo_item.name}}
+      --display-name {{app_project_item.name}}
       --homepage {{app_domain}}
       --identifier-uris {{az_ad_identifier_urls | join(' ')}}
       --reply-urls {{az_ad_reply_urls | join(' ')}}
@@ -49,7 +49,7 @@
     command: >-
       az ad app update
       --id {{az_ad_identifier_urls | first}}
-      --display-name {{app_repo_item.name}}
+      --display-name {{app_project_item.name}}
       --homepage {{app_domain}}
       --identifier-uris {{az_ad_identifier_urls | join(' ')}}
       --reply-urls {{az_ad_reply_urls | join(' ')}}
@@ -60,17 +60,19 @@
     changed_when: az_ad_app_facts.stdout != ""
     no_log: true
 
-
-  # - debug:
-  #     var: az_ad_app_facts
-  # - set_fact:
-  #     az_ad_app_keys: "{{(az_ad_app_facts.stdout | from_json).keys() | list | sort}}"
-  # - set_fact:
-  #     az_ad_app_convert: "{{az_ad_app_facts.stdout | from_json | json_query('{appId: appId, displayName: displayName}')}}"
+  - debug:
+      var: az_ad_app_facts
   
-  when:
-  # - app_authentication is defined
-  # - app_authentication != 'None'
-  - az_app_registration
+  
+  - name: List active AD application object registrations
+    command: az ad app list
+    register: az_ad_app_list_facts
+    no_log: true
+
+  - set_fact:
+      az_ad_app_displayNames: "{{ az_ad_app_list_facts.stdout | from_json | json_query('[*].displayName') | list | sort }}"
+  - set_fact:
+      az_ad_app_list_count: "{{ az_ad_app_list_facts.stdout | from_json | list | count }}"
+
   tags: [azure, az, active_directory, ad, application, identity]
 ...

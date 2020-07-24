@@ -13,7 +13,7 @@ az_default_managed_identity: "{{az_managed_identities | first}}"
 az_active_directory: davidrachwalikoutlook
 az_app_registration: "{{app_repo_item | json_query('dotnet_projects[*].authentication') | count > 0}}"
 az_ad_domain: "https://{{az_active_directory}}.onmicrosoft.com"
-az_ad_identifier_urls: ["{{az_ad_domain}}/{{app_repo_item.name | lower}}"]
+az_ad_identifier_urls: ["{{az_ad_domain}}/{{app_project_item.name | lower}}"]
 az_ad_reply_urls: ["{{app_domain}}/signin-oidc"]
 az_devops_organization: https://dev.azure.com/david-rachwalik
 

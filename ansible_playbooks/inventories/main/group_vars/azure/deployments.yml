@@ -3,7 +3,7 @@
 az_project: "{{app_repo_item.name | lower}}"
 az_location: "{{app_repo_item.arm_location | default(az_default_location)}}"
 # az_resource_group: "{{az_project}}-rg"
-az_resource_group: "{{app_repo_item.name}}"
+az_resource_group: "{{app_project_item.name}}"
 
 az_rm_template: "{{ lookup('template', app_repo_item.az_rm_template) }}"
 az_rm_parameters_file: "{{ lookup('template', app_repo_item.az_rm_parameters) }}"
