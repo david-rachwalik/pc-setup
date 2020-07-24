@@ -3,6 +3,9 @@
 # appc --tags ad -e "app_repo_names=['DMR']"
 # appc --tags ad
 
+# appc --tags dotnet -e "app_repo_names=['DMR']"
+# appc --tags repo -e "app_repo_names=['DMR']"
+
 
 - hosts: azure
   tasks:
@@ -20,12 +23,18 @@
 
 - hosts: windows
   tasks:
-  - name: Create .NET Core application repository
+  - name: Create .NET Core application
     include_role:
       name: windows/apps/dotnet/create
       tasks_from: loop_app_repo
-    tags: [repository, repo, dotnet, new, git]
+    tags: [dotnet, new]
 
+  - name: Initialize Git repository
+    include_role:
+      name: windows/apps/git/init
+      tasks_from: loop_app_repo
+    tags: [repository, repo, git]
+  
 
 - hosts: azure
   tasks:
