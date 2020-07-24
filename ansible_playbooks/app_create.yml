@@ -23,7 +23,7 @@
   - name: Create .NET Core application repository
     include_role:
       name: windows/apps/dotnet/create
-      tasks_from: loop_app_project
+      tasks_from: loop_app_repo
     tags: [repository, repo, dotnet, new, git]
 
 
