@@ -1,5 +1,14 @@
 #!/bin/sh
 
+# tested for Linux Ubuntu versions: [18.04, 20.04]
+distro=$(lsb_release --id --short) # Ubuntu
+release=$(lsb_release --release --short) # [18.04, 20.04]
+
+if test "${distro}" != "Ubuntu"; then
+    echo "This script currently only supports Ubuntu distributions"
+    exit 1
+fi
+
 if test "${SUDO_USER}" != ""; then
     run_user="${SUDO_USER}"
 else
@@ -11,10 +20,10 @@ fi
 # Grant user nopasswd sudo access
 # https://gist.github.com/carlessanagustin/922711701b1cfcc5c7a056c7018e8fe2
 if ! test -f /etc/sudoers.d/${run_user}; then
-    touch /etc/sudoers.d/${run_user}
+    # touch /etc/sudoers.d/${run_user}
+    usermod -a -G sudo ${run_user} # add user to sudoers group
     bash -c "echo '%${run_user} ALL=NOPASSWD:ALL' > /etc/sudoers.d/${run_user}"
     chmod 440 /etc/sudoers.d/${run_user}
-    usermod -a -G sudo ${run_user}
 fi
 
 # Upgrade Linux distribution
