@@ -16,6 +16,7 @@
 2. Run script to install Ansible on Linux and call provisioning playbooks
 
     ``` bash
+    # Script installs might fail behind VPN
     curl -s https://raw.githubusercontent.com/david-rachwalik/pc-setup/master/wsl_init.sh | sudo -H bash
     ```
 
