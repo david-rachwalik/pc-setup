@@ -36,17 +36,16 @@ apt-get install -y python3-pip
 apt-get install -y python3-winrm
 pip3 install ansible
 
-# # Register Microsoft repository key and feed (prep for .NET SDK and Azure CLI)
-# # https://docs.microsoft.com/en-us/dotnet/core/install/linux-ubuntu#2004-
-# ubuntu_src="https://packages.microsoft.com/config/ubuntu/20.04/packages-microsoft-prod.deb"
-# ubuntu_tmp="/var/cache/apt/archives/packages-microsoft-prod.deb"
-# if ! test -f ${ubuntu_tmp}; then
-#     wget -q ${ubuntu_src} -O ${ubuntu_tmp}
-#     dpkg -i ${ubuntu_tmp}
-# fi
+# Register Microsoft to trusted keys and add package repository (for .NET SDK and Azure CLI)
+# https://docs.microsoft.com/en-us/dotnet/core/install/linux-ubuntu
+$microsoft_repository_src="https://packages.microsoft.com/config/ubuntu/${release}/packages-microsoft-prod.deb"
+$microsoft_repository_tmp="/var/cache/apt/archives/packages-microsoft-prod.deb"
+if ! test -f ${microsoft_repository_tmp}; then
+    wget -q ${microsoft_repository_src} -O ${microsoft_repository_tmp}
+    dpkg -i ${microsoft_repository_tmp}
+fi
 
-# Register Microsoft repository key and feed (prep for .NET SDK and Azure CLI)
-# https://docs.microsoft.com/en-us/dotnet/core/install/linux-ubuntu#scripted-install
+# Install .NET SDK
 dotnet_install_path=https://raw.githubusercontent.com/dotnet/runtime/master/eng/common/dotnet-install.sh
 version="3.1" # default is 'Current'
 curl -sSL $dotnet_install_path | bash /dev/stdin -c $version

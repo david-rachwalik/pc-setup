@@ -1,42 +1,46 @@
 ---
-# ansible-playbook system_setup.yml --tags "apt"
-# setup --tags apt --step
+# ansible-playbook system_setup.yml --tags "apt" --step
+# setup --tags apt
 
+# https://help.ubuntu.com/community/AptGet/Howto
 # https://stackoverflow.com/questions/41535838/how-to-run-apt-update-and-upgrade-via-ansible-shell
-
 - block:
   # https://docs.ansible.com/ansible/latest/modules/include_role_module.html
   - include_role:
       name: linux/system/apt
       tasks_from: status
   
-  # https://docs.ansible.com/ansible/latest/modules/apt_module.html
-  - name: Upgrade distro packages
-    apt:
-      upgrade: dist
-      force_apt_get: true
-
   # https://docs.ansible.com/ansible/latest/modules/apt_repository_module.html
   - name: Add repository from PPA and install its signing key
     apt_repository:
-      # https://git-scm.com/download/linux
       repo: "{{item}}"
       state: present
     loop: "{{apt_repository_packages}}"
+
+  # https://docs.ansible.com/ansible/latest/modules/apt_module.html
+  - name: Update apt repositories and cache
+    apt:
+      update_cache: true
+      force_apt_get: true
+      cache_valid_time: 3600 #One hour
+      # cache_valid_time: 86400 #One day
+
+  - name: Upgrade all apt packages
+    apt:
+      upgrade: dist
+      force_apt_get: true
 
   - name: Install missing apt packages
     apt:
       name: "{{apt_packages_to_install}}"
       state: present
+      force_apt_get: true
 
   - name: Upgrade all packages to the latest version
     apt:
       # name: "*"
       name: "{{apt_packages_installed}}"
       state: latest
-      update_cache: yes
-      # cache_valid_time: 3600 #One hour
-      cache_valid_time: 86400 #One day
       force_apt_get: true
     ignore_errors: true
 
