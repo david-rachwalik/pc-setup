@@ -47,8 +47,9 @@ pip3 install ansible
 
 # Register Microsoft repository key and feed (prep for .NET SDK and Azure CLI)
 # https://docs.microsoft.com/en-us/dotnet/core/install/linux-ubuntu#scripted-install
+dotnet_install_path=https://raw.githubusercontent.com/dotnet/runtime/master/eng/common/dotnet-install.sh
 version="3.1" # default is 'Current'
-curl -sSL https://dot.net/v1/dotnet-install.sh | bash /dev/stdin -c $version
+curl -sSL $dotnet_install_path | bash /dev/stdin -c $version
 
 # Install Azure CLI
 # https://docs.microsoft.com/en-us/cli/azure/install-azure-cli-apt
