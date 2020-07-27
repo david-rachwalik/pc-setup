@@ -27,7 +27,7 @@
     tags: [bash]
 
   - include_role:
-      name: linux/apps/git
+      name: linux/apps/git/setup
     tags: [git]
 
   - include_role:
