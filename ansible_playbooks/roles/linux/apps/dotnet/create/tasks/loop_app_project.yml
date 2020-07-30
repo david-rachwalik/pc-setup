@@ -13,5 +13,5 @@
       loop_var: app_project
     tags: [project]
 
-  tags: [dotnet, new]
+  tags: [repository, repo, dotnet]
 ...

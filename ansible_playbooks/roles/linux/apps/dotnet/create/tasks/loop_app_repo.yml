@@ -10,5 +10,5 @@
   loop: "{{app_repo_names}}"
   loop_control:
     loop_var: app_repo
-  tags: [dotnet, new]
+  tags: [repository, repo, dotnet]
 ...
