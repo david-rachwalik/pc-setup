@@ -1,0 +1,38 @@
+---
+- block:
+  - name: Initialize Git repository directory
+    command: "git init"
+    args:
+      chdir: "{{path}}"
+      creates: "{{path}}/.git"
+    tags: [git, init]
+    register: out_git_init
+
+  # https://raw.githubusercontent.com/github/gitignore/master/VisualStudio.gitignore
+  - name: Ensure repository directory has git-ignore
+    copy:
+      src: "{{app_gitignore | basename}}"
+      dest: "{{app_gitignore}}"
+      force: false # only when dest doesn't exist
+    tags: [git, gitignore]
+
+  - name: Ensure repository directory has git-attributes
+    copy:
+      src: "{{app_gitattributes | basename}}"
+      dest: "{{app_gitattributes}}"
+      force: false # only when dest doesn't exist
+    tags: [git, gitattributes]
+
+  # https://elanderson.net/2016/09/add-git-ignore-to-existing-visual-studio-project/
+  # - name: Stop tracking files that should be ignored
+  #   command: >-
+  #     git rm -r --cached .
+  #     git add .
+  #     git commit -am "Remove ignored files"
+  #   args:
+  #     chdir: "{{path}}"
+  #   register: out_git_untrack
+  #   tags: ["git", "rm"]
+
+  tags: [repository, repo, git]
+...

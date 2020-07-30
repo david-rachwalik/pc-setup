@@ -6,42 +6,47 @@
 
   # https://docs.microsoft.com/en-us/cli/azure/ad/signed-in-user
   - name: Verify signed in Azure
-    win_shell: "az ad signed-in-user show"
+    command: "az ad signed-in-user show"
     when: app_authentication != 'None'
     register: out_az_ad_user
     changed_when: false # query only
     failed_when: out_az_ad_user.rc != 0
     no_log: true
 
-  - include_role:
+  - name: Refresh Azure AD application registration for project
+    include_role:
       name: azure/active_directory/application/create
       tasks_from: show
   
 
   # TODO: create matrix in inventory to reduce these actions to 1 step
   - include_role:
-      name: windows/apps/dotnet/create
+      name: linux/apps/dotnet/create
       tasks_from: new
 
 
   # https://docs.microsoft.com/en-us/dotnet/core/tools/dotnet-sln
   - name: Add project to the solution
-    win_shell: "dotnet sln {{app_sln}} add {{app_csproj}}"
+    command: "dotnet sln {{app_sln}} add {{app_csproj}}"
     tags: [solution, sln]
     register: out_sln_add
     changed_when: not 'already contains project' in out_sln_add.stdout
 
 
   - include_role:
-      name: windows/apps/dotnet/create
+      name: linux/apps/dotnet/create
       tasks_from: package
     tags: [add, package]
 
 
   # - include_role:
-  #     name: windows/apps/dotnet/create
+  #     name: linux/apps/dotnet/create
   #     tasks_from: ef
   #   tags: [entity_framework, ef]
+
+
+  - fail:
+      msg: break point
 
   tags: [dotnet, new]
 ...

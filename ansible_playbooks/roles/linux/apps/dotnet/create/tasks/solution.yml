@@ -4,25 +4,25 @@
       msg: "ASP.NET solution: {{app_repo_item.name}}"
 
   # https://docs.microsoft.com/en-us/dotnet/core/tools/dotnet-new
-  # https://docs.ansible.com/ansible/latest/modules/win_shell_module.html
+  # https://docs.ansible.com/ansible/latest/modules/command_module.html
   - name: Create .NET Core solution
-    win_shell: "dotnet new sln --output {{app_solution_dir}}"
+    command: "dotnet new sln --output {{app_solution_dir}}"
     args:
       creates: "{{app_sln}}"
     register: dotnet_new_facts
 
-  # # https://docs.ansible.com/ansible/latest/modules/win_copy_module.html
+  # # https://docs.ansible.com/ansible/latest/modules/copy_module.html
   # - name: Ensure solution has readme
-  #   win_copy:
-  #     src: "{{app_readme | win_basename}}"
+  #   copy:
+  #     src: "{{app_readme | basename}}"
   #     dest: "{{app_readme}}"
   #     force: false # only when dest doesn't exist
   #   when: app_use_extras
   #   tags: [extras, readme]
 
   # - name: Ensure solution has license
-  #   win_copy:
-  #     src: "{{app_license | win_basename}}"
+  #   copy:
+  #     src: "{{app_license | basename}}"
   #     dest: "{{app_license}}"
   #     force: false # only when dest doesn't exist
   #   when: app_use_extras

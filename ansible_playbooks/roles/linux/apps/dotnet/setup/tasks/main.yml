@@ -1,0 +1,28 @@
+---
+# https://docs.microsoft.com/en-us/aspnet/core/data/ef-rp
+# ansible linux -m include_role -a name=linux/apps/dotnet/setup
+
+- name: List .NET Core tools installed
+  command: "dotnet tool list --global"
+  # loop: "{{app_database_tools}}"
+  # when: app_use_database
+  register: out_tool_install
+  changed_when: false # query only
+  tags: [dotnet, tool]
+
+# - name: Install .NET Core tool
+#   command: "dotnet tool install --global {{item}}"
+#   loop: "{{app_database_tools}}"
+#   when: app_use_database
+#   register: out_tool_install
+#   failed_when: not 'is already installed' in out_tool_install.stderr
+#   changed_when: not 'is already installed' in out_tool_install.stderr
+
+# - name: Ensure .NET Core tools are updated
+#   command: "dotnet tool update --global {{item}}"
+#   loop: "{{app_database_tools}}"
+#   when: app_use_database
+#   register: out_tool_install
+#   failed_when: not 'is already installed' in out_tool_install.stderr
+#   changed_when: not 'is already installed' in out_tool_install.stderr
+...
