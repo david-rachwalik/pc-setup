@@ -36,5 +36,5 @@
     loop: "{{dotnet_packages}}"
     when: not item in out_dotnet_installed.stdout
   
-  tags: [dotnet, new, package]
+  tags: [repository, repo, dotnet, new, package]
 ...

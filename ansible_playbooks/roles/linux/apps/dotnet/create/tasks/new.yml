@@ -34,5 +34,5 @@
     register: dotnet_new_facts
     when: app_authentication != 'MultiOrg'
 
-  tags: [dotnet, new]
+  tags: [repository, repo, dotnet, new]
 ...
