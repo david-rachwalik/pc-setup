@@ -10,7 +10,7 @@
   when: app_use_database
   register: out_database_update
   ignore_errors: true
-  tags: ["dotnet", "ef", "database", "db"]
+  tags: [repository, repo, dotnet, ef, database, db]
 
 
 # - name: Create initial database migration
