@@ -27,16 +27,20 @@
     tags: [bash]
 
   - include_role:
+      name: python/user_modules
+    tags: [python, py]
+
+  - include_role:
       name: linux/apps/git/setup
     tags: [git]
 
   - include_role:
-      name: azure/extension
-    tags: [azure, az, extension]
+      name: linux/apps/dotnet/setup
+    tags: [dotnet]
 
   - include_role:
-      name: python/user_modules
-    tags: [python, py]
+      name: azure/extension
+    tags: [azure, az, extension]
 
   tags: [linux]
 
@@ -70,16 +74,16 @@
     tags: [scheduled_task, sched, desktop]
 
   - include_role:
-      name: azure/extension
-    tags: [azure, az]
-
-  - include_role:
       name: python/user_modules
     tags: [python, py]
 
   - include_role:
       name: windows/apps/dotnet/setup
     tags: [dotnet, tool]
+
+  - include_role:
+      name: azure/extension
+    tags: [azure, az]
 
   - include_role:
       name: windows/apps/vscode/setup
