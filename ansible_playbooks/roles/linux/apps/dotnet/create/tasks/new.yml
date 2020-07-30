@@ -1,0 +1,38 @@
+---
+# appc --tags repo -e "app_repo_names=['Tester']"
+
+# (tested on MultiOrg)
+# Authentication only requires: '--client-id'
+# - do not use: '--aad-instance', '--domain', '--tenant-id'
+- block:
+  # 'dotnet new' automatically calls build and restore
+  # https://docs.microsoft.com/en-us/dotnet/core/tools/dotnet-new
+  - name: Create .NET Core project
+    command: >-
+      dotnet new {{app_project_item.template}}
+      --framework {{app_project_item.framework | default('netcoreapp3.1')}}
+      --output {{app_project_dir}}
+      --auth {{app_authentication}}
+      --client-id {{hostvars['localhost']['az_ad_app_client_id']}}
+      --org-read-access
+    args:
+      creates: "{{app_csproj}}"
+    register: dotnet_new_facts
+    when: app_authentication == 'MultiOrg'
+
+
+  - name: Create .NET Core project
+    command: >-
+      dotnet new {{app_project_item.template}}
+      --framework {{app_project_item.framework | default('netcoreapp3.1')}}
+      --output {{app_project_dir}}
+      --auth {{app_authentication}}
+      --domain {{app_domain}}
+      --org-read-access
+    args:
+      creates: "{{app_csproj}}"
+    register: dotnet_new_facts
+    when: app_authentication != 'MultiOrg'
+
+  tags: [dotnet, new]
+...

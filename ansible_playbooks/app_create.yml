@@ -6,6 +6,8 @@
 # appc --tags dotnet -e "app_repo_names=['DMR']"
 # appc --tags repo -e "app_repo_names=['DMR']"
 
+# appc --tags ad -e "app_repo_names=['Tester']"
+
 
 - hosts: azure
   tasks:
@@ -14,30 +16,24 @@
       name: azure/active_directory/subscription
     tags: [azure, az, active_directory, ad, subscription, login]
 
-  - name: Create Azure Active Directory application
+  - name: Register Azure Active Directory application
     include_role:
       name: azure/active_directory/application/create
       tasks_from: loop_app_repo
     tags: [azure, az, active_directory, ad, application, identity]
 
-
-- hosts: windows
-  tasks:
   - name: Create .NET Core application
     include_role:
-      name: windows/apps/dotnet/create
+      name: linux/apps/dotnet/create
       tasks_from: loop_app_repo
     tags: [dotnet, new]
 
   - name: Initialize Git repository
     include_role:
-      name: windows/apps/git/init
+      name: linux/apps/git/init
       tasks_from: loop_app_repo
     tags: [repository, repo, git]
-  
 
-- hosts: azure
-  tasks:
   - name: Deploy Azure Resource Manager Template
     include_role:
       name: azure/resource_manager/deploy
