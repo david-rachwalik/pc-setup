@@ -30,12 +30,21 @@ application_authentication_whitelist: [Individual, SingleOrg, MultiOrg]
 
 # app_repo = application_repositories[*].name
 application_repositories:
-# - name: Main
-#   host: Azure
-#   azure_devops_projects:
-#   - host: Azure
-#   # az_rm_template: all/managed_identity/azuredeploy.json
-#   # az_rm_parameters: all/managed_identity/azuredeploy.parameters.json
+- name: Tester
+  source: GitHub
+  dotnet_projects:
+  - name: Tester.WebApp
+    template: webapp
+    database_context: MainContext
+    authentication: MultiOrg
+    az_pipelines: true
+  # - name: Tester.UnitTests
+  #   template: xunit
+  # - name: Tester.API
+  #   template: webapi
+  #   authentication: SingleOrg
+  # az_rm_template: all/webapp_sql/azuredeploy.json
+  # az_rm_parameters: all/webapp_sql/azuredeploy.parameters.json
 
 - name: pc-setup
   source: GitHub
@@ -45,8 +54,10 @@ application_repositories:
   dotnet_projects:
   - name: DMR.WebApp
     template: webapp
+    database_context: MainContext
     authentication: MultiOrg
     az_pipelines: true
+    az_resource_manager: all/webapp_sql
   - name: DMR.UnitTests
     template: xunit
   # az_rm_template: all/webapp_sql/azuredeploy.json
@@ -76,7 +87,7 @@ application_repositories:
   dotnet_projects:
   - name: WebApiApps.WebApp
     template: webapp
-    authentication: SingleOrg
+    authentication: MultiOrg
   - name: WebApiApps.UnitTests
     template: xunit
 
@@ -93,41 +104,8 @@ application_repositories:
   - name: ContosoUniversity
     template: webapp
 
-# https://docs.microsoft.com/en-us/aspnet/core/razor-pages/index
-
 - name: david-rachwalik.github.io
   source: GitHub
-
-- name: Tester
-  source: GitHub
-  dotnet_projects:
-  - name: Tester.Api
-    template: webapi
-    authentication: SingleOrg
-  # az_rm_template: all/webapp_sql/azuredeploy.json
-  # az_rm_parameters: all/webapp_sql/azuredeploy.parameters.json
-  
-  # az_rm_template: 201-web-app-github-deploy/azuredeploy.json
-  # az_rm_parameters: 201-web-app-github-deploy/azuredeploy.parameters.json
-  
-  az_rm_template: linux/webapp_blank/azuredeploy.json
-  az_rm_parameters: linux/webapp_blank/azuredeploy.parameters.json
-
-  # arm_template_url: https://raw.githubusercontent.com/Azure/azure-quickstart-templates/master/201-web-app-github-deploy/azuredeploy.json
-
-  # template_url: https://github.com/Azure/azure-quickstart-templates/blob/master/201-web-app-github-deploy/azuredeploy.json
-  # parameter_url: https://github.com/Azure/azure-quickstart-templates/blob/master/201-web-app-github-deploy/azuredeploy.parameters.json
-
-  # - name: Tester.WebApp
-  #   template: webapp
-  #   authentication: MultiOrg
-  # - name: Tester.UnitTests
-  #   template: xunit
-  use_extras: true
-
-- name: WebAppTest
-  az_rm_template: all/webapp_sql/azuredeploy.json
-  az_rm_parameters: all/webapp_sql/azuredeploy.parameters.json
 
 
 # ------------------------ Application Repository/Project Parsing ------------------------
@@ -141,4 +119,8 @@ app_repo_item: "{{application_repositories | json_query(app_repo_query) | first}
 
 app_project_query: "[*].dotnet_projects[?name=='{{app_project}}']"
 app_project_item: "{{application_repositories | json_query(app_project_query) | flatten | first}}"
+
+app_domain: "https://localhost:5001"
+app_authentication: "{{app_project_item.authentication | default('None')}}"
+app_database_context: "{{app_project_item.database_context | default('None')}}"
 ...

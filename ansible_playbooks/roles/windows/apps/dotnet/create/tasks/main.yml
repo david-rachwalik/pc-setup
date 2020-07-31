@@ -1,7 +1,7 @@
 ---
 - block:
   - debug:
-      msg: "App .NET project: {{app_project_item.name}}"
+      msg: "App .NET project: {{app_project}}"
 
 
   # https://docs.microsoft.com/en-us/cli/azure/ad/signed-in-user

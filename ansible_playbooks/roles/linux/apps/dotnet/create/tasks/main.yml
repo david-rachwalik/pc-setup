@@ -13,11 +13,6 @@
     failed_when: out_az_ad_user.rc != 0
     no_log: true
 
-  - name: Refresh Azure AD application registration for project
-    include_role:
-      name: azure/active_directory/application/create
-      tasks_from: show
-  
 
   # TODO: create matrix in inventory to reduce these actions to 1 step
   - include_role:
@@ -43,10 +38,6 @@
   #     name: linux/apps/dotnet/create
   #     tasks_from: ef
   #   tags: [entity_framework, ef]
-
-
-  - fail:
-      msg: break point
 
   tags: [repository, repo, dotnet]
 ...

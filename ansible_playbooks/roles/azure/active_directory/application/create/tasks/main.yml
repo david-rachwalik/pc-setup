@@ -6,73 +6,70 @@
 # https://docs.microsoft.com/en-us/azure/active-directory/develop/quickstart-v2-aspnet-core-webapp
 # https://docs.microsoft.com/en-us/azure/active-directory/develop/app-objects-and-service-principals
 
+# https://docs.microsoft.com/en-us/cli/azure/ad/app
 - block:
   - debug:
-      msg: "Azure AD application: {{app_project_item.name}}"
+      msg: "Azure AD application: {{app_project}}"
 
 
-  - name: Check Azure AD application object registration
-    command: >-
-      az ad app show
-      --id {{az_ad_identifier_urls | first}}
-    register: az_ad_app_show_facts
-    changed_when: false # query only
-    failed_when:  false # query only
-    ignore_errors: true
-    no_log: true
-
-  # - set_fact:
-  #     az_ad_app_show_parse: "{{ az_ad_app_show_facts.stdout | from_json }}"
+  - include_role:
+      name: azure/active_directory/application/create
+      tasks_from: show
+  
   # - debug:
   #     var: az_ad_app_client_id
+  # - debug:
+  #     var: az_ad_app_service_principal_id
 
 
-  # https://docs.microsoft.com/en-us/cli/azure/ad/app#az-ad-app-create
-  # NOTE: The az command is idempotent and provides the same output as app show/list
+  # Neither the create nor update action returns output
   - name: Create Azure AD application object registration
     command: >-
       az ad app create
-      --display-name {{app_project_item.name}}
+      --display-name {{app_project}}
       --homepage {{app_domain}}
       --identifier-uris {{az_ad_identifier_urls | join(' ')}}
       --reply-urls {{az_ad_reply_urls | join(' ')}}
+      --available-to-other-tenants {{app_authentication == 'MultiOrg'}}
+    # --required-resource-accesses {{az_ad_app_permissions | to_json}}
     # --oauth2-allow-implicit-flow true
     # TODO: add --app-roles once authentication testing is further
     when: az_ad_app_show_facts.rc != 0
-    register: az_ad_app_facts
-    no_log: true
+    # no_log: true
 
-
-  # https://docs.microsoft.com/en-us/cli/azure/ad/app#az-ad-app-update
-  # NOTE: The az command is idempotent and provides the same output as app show/list
   - name: Update Azure AD application object registration
     command: >-
       az ad app update
       --id {{az_ad_identifier_urls | first}}
-      --display-name {{app_project_item.name}}
+      --display-name {{app_project}}
       --homepage {{app_domain}}
       --identifier-uris {{az_ad_identifier_urls | join(' ')}}
       --reply-urls {{az_ad_reply_urls | join(' ')}}
+      --available-to-other-tenants {{app_authentication == 'MultiOrg'}}
+    # --required-resource-accesses {{az_ad_app_permissions | to_json}}
     # --oauth2-allow-implicit-flow true
     # TODO: add --app-roles once authentication testing is further
     when: az_ad_app_show_facts.rc == 0
-    register: az_ad_app_facts
-    changed_when: az_ad_app_facts.stdout != ""
-    no_log: true
+    register: az_ad_app_update_facts
+    changed_when: az_ad_app_update_facts.stdout != ""
+    # no_log: true
 
-  - debug:
-      var: az_ad_app_facts
-  
-  
+
   - name: List active AD application object registrations
     command: az ad app list
     register: az_ad_app_list_facts
+    changed_when: false # query only
     no_log: true
 
-  - set_fact:
-      az_ad_app_displayNames: "{{ az_ad_app_list_facts.stdout | from_json | json_query('[*].displayName') | list | sort }}"
-  - set_fact:
-      az_ad_app_list_count: "{{ az_ad_app_list_facts.stdout | from_json | list | count }}"
+  - debug:
+      var: az_ad_app_display_names
+  - debug:
+      msg: "Count: {{az_ad_app_display_names | count}}"
 
+
+  - include_role:
+      name: azure/active_directory/application/create
+      tasks_from: permissions
+  
   tags: [azure, az, active_directory, ad, application, identity]
 ...

@@ -1,0 +1,28 @@
+---
+- block:
+  # same output as: az ad app list --query "[?displayName=='{{app_project}}'] | [0]"
+  # https://docs.microsoft.com/en-us/cli/azure/ad/app
+  - name: Check Azure AD application registration
+    command: >-
+      az ad app show
+      --id {{az_ad_identifier_urls | first}}
+    register: az_ad_app_show_facts
+    changed_when: false # query only
+    failed_when:  false # query only
+    ignore_errors: true
+    no_log: true
+
+  # same output as: az ad sp list --query "[?displayName=='{{app_project}}'] | [0]" --all
+  # https://docs.microsoft.com/en-us/cli/azure/ad/sp
+  - name: Check Azure AD application service principal
+    command: >-
+      az ad sp show
+      --id {{az_ad_app_client_id}}
+    register: az_ad_sp_show_facts
+    changed_when: false # query only
+    failed_when:  false # query only
+    ignore_errors: true
+    no_log: true
+    
+  tags: [azure, az, active_directory, ad, application, identity]
+...
