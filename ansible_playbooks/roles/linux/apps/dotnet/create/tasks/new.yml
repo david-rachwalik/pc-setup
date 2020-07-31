@@ -5,12 +5,19 @@
 # Authentication only requires: '--client-id'
 # - do not use: '--aad-instance', '--domain', '--tenant-id'
 - block:
+  # Dependency for 'az_ad_app_client_id'
+  - name: Refresh Azure AD application registration for project
+    include_role:
+      name: azure/active_directory/application/create
+      tasks_from: show
+  
+  
   # 'dotnet new' automatically calls build and restore
   # https://docs.microsoft.com/en-us/dotnet/core/tools/dotnet-new
   - name: Create .NET Core project
     command: >-
       dotnet new {{app_project_item.template}}
-      --framework {{app_project_item.framework | default('netcoreapp3.1')}}
+      --framework {{app_project_item.framework | default(dotnet_default_framework)}}
       --output {{app_project_dir}}
       --auth {{app_authentication}}
       --client-id {{hostvars['localhost']['az_ad_app_client_id']}}
@@ -24,7 +31,7 @@
   - name: Create .NET Core project
     command: >-
       dotnet new {{app_project_item.template}}
-      --framework {{app_project_item.framework | default('netcoreapp3.1')}}
+      --framework {{app_project_item.framework | default(dotnet_default_framework)}}
       --output {{app_project_dir}}
       --auth {{app_authentication}}
       --domain {{app_domain}}

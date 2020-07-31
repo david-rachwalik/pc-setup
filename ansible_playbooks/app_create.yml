@@ -1,12 +1,7 @@
 ---
 # ansible-playbook app_create.yml -e "app_repo_names=['DMR']"
-# appc --tags ad -e "app_repo_names=['DMR']"
-# appc --tags ad
-
-# appc --tags dotnet -e "app_repo_names=['DMR']"
-# appc --tags repo -e "app_repo_names=['DMR']"
-
-# appc --tags ad -e "app_repo_names=['Tester']"
+# appc -e "app_repo_names=['Tester']" --tags ad
+# appc -e "app_repo_names=['Tester']" --skip-tags deploy
 
 
 - hosts: azure

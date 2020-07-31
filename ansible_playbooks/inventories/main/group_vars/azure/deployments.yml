@@ -1,9 +1,9 @@
 ---
 # https://docs.microsoft.com/en-us/azure/architecture/best-practices/naming-conventions
-az_project: "{{app_repo_item.name | lower}}"
+az_project: "{{app_repo | lower}}"
 az_location: "{{app_repo_item.arm_location | default(az_default_location)}}"
 # az_resource_group: "{{az_project}}-rg"
-az_resource_group: "{{app_project_item.name}}"
+az_resource_group: "{{app_project}}"
 
 az_rm_template: "{{ lookup('template', app_repo_item.az_rm_template) }}"
 az_rm_parameters_file: "{{ lookup('template', app_repo_item.az_rm_parameters) }}"
@@ -11,7 +11,7 @@ az_rm_parameters: "{{ (az_rm_parameters_file is defined) | ternary(az_rm_paramet
 
 # 'az_plan' must be between 3-24 chars, only lowercase or numbers
 # TODO: replace() will use regex to strip ALL special characters
-# az_service_plan: "plan-{{app_project_item.name | replace('_', '') | truncate(19) | lower}}"
+# az_service_plan: "plan-{{app_project | replace('_', '') | truncate(19) | lower}}"
 # app must be globally unique with valid characters a-z, 0-9, and -
 az_service_plan: "{{az_project}}-plan"
 az_service_plan_id: "{{az_appserviceplan_facts | json_query('appserviceplans[0].id')}}"
@@ -22,10 +22,4 @@ az_sql_database: "{{az_project}}-sqldb"
 az_storage_account: "{{az_project}}-sa"
 # database username must be unique within Azure; must not contain the '@' symbol for local Git pushes
 # database password must contain at least 2 of the 3 elements: letters, numbers, and symbols; must be >= 8 characters long
-
-app_authentication: "{{app_project_item.authentication | default('None')}}"
-app_domain: "https://localhost:5001"
-app_use_extras: "{{app_repo_item.use_extras | default(false)}}"
-# app_use_database: "{{app_project_item.use_database | default(false)}}"
-# app_database_context: MainContext
 ...

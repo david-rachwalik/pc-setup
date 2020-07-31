@@ -7,23 +7,38 @@ az_default_resource_group: Main
 az_default_key_vault: main-keyvault
 az_default_managed_identity: "{{az_managed_identities | first}}"
 # --------------------------------------------------------
+# --- Service Provider Index ---
+# --------------------------------------------------------
+# * List Azure AD service principal service providers
+# az ad sp list --query "[].{Name:appDisplayName, Id:appId}" --output table --all
+# az_ad_sp_service_providers: "{{az_ad_sp_list_facts.results | json_query('[*].stdout') | map('from_json') | list | items2dict}}"
+az_ad_sp_service_providers: "{{az_ad_sp_list_facts.stdout | from_json | list | items2dict}}"
+# * Fetch 'Microsoft Graph' service provider
+# az ad sp list --query "[?appDisplayName=='Microsoft Graph'].appId | [0]" --all
+#     "Microsoft Graph": "00000003-0000-0000-c000-000000000000"
+# --------------------------------------------------------
+# * List Azure AD service principal permissions
+# az ad sp show --id "00000003-0000-0000-c000-000000000000" --query "appRoles[].{Value:value, Id:id}" --output table
+# az_ad_sp_permissions: "{{az_ad_sp_show_facts.results | json_query('[*].stdout') | map('from_json') | list | items2dict}}"
+az_ad_sp_permissions: "{{az_ad_sp_show_facts.stdout | from_json | list | items2dict}}"
+# * Fetch 'User.Read' permission (Sign in and read user profile)
+# az ad sp show --id "00000003-0000-0000-c000-000000000000" --query "oauth2Permissions[?value=='User.Read'].id | [0]"
+#     "User.Read": "e1fe6dd8-ba31-4d61-89e7-88639da4683d"
+# --------------------------------------------------------
+# $openid = az ad sp show --id $graphId --query "oauth2Permissions[?value=='openid'].id | [0]"
+# $profile = az ad sp show --id $graphId --query "oauth2Permissions[?value=='profile'].id | [0]"
+# $userRead = az ad sp show --id $graphId --query "oauth2Permissions[?value=='User.Read'].id | [0]"
+# $groupReadAll = az ad sp show --id $graphId --query "oauth2Permissions[?value=='Group.Read.All'].id | [0]"
+# --------------------------------------------------------
 
 
-# --- Active Directory (tenant/directory to store resources) ---
-az_active_directory: davidrachwalikoutlook
-az_app_registration: "{{app_repo_item | json_query('dotnet_projects[*].authentication') | count > 0}}"
-az_ad_domain: "https://{{az_active_directory}}.onmicrosoft.com"
-az_ad_identifier_urls: ["{{az_ad_domain}}/{{app_project_item.name | lower}}"]
-az_ad_reply_urls: ["{{app_domain}}/signin-oidc"]
-az_devops_organization: https://dev.azure.com/david-rachwalik
-
-# --- User ---
+# --- User (Signed-In) ---
 az_user: "{{az_user_facts.stdout | from_json}}"
 az_user_id: "{{az_user.objectId}}"
 
+
 # --- Account Subscription (payment contract for resources) ---
-az_subscriptions:
-- Pay-As-You-Go
+az_subscriptions: [Pay-As-You-Go]
 az_subscription_item_query: "[?name=='{{az_default_subscription}}']"
 az_subscription_item: "{{az_subscription_list_facts.stdout | from_json | json_query(az_subscription_item_query) | list | first}}"
 az_tenant_id: "{{az_subscription_item.tenantId}}"
@@ -31,6 +46,31 @@ az_subscription_id: "{{az_subscription_item.id}}"
 az_subscription: "{{az_subscription_item.name}}"
 az_subscription_user: "{{az_subscription_item.user.name}}"
 
+
+# --- Active Directory (tenant/directory to store resources) ---
+az_active_directory: davidrachwalikoutlook
+az_app_registration: "{{app_repo_item | json_query('dotnet_projects[*].authentication') | count > 0}}"
+az_ad_domain: "https://{{az_active_directory}}.onmicrosoft.com"
+az_ad_identifier_urls: ["{{az_ad_domain}}/{{app_project | lower}}"]
+az_ad_reply_urls: ["{{app_domain}}/signin-oidc"]
+az_devops_organization: https://dev.azure.com/david-rachwalik
+
+
+# --- Application Object Registration ---
+# Products available by region: https://azure.microsoft.com/en-us/global-infrastructure/services
+az_ad_app_project_query: "[?displayName=='{{app_project}}'].{appId: appId, displayName: displayName}"
+# http://jmespath.org/specification.html#contains
+az_ad_app_project_delete_query: "[?displayName.contains(@, '{{az_ad_app_displayName_to_delete}}')].{appId: appId, displayName: displayName}"
+az_ad_app_display_names: "{{ az_ad_app_list_facts.stdout | from_json | json_query('[*].displayName') | list | sort }}"
+# https://portal.azure.com/#blade/Microsoft_AAD_RegisteredApps/ApplicationsListBlade
+az_ad_app_client_id: "{{az_ad_app_show_facts.stdout | from_json | json_query('appId')}}"
+# System-Assigned Managed Identity: https://docs.microsoft.com/en-us/azure/active-directory/managed-identities-azure-resources/overview
+az_ad_app_service_principal_id: "{{az_ad_sp_show_facts.stdout | from_json | json_query('objectId')}}"
+# --------------------------------------------------------
+# --- Application Object Permissions ---
+az_ad_app_permission_expected_ids: ["{{az_ad_sp_permissions['User.Read']}}"]
+az_ad_app_permission_active_ids: "{{az_ad_app_permission_list_facts.stdout | from_json | json_query('resourceAccess[*].id') | default([], true) | list}}"
+az_ad_app_permission_missing_ids: "{{az_ad_app_permission_expected_ids | difference(az_ad_app_permission_active_ids)}}"
 
 
 # --- User-Assigned Managed Identity ---
@@ -60,17 +100,4 @@ az_service_principal_list_apps: "{{az_service_principal_facts.stdout | from_json
 az_service_principal_count: "{{az_service_principal_list_names | count}}"
 az_service_principal_item_query: "[?name=='{{az_default_service_principal}}']"
 az_service_principal_item: "{{az_service_principal_list_facts.stdout | from_json | json_query(az_service_principal_item_query) | list | first}}"
-
-
-# --- Application Object ---
-# Products available by region
-# https://azure.microsoft.com/en-us/global-infrastructure/services/
-
-# az_ad_app_project_query: "[?displayName=='{{app_project_item.name}}']"
-az_ad_app_project_query: "[?displayName=='{{app_project_item.name}}'].{appId: appId, displayName: displayName}"
-# http://jmespath.org/specification.html#contains
-az_ad_app_project_delete_query: "[?displayName.contains(@, '{{az_ad_app_displayName_to_delete}}')].{appId: appId, displayName: displayName}"
-
-# https://portal.azure.com/#blade/Microsoft_AAD_RegisteredApps/ApplicationsListBlade
-az_ad_app_client_id: "{{az_ad_app_show_facts.stdout | from_json | json_query('appId')}}"
 ...

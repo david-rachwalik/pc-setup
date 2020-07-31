@@ -1,7 +1,7 @@
 ---
 - block:
   - debug:
-      msg: "ASP.NET solution: {{app_repo_item.name}}"
+      msg: "ASP.NET solution: {{app_repo}}"
 
   # https://docs.microsoft.com/en-us/dotnet/core/tools/dotnet-new
   # https://docs.ansible.com/ansible/latest/modules/command_module.html
