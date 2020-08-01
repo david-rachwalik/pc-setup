@@ -1,51 +1,14 @@
 ---
-# appc --tags ad -e "app_repo_names=['Tester']"
+# appc -e "app_repo_names=['Tester']" --tags ad
 
 # https://simonagren.github.io/azcli-adscope/
 # https://docs.microsoft.com/en-us/azure/active-directory/manage-apps/assign-user-or-group-access-portal
 - block:
-  - name: Fetch service provider IDs
-    command: >-
-      az ad sp list
-      --query "[].{key: appDisplayName, value: appId} | []"
-      --all
-    # command: >-
-    #   az ad sp list
-    #   --query "[?appDisplayName=='{{item}}'].{key: appDisplayName, value: appId} | [0]"
-    #   --all
-    # loop: [Microsoft Graph]
-    register: az_ad_sp_list_facts
-    changed_when: false # query only
-    no_log: true
+  # Dependency for 'az_ad_sp_service_providers'
+  - include_role:
+      name: azure/active_directory/service_principal/fetch
+    run_once: true
   
-  # - debug:
-  #     var: az_ad_sp_service_providers
-  # - debug:
-  #     msg: "Count: {{az_ad_sp_service_providers | count}}"
-
-
-  - name: Fetch application permission IDs
-    command: >-
-      az ad sp show
-      --id {{az_ad_sp_service_providers['Microsoft Graph']}}
-      --query "oauth2Permissions[].{key: value, value: id} | []"
-    # command: >-
-    #   az ad sp show
-    #   --id {{az_ad_sp_service_providers['Microsoft Graph']}}
-    #   --query "oauth2Permissions[?value=='{{item}}'].{key: value, value: id} | [0]"
-    # loop: [openid, profile, User.Read, Group.Read.All]
-    register: az_ad_sp_show_facts
-    changed_when: false # query only
-    no_log: true
-  
-  # - debug:
-  #     var: az_ad_sp_permissions
-  # - debug:
-  #     msg: "Count: {{az_ad_sp_permissions | count}}"
-
-
-  # -------- TODO: CONVERT ABOVE TO SINGLETON ROLE DEPENDENCY --------
-
   # Dependency for 'az_ad_app_client_id'
   - include_role:
       name: azure/active_directory/application/create
@@ -55,7 +18,8 @@
   - name: List Azure AD application's active permissions
     command: >-
       az ad app permission list
-      --id {{az_ad_app_client_id}}
+      --id {{az_ad_app_service_principal_id}}
+    # --id {{az_ad_app_client_id}}
     register: az_ad_app_permission_list_facts
     changed_when: false # query only
     failed_when: false  # query only
@@ -70,12 +34,14 @@
       var: az_ad_app_permission_missing_ids
 
 
+  # Ignore stderr warning: Invoking 'az ad app permission grant' is needed to make the change effective
   - name: Add Azure AD application's missing permissions
     command: >-
       az ad app permission add
-      --id {{az_ad_app_client_id}}
+      --id {{az_ad_app_service_principal_id}}
       --api {{az_ad_sp_service_providers['Microsoft Graph']}}
       --api-permissions {{item}}=Scope
+    # --id {{az_ad_app_client_id}}
     loop: "{{az_ad_app_permission_missing_ids}}"
     register: az_ad_app_permission_add_facts
     changed_when: false # query only
