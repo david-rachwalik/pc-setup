@@ -6,6 +6,9 @@
 # https://docs.microsoft.com/en-us/azure/active-directory/develop/quickstart-v2-aspnet-core-webapp
 # https://docs.microsoft.com/en-us/azure/active-directory/develop/app-objects-and-service-principals
 
+# OAuth 2.0 implicit grant flow for single-page apps (Angular, Ember.js, React.js, etc.)
+# https://docs.microsoft.com/en-us/azure/active-directory/develop/v2-oauth2-implicit-grant-flow
+
 # https://docs.microsoft.com/en-us/cli/azure/ad/app
 - block:
   - debug:
@@ -16,11 +19,6 @@
       name: azure/active_directory/application/create
       tasks_from: show
   
-  # - debug:
-  #     var: az_ad_app_client_id
-  # - debug:
-  #     var: az_ad_app_service_principal_id
-
 
   # Neither the create nor update action returns output
   - name: Create Azure AD application object registration
@@ -34,8 +32,8 @@
     # --required-resource-accesses {{az_ad_app_permissions | to_json}}
     # --oauth2-allow-implicit-flow true
     # TODO: add --app-roles once authentication testing is further
-    when: az_ad_app_show_facts.rc != 0
-    # no_log: true
+    when: az_ad_app_client_id == ''
+    no_log: true
 
   - name: Update Azure AD application object registration
     command: >-
@@ -49,10 +47,10 @@
     # --required-resource-accesses {{az_ad_app_permissions | to_json}}
     # --oauth2-allow-implicit-flow true
     # TODO: add --app-roles once authentication testing is further
-    when: az_ad_app_show_facts.rc == 0
+    when: az_ad_app_client_id != ''
     register: az_ad_app_update_facts
     changed_when: az_ad_app_update_facts.stdout != ""
-    # no_log: true
+    no_log: true
 
 
   - name: List active AD application object registrations
@@ -64,8 +62,12 @@
   - debug:
       var: az_ad_app_display_names
   - debug:
-      msg: "Count: {{az_ad_app_display_names | count}}"
+      msg: "application registration count: {{az_ad_app_display_names | count}}"
 
+  
+  - include_role:
+      name: azure/active_directory/service_principal/create
+  
 
   - include_role:
       name: azure/active_directory/application/create

@@ -17,7 +17,6 @@
       --framework {{app_project_item.framework | default(dotnet_default_framework)}}
       --output {{app_project_dir}}
       --auth {{app_authentication}}
-      --aad-instance 'https://login.microsoftonline.com'
       --client-id {{hostvars['localhost']['az_ad_app_client_id']}}
       --org-read-access
       --domain 'davidrachwalikoutlook.onmicrosoft.com'

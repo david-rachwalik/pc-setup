@@ -19,8 +19,8 @@ az_ad_sp_service_providers: "{{az_ad_sp_list_facts.stdout | from_json | list | i
 # --------------------------------------------------------
 # * List Azure AD service principal permissions
 # az ad sp show --id "00000003-0000-0000-c000-000000000000" --query "appRoles[].{Value:value, Id:id}" --output table
-# az_ad_sp_permissions: "{{az_ad_sp_show_facts.results | json_query('[*].stdout') | map('from_json') | list | items2dict}}"
-az_ad_sp_permissions: "{{az_ad_sp_show_facts.stdout | from_json | list | items2dict}}"
+# az_ad_sp_permissions: "{{az_ad_sp_permission_facts.results | json_query('[*].stdout') | map('from_json') | list | items2dict}}"
+az_ad_sp_permissions: "{{az_ad_sp_permission_facts.stdout | from_json | list | items2dict}}"
 # * Fetch 'User.Read' permission (Sign in and read user profile)
 # az ad sp show --id "00000003-0000-0000-c000-000000000000" --query "oauth2Permissions[?value=='User.Read'].id | [0]"
 #     "User.Read": "e1fe6dd8-ba31-4d61-89e7-88639da4683d"
@@ -63,13 +63,15 @@ az_ad_app_project_query: "[?displayName=='{{app_project}}'].{appId: appId, displ
 az_ad_app_project_delete_query: "[?displayName.contains(@, '{{az_ad_app_displayName_to_delete}}')].{appId: appId, displayName: displayName}"
 az_ad_app_display_names: "{{ az_ad_app_list_facts.stdout | from_json | json_query('[*].displayName') | list | sort }}"
 # https://portal.azure.com/#blade/Microsoft_AAD_RegisteredApps/ApplicationsListBlade
-az_ad_app_client_id: "{{az_ad_app_show_facts.stdout | from_json | json_query('appId')}}"
+az_ad_app_client_id: "{{az_ad_app_show_facts.stdout | default('{}', true) | from_json | json_query('appId')}}"
 # System-Assigned Managed Identity: https://docs.microsoft.com/en-us/azure/active-directory/managed-identities-azure-resources/overview
-az_ad_app_service_principal_id: "{{az_ad_sp_show_facts.stdout | from_json | json_query('objectId')}}"
+# * App registration's ID (appId) is equal to service principal's objectId
+az_ad_app_service_principal_id: "{{az_ad_app_sp_facts.stdout | default('{}', true) | from_json | json_query('appId')}}"
+az_ad_sp_display_names: "{{ az_ad_app_list_facts.stdout | from_json | json_query('[*].displayName') | list | sort }}"
 # --------------------------------------------------------
 # --- Application Object Permissions ---
 az_ad_app_permission_expected_ids: ["{{az_ad_sp_permissions['User.Read']}}"]
-az_ad_app_permission_active_ids: "{{az_ad_app_permission_list_facts.stdout | from_json | json_query('resourceAccess[*].id') | default([], true) | list}}"
+az_ad_app_permission_active_ids: "{{az_ad_app_permission_list_facts.stdout | from_json | json_query('[*].resourceAccess[*].id') | list | flatten}}"
 az_ad_app_permission_missing_ids: "{{az_ad_app_permission_expected_ids | difference(az_ad_app_permission_active_ids)}}"
 
 

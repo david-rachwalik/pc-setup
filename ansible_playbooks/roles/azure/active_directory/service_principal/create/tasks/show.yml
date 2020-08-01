@@ -1,0 +1,25 @@
+---
+- block:
+  # same output if exists; list returns rc=0, stdout="" if missing
+  # - az ad sp list --query "[?displayName=='{{app_project}}'] | [0]" --all
+  # - az ad sp show --id {{az_ad_app_client_id}}
+  # https://docs.microsoft.com/en-us/cli/azure/ad/sp
+  - name: Check Azure AD application service principal
+    command: >-
+      az ad sp list
+      --query "[?displayName=='{{app_project}}'] | [0]"
+      --all
+    # command: >-
+    #   az ad sp show
+    #   --id {{az_ad_app_client_id}}
+    register: az_ad_app_sp_facts
+    changed_when: false # query only
+    failed_when:  false # query only
+    ignore_errors: true
+    no_log: true
+    
+  - debug:
+      var: az_ad_app_service_principal_id
+
+  tags: [azure, az, active_directory, ad, application, identity, service_principal, sp]
+...
