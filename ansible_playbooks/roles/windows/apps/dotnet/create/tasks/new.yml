@@ -5,8 +5,7 @@
   # Dependency for 'az_ad_app_client_id'
   - name: Refresh Azure AD application registration for project
     include_role:
-      name: azure/active_directory/application/create
-      tasks_from: show
+      name: azure/active_directory/application/show
   
   
   # 'dotnet new' automatically calls build and restore

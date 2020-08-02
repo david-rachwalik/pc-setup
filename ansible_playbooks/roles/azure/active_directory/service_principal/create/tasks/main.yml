@@ -15,8 +15,7 @@
 
 
   - include_role:
-      name: azure/active_directory/service_principal/create
-      tasks_from: show
+      name: azure/active_directory/service_principal/show
   
 
   # Neither the create nor update action returns output
@@ -31,8 +30,7 @@
     # no_log: true
 
   - include_role:
-      name: azure/active_directory/service_principal/create
-      tasks_from: show
+      name: azure/active_directory/service_principal/show
     when: az_ad_app_service_principal_id == ''
   
   # TODO: fix this step to accept changes *********************************

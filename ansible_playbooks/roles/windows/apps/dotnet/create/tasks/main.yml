@@ -14,8 +14,7 @@
     no_log: true
 
   - include_role:
-      name: azure/active_directory/application/create
-      tasks_from: show
+      name: azure/active_directory/application/show
   
 
   # TODO: create matrix in inventory to reduce these actions to 1 step
