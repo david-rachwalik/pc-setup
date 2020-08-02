@@ -16,8 +16,7 @@
 
 
   - include_role:
-      name: azure/active_directory/application/create
-      tasks_from: show
+      name: azure/active_directory/application/show
   
 
   # Neither the create nor update action returns output
