@@ -17,7 +17,7 @@ dotnet_development_packages:
 # Although the app won't use SQL Server, the scaffolding tool needs the SQL Server package.
 dotnet_database_packages:
 # Automatically includes Microsoft.EntityFrameworkCore as dependency
-- Microsoft.EntityFrameworkCore.Sqlite      # Install SQLite database provider
+# - Microsoft.EntityFrameworkCore.Sqlite      # Install SQLite database provider
 - Microsoft.EntityFrameworkCore.SqlServer   # Install SQL Server database provider
 - Microsoft.EntityFrameworkCore.Design      # Install EF Core design package
 - Microsoft.EntityFrameworkCore.Tools
