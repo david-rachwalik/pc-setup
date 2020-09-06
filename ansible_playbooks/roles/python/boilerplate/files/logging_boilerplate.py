@@ -2,8 +2,8 @@
 
 # Basename: logging_boilerplate
 # Description: Common logic for Python logging
-# Version: 1.3.1
-# VersionDate: 14 Jun 2020
+# Version: 1.3.2
+# VersionDate: 27 Aug 2020
 
 import logging, datetime, pytz
 
@@ -22,13 +22,18 @@ def is_logger(log):
     return isinstance(log, logging.Logger)
 
 
-defaultMessageFormat = "%(asctime)s [%(levelname)s] %(message)s"
 # defaultMessageFormat = "%(asctime)s %(name)s\t[%(levelname)s]\t%(message)s"
 # defaultMessageFormat = "%(asctime)s %(levelname)-7s %(message)s"
+# defaultMessageFormat = "%(asctime)s [%(levelname)s] %(message)s"
+
+# Restrict output to 1 character
+# defaultMessageFormat = "%(asctime)s [%(levelname).1s] %(message)s"
+defaultMessageFormat = "%(asctime)s [%(levelname).1s] %(name)s:%(message)s"
+
 
 # Levels: 10-DEBUG, 20-INFO, 30-WARNING, 40-ERROR, 50-CRITICAL
 class LogOptions(object):
-    def __init__(self, name="", level=logging.WARN, path="", messageFormat=defaultMessageFormat, timeFormat="%Y-%m-%d %H:%M:%S", timezone="US/Central"):
+    def __init__(self, name="", level=logging.WARNING, path="", messageFormat=defaultMessageFormat, timeFormat="%Y-%m-%d %H:%M:%S", timezone="US/Central"):
         self.name = str(name)
         self.level = int(level)
         self.path = str(path)
@@ -41,7 +46,7 @@ class LogOptions(object):
 # Providing LogOptions will establish the first handler automatically
 def get_logger(log):
     logger = None
-    # Instialize the logger
+    # Initialize the logger
     if is_logger(log):
         return log
     elif isinstance(log, LogOptions):
@@ -60,8 +65,11 @@ def get_logger(log):
     return logger
 
 
-def add_log_handler(logger, level=logging.WARN, path="", messageFormat="", timeFormat="", timezone=""):
+def add_log_handler(logger, level=logging.WARNING, path="", messageFormat="", timeFormat="", timezone=""):
     if not is_logger(log): return
+    # Replace built-in level names
+    logging.addLevelName(logging.WARNING, "WARN")
+    logging.addLevelName(logging.CRITICAL, "FATAL")
     # Create formatter to attach to handler
     logFormatter = logging.Formatter(fmt=messageFormat, datefmt=timeFormat)
     logFormatter.converter = get_timezone_converter(timezone)
