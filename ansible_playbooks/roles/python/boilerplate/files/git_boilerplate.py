@@ -2,8 +2,8 @@
 
 # Basename: git_boilerplate
 # Description: Common business logic for Git (v1.8.x)
-# Version: 1.2.1
-# VersionDate: 26 Aug 2020
+# Version: 1.2.3
+# VersionDate: 4 Sep 2020
 
 # --- Global Git Commands ---
 # Repository (bare/work):       repo_exists, repo_create
@@ -67,7 +67,7 @@ def repo_create(path, bare=False):
 # Ensure remote path links to bare repository
 def work_remote(path, remote_path, remote_alias="origin"):
     logger.debug("(work_remote): Init")
-    succeeded = False
+    failed = False
     # Check local repository for remote alias
     command = ["git", "config", "--get", "remote.{0}.url".format(remote_alias)]
     (rc, stdout, stderr) = sh.subprocess_await(command, path)
@@ -96,7 +96,7 @@ def work_remote(path, remote_path, remote_alias="origin"):
 
 
 def work_status(path):
-    logger.debug("(work_status): Init")
+    # logger.debug("(work_status): Init")
     command = ["git", "status"]
     logger.debug("(work_status): command => {0}".format(str.join(" ", command)))
     (rc, stdout, stderr) = sh.subprocess_await(command, path)
@@ -108,13 +108,9 @@ def work_status(path):
     return is_clean
 
 
-def work_commit(path, message="Ansible auto-commit", initial=False):
-    logger.debug("(work_commit): Init")
+def work_commit(path, message="auto-commit", initial=False):
+    # logger.debug("(work_commit): Init")
     if not initial:
-        # # Check working directory status
-        # status = work_status(path)
-        # logger.debug("(work_commit): status is clean: {0}".format(status))
-
         # Stage working directory; copies files into '.git' directory
         # 'git add' detects all changes; 'git commit -a' only detects modified/deleted
         command = ["git", "add", "--all", "."]
@@ -132,11 +128,10 @@ def work_commit(path, message="Ansible auto-commit", initial=False):
         changed = (not failed and "nothing to commit (working directory clean)" not in stdout)
         return (not failed, changed)    # (succeeded, changed)
     else:
-        # Initial commit for origin/master (fast-forward commit)
-        # - pulls more reliable; helps prevent dangling HEAD refs
-        # - HEAD initializes pointed to 'refs/heads/master'...
-        #     but there's no true 'master' branch until first commit
-        command = ["git", "commit", "--allow-empty", "-m 'Initial :: {0}'".format(message)]
+        # Initial commit so 'master' branch exists; helps prevent dangling HEAD refs
+        # - HEAD points to 'refs/heads/master' after 'git init'
+        # - however, there's no true 'master' branch until first commit
+        command = ["git", "commit", "--allow-empty", "-m 'Initial {0}'".format(message)]
         logger.debug("(work_commit): command => {0}".format(str.join(" ", command)))
         (rc, stdout, stderr) = sh.subprocess_await(command, path)
         return (True, True)             # (succeeded, changed)
@@ -144,15 +139,13 @@ def work_commit(path, message="Ansible auto-commit", initial=False):
 
 # TODO: Set upstream (-u) on initial push; streamlines fetch
 def work_push(path, version="master", remote_alias="origin"):
-    logger.debug("(work_push): Init")
+    # logger.debug("(work_push): Init")
     command = ["git", "push", remote_alias, version]
     logger.debug("(work_push): command => {0}".format(str.join(" ", command)))
     (rc, stdout, stderr) = sh.subprocess_await(command, path)
-    
-    logger.debug("(work_push): rc: {0}".format(rc))
-    if len(stdout) > 0: logger.info("(work_push): stdout: {0}".format(stdout))
-    if len(stderr) > 0: logger.error("(work_push): stderr: {0}".format(stderr))
-
+    # logger.debug("(work_push): rc: {0}".format(rc))
+    if len(stdout) > 0: logger.info(str(stdout))
+    if len(stderr) > 0: logger.error(str(stderr))
     failed = (rc != 0 and "Everything up-to-date" not in stderr)
     changed = (not failed and "Everything up-to-date" not in stderr)
     return (not failed, changed)
@@ -171,7 +164,8 @@ def _ref_formatter(in_list):
 
 def ref_head(path):
     # logger.debug("(ref_head): Init")
-    command = ["git", "show-ref", "--head"]
+    # command = ["git", "show-ref", "--head"]
+    command = ["git", "rev-parse", "--abbrev-ref", "HEAD"]
     logger.debug("(ref_head): command => {0}".format(str.join(" ", command)))
     (rc, stdout, stderr) = sh.subprocess_await(command, path)
     # logger.debug("(ref_head): rc: {0}".format(rc))
@@ -180,7 +174,8 @@ def ref_head(path):
     # failed = (rc != 0 and "Reinitialized existing Git repository" not in stdout)
     # changed = (not failed and "skipped, since" not in stdout)
     # return (not failed, changed)
-    return stdout
+    result = stdout if (rc == 0) else ""
+    return result
 
 
 # git for-each-ref --format='%(refname:short)' refs/heads
@@ -229,7 +224,7 @@ def ref_tags(path):
 
 # Validate version meets Git-allowed reference name rules
 def branch_validate(version="master"):
-    logger.debug("(branch_validate): Init")
+    # logger.debug("(branch_validate): Init")
     failed = False
     if version == "HEAD": return failed
     command = ["git", "check-ref-format", "--branch", version]
@@ -243,22 +238,35 @@ def branch_validate(version="master"):
 
 
 # Providing 'remote_alias' will search in remotes instead of heads
-def branch_exists(path, version="master", remote_alias=""):
-    logger.debug("(branch_exists): Init")
-    is_remote = bool(remote_alias)
-    verify_branch = "{0}/{1}".format(remote_alias, version) if is_remote else version
+def branch_list(path, remote_alias=""):
+    # logger.debug("(branch_list): Init")
     # Determine which metadata to check for branch list
     ref_method = ref_remotes if is_remote else ref_heads
     branch_results = ref_method(path)
+    logger.debug("(branch_list): branches: {0}".format(branch_results))
+    return branch_results
+
+
+# Providing 'remote_alias' will search in remotes instead of heads
+# - 'branches' expects list of strings; omit to automatically call branch_list
+def branch_exists(path, version="master", remote_alias="", branches=None):
+    # logger.debug("(branch_exists): Init")
+    remote_branch = "{0}/{1}".format(remote_alias, version)
+    use_branch = remote_branch is remote_alias else version
+    # Gather cache of branch names
+    if isinstance(branches, list):
+        branch_results = branches
+    else:
+        branch_results = branch_list(path, remote_alias)
     # Check branch version exists in branch list
-    logger.debug("(branch_exists): current branches: {0}".format(branch_results))
-    is_found = (verify_branch in branch_results)
-    logger.debug("(branch_exists): branch '{0}' is found: {1}".format(verify_branch, is_found))
+    logger.debug("(branch_exists): branches: {0}".format(branch_results))
+    is_found = (use_branch in branch_results)
+    logger.debug("(branch_exists): branch '{0}' is found: {1}".format(use_branch, is_found))
     return is_found
 
 
 def branch_create(path, version="master"):
-    logger.debug("(branch_create): Init")
+    # logger.debug("(branch_create): Init")
     # 'git branch --force' resets the branch's HEAD (not wanted)
     command = ["git", "branch", version]
     logger.debug("(branch_create): command => {0}".format(str.join(" ", command)))
@@ -268,30 +276,34 @@ def branch_create(path, version="master"):
     # if len(stderr) > 0: logger.error(str(stderr))
     failed = (rc != 0 and "already exists" not in stderr)
     changed = (not failed and "already exists" not in stderr)
-    logger.debug("(branch_create): succeeded: {0}, changed: {1}".format(not failed, changed))
+    # logger.debug("(branch_create): succeeded: {0}, changed: {1}".format(not failed, changed))
     return (not failed, changed)
 
 
 # TODO: option to call exists and create
-def branch_switch(path, version="master"):
-    logger.debug("(branch_switch): Init")
-    # 'git branch --force' resets the branch's HEAD (not wanted)
-    command = ["git", "checkout", version]
+def branch_switch(path, version="master", remote_alias=""):
+    # logger.debug("(branch_switch): Init")
+    remote_branch = "{0}/{1}".format(remote_alias, version)
+    use_branch = remote_branch if remote_alias else version
+    command = ["git", "checkout", use_branch]
     logger.debug("(branch_switch): command => {0}".format(str.join(" ", command)))
     (rc, stdout, stderr) = sh.subprocess_await(command, path)
-    changed = ("Already on" not in stderr)
-    return changed
+    # logger.debug("(branch_switch): rc: {0}".format(rc))
+    # if len(stdout) > 0: logger.info("(branch_switch): stdout: {0}".format(stdout))
+    # if len(stderr) > 0: logger.error("(branch_switch): stderr: {0}".format(stderr))
+    failed = (rc != 0)
+    changed = (not failed and "Already on" not in stderr)
+    return (not failed, changed)
 
 
 # Supports either local or remote paths
 def branch_delete(path, version="master"):
-    logger.debug("(branch_delete): Init")
-    command = ["git", "branch", "-D {0}".format(version)]
+    # logger.debug("(branch_delete): Init")
+    command = ["git", "branch", "-D", version]
     logger.debug("(branch_delete): command => {0}".format(str.join(" ", command)))
     (rc, stdout, stderr) = sh.subprocess_await(command, path)
     if len(stdout) > 0: logger.info(str(stdout))
     if len(stderr) > 0: logger.error(str(stderr))
-
     failed = (rc != 0)
     changed = (not failed and "Deleted branch" in stdout)
     logger.debug("(branch_delete): succeeded: {0}, changed: {1}".format(not failed, changed))
@@ -311,30 +323,33 @@ def work_fetch(path, remote_alias="origin"):
     return (not failed, changed)
 
 
-# other pull_type choice is 'theirs'
-def work_merge(path, version="master", remote_alias="origin", fast_forward=True, pull_type="ours"):
-    logger.debug("(work_merge): Init")
+# other pull_type choice is 'theirs'; message for potential merge commit
+def work_merge(path, version="master", remote_alias="", message="auto-merge", fast_forward=True, pull_type="ours"):
+    # logger.debug("(work_merge): Init")
     # Merge pull branch (auto-resolve)
     remote_branch = "{0}/{1}".format(remote_alias, version)
-    command = ["git", "merge", remote_branch]
+    use_branch = remote_branch if remote_alias else version
+    command = ["git", "merge", use_branch]
     if not fast_forward: command.append("--no-ff")
-    command.extend(["--strategy=recursive", "--strategy-option={0}".format(pull_type), "-m 'Ansible auto-merge'"])
+    command.extend(["--strategy=recursive", "--strategy-option={0}".format(pull_type), "-m '{0}'".format(message)])
     logger.debug("(work_merge): command => {0}".format(str.join(" ", command)))
     (rc, stdout, stderr) = sh.subprocess_await(command, path)
-    
-    logger.debug("(work_merge): rc: {0}".format(rc))
-    if len(stdout) > 0: logger.info("(work_merge): stdout: {0}".format(stdout))
-    if len(stderr) > 0: logger.error("(work_merge): stderr: {0}".format(stderr))
+    # logger.debug("(work_merge): rc: {0}".format(rc))
+    # if len(stdout) > 0: logger.info("(work_merge): stdout: {0}".format(stdout))
+    # if len(stderr) > 0: logger.error("(work_merge): stderr: {0}".format(stderr))
+    failed = (rc != 0)
+    changed = (not failed and "Already uptodate" not in stdout and "Already up-to-date" not in stdout)
+    return (not failed, changed)
 
-    changed = ("Already uptodate" not in stdout and "Already up-to-date" not in stdout)
-    return changed
 
-
-def work_rebase(path, version="master", remote_alias="origin"):
-    logger.debug("(work_rebase): Init")
+# Rebase replays commits from currently active branch onto 'version' parameter target branch
+# - automatically uses default of --strategy='recursive' --strategy-option='theirs'
+# - ours/theirs is reverse of merge; theirs is currently active branch - ours is target branch
+# - 'remote_alias' parameter not implemented so rebase is only used for local work (e.g. feature branch)
+def work_rebase(path, version="master"):
+    # logger.debug("(work_rebase): Init")
     # Merge pull branch (auto-resolve)
-    remote_branch = "{0}/{1}".format(remote_alias, version)
-    command = ["git", "rebase", remote_branch]
+    command = ["git", "rebase", version]
     logger.debug("(work_rebase): command => {0}".format(str.join(" ", command)))
     (rc, stdout, stderr) = sh.subprocess_await(command, path)
     # logger.debug("(work_rebase): rc: {0}".format(rc))
@@ -345,61 +360,18 @@ def work_rebase(path, version="master", remote_alias="origin"):
     return (not failed, changed)
 
 
-def work_reset(path, version="master", remote_alias="origin"):
-    logger.debug("(work_reset): Init")
+def work_reset(path, version="master", remote_alias=""):
+    # logger.debug("(work_reset): Init")
     # Reset branch to latest (auto-resolve)
     remote_branch = "{0}/{1}".format(remote_alias, version)
-    command = ["git", "reset", "--hard", remote_branch]
+    use_branch = remote_branch if remote_alias else version
+    command = ["git", "reset", "--hard", use_branch]
     logger.debug("(work_reset): command => {0}".format(str.join(" ", command)))
     (rc, stdout, stderr) = sh.subprocess_await(command, path)
-    
-    logger.debug("(work_reset): rc: {0}".format(rc))
-    if len(stdout) > 0: logger.info(str(stdout))
-    if len(stderr) > 0: logger.error(str(stderr))
-
+    # logger.debug("(work_reset): rc: {0}".format(rc))
+    # if len(stdout) > 0: logger.info(str(stdout))
+    # if len(stderr) > 0: logger.error(str(stderr))
     return (rc == 0)
-
-
-# ------------------------ Primary Classes ------------------------
-
-class Repository(object):
-    def __init__(self, path, remote_path="", skip_create=False, force=False):
-        # logger.debug("(Repository:__init__): Init")
-        self.path = str(path)
-        self.remote_path = str(remote_path) if remote_path else ""
-        self.force = bool(force)
-        self.is_bare = not bool(self.remote_path)
-        self.repo_descriptor = "remote, bare" if self.is_bare else "local, work"
-
-        self.exists = repo_exists(self.path, self.is_bare)
-        if self.exists:
-            logger.debug("(Repository:__init__): Successfully found {0} repository".format(self.repo_descriptor))
-        else:
-            logger.debug("(Repository:__init__): Unable to locate {0} repository".format(self.repo_descriptor))
-            if self.is_bare:
-                if not skip_create: self.create()
-            else:
-                # Create repository whenever missing
-                self.create()
-
-
-    def create(self):
-        logger.debug("(Repository:create): Init")
-        if not self.force:
-            response = raw_input("Repository not found ({0}/.git), initialize?  (y or yes):".format(self.path))
-            if response.lower() not in ["", "y", "yes"]:
-                logger.info("Exiting without creating repository")
-                sh.process_fail()
-        else:
-            logger.info("Repository not found ({0}/.git), initializing...".format(self.path))
-        
-        # Initialize the repository
-        (self.exists, changed) = repo_create(self.path, self.is_bare)
-        if self.exists:
-            logger.info("Repository successfully created!")
-        else:
-            logger.error("(Repository:create): Unable to create {0} repository".format(self.repo_descriptor))
-            sh.process_fail()
 
 
 # ------------------------ Main Program ------------------------
