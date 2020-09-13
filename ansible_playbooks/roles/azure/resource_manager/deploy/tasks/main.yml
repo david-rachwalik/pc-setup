@@ -1,23 +1,57 @@
 ---
 # https://docs.microsoft.com/en-us/azure/azure-resource-manager/templates/template-tutorial-create-first-template?tabs=azure-cli
+# https://docs.microsoft.com/en-us/cli/azure/deployment/group
+
+# 'az group deployment' is deprecated: https://docs.microsoft.com/en-us/cli/azure/group/deployment
 - block:
   - include_role:
       name: azure/resource_group/create
       tasks_from: create
 
-  # https://docs.ansible.com/ansible/latest/modules/azure_rm_deployment_module.html
-  - name: Deploy Azure Resource Manager Template
-    azure_rm_deployment:
-      name: "{{app_repo_item.arm_name | default(omit)}}"
-      resource_group: "{{az_resource_group}}"
-      location: "{{az_location}}"
-      state: present
-      # template: "{{(app_repo_item.az_rm_template is defined) | ternary(lookup('file', app_repo_item.az_rm_template), omit)}}"
-      template: "{{ az_rm_template | default(omit) }}"
-      template_link: "{{app_repo_item.arm_template_url | default(omit)}}"
-      # parameters: "{{app_repo_item.az_rm_parameters | default(omit)}}"
-      parameters: "{{ az_rm_parameters | default(omit) }}"
-      parameters_link: "{{app_repo_item.arm_parameters_url | default(omit)}}"
+  # # https://docs.ansible.com/ansible/latest/modules/azure_rm_deployment_module.html
+  # - name: Deploy Azure Resource Manager Template
+  #   azure_rm_deployment:
+  #     name: "{{app_repo_item.arm_name | default(omit)}}"
+  #     resource_group: "{{az_resource_group}}"
+  #     location: "{{az_location}}"
+  #     template: "{{az_rm_template | default(omit)}}"
+  #     parameters: "{{az_rm_parameters | default(omit)}}"
+
+  # - debug:
+  #     var: az_resource_group
+  # - debug:
+  #     var: az_rm_template_path
+  # - debug:
+  #     var: az_rm_parameters
+
+  # To repeat validation manually when failed (ansible output is ugly)
+  - debug:
+      msg: >-
+        Validation command:
+        az deployment group validate
+        --resource-group {{az_resource_group}}
+        --template-file {{az_rm_template_path}}
+        --parameters {{az_rm_parameters}}
+
+  # https://docs.ansible.com/ansible/latest/modules/command_module.html
+  - name: Validate Azure Resource Manager Template
+    command: >-
+      az deployment group validate
+      --resource-group {{az_resource_group}}
+      --template-file {{az_rm_template_path}}
+      --parameters {{az_rm_parameters}}
+    register: az_rm_deploy_validate_facts
+    changed_when: false # query only
+    no_log: true
+
+  - name: Create Azure Resource Manager Deployment
+    command: >-
+      az deployment group create
+      --resource-group {{az_resource_group}}
+      --template-file {{az_rm_template_path}}
+      --parameters {{az_rm_parameters}}
+    register: az_rm_deploy_create_facts
+    no_log: true
 
   tags: [azure, az, deploy, resource_manager, arm]
 ...

@@ -3,13 +3,16 @@
 
 # --- Azure Defaults ---
 az_location: "{{app_repo_item.az_location | default(az_default_location)}}"
+az_resource_group: "{{(app_repo + '-' + app_environment) | regex_replace('[^a-zA-Z0-9-]', '-')}}"
 az_app_registration: "{{(app_project + '-' + app_environment) | regex_replace('[^a-zA-Z0-9-]', '-')}}"
-az_resource_group: "{{az_app_registration}}"
 
 # --- Azure Resource Manager ---
-az_rm_template: "{{ lookup('template', app_repo_item.az_rm_template) }}"
-az_rm_parameters_file: "{{ lookup('template', app_repo_item.az_rm_parameters) }}"
-az_rm_parameters: "{{ (az_rm_parameters_file is defined) | ternary(az_rm_parameters_file.parameters, {}) }}"
+az_rm_root_path: ~/pc-setup/ansible_playbooks/roles/azure/resource_manager/deploy/templates
+az_rm_template_path: "{{az_rm_root_path}}/{{app_repo_item.az_resource_manager}}/azuredeploy.json"
+az_rm_parameters_path: "{{az_rm_root_path}}/{{app_repo_item.az_resource_manager}}/azuredeploy.parameters.json"
+az_rm_parameters_file: "{{lookup('template', az_rm_parameters_path)}}"
+az_rm_template: "{{lookup('template', az_rm_template_path)}}"
+az_rm_parameters: "{{(az_rm_parameters_file is defined) | ternary(az_rm_parameters_file.parameters, {})}}"
 
 # --- Azure Resources ---
 # 'az_plan' must be between 3-24 chars, only lowercase or numbers

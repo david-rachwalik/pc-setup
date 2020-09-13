@@ -72,9 +72,5 @@
       name: azure/active_directory/application/create
       tasks_from: permissions
   
-
-  - fail:
-      msg: break point
-
   tags: [azure, az, active_directory, ad, application, identity]
 ...

@@ -7,9 +7,11 @@
 
 - include_role:
     name: azure/resource_manager/deploy
+    tasks_from: loop_app_environment
   loop: "{{app_repo_names}}"
   loop_control:
     loop_var: app_repo
-  when: app_repo_item.host == 'Azure'
+  # when: app_repo_item.source == 'Azure'
+  when: app_repo_item.az_resource_manager is defined
   tags: [azure, az, deploy, resource_manager, arm]
 ...
