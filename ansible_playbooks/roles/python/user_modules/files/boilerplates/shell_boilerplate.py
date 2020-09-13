@@ -8,7 +8,7 @@
 # --- Global Shell Commands ---
 # Utility:          directory_shift, directory_change, is_list_of_strings, list_differences
 # Process:          process_exit, process_fail, process_id, process_parent_id
-# Path:             path_current, path_expand, path_join, path_basename, path_exists
+# Path:             path_current, path_expand, path_join, path_basename, path_filename, path_exists
 # Directory:        directory_list, directory_create, directory_delete, directory_copy, directory_sync
 # File:             file_read, file_write, file_delete
 # Signal:           signal_max, signal_handler, signal_send
@@ -106,6 +106,14 @@ def path_join(path, *paths):
 # Returns 'item' from /foo/bar/item
 def path_basename(name):
     return os.path.basename(name)
+
+
+# Returns 'file.txt.zip' from /path/to/some/file.txt.zip.asc
+# https://stackoverflow.com/questions/678236/how-to-get-the-filename-without-the-extension-from-a-path-in-python
+def path_filename(name):
+    extension_trimmed = os.path.splitext(name)[0]
+    filename = path_basename(extension_trimmed)
+    return filename
 
 
 # Returns '/foo/bar' from /foo/bar/item
@@ -211,7 +219,7 @@ def directory_sync(src, dest, recursive=True, purge=True, cut=False, include=(),
             changed_files.append(path_join(dest, file_name))
         elif itemized_output[1] == "d":
             changes_dirs.append(path_join(dest, file_name))
-    
+
     logger.debug("(directory_sync) changed_files: {0}".format(changed_files))
     return (changed_files, changes_dirs)
 
@@ -345,7 +353,7 @@ class SubProcess(object):
 
     def __str__(self):
         return str(self.process)
-    
+
 
     # Waits for process to finish and returns output tuple (rc, stdout, stderr)
     def await_results(self):
@@ -358,7 +366,7 @@ class SubProcess(object):
             return (self.rc, self.stdout, self.stderr)
         except:
             return (-1, None, None)
-    
+
 
     # ProcessOutputFormat
     def format_output(self, text):
@@ -413,7 +421,7 @@ if __name__ == "__main__":
             subprocess_print(rc, stdout, stderr, validatorCmd)
         else:
             logger.debug("(__main__): {0} was successfully validated.".format(xmlPath))
-    
+
     # -------- SubProcess Test --------
     elif args.test == "subprocess":
         # testCmd = "ls -la /var"
