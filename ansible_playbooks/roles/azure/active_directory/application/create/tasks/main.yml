@@ -12,7 +12,7 @@
 # https://docs.microsoft.com/en-us/cli/azure/ad/app
 - block:
   - debug:
-      msg: "Azure AD application: {{app_project}}"
+      msg: "Azure AD application: {{az_app_registration}}"
 
 
   - include_role:
@@ -23,7 +23,7 @@
   - name: Create Azure AD application object registration
     command: >-
       az ad app create
-      --display-name {{app_project}}
+      --display-name {{az_app_registration}}
       --homepage {{app_domain}}
       --identifier-uris {{az_ad_identifier_urls | join(' ')}}
       --reply-urls {{az_ad_reply_urls | join(' ')}}
@@ -38,7 +38,7 @@
     command: >-
       az ad app update
       --id {{az_ad_identifier_urls | first}}
-      --display-name {{app_project}}
+      --display-name {{az_app_registration}}
       --homepage {{app_domain}}
       --identifier-uris {{az_ad_identifier_urls | join(' ')}}
       --reply-urls {{az_ad_reply_urls | join(' ')}}
@@ -58,8 +58,8 @@
     changed_when: false # query only
     no_log: true
 
-  - debug:
-      var: az_ad_app_display_names
+  # - debug:
+  #     var: az_ad_app_display_names
   - debug:
       msg: "application registration count: {{az_ad_app_display_names | count}}"
 
@@ -72,5 +72,9 @@
       name: azure/active_directory/application/create
       tasks_from: permissions
   
+
+  - fail:
+      msg: break point
+
   tags: [azure, az, active_directory, ad, application, identity]
 ...
