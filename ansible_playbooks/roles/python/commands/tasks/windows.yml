@@ -3,7 +3,7 @@
   # https://docs.ansible.com/ansible/latest/modules/win_file_module.html
   - name: Ensure Python module directory exists
     win_file:
-      path: "{{python_user_site_dir}}"
+      path: "{{python_user_command_dir}}"
       state: directory
       mode: 0775
 
@@ -11,9 +11,11 @@
   - name: Deploy Python module
     win_copy:
       src: "{{item}}"
-      dest: "{{python_user_site_dir}}\\{{item | basename}}"
-      mode: 0660
-    loop: "{{python_user_modules}}"
+      # dest: "{{python_user_command_dir}}/{{(item | splitext)[0]}}"
+      # remove extension from filename (e.g. test.file.name.txt to test.file.name.csv)
+      dest: "{{python_user_command_dir}}\\{{(item | splitext)[:-1] | join('.')}}"
+      mode: 0770
+    loop: "{{python_user_commands}}"
 
   # - name: Install boilerplate package
   #   copy:

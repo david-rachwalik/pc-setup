@@ -1,10 +1,24 @@
 ---
+# ansible-playbook system_setup.yml --tags logrotate
+
+- block:
+  - stat:
+      path: /usr/bin/python
+    register: python_command
+
+  - name: Correct path to Python3
+    file:
+      src: /usr/bin/python3
+      dest: /usr/bin/python
+      state: link
+    when: python_command.stat.exists == False
+
+  tags: [python, py]
+
+
 # view /etc/logrotate.conf
 # https://linux.die.net/man/8/logrotate
 # https://www.digitalocean.com/community/tutorials/how-to-manage-logfiles-with-logrotate-on-ubuntu-16-04
-
-# ansible-playbook system_setup.yml --tags logrotate
-
 - name: Update log rotate
   copy:
     src: "{{item}}"

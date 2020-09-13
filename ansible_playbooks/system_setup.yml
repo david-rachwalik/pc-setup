@@ -7,15 +7,15 @@
   - include_role:
       name: linux/system/apt
     tags: [apt]
-  
+
   - include_role:
       name: linux/system/pip
     tags: [pip]
-  
+
   - include_role:
       name: linux/system/setup
-    tags: [logrotate]
-  
+    tags: [python, py, logrotate]
+
   tags: [linux]
 
 
@@ -28,6 +28,10 @@
 
   - include_role:
       name: python/user_modules
+    tags: [python, py]
+
+  - include_role:
+      name: python/commands
     tags: [python, py]
 
   - include_role:
