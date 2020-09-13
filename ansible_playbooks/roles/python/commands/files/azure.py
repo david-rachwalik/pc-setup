@@ -2,7 +2,7 @@
 
 # Basename: azure
 # Description: A service to control common Azure business logic
-# Version: 0.0.1
+# Version: 0.0.2
 # VersionDate: 12 Sep 2020
 
 #         *** Actions ***
@@ -48,8 +48,7 @@ def login(path, version="master", remote_alias=""):
 # ------------------------ Main program ------------------------
 
 # Initialize the logger
-# basename = "azure"
-basename = sh.path_filename(__module__)
+basename = "azure"
 log_file = "/var/log/{0}.log".format(basename)
 log_options = LogOptions(basename)
 logger = get_logger(log_options)
