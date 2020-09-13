@@ -1,0 +1,8 @@
+---
+- include_role:
+    name: azure/resource_manager/deploy
+  loop: "{{app_environments}}"
+  loop_control:
+    loop_var: app_environment
+  tags: [azure, az, deploy, resource_manager, arm]
+...

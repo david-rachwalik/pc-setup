@@ -2,7 +2,7 @@
 # -------- Application Repository Options --------
 # --- requires 'dotnet_projects' to create solution directory ---
 # ------------------------------------------------
-# name:               repository directory, solution
+# name:               repository directory, dotnet solution
 # source:             [GitHub, Azure]
 # dotnet_projects:    list of .NET project configurations
 # -------- ASP.NET Core Project Options --------
@@ -11,8 +11,7 @@
 # sql_database:       false by default, automatically true with authentication
 # authentication:     [Individual, SingleOrg, MultiOrg]
 # -------- Host Options --------
-# az_rm_template:     path to Azure Resource Manager (ARM) template file
-# az_rm_parameters:   path to Azure Resource Manager (ARM) parameter file
+# az_resource_manager:   relative path to Azure Resource Manager (ARM) template
 # az_pipeline:        path to Azure Pipelines file
 # ------------------------------------------------
 
@@ -32,6 +31,7 @@ application_authentication_choices: [Individual, SingleOrg, MultiOrg]
 
 # app_repo = application_repositories[*].name
 application_repositories:
+# --- Test Repositories ---
 - name: Tester
   source: GitHub
   dotnet_projects:
@@ -45,8 +45,7 @@ application_repositories:
   # - name: Tester.API
   #   template: webapi
   #   authentication: SingleOrg
-  # az_rm_template: all/webapp_sql/azuredeploy.json
-  # az_rm_parameters: all/webapp_sql/azuredeploy.parameters.json
+  # az_resource_manager: all/webapp_sql
 
 - name: pc-setup
   source: GitHub
@@ -56,22 +55,24 @@ application_repositories:
   dotnet_projects:
   - name: DMR.WebApp
     template: webapp
-    database_context: MainContext
-    authentication: MultiOrg
-    az_pipelines: true
-    az_resource_manager: all/webapp_sql
-  - name: DMR.UnitTests
-    template: xunit
-  # az_rm_template: all/webapp_sql/azuredeploy.json
-  # az_rm_parameters: all/webapp_sql/azuredeploy.parameters.json
+    # database_context: MainContext
+    # authentication: MultiOrg
+    # az_pipelines: true
+    # az_resource_manager: all/webapp_sql
+    # az_resource_manager: linux/webapp_blank
+  # - name: DMR.UnitTests
+  #   template: xunit
+  az_environments: [Dev]
+  # az_resource_manager: all/webapp_sql
+  az_resource_manager: linux/webapp_blank
+  az_pipelines: true
 
 - name: SexBound
   source: Azure
   dotnet_projects:
   - name: SexBound.WebApp
     template: webapp
-  # az_rm_template: all/webapp_sql/azuredeploy.json
-  # az_rm_parameters: all/webapp_sql/azuredeploy.parameters.json
+  # az_resource_manager: all/webapp_sql
 
 - name: CorruptionOfChampions
   source: Azure
@@ -126,6 +127,6 @@ app_project_item: "{{application_repositories | json_query(app_project_query) | 
 app_environments: "{{app_repo_item.az_environments | default(application_environment_choices)}}"
 app_environment: "{{app_environments | first}}"
 app_domain: "https://localhost:5001"
-app_authentication: "{{app_project_item.authentication | default('None')}}"
 app_database_context: "{{app_project_item.database_context | default('None')}}"
+app_authentication: "{{app_project_item.authentication | default('None')}}"
 ...

@@ -37,21 +37,17 @@
                 "description": "The pricing tier for the hosting plan."
             }
         },
-        "workerSize": {
+        "linuxFxVersion" : {
             "type": "string",
-            "allowedValues": [
-                "0",
-                "1",
-                "2"
-            ],
-            "defaultValue": "0",
+            "defaultValue" : "php|7.0",
             "metadata": {
-                "description": "The instance size of the hosting plan (small, medium, or large)."
+                "description": "The Runtime stack of current web app"
             }
         },
+
         "repoURL": {
             "type": "string",
-            "defaultValue": "https://github.com/Azure-Samples/app-service-web-html-get-started.git",
+            "defaultValue": "https://github.com/david-rachwalik/DMR.git",
             "metadata": {
                 "description": "The URL for the GitHub repository that contains the project to deploy."
             }
@@ -74,28 +70,32 @@
             "name": "[variables('hostingPlanName')]",
             "location": "[parameters('location')]",
             "sku": {
-                "name": "[parameters('sku')]",
-                "capacity": "[parameters('workerSize')]"
+                "name": "[parameters('sku')]"
             },
+            "kind": "linux",
             "properties": {
-                "name": "[variables('hostingPlanName')]"
+                "reserved": true
             }
         },
         {
             "type": "Microsoft.Web/sites",
-            "apiVersion": "2018-02-01",
+            "apiVersion": "2018-11-01",
             "name": "[parameters('siteName')]",
             "location": "[parameters('location')]",
+            "kind": "app",
             "dependsOn": [
                 "[resourceId('Microsoft.Web/serverfarms', variables('hostingPlanName'))]"
             ],
             "properties": {
-                "serverFarmId": "[variables('hostingPlanName')]"
+                "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', variables('hostingPlanName'))]",
+                "siteConfig": {
+                    "linuxFxVersion": "[parameters('linuxFxVersion')]"
+                }
             },
             "resources": [
                 {
                     "type": "sourcecontrols",
-                    "apiVersion": "2018-02-01",
+                    "apiVersion": "2018-11-01",
                     "name": "web",
                     "location": "[parameters('location')]",
                     "dependsOn": [
