@@ -66,7 +66,7 @@ def get_logger(log):
 
 
 def add_log_handler(logger, level=logging.WARNING, path="", messageFormat="", timeFormat="", timezone=""):
-    if not is_logger(log): return
+    if not is_logger(logger): return
     # Replace built-in level names
     logging.addLevelName(logging.WARNING, "WARN")
     logging.addLevelName(logging.CRITICAL, "FATAL")
