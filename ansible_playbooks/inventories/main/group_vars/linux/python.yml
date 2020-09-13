@@ -8,6 +8,7 @@ python_user_modules:
 # --- Boilerplates ---
 - boilerplates/logging_boilerplate.py
 - boilerplates/shell_boilerplate.py
+- boilerplates/azure_boilerplate.py
 - boilerplates/git_boilerplate.py
 - boilerplates/xml_boilerplate.py
 - boilerplates/multiprocess_boilerplate.py
