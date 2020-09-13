@@ -16,7 +16,7 @@
 # --- SubProcess Class Commands ---
 # await_results, is_done, format_output
 
-from logging_boilerplate import LogManager
+from logging_boilerplate import *
 import sys, os, subprocess, signal
 from contextlib import contextmanager
 import distutils.dir_util
