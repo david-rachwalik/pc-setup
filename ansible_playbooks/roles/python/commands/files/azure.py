@@ -5,14 +5,14 @@
 # Version: 0.0.1
 # VersionDate: 12 Sep 2020
 
-# 		*** Actions ***
-# login:			Ensure credential file exists or prompts manual login to create
-# show:				Print output for a resource, key vault secret, etc.
-# deploy:			Deploy an application to Azure (webapp, api, nuget package)
-# status:			View running state of deployed application
-# 		*** Options ***
-# --debug: 			Enable to display log messages for development
-# --quiet:			Enable to reduce verbosity and disregard the manual login prompt
+#         *** Actions ***
+# login:            Ensure credential file exists or prompts manual login to create
+# show:                Print output for a resource, key vault secret, etc.
+# deploy:            Deploy an application to Azure (webapp, api, nuget package)
+# status:            View running state of deployed application
+#         *** Options ***
+# --debug:             Enable to display log messages for development
+# --quiet:            Enable to reduce verbosity and disregard the manual login prompt
 
 from logging_boilerplate import *
 import shell_boilerplate as sh
@@ -68,11 +68,11 @@ if __name__ == "__main__":
     if args.debug: log_level = 10   # logging.DEBUG
     logger.setLevel(log_level)
 
-	# If we get to this point, assume all went well
-	logger.debug("--------------------------------------------------------")
-	logger.debug("--- end point reached :3 ---")
-	sh.process_exit()
+    # If we get to this point, assume all went well
+    logger.debug("--------------------------------------------------------")
+    logger.debug("--- end point reached :3 ---")
+    sh.process_exit()
 
-	# :: Usage Example ::
-	# setup --tags "py" --skip-tags "windows"
+    # :: Usage Example ::
+    # setup --tags "py" --skip-tags "windows"
     # azure --debug
