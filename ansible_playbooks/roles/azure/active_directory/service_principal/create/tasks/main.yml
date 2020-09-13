@@ -11,19 +11,19 @@
 # https://docs.microsoft.com/en-us/cli/azure/ad/sp
 - block:
   - debug:
-      msg: "Azure AD service principal: {{app_project}}"
+      msg: "Azure AD service principal: {{az_app_registration}}"
 
 
   - include_role:
       name: azure/active_directory/service_principal/show
   
 
-  # Neither the create nor update action returns output
+  # --- Neither the create nor update action returns output ---
   # https://docs.microsoft.com/en-us/cli/azure/create-an-azure-service-principal-azure-cli
   - name: Create Azure AD service principal
     command: >-
       az ad sp create-for-rbac
-      --name {{app_project}}
+      --name {{az_app_registration}}
       --create-cert
     # - store certificate in key vault
     when: az_ad_app_service_principal_id == ''
@@ -33,6 +33,7 @@
       name: azure/active_directory/service_principal/show
     when: az_ad_app_service_principal_id == ''
   
+  # --- Neither the create nor update action returns output ---
   # TODO: fix this step to accept changes *********************************
   - name: Update Azure AD service principal
     command: >-
@@ -43,7 +44,7 @@
     # --set servicePrincipalNames={{az_ad_identifier_urls}}
     when: az_ad_app_service_principal_id != ''
     register: az_ad_sp_update_facts
-    changed_when: az_ad_sp_update_facts.stdout != ""
+    changed_when: az_ad_sp_update_facts.stdout != ''
     # no_log: true
 
 
@@ -53,8 +54,8 @@
     changed_when: false # query only
     no_log: true
 
-  - debug:
-      var: az_ad_sp_display_names
+  # - debug:
+  #     var: az_ad_sp_display_names
   - debug:
       msg: "service principal count: {{az_ad_sp_display_names | count}}"
 

@@ -50,14 +50,14 @@ az_subscription_user: "{{az_subscription_item.user.name}}"
 # --- Active Directory (tenant/directory to store resources) ---
 az_active_directory: davidrachwalikoutlook
 az_ad_domain: "https://{{az_active_directory}}.onmicrosoft.com"
-az_ad_identifier_urls: ["{{az_ad_domain}}/{{app_project | lower}}"]
+az_ad_identifier_urls: ["{{az_ad_domain}}/{{az_app_registration | lower}}"]
 az_ad_reply_urls: ["{{app_domain}}/signin-oidc"]
 az_devops_organization: https://dev.azure.com/david-rachwalik
 
 
 # --- Application Object Registration ---
 # Products available by region: https://azure.microsoft.com/en-us/global-infrastructure/services
-az_ad_app_project_query: "[?displayName=='{{app_project}}'].{appId: appId, displayName: displayName}"
+az_ad_app_project_query: "[?displayName=='{{az_app_registration}}'].{appId: appId, displayName: displayName}"
 # http://jmespath.org/specification.html#contains
 az_ad_app_project_delete_query: "[?displayName.contains(@, '{{az_ad_app_displayName_to_delete}}')].{appId: appId, displayName: displayName}"
 az_ad_app_display_names: "{{ az_ad_app_list_facts.stdout | from_json | json_query('[*].displayName') | list | sort }}"

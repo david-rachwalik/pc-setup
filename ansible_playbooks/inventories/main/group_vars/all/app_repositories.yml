@@ -25,8 +25,10 @@
 # ARM template mode plans: [nodb, sqlserver, identity, docker]
 
 
-application_environments: [Development, Staging, Production]
-application_authentication_whitelist: [Individual, SingleOrg, MultiOrg]
+# Development, Staging Area, Production
+# - using abbreviations to allow more namespace for resources
+application_environment_choices: [Dev, SA, Prod]
+application_authentication_choices: [Individual, SingleOrg, MultiOrg]
 
 # app_repo = application_repositories[*].name
 application_repositories:
@@ -120,6 +122,9 @@ app_repo_item: "{{application_repositories | json_query(app_repo_query) | first}
 app_project_query: "[*].dotnet_projects[?name=='{{app_project}}']"
 app_project_item: "{{application_repositories | json_query(app_project_query) | flatten | first}}"
 
+# --- Configuration Defaults ---
+app_environments: "{{app_repo_item.az_environments | default(application_environment_choices)}}"
+app_environment: "{{app_environments | first}}"
 app_domain: "https://localhost:5001"
 app_authentication: "{{app_project_item.authentication | default('None')}}"
 app_database_context: "{{app_project_item.database_context | default('None')}}"

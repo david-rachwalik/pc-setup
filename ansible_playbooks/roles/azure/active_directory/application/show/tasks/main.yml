@@ -1,13 +1,13 @@
 ---
 - block:
   # same output if exists; list returns rc=0, stdout="" if missing
-  # - az ad app list --query "[?displayName=='{{app_project}}'] | [0]"
+  # - az ad app list --query "[?displayName=='{{az_app_registration}}'] | [0]"
   # - az ad app show --id {{az_ad_identifier_urls | first}}
   # https://docs.microsoft.com/en-us/cli/azure/ad/app
   - name: Check Azure AD application registration
     command: >-
       az ad app list
-      --query "[?displayName=='{{app_project}}'] | [0]"
+      --query "[?displayName=='{{az_app_registration}}'] | [0]"
     # command: >-
     #   az ad app show
     #   --id {{az_ad_identifier_urls | first}}
