@@ -1,7 +1,0 @@
----
-git_bare_repo: git@github.com:david-rachwalik/pc-setup.git
-git_work_repo: ~/pc-setup
-
-git_config: ~/.gitconfig
-shell_alias: ~/.bash_aliases
-...

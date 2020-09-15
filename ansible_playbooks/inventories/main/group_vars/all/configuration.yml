@@ -1,0 +1,21 @@
+---
+# -------- Configuration (personal) --------
+
+git_bare_repo: git@github.com:david-rachwalik/pc-setup.git
+git_work_repo: ~/pc-setup
+git_config: ~/.gitconfig
+
+az_subscriptions: [Pay-As-You-Go]
+az_active_directory: davidrachwalikoutlook
+az_organization: david-rachwalik
+
+az_managed_identities:
+- MainDevelopment
+# - MainStaging
+- MainProduction
+
+# az_service_principal: main-msi
+az_service_principal: main-sp
+
+az_app_deploy_user: Zevkah
+...
