@@ -23,8 +23,12 @@
   hosts: linux
   tasks:
   - include_role:
-      name: linux/system/bash
-    tags: [bash]
+      name: linux/system/bash/setup
+    tags: [bash, sh, alias]
+
+  - include_role:
+      name: linux/system/bash/command
+    tags: [bash, sh, script, bin]
 
   - include_role:
       name: python/user_modules

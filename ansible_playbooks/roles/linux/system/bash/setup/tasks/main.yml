@@ -1,0 +1,12 @@
+---
+# setup --tags sh
+
+- block:
+  - name: Update bash shell aliases
+    copy:
+      src: "{{shell_alias | basename}}"
+      dest: "{{shell_alias}}"
+      mode: 0644
+
+  tags: [bash, sh, alias]
+...
