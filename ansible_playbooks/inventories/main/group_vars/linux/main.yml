@@ -1,3 +1,8 @@
 ---
 os_family: Linux
+
+bash_user_command_dir: ~/bin
+bash_user_commands:
+- up.sh
+- tester.sh
 ...

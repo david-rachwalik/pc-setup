@@ -1,0 +1,21 @@
+---
+# setup --tags sh
+
+- block:
+  # https://docs.ansible.com/ansible/latest/modules/file_module.html
+  - name: Ensure Bash command directory exists
+    file:
+      path: "{{bash_user_command_dir}}"
+      state: directory
+      mode: 0775
+
+  # https://docs.ansible.com/ansible/latest/modules/copy_module.html
+  - name: Deploy Bash command script
+    copy:
+      src: "{{item}}"
+      dest: "{{bash_user_command_dir}}/{{(item | splitext)[:-1] | join('.')}}"
+      mode: 0770
+    loop: "{{bash_user_commands}}"
+
+  tags: [bash, sh, script, bin]
+...
