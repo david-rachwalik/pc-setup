@@ -38,7 +38,6 @@ az_user_id: "{{az_user.objectId}}"
 
 
 # --- Account Subscription (payment contract for resources) ---
-az_subscriptions: [Pay-As-You-Go]
 az_subscription_item_query: "[?name=='{{az_default_subscription}}']"
 az_subscription_item: "{{az_subscription_list_facts.stdout | from_json | json_query(az_subscription_item_query) | list | first}}"
 az_tenant_id: "{{az_subscription_item.tenantId}}"
@@ -48,11 +47,10 @@ az_subscription_user: "{{az_subscription_item.user.name}}"
 
 
 # --- Active Directory (tenant/directory to store resources) ---
-az_active_directory: davidrachwalikoutlook
 az_ad_domain: "https://{{az_active_directory}}.onmicrosoft.com"
 az_ad_identifier_urls: ["{{az_ad_domain}}/{{az_app_registration | lower}}"]
 az_ad_reply_urls: ["{{app_domain}}/signin-oidc"]
-az_devops_organization: https://dev.azure.com/david-rachwalik
+az_devops_organization: "https://dev.azure.com/{{az_organization}}"
 
 
 # --- Application Object Registration ---
@@ -75,10 +73,6 @@ az_ad_app_permission_missing_ids: "{{az_ad_app_permission_expected_ids | differe
 
 
 # --- User-Assigned Managed Identity ---
-az_managed_identities:
-- MainDevelopment
-# - MainStaging
-- MainProduction
 az_managed_identity_list_names: "{{az_managed_identity_list_facts.stdout | from_json | json_query('[*].name') | list}}"
 az_managed_identity_list_to_delete: "{{az_managed_identity_list_names | difference(az_managed_identities)}}"
 
@@ -93,8 +87,6 @@ az_managed_identity_principal_id: "{{az_managed_identity_item.principalId}}"
 
 
 # --- Service Principal / App Client Token ---
-# az_service_principal: main-msi
-az_service_principal: main-sp
 az_service_principal_list_names: "{{az_service_principal_facts.stdout | from_json | json_query('[*].appDisplayName') | list}}"
 az_service_principal_list_apps: "{{az_service_principal_facts.stdout | from_json | json_query('[*].servicePrincipalType') | list}}"
 
