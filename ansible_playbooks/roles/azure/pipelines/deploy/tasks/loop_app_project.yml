@@ -1,0 +1,10 @@
+---
+# https://docs.ansible.com/ansible/latest/modules/include_role_module.html
+- include_role:
+    name: azure/pipelines/deploy
+    tasks_from: loop_app_environment
+  loop: "{{app_project_names}}"
+  loop_control:
+    loop_var: app_project
+  tags: [azure, az, deploy, pipelines]
+...

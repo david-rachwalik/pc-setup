@@ -43,21 +43,6 @@
             "metadata": {
                 "description": "The Runtime stack of current web app"
             }
-        },
-
-        "repoURL": {
-            "type": "string",
-            "defaultValue": "https://github.com/david-rachwalik/DMR.git",
-            "metadata": {
-                "description": "The URL for the GitHub repository that contains the project to deploy."
-            }
-        },
-        "branch": {
-            "type": "string",
-            "defaultValue": "master",
-            "metadata": {
-                "description": "The branch of the GitHub repository to use."
-            }
         }
     },
     "variables": {
@@ -91,23 +76,7 @@
                 "siteConfig": {
                     "linuxFxVersion": "[parameters('linuxFxVersion')]"
                 }
-            },
-            "resources": [
-                {
-                    "type": "sourcecontrols",
-                    "apiVersion": "2018-11-01",
-                    "name": "web",
-                    "location": "[parameters('location')]",
-                    "dependsOn": [
-                        "[resourceId('Microsoft.Web/sites', parameters('siteName'))]"
-                    ],
-                    "properties": {
-                        "repoUrl": "[parameters('repoURL')]",
-                        "branch": "[parameters('branch')]",
-                        "isManualIntegration": true
-                    }
-                }
-            ]
+            }
         }
     ]
 }

@@ -8,6 +8,7 @@
       name: azure/resource_group/create
       tasks_from: create
 
+
   # # https://docs.ansible.com/ansible/latest/modules/azure_rm_deployment_module.html
   # - name: Deploy Azure Resource Manager Template
   #   azure_rm_deployment:
@@ -23,6 +24,7 @@
   #     var: az_rm_template_path
   # - debug:
   #     var: az_rm_parameters
+
 
   # To repeat validation manually when failed (ansible output is ugly)
   - debug:
@@ -52,6 +54,17 @@
       --parameters {{az_rm_parameters}}
     register: az_rm_deploy_create_facts
     no_log: true
+
+
+  # - include_role:
+  #     name: azure/resource_manager/deploy
+  #     tasks_from: webapp_deploy_user
+
+
+  # # Dependency on deployment user
+  # - include_role:
+  #     name: azure/resource_manager/deploy
+  #     tasks_from: webapp_source
 
   tags: [azure, az, deploy, resource_manager, arm]
 ...

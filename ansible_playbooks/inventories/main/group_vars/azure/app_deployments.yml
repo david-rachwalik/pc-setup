@@ -5,6 +5,12 @@
 az_location: "{{app_repo_item.az_location | default(az_default_location)}}"
 az_resource_group: "{{(app_repo + '-' + app_environment) | regex_replace('[^a-zA-Z0-9-]', '-')}}"
 az_app_registration: "{{(app_project + '-' + app_environment) | regex_replace('[^a-zA-Z0-9-]', '-')}}"
+az_app_branch: master
+az_app_repository_type: github # [github, tfsgit]
+az_app_repo_url: https://github.com/Azure-Samples/function-image-upload-resize
+az_app_deploy_user_parse: "{{(az_webapp_deploy_user_facts.stdout | from_json).publishingUserName}}"
+az_app_source: "{{app_repo_item.source | default('')}}"
+az_app_yml_path: azure-pipelines.yml
 
 # --- Azure Resource Manager ---
 az_rm_root_path: ~/pc-setup/ansible_playbooks/roles/azure/resource_manager/deploy/templates

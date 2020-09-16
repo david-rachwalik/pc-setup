@@ -1,0 +1,24 @@
+---
+# https://docs.microsoft.com/en-us/cli/azure/webapp/deployment/source
+- block:
+  - name: Show Azure WebApp Source
+    command: >-
+      az webapp deployment source show
+      --name {{az_app_registration}}
+      --resource-group {{az_resource_group}}
+    register: az_webapp_deploy_source_facts
+    # no_log: true
+
+  - name: Deploy Azure WebApp Source
+    command: >-
+      az webapp deployment source config
+      --name {{az_app_registration}}
+      --resource-group {{az_resource_group}}
+      --repo-url {{az_app_repo_url}}
+      --branch {{az_app_branch}}
+      --manual-integration
+    register: az_webapp_deploy_source_facts
+    # no_log: true
+
+  tags: [azure, az, deploy, resource_manager, arm]
+...

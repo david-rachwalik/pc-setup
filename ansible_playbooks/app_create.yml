@@ -1,7 +1,8 @@
 ---
 # ansible-playbook app_create.yml -e "app_repo_names=['DMR']"
-# appc -e "app_repo_names=['Tester']" --tags ad
-# appc -e "app_repo_names=['Tester']" --skip-tags deploy
+# appc -e "app_repo_names=['DMR']" --skip-tags "deploy"
+# appc -e "app_repo_names=['DMR']" --skip-tags "ad,repo,arm"
+# appc -e "app_repo_names=['DMR']" --skip-tags "ad,repo,pipelines"
 
 
 - hosts: azure

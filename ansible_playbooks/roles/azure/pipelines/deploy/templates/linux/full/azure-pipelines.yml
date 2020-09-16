@@ -1,0 +1,210 @@
+# ASP.NET
+# Build and test ASP.NET projects.
+# Add steps that publish symbols, save build artifacts, deploy, and more:
+# https://docs.microsoft.com/azure/devops/pipelines/apps/aspnet/build-aspnet-4
+
+# https://docs.microsoft.com/en-us/azure/devops/pipelines/ecosystems/dotnet-core
+
+parameters:
+- name: appProject
+  type: string
+  default: Test-PipelineArmTemplates.Web
+
+trigger:
+- master
+
+stages:
+- stage: Build
+  pool:
+    vmImage: "ubuntu-latest"
+  variables:
+    dotnetRuntimeVersion: "3.1.x"
+    solution: "**/*.sln"
+    buildPlatform: "AnyCPU"
+    buildConfiguration: "Release"
+    scriptName: "migrations.sql"
+    dbContext: "DefaultContext"
+  jobs:
+  - job: Build
+    steps:
+    - task: UseDotNet@2
+      displayName: "Install .NET Core SDK"
+      inputs:
+        version: "$(dotnetRuntimeVersion)"
+        packageType: runtime
+    
+    # Omit '--version' here and let SDK find correct EF package
+    - script: dotnet tool install --global dotnet-ef
+      displayName: "Install .NET EF Core"
+
+    - task: NuGetToolInstaller@1
+      displayName: "Install NuGet"
+
+    - task: NuGetCommand@2
+      displayName: "Restore NuGet package dependencies"
+      inputs:
+        restoreSolution: "$(solution)"
+
+    - task: DotNetCoreCLI@2
+      displayName: "Build .NET: $(buildConfiguration)"
+      inputs:
+        command: "build"
+        arguments: "--configuration $(buildConfiguration)"
+
+    # Build Restored /home/vsts/work/1/s/Test-PipelineArmTemplates.Web/Test-PipelineArmTemplates.Web.csproj (in 152 ms).
+    # Test-PipelineArmTemplates.Web -> /home/vsts/work/1/s/Test-PipelineArmTemplates.Web/bin/Release/netcoreapp3.1/Test-PipelineArmTemplates.Web.dll
+    # Test-PipelineArmTemplates.Web -> /home/vsts/work/1/s/Test-PipelineArmTemplates.Web/bin/Release/netcoreapp3.1/Test-PipelineArmTemplates.Web.Views.dll
+
+
+  
+    # - script: echo This is pipeline $(System.DefinitionId)      # 8
+    # - bash: pwd                                                 # /home/vsts/work/1/s       # same as $(System.DefaultWorkingDirectory)
+    # https://docs.microsoft.com/en-us/azure/devops/pipelines/build/variables
+    # - bash: "ls -la $(Agent.BuildDirectory)"                    # /home/vsts/work/1         # returned [Nuget, TestResults, a, b, s]
+    # - bash: "ls -la $(Build.ArtifactStagingDirectory)"          # /home/vsts/work/1/a
+    #   * was empty
+    # - bash: "ls -la $(Build.SourcesDirectory)"                  # /home/vsts/work/1/s
+    #   * directory contains: [.git, .gitattributes, .gitignore, .vscode, Test-PipelineArmTemplates.Web, Test-PipelineArmTemplates.sln, azure-pipelines.yml]
+    
+
+
+    # - script: >-
+    #     dotnet ef migrations script
+    #     --startup-project $(Build.SourcesDirectory)
+    #     --context $(dbContext)
+    #     --configuration $(buildConfiguration)
+    #     --output $(Build.ArtifactStagingDirectory)/sql/$(scriptName)
+    #     --idempotent
+      
+    # https://docs.microsoft.com/en-us/ef/core/miscellaneous/cli/dotnet
+    - script: >-
+        dotnet ef migrations script
+        --output $(Build.ArtifactStagingDirectory)/sql/$(scriptName)
+        --idempotent
+      # --project **/*.sln
+      # --runtime version: "$(dotnetRuntimeVersion)"
+      displayName: "Generate SQL migration script"
+      # https://docs.microsoft.com/en-us/azure/devops/pipelines/tasks/utility/command-line
+      # workingDirectory: "$(Agent.BuildDirectory)/s/Test-PipelineArmTemplates.Web/bin/Release/netcoreapp3.1"
+      # workingDirectory: "$(Build.SourcesDirectory)/Test-PipelineArmTemplates.Web"
+      workingDirectory: "$(Build.SourcesDirectory)/${{ parameters.appProject }}"
+      # *ERROR: Test-PipelineArmTemplates.Web must reference 'Microsoft.EntityFrameworkCore.Design' package
+
+      
+    - bash: "ls -la $(Agent.BuildDirectory)"                    # /home/vsts/work/1         # returned TestResults, a, b, s
+    - bash: "ls -la $(Build.ArtifactStagingDirectory)"          # /home/vsts/work/1/a
+    - bash: "ls -la $(Build.SourcesDirectory)"                  # /home/vsts/work/1/s
+
+
+    - task: DotNetCoreCLI@2
+      displayName: "dotnet test $(buildConfiguration)"
+      inputs:
+        command: test
+        projects: "**/*Tests/*.csproj"
+        arguments: "--configuration $(buildConfiguration)"
+
+    # Provides zip file for web app service
+    - task: DotNetCoreCLI@2
+      displayName: "Stage build output"
+      inputs:
+        command: publish
+        publishWebProjects: True
+        arguments: "--configuration $(buildConfiguration) --output $(Build.ArtifactStagingDirectory)"
+        zipAfterPublish: True
+
+    # Provides dacpac file for database
+    - task: CopyFiles@2
+      displayName: "Copy files to: $(Build.ArtifactStagingDirectory)"
+      inputs:
+        sourceFolder: "$(Build.SourcesDirectory)"
+        contents: "**\\bin\\$(buildConfiguration)\\**"
+        targetFolder: "$(Build.ArtifactStagingDirectory)"
+
+    - task: PublishBuildArtifacts@1
+      displayName: "Publish build artifact: drop"
+      inputs:
+        pathtoPublish: "$(Build.ArtifactStagingDirectory)" 
+        artifactName: "drop"
+
+  
+    - bash: "ls -la $(Agent.BuildDirectory)"                    # /home/vsts/work/1         # returned TestResults, a, b, s
+    - bash: "ls -la $(Build.ArtifactStagingDirectory)"          # /home/vsts/work/1/a
+    - bash: "ls -la $(Build.SourcesDirectory)"                  # /home/vsts/work/1/s
+    
+
+- stage: Development
+  dependsOn: Build
+  pool:
+    vmImage: "ubuntu-latest"
+  variables:
+    azureSubscription: "Pay-As-You-Go"
+    resourceGroup: "[resourceGroup().name]"
+    location: "[resourceGroup().location]"
+    scriptName: "migrations.sql"
+    WebAppName: "Test-PipelineArmTemplates-Ubuntu"
+  jobs:
+  - job: Deploy
+    steps:
+    # https://docs.microsoft.com/en-us/azure/devops/pipelines/tasks/deploy/azure-key-vault
+    - task: AzureKeyVault@1
+      displayName: "Gather Azure Key Vault secrets"
+      inputs:
+        # azureSubscription: "$(azureSubscription)"
+        # azureSubscription: "[subscription().subscriptionId]"
+        azureSubscription: "Pay-As-You-Go"
+        keyVaultName: "$(resourceGroup)"
+        secretsFilter: "*"
+        runAsPreJob: false # Azure DevOps Services only
+
+    # # https://docs.microsoft.com/en-us/azure/devops/pipelines/tasks/deploy/azure-resource-group-deployment
+    # - task: AzureResourceGroupDeployment@2
+    #   displayName: "Deploy ARM template to resource group"
+    #   inputs:
+    #     azureSubscription: "$(azureSubscription)"
+    #     action: "Create Or Update Resource Group"
+    #     resourceGroupName: "$(resourceGroup)"
+    #     location: "$(location)"
+    #     templateLocation: "Linked artifact"
+    #     csmFile: "$(Build.ArtifactStagingDirectory)/azuredeploy.json"
+    #     # csmParametersFile: "$(Build.ArtifactStagingDirectory)/azuredeploy.parameters.json"
+    #     overrideParameters: >-
+    #       -siteName $(siteName)
+    #       -administratorLogin $(adminUser)
+    #       -administratorLoginPassword $(ARM_PASS)
+    #     deploymentMode: "Incremental"
+
+    # # https://github.com/microsoft/azure-pipelines-tasks/tree/master/Tasks/AzureResourceManagerTemplateDeploymentV3
+    # - task: AzureResourceManagerTemplateDeployment@3
+    #   displayName: "Deploy ARM template to resource group"
+    #   inputs:
+    #     deploymentScope: "Resource Group"
+    #     azureResourceManagerConnection: "<your-resource-manager-connection>"
+    #     subscriptionId: "$(azureSubscription)"
+    #     action: "Create Or Update Resource Group"
+    #     resourceGroupName: "$(resourceGroup)"
+    #     location: "$(location)"
+    #     templateLocation: "Linked artifact"
+    #     csmFile: "$(Build.ArtifactStagingDirectory)/azuredeploy.json"
+    #     csmParametersFile: "$(Build.ArtifactStagingDirectory)/azuredeploy.parameters.json"
+    #     # overrideParameters: "-siteName $(siteName) -administratorLogin $(adminUser) -administratorLoginPassword $(ARM_PASS)"
+    #     deploymentMode: "Incremental"
+
+    # - task: AzureRmWebAppDeployment@4
+    #   displayName: "Deploy Azure App Service"
+    #   inputs:
+    #     azureSubscription: "$(azureSubscription)"
+    #     WebAppName: "$(WebAppName)"
+
+    # # https://docs.microsoft.com/en-us/azure/devops/pipelines/tasks/deploy/sql-azure-dacpac-deployment
+    # - task: SqlAzureDacpacDeployment@1
+    #   displayName: "Deploy database migrations"
+    #   inputs:
+    #     # azureSubscription: "$(Parameters.ServiceConnectionName)"
+    #     azureSubscription: "$(azureSubscription)"
+    #     authenticationType: "server"
+    #     serverName: "$(Parameters.sqlServerName)"
+    #     databaseName: "$(Parameters.sqlDatabaseName)"
+    #     sqlUsername: "$(sqlUsername)" # from key vault
+    #     sqlPassword: "$(sqlPassword)"
+    #     dacpacFile: "$(Build.ArtifactStagingDirectory)\\sql\\$(scriptName)"
+    #     ipDetectionMethod: "AutoDetect"
