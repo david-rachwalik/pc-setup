@@ -9,10 +9,12 @@
       name: azure/active_directory/service_principal/fetch
     run_once: true
   
+  
   # Dependency for 'az_ad_app_client_id'
   - include_role:
       name: azure/active_directory/application/show
   
+
   # https://docs.microsoft.com/en-us/cli/azure/ad/app/permission
   - name: List Azure AD application's active permissions
     command: >-

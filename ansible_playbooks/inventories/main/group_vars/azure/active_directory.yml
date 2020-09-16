@@ -1,6 +1,7 @@
 ---
 # --- Configuration Defaults ---
 az_default_subscription: "{{az_subscriptions | first}}"
+az_default_service_connection: "{{az_devops_service_connections | first}}"
 az_default_repository: "{{application_repositories | first}}"
 az_default_location: southcentralus # South Central US     # az account list-locations
 az_default_resource_group: Main

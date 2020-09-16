@@ -2,23 +2,24 @@
 # -------- Application Repository Options --------
 # --- requires 'dotnet_projects' to create solution directory ---
 # ------------------------------------------------
-# name:               repository directory, dotnet solution
-# source:             [GitHub, Azure]
-# dotnet_projects:    list of .NET project configurations
+# name:                   repository directory, dotnet solution
+# source:                 [github, tfsgit]
+# dotnet_projects:        list of .NET project configurations
 # -------- ASP.NET Core Project Options --------
-# name:               dotnet project name within solution
-# template:           [webapp, webapi, xunit, console]
-# sql_database:       false by default, automatically true with authentication
-# authentication:     [Individual, SingleOrg, MultiOrg]
+# name:                   dotnet project name within solution
+# template:               [webapp, webapi, xunit, console]
+# database_context:       DbContext to generate; activates SQL database
+# authentication:         [Individual, SingleOrg, MultiOrg]
 # -------- Host Options --------
-# az_resource_manager:   relative path to Azure Resource Manager (ARM) template
-# az_pipeline:        path to Azure Pipelines file
+# az_resource_manager:    relative path to Azure Resource Manager (ARM) template
+# az_pipeline:            path to Azure Pipelines file
 # ------------------------------------------------
 
 # .NET project 'name':
-# - *.WebApp          triggers pipeline task Deploy App Service 
-# - *.UnitTests       triggers pipeline task Run Tests
-# - *.API             triggers pipeline task Deploy SQL Database
+# - *.WebApp              triggers pipeline task Deploy App Service 
+# - *.UnitTests           triggers pipeline task Run Tests
+# - *.SQL                 triggers pipeline task Deploy SQL Database
+# - *.API                 triggers pipeline task Deploy App Service
 
 # .NET project 'authentication' is typically MultiOrg (SingleOrg for APIs)
 # ARM template mode plans: [nodb, sqlserver, identity, docker]
@@ -31,27 +32,13 @@ application_authentication_choices: [Individual, SingleOrg, MultiOrg]
 
 # app_repo = application_repositories[*].name
 application_repositories:
-# --- Test Repositories ---
-- name: Tester
-  source: GitHub
-  dotnet_projects:
-  - name: Tester.WebApp
-    template: webapp
-    database_context: MainContext
-    authentication: MultiOrg
-    az_pipelines: true
-  # - name: Tester.UnitTests
-  #   template: xunit
-  # - name: Tester.API
-  #   template: webapi
-  #   authentication: SingleOrg
-  # az_resource_manager: all/webapp_sql
+# --- Primary Repositories ---
 
 - name: pc-setup
-  source: GitHub
+  source: github
 
 - name: DMR
-  source: GitHub
+  source: github
   dotnet_projects:
   - name: DMR.WebApp
     template: webapp
@@ -62,20 +49,86 @@ application_repositories:
     # az_resource_manager: linux/webapp_blank
   # - name: DMR.UnitTests
   #   template: xunit
+  # - name: DMR.API
+  #   template: webapi
+  #   authentication: SingleOrg
   az_environments: [Dev]
   # az_resource_manager: all/webapp_sql
   az_resource_manager: linux/webapp_blank
+  az_pipelines: linux/basic
+
+- name: david-rachwalik.github.io
+  source: github
+
+
+# --- Test Repositories ---
+
+- name: Test-Basic
+  source: github
+  dotnet_projects:
+  - name: Test-Basic.WebApp
+    template: webapp
+    database_context: MainContext
+    authentication: MultiOrg
+  # - name: Test-Basic.UnitTests
+  #   template: xunit
+  az_resource_manager: linux/webapp_blank
   az_pipelines: true
 
+- name: Test-Database
+  source: github
+  dotnet_projects:
+  - name: Test-Database.WebApp
+    template: webapp
+    database_context: MainContext
+  az_resource_manager: all/webapp_sql
+  az_pipelines: true
+
+- name: Test-Identity
+  source: github
+  dotnet_projects:
+  - name: Test-Identity.WebApp
+    template: webapp
+    database_context: MainContext
+    authentication: MultiOrg
+  az_resource_manager: all/webapp_sql
+  az_pipelines: true
+
+
+# --- Tutorial Repositories ---
+
+- name: Tutorials-WebApiApps
+  source: github
+  dotnet_projects:
+  - name: WebApiApps.WebApp
+    template: webapp
+    authentication: MultiOrg
+
+# https://docs.microsoft.com/en-us/aspnet/core/tutorials/razor-pages
+- name: Tutorials-WebApps-RazorPages
+  source: github
+  dotnet_projects:
+  - name: RazorPagesMovie
+    template: webapp
+
+- name: Tutorials-DataAccess-RazorPages
+  source: github
+  dotnet_projects:
+  - name: ContosoUniversity
+    template: webapp
+
+
+# --- Backup Repositories ---
+
 - name: SexBound
-  source: Azure
+  source: tfsgit # Azure
   dotnet_projects:
   - name: SexBound.WebApp
     template: webapp
   # az_resource_manager: all/webapp_sql
 
 - name: CorruptionOfChampions
-  source: Azure
+  source: tfsgit # Azure
   dotnet_projects:
   - name: CorruptionOfChampions.Conversion
     template: webapp
@@ -83,32 +136,7 @@ application_repositories:
     template: webapp
 
 - name: WorldOfWarcraftAddonDev
-  source: Azure
-
-- name: Tutorials-WebApiApps
-  source: GitHub
-  dotnet_projects:
-  - name: WebApiApps.WebApp
-    template: webapp
-    authentication: MultiOrg
-  - name: WebApiApps.UnitTests
-    template: xunit
-
-# https://docs.microsoft.com/en-us/aspnet/core/tutorials/razor-pages
-- name: Tutorials-WebApps-RazorPages
-  source: GitHub
-  dotnet_projects:
-  - name: RazorPagesMovie
-    template: webapp
-
-- name: Tutorials-DataAccess-RazorPages
-  source: GitHub
-  dotnet_projects:
-  - name: ContosoUniversity
-    template: webapp
-
-- name: david-rachwalik.github.io
-  source: GitHub
+  source: tfsgit # Azure
 
 
 # ------------------------ Application Repository/Project Parsing ------------------------

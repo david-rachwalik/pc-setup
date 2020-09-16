@@ -1,0 +1,25 @@
+---
+# https://docs.microsoft.com/en-us/cli/azure/webapp/deployment/user
+- block:
+  - name: Show Azure Deployment User
+    command: >-
+      az webapp deployment user show
+    register: az_webapp_deploy_user_facts
+    changed_when: false # query only
+    ignore_errors: true
+    no_log: true
+
+  # - debug:
+  #     var: az_app_deploy_user_parse
+
+  - name: Create Azure Deployment User
+    command: >-
+      az webapp deployment user set
+      --user-name {{az_app_deploy_user}}
+    # --password {{az_app_deploy_pass}}
+    register: az_webapp_deploy_user_create_facts
+    when: az_webapp_deploy_user_facts is failed or az_app_deploy_user_parse != az_app_deploy_user
+    # no_log: true
+
+  tags: [azure, az, deploy, resource_manager, arm]
+...

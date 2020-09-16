@@ -14,8 +14,8 @@ az_managed_identities:
 # - MainStaging
 - MainProduction
 
-# az_service_principal: main-msi
 az_service_principal: main-sp
-
 az_app_deploy_user: Zevkah
+
+az_devops_service_connections: [DMR-AzureRM]
 ...

@@ -1,0 +1,13 @@
+---
+# ansible-playbook app_create.yml -e "app_repo_names=['DMR']" --skip-tags "ad,repo,arm"
+# appc -e "app_repo_names=['DMR']" --skip-tags "ad,repo,arm"
+
+- include_role:
+    name: azure/pipelines/deploy
+    tasks_from: loop_app_project
+  loop: "{{app_repo_names}}"
+  loop_control:
+    loop_var: app_repo
+  when: app_repo_item.az_pipelines is defined
+  tags: [azure, az, deploy, pipelines]
+...
