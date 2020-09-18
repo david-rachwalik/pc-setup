@@ -19,5 +19,6 @@ python_user_modules:
 - mytest.py
 
 python_user_commands:
+- mygit.py
 - azure.py
 ...

@@ -20,5 +20,6 @@ python_user_modules:
 - test_process.py
 
 python_user_commands:
+- mygit.py
 - azure.py
 ...
