@@ -2,17 +2,18 @@
 
 # Basename: shell_boilerplate
 # Description: Common business logic for *nix shell interactions
-# Version: 1.5
-# VersionDate: 27 Feb 2020
+# Version: 1.6.0
+# VersionDate: 11 Sep 2020
 
 # --- Global Shell Commands ---
 # Utility:          directory_shift, directory_change, is_list_of_strings, list_differences
 # Process:          process_exit, process_fail, process_id, process_parent_id
-# Path:             path_current, path_expand, path_join, path_basename, path_filename, path_exists
+# Path:             path_current, path_expand, path_join, path_exists, path_dirname, path_basename, path_filename
 # Directory:        directory_list, directory_create, directory_delete, directory_copy, directory_sync
-# File:             file_read, file_write, file_delete
+# File:             file_read, file_write, file_delete, file_copy, file_hash, file_match
 # Signal:           signal_max, signal_handler, signal_send
-# SubProcess:       subprocess_await, subprocess_print
+# SubProcess:       subprocess_run, subprocess_log
+
 # --- SubProcess Class Commands ---
 # await_results, is_done, format_output
 
@@ -103,6 +104,22 @@ def path_join(path, *paths):
     return os.path.join(path, *paths)
 
 
+# Pass either "f" (file) or 'd' (directory) to file_type
+def path_exists(path, file_type=""):
+    if not (path and isinstance(path, str)): raise TypeError("path_exists() expects 'path' parameter as string")
+    if file_type == "d":
+        return os.path.isdir(path)
+    elif file_type == "f":
+        return os.path.isfile(path)
+    else:
+        return os.path.exists(path)
+
+
+# Returns '/foo/bar' from /foo/bar/item
+def path_dirname(name):
+    return os.path.dirname(name)
+
+
 # Returns 'item' from /foo/bar/item
 def path_basename(name):
     return os.path.basename(name)
@@ -114,22 +131,6 @@ def path_filename(name):
     extension_trimmed = os.path.splitext(name)[0]
     filename = path_basename(extension_trimmed)
     return filename
-
-
-# Returns '/foo/bar' from /foo/bar/item
-def path_dirname(name):
-    return os.path.dirname(name)
-
-
-# Pass either 'f' (file) or 'd' (directory) to file_type
-def path_exists(path, file_type=""):
-    if not (path and isinstance(path, str)): raise TypeError("path_exists() expects 'path' parameter as string.")
-    if file_type == "d":
-        return os.path.isdir(path)
-    elif file_type == "f":
-        return os.path.isfile(path)
-    else:
-        return os.path.exists(path)
 
 
 # --- Directory Commands ---
@@ -149,14 +150,14 @@ def directory_copy(src, dest):
 
 def directory_delete(path):
     result = None
-    if path_exists(path, 'd'):
+    if path_exists(path, "d"):
         # Better alternative to shutil.rmtree(path)
         result = distutils.dir_util.remove_tree(path)
-        return result
+    return result
 
 
 def directory_list(path):
-    if not path_exists(path, 'd'): return []
+    if not path_exists(path, "d"): return []
     paths = os.listdir(path)
     paths.sort()
     return paths
@@ -164,49 +165,49 @@ def directory_list(path):
 
 # Uses rsync, a better alternative to 'shutil.copytree' with ignore
 def directory_sync(src, dest, recursive=True, purge=True, cut=False, include=(), exclude=(), debug=False):
-    if not isinstance(include, tuple): raise TypeError("directory_sync() expects 'include' parameter as tuple.")
-    if not isinstance(exclude, tuple): raise TypeError("directory_sync() expects 'exclude' parameter as tuple.")
+    if not isinstance(include, tuple): raise TypeError("directory_sync() expects 'include' parameter as tuple")
+    if not isinstance(exclude, tuple): raise TypeError("directory_sync() expects 'exclude' parameter as tuple")
     logger.debug("(directory_sync): Init")
     changed_files = []
     changes_dirs = []
     # Create sequence of command options
-    commandOptions = []
+    command_options = []
     # --itemize-changes returns files with any change (e.g. permission attributes)
     # --list-only returns eligible files, not what actually changed
-    commandOptions.append("--itemize-changes")
-    commandOptions.append("--compress")
-    commandOptions.append("--prune-empty-dirs")
-    commandOptions.append("--human-readable")
-    commandOptions.append("--out-format=%i %n") # omit %L for symlink paths
+    command_options.append("--itemize-changes")
+    command_options.append("--compress")
+    command_options.append("--prune-empty-dirs")
+    command_options.append("--human-readable")
+    command_options.append("--out-format=%i %n") # omit %L for symlink paths
     # No operations performed, returns file paths the actions would effect
-    if debug: commandOptions.append("--dry-run")
+    if debug: command_options.append("--dry-run")
     # Copy files recursively, not only first level
     if recursive:
-        commandOptions.append("--archive") # rlptgoD (not -H -A -X)
+        command_options.append("--archive") # rlptgoD (not -H -A -X)
     else:
-        commandOptions.append("--links")
-        commandOptions.append("--perms")
-        commandOptions.append("--times")
-        commandOptions.append("--group")
-        commandOptions.append("--owner")
-        commandOptions.append("--devices")
-        commandOptions.append("--specials")
+        command_options.append("--links")
+        command_options.append("--perms")
+        command_options.append("--times")
+        command_options.append("--group")
+        command_options.append("--owner")
+        command_options.append("--devices")
+        command_options.append("--specials")
     # Purge destination files not in source
-    if purge: commandOptions.append("--delete")
+    if purge: command_options.append("--delete")
     # Delete source files after successful transfer
-    if cut: commandOptions.append("--remove-source-files")
+    if cut: command_options.append("--remove-source-files")
     # Add whitelist/blacklist filters
     for i in include:
-        if i: commandOptions.append("--include={0}".format(i))
+        if i: command_options.append("--include={0}".format(i))
     for i in exclude:
-        if i: commandOptions.append("--exclude={0}".format(i))
+        if i: command_options.append("--exclude={0}".format(i))
     # Build and run the command
     command = ["rsync"]
-    command.extend(commandOptions)
+    command.extend(command_options)
     command.extend([src, dest])
     logger.debug("(directory_sync) command used: {0}".format(command))
-    (rc, stdout, stderr) = subprocess_await(command)
-    # subprocess_print(rc, stdout, stderr)
+    (stdout, stderr, rc) = subprocess_run(command)
+    # subprocess_log(logger, stdout, stderr, rc)
 
     results = str.splitlines(stdout)
     logger.debug("(directory_sync) results: {0}".format(results))
@@ -225,10 +226,11 @@ def directory_sync(src, dest, recursive=True, purge=True, cut=False, include=(),
 
 
 # --- File Commands ---
+
+# Touch file and optionally fill with content
 def file_write(path, content=None, append=False):
     # Ensure path is specified
-    if not isinstance(path, str): raise TypeError("file_write() expects 'path' parameter as string.")
-    # Touch file and optionally fill with content
+    if not isinstance(path, str): raise TypeError("file_write() expects 'path' parameter as string")
     strategy = "a" if (append) else "w"
     f = open(path, strategy)
     # Accept content as string or sequence of strings
@@ -244,7 +246,7 @@ def file_write(path, content=None, append=False):
 
 def file_read(path, oneline=False):
     data = ""
-    if not (path or path_exists(path, 'f')): return data
+    if not (path or path_exists(path, "f")): return data
     try:
         # Open file; never use deprecated file()
         f = open(path, "r")
@@ -255,33 +257,78 @@ def file_read(path, oneline=False):
     return data
 
 
-def file_delete(file):
-    if path_exists(file, 'f'): os.unlink(file)
+def file_delete(path):
+    if path_exists(path, "f"): os.unlink(path)
+
+
+def file_copy(src, dest):
+    if not path_exists(src, "f"): return False
+    command = ["cp", "--force", src, dest]
+    (stdout, stderr, rc) = subprocess_run(command)
+    subprocess_log(logger, stdout, stderr, rc, prefix="file_copy", debug=True)
+    return (rc == 0)
+
+
+def file_hash(path):
+    if not path_exists(path, "f"): return ""
+    # Using SHA-2 hash check (more secure than MD5|SHA-1)
+    command = ["sha256sum", path]
+    (stdout, stderr, rc) = subprocess_run(command)
+    subprocess_log(logger, stdout, stderr, rc, prefix="file_hash", debug=True)
+    results = stdout.split()
+    # logger.debug("(file_hash): results: {0}".format(results))
+    return results[0]
+
+
+# Uses hash to validate file integrity
+def file_match(path1, path2):
+    logger.debug("(file_match): path1: {0}".format(path1))
+    logger.debug("(file_match): path2: {0}".format(path2))
+    hash1 = file_hash(path1)
+    hash2 = file_hash(path2)
+    logger.debug("(file_match): hash1: {0}".format(hash1))
+    logger.debug("(file_match): hash2: {0}".format(hash2))
+    if len(hash1) > 0 and len(hash2) > 0:
+        return (hash1 == hash2)
+    else:
+        return False
 
 
 # --- Process Commands ---
 
 # Creates asyncronous process and immediately awaits the tuple results
 # NOTE: Only accepting 'command' as list; argument options can have spaces
-def subprocess_await(command, path="", env="", stdout_log=None, stderr_log=None):
+def subprocess_run(command, path="", env=""):
+    if not isinstance(command, list): raise TypeError("subprocess_run() expects 'command' parameter as list")
     process = SubProcess(command, path, env)
-    (rc, stdout, stderr) = process.await_results()
-    if int(rc) != 0 and is_logger(stderr_log):
-        subprocess_print(stderr_log, rc, stdout, stderr, command)
-    elif is_logger(stdout_log):
-        subprocess_print(stdout_log, rc, stdout, stderr, command)
-    return (rc, stdout, stderr)
+    (stdout, stderr, rc) = process.await_results()
+    return (stdout, stderr, rc)
 
 
-def subprocess_print(logger, rc, stdout, stderr, prefix=""):
-    # Ensure logger is provided
-    if not is_logger(logger): raise TypeError("subprocess_print() expects 'logger' parameter as logger instance.")
-    if prefix: prefix = "({0}) ".format(prefix)
-    if int(rc) != 0:
-        if stdout: logger.warning("{0}{1}".format(prefix, stdout))
-        if stderr: logger.error("{0}{1}".format(prefix, stderr))
-    else:
-        if stdout: logger.info("{0}{1}".format(prefix, stdout))
+# Log the subprocess output provided; prefix only for stderr|rc unless debug=True
+def subprocess_log(logger, stdout=None, stderr=None, rc=None, prefix="", debug=False):
+    if not is_logger(logger): raise TypeError("subprocess_log() expects 'logger' parameter as logging.Logger instance")
+    log_prefix = "({0}): ".format(prefix) if prefix else ""
+    if isinstance(stdout, str) and len(stdout) > 0:
+        log_stdout = "{0}stdout: {1}".format(log_prefix, stdout) if debug else stdout
+        logger.info(log_stdout)
+    if isinstance(stderr, str) and len(stdout) > 0:
+        log_stderr = "{0}stderr: {1}".format(log_prefix, stderr) if debug else "{0}{1}".format(log_prefix, stderr)
+        # logger.error(log_stderr)
+        logger.info(log_stderr) # INFO so message is below WARN level (default on import)
+    if isinstance(rc, int):
+        log_rc = "{0}rc: {1}".format(log_prefix, rc) if debug else "{0}{1}".format(log_prefix, rc)
+        logger.debug(log_rc)
+
+    # Example :: prefix="example_prefix", debug=False
+    # [Info]  "{0}"
+    # [Info]  "(example_prefix): {0}"
+    # [Debug] "(example_prefix): {0}"
+
+    # Example :: prefix="example_prefix", debug=True
+    # [Info]  "(example_prefix): stdout: {0}"
+    # [Info]  "(example_prefix): stderr: {0}"
+    # [Debug] "(example_prefix): rc: {0}"
 
 
 # --- Signal Commands ---
@@ -294,22 +341,22 @@ def signal_max():
 def signal_handler(signal_num, int):
     # Validate parameter input
     if not isinstance(signal_num, int):
-        raise TypeError("signal_handler() expects 'signal_num' parameter as integer.")
+        raise TypeError("signal_handler() expects 'signal_num' parameter as integer")
     task_whitelist = [signal.SIG_DFL, signal.SIG_IGN]
     valid_task = callable(task) or task in task_whitelist
     if not valid_task:
-        raise TypeError("signal_handler() expects 'task' parameter as callable <function> or an integer of 0 or 1 (signal.SIG_DFL or signal.SIG_IGN).")
+        raise TypeError("signal_handler() expects 'task' parameter as callable <function> or an integer of 0 or 1 (signal.SIG_DFL or signal.SIG_IGN)")
     # Update the signal handler (callback method)
     signal.signal(signal_num, task)
 
 
 def signal_send(pid, signal_num=signal.SIGTERM):
-    if not (pid and isinstance(pid, int)): raise TypeError("signal_send() expects 'pid' parameter as positive integer.")
-    if not isinstance(signal_num, int): raise TypeError("signal_send() expects 'signal_num' parameter as integer.")
+    if not (pid and isinstance(pid, int)): raise TypeError("signal_send() expects 'pid' parameter as positive integer")
+    if not isinstance(signal_num, int): raise TypeError("signal_send() expects 'signal_num' parameter as integer")
     os.kill(pid, signal_num)
 
 
-# --- SubProcess Class ---
+# ------------------------ SubProcess Class ------------------------
 
 # Only accepts 'command' parameter as a list/sequence of strings
 # - Cannot string split because any argument options with values use spaces
@@ -327,7 +374,7 @@ class SubProcess(object):
         if is_list_of_strings(command):
             self.command = command
         else:
-            raise TypeError("SubProcess 'command' property expects a list/sequence of strings.")
+            raise TypeError("SubProcess 'command' property expects a list/sequence of strings")
 
         # Build arguments and environment variables to support command
         command_args = {
@@ -355,7 +402,7 @@ class SubProcess(object):
         return str(self.process)
 
 
-    # Waits for process to finish and returns output tuple (rc, stdout, stderr)
+    # Waits for process to finish and returns output tuple (stdout, stderr, rc)
     def await_results(self):
         try:
             (stdout, stderr) = self.process.communicate()
@@ -363,9 +410,9 @@ class SubProcess(object):
             self.pid = self.process.pid
             self.stdout = self.format_output(stdout)
             self.stderr = self.format_output(stderr)
-            return (self.rc, self.stdout, self.stderr)
+            return (self.stdout, self.stderr, self.rc)
         except:
-            return (-1, None, None)
+            return (None, None, -1)
 
 
     # ProcessOutputFormat
@@ -406,44 +453,42 @@ if __name__ == "__main__":
     # -------- XML Test --------
     if args.test == "xml":
         # Build command to send
-        xmlPath = "$HOME/configuration.xml"
-        schemaPath = "$HOME/configuration.xsd"
-
-        # validatorCmd = "/usr/bin/xmllint --noout --schema {0} {1}".format(schemaPath, xmlPath)
-        validatorCmd = ["/usr/bin/xmllint", "--noout", "--schema {0}".format(schemaPath), xmlPath]
-        logger.debug("(__main__): Validation command: {0}".format(validatorCmd))
+        xml_path = "$HOME/configuration.xml"
+        schema_path = "$HOME/configuration.xsd"
+        validator_command = ["/usr/bin/xmllint", "--noout", "--schema {0}".format(schema_path), xml_path]
+        logger.debug("(__main__): validation command => {0}".format(validator_command))
 
         # Validate configuration against the schema
-        # (rc, stdout, stderr) = subprocess_await(validatorCmd, stdout_log=logger, stderr_log=logger)
-        (rc, stdout, stderr) = subprocess_await(validatorCmd)
+        (stdout, stderr, rc) = subprocess_run(validator_command)
         if rc != 0:
             logger.error("(__main__): XML file ({0}) failed to validate against schema ({1})".format(config_xml, config_xsd))
-            subprocess_print(rc, stdout, stderr, validatorCmd)
+            subprocess_log(logger, stdout, stderr, rc, prefix="__main__", debug=True)
         else:
-            logger.debug("(__main__): {0} was successfully validated.".format(xmlPath))
+            logger.debug("(__main__): {0} was successfully validated".format(xml_path))
 
     # -------- SubProcess Test --------
     elif args.test == "subprocess":
-        # testCmd = "ls -la /var"
-        testCmd = ["ls", "-la", "/var"]
-        logger.debug("(__main__): test command: {0}".format(testCmd))
-        (rc, stdout, stderr) = subprocess_await(testCmd, stdout_log=logger, stderr_log=logger)
+        test_command = ["ls", "-la", "/var"]
+        logger.debug("(__main__): test command => {0}".format(test_command))
+        (stdout, stderr, rc) = subprocess_run(test_command)
+        subprocess_log(logger, stdout, stderr, rc, prefix="__main__", debug=True)
 
         # Test writing to files
-        testFile = "/tmp/ewertz"
-        # testCommand = "cat {0}".format(testFile)
-        testCommand = ["cat", testFile]
+        test_file = "/tmp/ewertz"
+        test_command = ["cat", test_file]
         inputs = ["", "123", "12345", "1"]
         for i in inputs:
-            file_write(testFile, i)
-            (rc, stdout, stderr) = subprocess_await(testCommand, stdout_log=logger, stderr_log=logger)
-        file_delete(testFile)
+            file_write(test_file, i)
+            (stdout, stderr, rc) = subprocess_run(test_command)
+            subprocess_log(logger, stdout, stderr, rc, prefix="__main__", debug=True)
+        file_delete(test_file)
 
     # -------- SubProcess (simple) Test --------
     else:
-        testCmd = ["ls", "-la", "/tmp"]
-        logger.debug("(__main__): test command: {0}".format(testCmd))
-        (rc, stdout, stderr) = subprocess_await(testCmd, stdout_log=logger, stderr_log=logger)
+        test_command = ["ls", "-la", "/tmp"]
+        logger.debug("(__main__): test command => {0}".format(test_command))
+        (stdout, stderr, rc) = subprocess_run(test_command)
+        subprocess_log(logger, stdout, stderr, rc, prefix="__main__", debug=True)
 
 
     # --- Usage Example ---
