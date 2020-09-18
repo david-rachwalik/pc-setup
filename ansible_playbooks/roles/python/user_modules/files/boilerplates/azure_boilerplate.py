@@ -2,19 +2,20 @@
 
 # Basename: azure_boilerplate
 # Description: Common business logic for Azure resources
-# Version: 0.0.1
-# VersionDate: 12 Sep 2020
+# Version: 0.1.1
+# VersionDate: 15 Sep 2020
 
-# --- Global Git Commands ---
+# --- Global Azure Commands ---
 # authentication:               subscription_login, service_principal_create
+# devops authentication:        devops_login, devops_config
 # resource group:               rg_create, rg_delete
-
-
-# Repository (bare/work):       repo_exists, repo_create
-# Working Directory:            work_remote, work_status, work_commit, work_push
-# - meta reference:             ref_head, ref_heads, ref_remotes, ref_tags
-# - branch:                     branch_validate, branch_exists, branch_create, branch_switch, branch_delete
-# - pull methods:               work_fetch, work_merge, work_rebase, work_reset
+# key vault:                    kv_set, kv_get
+# key vault secret:             secret_set, secret_get
+# webapp service:               app_set, app_get
+# app service plan:             plan_set, plan_get
+# resource manager:             rm_set, rm_get
+# pipelines:                    pipeline_set, pipeline_get
+# SQL database:                 sql_db_set, sql_db_get
 
 from logging_boilerplate import *
 import shell_boilerplate as sh
@@ -32,18 +33,26 @@ except NameError:
 
 # --- Subscription Commands ---
 
-def login(path, version="master", remote_alias=""):
-    # logger.debug("(work_reset): Init")
-    # Reset branch to latest (auto-resolve)
-    remote_branch = "{0}/{1}".format(remote_alias, version)
-    use_branch = remote_branch if remote_alias else version
-    command = ["git", "reset", "--hard", use_branch]
-    logger.debug("(work_reset): command => {0}".format(str.join(" ", command)))
-    (rc, stdout, stderr) = sh.subprocess_await(command, path)
-    # logger.debug("(work_reset): rc: {0}".format(rc))
-    # if len(stdout) > 0: logger.info(str(stdout))
-    # if len(stderr) > 0: logger.error(str(stderr))
-    return (rc == 0)
+def subscription_login(prompt=True):
+    logger.debug("(subscription_login): Init")
+    logger.debug("(subscription_login): prompt: {0}".format(prompt))
+
+    logger.debug("(subscription_login): check if already signed-in...")
+    signed_in = False
+
+    if signed_in:
+        logger.debug("(subscription_login): already signed-in!")
+        logger.debug("(subscription_login): gather subscription info...")
+    else:
+        if prompt:
+            logger.debug("(subscription_login): :: mock prompt for manual sign-in ::")
+        else:
+            # Only expect to reach here when --quiet is flagged
+            logger.debug("(subscription_login): not signed-in, exiting...")
+            sh.process_fail()
+
+    return signed_in
+
 
 
 # ------------------------ Main Program ------------------------
@@ -54,6 +63,7 @@ log_options = LogOptions(basename)
 logger = get_logger(log_options)
 
 if __name__ == "__main__":
+    # Returns argparse.Namespace; to pass into function, use **vars(self.args)
     def parse_arguments():
         import argparse
         parser = argparse.ArgumentParser()
@@ -61,14 +71,14 @@ if __name__ == "__main__":
         return parser.parse_args()
     args = parse_arguments()
 
-    # Configure the logger
+    # Configure the main logger
     log_level = 20                  # logging.INFO
     if args.debug: log_level = 10   # logging.DEBUG
     logger.setLevel(log_level)
+    
     logger.debug("(__main__): args: {0}".format(args))
     logger.debug("(__main__): ------------------------------------------------")
 
 
     # --- Usage Example ---
-    # sudo python /root/.local/lib/python2.7/site-packages/azure_boilerplate.py
-    # sudo python /root/.local/lib/python2.7/site-packages/azure_boilerplate.py --debug
+    # python ~/.local/lib/python2.7/site-packages/azure_boilerplate.py --debug
