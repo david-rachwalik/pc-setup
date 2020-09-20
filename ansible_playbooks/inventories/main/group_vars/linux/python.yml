@@ -10,14 +10,14 @@ python_user_modules:
 - boilerplates/shell_boilerplate.py
 - boilerplates/azure_boilerplate.py
 - boilerplates/git_boilerplate.py
-- boilerplates/xml_boilerplate.py
-- boilerplates/multiprocess_boilerplate.py
-- boilerplates/daemon_boilerplate.py
-- boilerplates/socket_boilerplate.py
+# - boilerplates/xml_boilerplate.py
+# - boilerplates/multiprocess_boilerplate.py
+# - boilerplates/daemon_boilerplate.py
+# - boilerplates/socket_boilerplate.py
 # --- Misc. ---
 - file_backup.py
-- mytest.py
-- test_process.py
+# - mytest.py
+# - test_process.py
 
 python_user_commands:
 - mygit.py
