@@ -11,7 +11,7 @@
 # get:              Show status output for a resource
 # remove:           Delete resources (not immediately purge, based on retention)
 #       *** Resources ***
-# subscription:     Will only pair with 'login'; sign-in/config for 'az' & 'az devops'
+# account:          Will only pair with 'login'; sign-in/config for 'az' & 'az devops'
 # secret:           Key vault secrets
 # deploy:           Resource manager template deployment to resource group
 # pipeline:         Pipelines (var groups, connections, end-points, etc.)
@@ -46,24 +46,56 @@ except NameError:
 # --- Subscription Commands ---
 
 def login():
-    logger.debug("(login): Init")
-    logger.debug("(login): prompt: {0}".format(not args.quiet))
-    az.subscription_login(not args.quiet)
+    _log.debug("(login): Init")
+    _log.debug("(login): prompt: {0}".format(not args.quiet))
+    az.account_login(not args.quiet)
+
+
+
+# --- Deploy Commands ---
+
+def app_create():
+    _log.debug("(app_create): Init")
+    _log.debug("(app_create): <mock 'app_create' group>")
+    # Register application object in Azure AD
+    # Create new ASP.NET Core web app
 
 
 def secret():
-    logger.debug("(secret): Init")
-    logger.debug("(secret): <mock 'secret' group>")
+    _log.debug("(secret): Init")
+    _log.debug("(secret): <mock 'secret' group>")
+    # Create resource group, key vault, key vault secret
+
+    login()
+
+    # Create a hardened container (a vault) in Azure
+    az.key_vault_create()
+    # Add a [key, secret, certificate] to the key vault
+    # Register an application with Azure Active Directory (AD)
+    # Authorize an application to use a key or secret
+    # Set key vault advanced access policies
+    # Work with Hardware security modules (HSMs)
+    # Delete the key vault and associated keys and secrets
+    # Miscellaneous Azure Cross-Platform Command-line Interface Commands
 
 
 def deploy():
-    logger.debug("(deploy): Init")
-    logger.debug("(deploy): <mock 'deploy' group>")
+    _log.debug("(deploy): Init")
+    _log.debug("(deploy): <mock 'deploy' group>")
+    # Deploy ARM templates:
+    # - resource group, app service plan, web app service
+    # - resource group, app service plan, web app service, sql server, sql database, connection
 
 
 def pipeline():
-    logger.debug("(pipeline): Init")
-    logger.debug("(pipeline): <mock 'pipeline' group>")
+    _log.debug("(pipeline): Init")
+    _log.debug("(pipeline): <mock 'pipeline' group>")
+    # Create pipeline for project
+    # - build csproj, deploy Python (pip) packages
+    # - build csproj, deploy NuGet packages
+    # - build csproj, deploy ARM templates
+    # - build csproj, deploy .zip file to web app service
+    # - build csproj, deploy .sql file to sql database
 
 
 
@@ -73,7 +105,7 @@ def pipeline():
 basename = "azure"
 log_file = "/var/log/{0}.log".format(basename)
 log_options = LogOptions(basename)
-logger = get_logger(log_options)
+_log = get_logger(log_options)
 
 if __name__ == "__main__":
     # When 'default' doesn't work, add nargs="?" and const=(same value as default)
@@ -106,33 +138,36 @@ if __name__ == "__main__":
         # Resource defaults
         parser.add_argument("--resource-group", "-g", default="Main")
         parser.add_argument("--key-vault", "-v", default="main-keyvault")
-        parser.add_argument("--key")
-        parser.add_argument("--value")
+        parser.add_argument("--secret-key")
+        parser.add_argument("--secret-value")
         return parser.parse_args()
     args = parse_arguments()
 
     # Configure the main logger
     log_level = 20                  # logging.INFO
     if args.debug: log_level = 10   # logging.DEBUG
-    logger.setLevel(log_level)
+    log_stream_options = LogHandlerOptions(log_level)
+    set_handlers(_log, [log_stream_options])
 
     # Configure the shell_boilerplate logger
     if args.debug:
-        sh_logger = get_logger("shell_boilerplate")
-        sh_logger.setLevel(log_level)
+        sh_log_options = LogOptions("shell_boilerplate", log_level)
+        sh_log = get_logger(sh_log_options)
+        set_handlers(sh_log, [log_stream_options])
 
     # Configure the azure_boilerplate logger
     if args.debug:
-        az_logger = get_logger("azure_boilerplate")
-        az_logger.setLevel(log_level)
+        az_log_options = LogOptions("azure_boilerplate", log_level)
+        az_log = get_logger(az_log_options)
+        set_handlers(az_log, [log_stream_options])
 
 
     # ------------------------ Business Logic (group/action) ------------------------
 
-    logger.debug("args: {0}".format(args))
-    # logger.debug("'{0}' group detected".format(args.group))
-    # logger.debug("'{0}' action detected".format(args.action))
-    logger.debug("--------------------------------------------------------")
+    _log.debug("args: {0}".format(args))
+    # _log.debug("'{0}' group detected".format(args.group))
+    # _log.debug("'{0}' action detected".format(args.action))
+    _log.debug("--------------------------------------------------------")
 
     # --- Run Actions ---
 
@@ -150,10 +185,11 @@ if __name__ == "__main__":
 
 
     # If we get to this point, assume all went well
-    logger.debug("--------------------------------------------------------")
-    logger.debug("--- end point reached :3 ---")
+    _log.debug("--------------------------------------------------------")
+    _log.debug("--- end point reached :3 ---")
     sh.process_exit()
 
     # :: Usage Example ::
     # setup --tags "py" --skip-tags "windows"
     # azure --debug login
+    # azure --debug --secret-key="AutoTestKey" --secret-value="007" secret
