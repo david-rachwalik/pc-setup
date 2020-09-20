@@ -73,7 +73,7 @@ chocolatey_packages:
   uninstall:
   - name: python2
   - name: mitkerberos
-  - name: docker-desktop
+  # - name: docker-desktop
   # - name: unity
   # - name: obs-studio
   - name: gimp
