@@ -2,8 +2,8 @@
 
 # Basename: logging_boilerplate
 # Description: Common logic for Python logging
-# Version: 1.4.0
-# VersionDate: 18 Sep 2020
+# Version: 1.4.1
+# VersionDate: 21 Sep 2020
 
 # --- Global Logging Commands ---
 # validation:           is_logger, is_handler
@@ -32,13 +32,7 @@ except NameError:
 
 _timezone="US/Central"
 _time_format="%Y-%m-%d %H:%M:%S"
-_message_format = "%(asctime)s [%(levelname).1s] %(name)s:%(message)s"
-
-# _message_format = "%(asctime)s %(name)s\t[%(levelname)s]\t%(message)s"
-# _message_format = "%(asctime)s %(levelname)-7s %(message)s"
-# _message_format = "%(asctime)s [%(levelname)s] %(message)s"
-# Restrict output to 1 character
-# _message_format = "%(asctime)s [%(levelname).1s] %(message)s"
+_message_format = "%(message)s"
 
 # Pass 'path' for file handler; must expand absolute paths ('~' treated relatively)
 class LogHandlerOptions(object):
@@ -62,6 +56,12 @@ class LogOptions(object):
     def __init__(self, name="", handlers=[_stream_handler]):
         self.name = str(name)
         self.handlers = handlers if _valid_handlers(handlers) else [_stream_handler]
+
+
+# Default args for logging; argparse expected to override
+class LogArgs(object):
+    def __init__(self, debug=False):
+        self.debug = bool(debug)
 
 
 # ------------------------ Global Functions ------------------------
@@ -137,6 +137,28 @@ def set_handlers(logger, handlers=[]):
         add_handler(logger, options)
 
 
+# Generate handlers with a standard configuration
+def gen_basic_handlers(debug=False, log_path=""):
+    # https://docs.python.org/3/library/logging.html#logrecord-attributes
+    # _message_format = "%(asctime)s %(name)s\t[%(levelname)s]\t%(message)s"
+    # _message_format = "%(asctime)s %(levelname)-7s %(message)s"
+    # _message_format = "%(asctime)s [%(levelname)s] %(message)s"
+    if debug:
+        log_level = 10 # logging.DEBUG
+        log_format = "%(asctime)s [%(levelname).1s] (%(module)s:%(funcName)s): %(message)s"
+    else:
+        log_level = 20 # logging.INFO
+        log_format = "%(message)s"
+    # Create stream handler (console/terminal)
+    log_stream_options = LogHandlerOptions(log_level, "", log_format)
+    log_handlers = [log_stream_options]
+    # Create file handler when path is provided
+    if log_path:
+        log_file_options = LogHandlerOptions(log_level, log_path, log_format)
+        log_handlers.append(log_file_options)
+    return log_handlers
+
+
 # --- Private Commands ---
 
 # Convert to timezone for log output
@@ -168,6 +190,7 @@ def _valid_handlers(handlers=[]):
 
 # Initialize the logger
 basename = "logging_boilerplate"
+args = LogArgs() # for external modules
 log_options = LogOptions(basename)
 _log = get_logger(log_options)
 

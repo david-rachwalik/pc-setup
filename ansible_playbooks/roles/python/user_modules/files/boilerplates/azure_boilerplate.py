@@ -7,10 +7,10 @@
 
 # --- Global Azure Methods ---
 # Helpers:                      json_parse
-# authentication:               account_show, account_list, account_login
+# authentication:               account_get, account_list, account_login
 # devops authentication:        devops_login, devops_config
 # service principal:            sp_create
-# resource group:               rg_create, rg_delete
+# resource group:               resource_group_set, rg_delete
 # key vault:                    kv_set, kv_get
 # key vault secret:             secret_set, secret_get
 # webapp service:               app_set, app_get
@@ -36,7 +36,7 @@ except NameError:
 
 class AzureGlobals(object):
     def __init__(self, tenant_id="", account="", subscription="", subscription_id="",
-        subscription_is_default=False
+        subscription_is_default=False, resource_group="", location="", key_vault=""
     ):
         self.tenant_id = str(tenant_id) # active directory
         self.account = str(account) # Microsoft account (*@outlook.com, *@hotmail.com)
@@ -44,7 +44,20 @@ class AzureGlobals(object):
         self.subscription_id = str(subscription_id)
         self.subscription_is_default = bool(subscription_is_default)
         
+        self.resource_group = str(resource_group)
+        self.location = str(location)
+
+        self.key_vault = str(key_vault)
+        
         # self.client_id = str(client_id)
+
+    def __repr__(self):
+        # return self
+        return vars(self)
+
+    def __str__(self):
+        # return str(self)
+        return str(vars(self))
 
 
 # https://goodcode.io/articles/python-dict-object
@@ -77,6 +90,7 @@ def _decode_dict(dct):
 
 # Deserialize JSON data: https://docs.python.org/2/library/json.html
 def json_parse(raw_string):
+    if len(raw_string) == 0: return ""
     results = json.loads(raw_string, object_hook=_decode_dict)
     return results
 
@@ -86,103 +100,247 @@ def json_parse(raw_string):
 # https://docs.microsoft.com/en-us/cli/azure/account
 
 def _account_parse(obj):
-    # _log.debug("(_account_parse): Init")
+    # _log.debug("Init")
+    # _log.debug("obj: {0}".format(obj))
+
     _az.tenant_id = obj.tenantId
-    # _log.debug("(account_login): tenant id: {0}".format(_az.tenant_id))
+    # _log.debug("tenant id: {0}".format(_az.tenant_id))
     _az.account = obj.user.name
-    # _log.debug("(account_login): account: {0}".format(_az.account))
+    # _log.debug("account: {0}".format(_az.account))
     _az.subscription = obj.name
-    # _log.debug("(account_login): subscription: {0}".format(_az.subscription))
+    # _log.debug("subscription: {0}".format(_az.subscription))
     _az.subscription_id = obj.id
-    # _log.debug("(account_login): subscription id: {0}".format(_az.subscription_id))
+    # _log.debug("subscription id: {0}".format(_az.subscription_id))
     _az.subscription_is_default = obj.isDefault
-    # _log.debug("(account_login): subscription is default: {0}".format(_az.subscription_is_default))
+    # _log.debug("subscription is default: {0}".format(_az.subscription_is_default))
 
     # _az.client_id = obj.id
-    # _log.debug("(account_login): subscription id: {0}".format(_az.client_id))
+    # _log.debug("subscription id: {0}".format(_az.client_id))
+
+    _log.debug("_az: {0}".format(_az))
 
 
-def account_show(subscription="Pay-As-You-Go"):
-    # _log.debug("(account_show): Init")
+def account_get(subscription="Pay-As-You-Go"):
+    # _log.debug("Init")
     command = ["az", "account", "show", "--subscription={0}".format(subscription)]
-    _log.debug("(account_show): command => {0}".format(str.join(" ", command)))
+    _log.debug("command => {0}".format(str.join(" ", command)))
     (stdout, stderr, rc) = sh.subprocess_run(command)
-    # sh.subprocess_log(_log, stdout, stderr, rc, prefix="account_show", debug=True)
+    # sh.subprocess_log(_log, stdout, stderr, rc, debug=args.debug)
     results = json_parse(stdout)
-    # _log.debug("(account_show): results: {0}".format(results))
+    # _log.debug("results: {0}".format(results))
     return results
 
 
 def account_list():
-    # _log.debug("(account_list): Init")
+    # _log.debug("Init")
     command = ["az", "account", "list", "--all"]
-    _log.debug("(account_list): command => {0}".format(str.join(" ", command)))
+    _log.debug("command => {0}".format(str.join(" ", command)))
     (stdout, stderr, rc) = sh.subprocess_run(command)
-    # sh.subprocess_log(_log, stdout, stderr, rc, prefix="account_list", debug=True)
+    # sh.subprocess_log(_log, stdout, stderr, rc, debug=args.debug)
     results = json_parse(stdout)
-    # _log.debug("(account_list): results: {0}".format(results))
+    # _log.debug("results: {0}".format(results))
     return results
 
 
 def account_set(subscription="Pay-As-You-Go"):
-    # _log.debug("(account_set): Init")
+    # _log.debug("Init")
     command = ["az", "account", "set", "--subscription={0}".format(subscription)]
-    _log.debug("(account_set): command => {0}".format(str.join(" ", command)))
+    _log.debug("command => {0}".format(str.join(" ", command)))
     (stdout, stderr, rc) = sh.subprocess_run(command)
-    # sh.subprocess_log(_log, stdout, stderr, rc, prefix="account_set", debug=True)
+    # sh.subprocess_log(_log, stdout, stderr, rc, debug=args.debug)
     return (rc == 0)
 
 
 def account_login(prompt=True):
-    # _log.debug("(account_login): Init")
+    # _log.debug("Init")
 
     # Check if account subscription exists
-    _log.debug("(account_login): check if already signed-in...")
-    account_info = account_show()
-    _log.debug("(account_login): account_info: {0}".format(account_info))
+    _log.debug("check if already signed-in...")
+    account_info = account_get()
+    _log.debug("account_info: {0}".format(account_info))
 
     if account_info:
-        _log.debug("account is signed-in, parsing...")
+        _log.debug("signed-in, gathering account info...")
         _account_parse(account_info)
     else:
         # Prompt manual login if not signed-in
-        _log.debug("account not signed-in, logging in now...")
-
+        _log.error("account subscription doesn't exist, exiting...")
+        sh.process_fail()
+        # _log.debug("account not signed-in, logging in now...")
+    
     # Ensure subscription is currently active
     if not _az.subscription_is_default:
-        _log.debug("(account_login): activating subscription...")
-        account_active = _az.account_set()
+        _log.debug("activating subscription...")
+        account_active = account_set()
         if not account_active:
-            _log.error("(account_login): failed to activate subscription")
+            _log.error("failed to activate subscription")
             sh.process_fail()
 
 
-    if account_info:
-        _log.debug("(account_login): already signed-in!")
-        _log.debug("(account_login): gather account info...")
-    else:
-        _log.debug("(account_login): prompt: {0}".format(prompt))
+    # if account_info:
+    #     _log.debug("signed-in, gathering account info...")
+    # else:
+    if not account_info:
+        _log.debug("prompt: {0}".format(prompt))
         if prompt:
-            _log.debug("(account_login): :: mock prompt for manual sign-in ::")
+            _log.debug(":: mock prompt for manual sign-in ::")
         else:
             # Only expect to reach here when --quiet is flagged
-            _log.debug("(account_login): not signed-in, exiting...")
+            _log.debug("not signed-in, exiting...")
             sh.process_fail()
 
     return account_info
 
 
-# --- Account/Subscription Commands ---
-# https://docs.microsoft.com/en-us/cli/azure/account
+# --- Resource Group Commands ---
+# https://docs.microsoft.com/en-us/cli/azure/group
+# * Identical output for [resource_group_get, resource_group_set]
 
-def key_vault_create():
-    _log.debug("(key_vault_create): Init")
+def _resource_group_parse(obj):
+    # _log.debug("Init")
+    # _log.debug("obj: {0}".format(obj))
+
+    _az.resource_group = obj.name
+    _az.location = obj.location
+    
+    _log.debug("_az: {0}".format(_az))
+
+
+def resource_group_get(name=""):
+    # _log.debug("Init")
+    command = ["az", "group", "show", "--name={0}".format(name)]
+    _log.debug("command => {0}".format(str.join(" ", command)))
+    (stdout, stderr, rc) = sh.subprocess_run(command)
+    # sh.subprocess_log(_log, stdout, stderr, rc, debug=args.debug)
+    results = json_parse(stdout)
+    # _log.debug("results: {0}".format(results))
+    return results
+
+
+def resource_group_set(name="", location=""):
+    # _log.debug("Init")
+    rg_info = resource_group_get(name)
+    # _log.debug("rg_info: {0}".format(rg_info))
+
+    if rg_info:
+        _log.debug("resource group exists, gathering info...")
+        # return True
+    else:
+        # Prompt manual login if not signed-in
+        _log.error("resource group doesn't exists, creating...")
+        command = ["az", "group", "create", "--name={0}".format(name), "--location={0}".format(location)]
+        _log.debug("command => {0}".format(str.join(" ", command)))
+        (stdout, stderr, rc) = sh.subprocess_run(command)
+        # sh.subprocess_log(_log, stdout, stderr, rc, debug=args.debug)
+        rg_info = json_parse(stdout)
+        # _log.debug("rg_info: {0}".format(rg_info))
+        # return (rc == 0)
+    
+    _resource_group_parse(rg_info)
+    return rg_info
+
+
+# --- Key Vault Commands ---
+# https://docs.microsoft.com/en-us/cli/azure/keyvault
+
+def _key_vault_parse(obj):
+    # _log.debug("Init")
+    # _log.debug("obj: {0}".format(obj))
+
+    _az.tenant_id = obj.properties.tenantId
+    _az.key_vault = obj.name
+    _az.resource_group = obj.resourceGroup
+    _az.location = obj.location
+    
+    _log.debug("_az: {0}".format(_az))
+
+
+def key_vault_get(name="", resource_group=""):
+    # _log.debug("Init")
+    command = ["az", "keyvault", "show", "--name={0}".format(name), "--resource-group={0}".format(resource_group)]
+    _log.debug("command => {0}".format(str.join(" ", command)))
+    (stdout, stderr, rc) = sh.subprocess_run(command)
+    # sh.subprocess_log(_log, stdout, stderr, rc, debug=args.debug)
+    results = json_parse(stdout)
+    # _log.debug("results: {0}".format(results))
+    return results
+
+
+def key_vault_set(name="", resource_group=""):
+    # _log.debug("Init")
+    key_vault_info = key_vault_get(name)
+    # _log.debug("key_vault_info: {0}".format(key_vault_info))
+
+    if key_vault_info:
+        _log.debug("key vault exists, gathering info...")
+        # return True
+    else:
+        # Prompt manual login if not signed-in
+        _log.error("key vault doesn't exists, creating...")
+        command = ["az", "keyvault", "create", "--name={0}".format(name), "--location={0}".format(location)]
+        _log.debug("command => {0}".format(str.join(" ", command)))
+        (stdout, stderr, rc) = sh.subprocess_run(command)
+        # sh.subprocess_log(_log, stdout, stderr, rc, debug=args.debug)
+        key_vault_info = json_parse(stdout)
+        # _log.debug("key_vault_info: {0}".format(key_vault_info))
+        # return (rc == 0)
+    
+    _key_vault_parse(key_vault_info)
+    return key_vault_info
+
+
+# --- Key Vault Secret Commands ---
+# https://docs.microsoft.com/en-us/cli/azure/keyvault/secret
+
+def _key_vault_secret_parse(obj):
+    # _log.debug("Init")
+    # _log.debug("obj: {0}".format(obj))
+
+    _az.secret_key = obj.name
+    _az.secret_value = obj.value
+    
+    _log.debug("_az: {0}".format(_az))
+
+
+def key_vault_secret_get(key_vault="", secret_key=""):
+    # _log.debug("Init")
+    command = ["az", "keyvault", "secret", "show", "--vault-name={0}".format(key_vault), "--name={0}".format(secret_key)]
+    _log.debug("command => {0}".format(str.join(" ", command)))
+    (stdout, stderr, rc) = sh.subprocess_run(command)
+    # sh.subprocess_log(_log, stdout, stderr, rc, debug=args.debug)
+    results = json_parse(stdout)
+    # _log.debug("results: {0}".format(results))
+    return results
+
+
+def key_vault_secret_set(key_vault="", secret_key="", secret_value=""):
+    # _log.debug("Init")
+    key_vault_secret_info = key_vault_secret_get(key_vault, secret_key)
+    # _log.debug("key_vault_secret_info: {0}".format(key_vault_secret_info))
+
+    if key_vault_secret_info:
+        _log.debug("key vault secret exists, gathering info...")
+        # return True
+    else:
+        # Prompt manual login if not signed-in
+        _log.error("key vault secret doesn't exists, creating...")
+        command = ["az", "keyvault", "secret", "set", "--vault-name={0}".format(key_vault), "--name={0}".format(secret_key), "--value={0}".format(secret_value)]
+        _log.debug("command => {0}".format(str.join(" ", command)))
+        (stdout, stderr, rc) = sh.subprocess_run(command)
+        # sh.subprocess_log(_log, stdout, stderr, rc, debug=args.debug)
+        key_vault_secret_info = json_parse(stdout)
+        # _log.debug("key_vault_secret_info: {0}".format(key_vault_secret_info))
+        # return (rc == 0)
+    
+    _key_vault_secret_parse(key_vault_secret_info)
+    return key_vault_secret_info
 
 
 # ------------------------ Main Program ------------------------
 
 # Initialize the logger
 basename = "azure_boilerplate"
+args = LogArgs() # for external modules
 log_options = LogOptions(basename)
 _log = get_logger(log_options)
 _az = AzureGlobals()
@@ -193,17 +351,21 @@ if __name__ == "__main__":
         import argparse
         parser = argparse.ArgumentParser()
         parser.add_argument("--debug", action="store_true")
+        parser.add_argument("--log-path", default="")
         return parser.parse_args()
     args = parse_arguments()
 
-    # Configure the main logger
-    log_level = 20                  # logging.INFO
-    if args.debug: log_level = 10   # logging.DEBUG
-    log_stream_options = LogHandlerOptions(log_level)
-    set_handlers(_log, [log_stream_options])
+    #  Configure the main logger
+    log_handlers = gen_basic_handlers(args.debug, args.log_path)
+    set_handlers(_log, log_handlers)
+    if args.debug:
+        # Configure the shell_boilerplate logger
+        _sh_log = get_logger("shell_boilerplate")
+        set_handlers(_sh_log, log_handlers)
+        sh.args.debug = args.debug
 
-    _log.debug("(__main__): args: {0}".format(args))
-    _log.debug("(__main__): ------------------------------------------------")
+    _log.debug("args: {0}".format(args))
+    _log.debug("------------------------------------------------")
 
 
     # --- Usage Example ---

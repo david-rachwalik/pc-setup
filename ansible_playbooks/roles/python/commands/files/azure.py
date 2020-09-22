@@ -46,8 +46,8 @@ except NameError:
 # --- Subscription Commands ---
 
 def login():
-    _log.debug("(login): Init")
-    _log.debug("(login): prompt: {0}".format(not args.quiet))
+    _log.debug("Init")
+    _log.debug("prompt: {0}".format(not args.quiet))
     az.account_login(not args.quiet)
 
 
@@ -55,22 +55,27 @@ def login():
 # --- Deploy Commands ---
 
 def app_create():
-    _log.debug("(app_create): Init")
-    _log.debug("(app_create): <mock 'app_create' group>")
+    _log.debug("Init")
+    _log.debug("<mock 'app_create' group>")
     # Register application object in Azure AD
     # Create new ASP.NET Core web app
 
 
 def secret():
-    _log.debug("(secret): Init")
-    _log.debug("(secret): <mock 'secret' group>")
+    _log.debug("Init")
+    _log.debug("<mock 'secret' group>")
     # Create resource group, key vault, key vault secret
 
     login()
 
+    rg_good = az.resource_group_set(args.resource_group, args.location)
+    if not rg_good:
+        _log.error("failed to create resource group")
+        sh.process_fail()
     # Create a hardened container (a vault) in Azure
-    az.key_vault_create()
+    az.key_vault_set(args.key_vault, args.resource_group)
     # Add a [key, secret, certificate] to the key vault
+    az.key_vault_secret_set(args.key_vault, args.secret_key, args.secret_value)
     # Register an application with Azure Active Directory (AD)
     # Authorize an application to use a key or secret
     # Set key vault advanced access policies
@@ -80,16 +85,16 @@ def secret():
 
 
 def deploy():
-    _log.debug("(deploy): Init")
-    _log.debug("(deploy): <mock 'deploy' group>")
+    _log.debug("Init")
+    _log.debug("<mock 'deploy' group>")
     # Deploy ARM templates:
     # - resource group, app service plan, web app service
     # - resource group, app service plan, web app service, sql server, sql database, connection
 
 
 def pipeline():
-    _log.debug("(pipeline): Init")
-    _log.debug("(pipeline): <mock 'pipeline' group>")
+    _log.debug("Init")
+    _log.debug("<mock 'pipeline' group>")
     # Create pipeline for project
     # - build csproj, deploy Python (pip) packages
     # - build csproj, deploy NuGet packages
@@ -103,7 +108,8 @@ def pipeline():
 
 # Initialize the logger
 basename = "azure"
-log_file = "/var/log/{0}.log".format(basename)
+args = LogArgs() # for external modules
+# log_file = "/var/log/{0}.log".format(basename)
 log_options = LogOptions(basename)
 _log = get_logger(log_options)
 
@@ -135,7 +141,9 @@ if __name__ == "__main__":
         parser.add_argument("action", default="get", const="get", nargs="?", choices=["get", "set", "remove"])
         parser.add_argument("--debug", "-d", action="store_true")
         parser.add_argument("--quiet", "-q", action="store_true")
+        parser.add_argument("--log-path", default="")
         # Resource defaults
+        parser.add_argument("--location", default="southcentralus") # az account list-locations
         parser.add_argument("--resource-group", "-g", default="Main")
         parser.add_argument("--key-vault", "-v", default="main-keyvault")
         parser.add_argument("--secret-key")
@@ -143,23 +151,18 @@ if __name__ == "__main__":
         return parser.parse_args()
     args = parse_arguments()
 
-    # Configure the main logger
-    log_level = 20                  # logging.INFO
-    if args.debug: log_level = 10   # logging.DEBUG
-    log_stream_options = LogHandlerOptions(log_level)
-    set_handlers(_log, [log_stream_options])
-
-    # Configure the shell_boilerplate logger
+    #  Configure the main logger
+    log_handlers = gen_basic_handlers(args.debug, args.log_path)
+    set_handlers(_log, log_handlers)
     if args.debug:
-        sh_log_options = LogOptions("shell_boilerplate", log_level)
-        sh_log = get_logger(sh_log_options)
-        set_handlers(sh_log, [log_stream_options])
-
-    # Configure the azure_boilerplate logger
-    if args.debug:
-        az_log_options = LogOptions("azure_boilerplate", log_level)
-        az_log = get_logger(az_log_options)
-        set_handlers(az_log, [log_stream_options])
+        # Configure the shell_boilerplate logger
+        _sh_log = get_logger("shell_boilerplate")
+        set_handlers(_sh_log, log_handlers)
+        sh.args.debug = args.debug
+        # Configure the azure_boilerplate logger
+        _az_log = get_logger("azure_boilerplate")
+        set_handlers(_az_log, log_handlers)
+        az.args.debug = args.debug
 
 
     # ------------------------ Business Logic (group/action) ------------------------
