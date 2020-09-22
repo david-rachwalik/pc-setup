@@ -2,8 +2,8 @@
 
 # Basename: shell_boilerplate
 # Description: Common business logic for *nix shell interactions
-# Version: 1.6.0
-# VersionDate: 11 Sep 2020
+# Version: 1.6.1
+# VersionDate: 21 Sep 2020
 
 # --- Global Shell Commands ---
 # Utility:          directory_shift, directory_change, is_list_of_strings, list_differences
@@ -167,7 +167,7 @@ def directory_list(path):
 def directory_sync(src, dest, recursive=True, purge=True, cut=False, include=(), exclude=(), debug=False):
     if not isinstance(include, tuple): raise TypeError("directory_sync() expects 'include' parameter as tuple")
     if not isinstance(exclude, tuple): raise TypeError("directory_sync() expects 'exclude' parameter as tuple")
-    logger.debug("(directory_sync): Init")
+    _log.debug("Init")
     changed_files = []
     changes_dirs = []
     # Create sequence of command options
@@ -205,12 +205,12 @@ def directory_sync(src, dest, recursive=True, purge=True, cut=False, include=(),
     command = ["rsync"]
     command.extend(command_options)
     command.extend([src, dest])
-    logger.debug("(directory_sync) command used: {0}".format(command))
+    _log.debug("command used: {0}".format(command))
     (stdout, stderr, rc) = subprocess_run(command)
-    # subprocess_log(logger, stdout, stderr, rc)
+    # subprocess_log(_log, stdout, stderr, rc)
 
     results = str.splitlines(stdout)
-    logger.debug("(directory_sync) results: {0}".format(results))
+    _log.debug("results: {0}".format(results))
 
     for r in results:
         result = r.split(" ", 1)
@@ -221,7 +221,7 @@ def directory_sync(src, dest, recursive=True, purge=True, cut=False, include=(),
         elif itemized_output[1] == "d":
             changes_dirs.append(path_join(dest, file_name))
 
-    logger.debug("(directory_sync) changed_files: {0}".format(changed_files))
+    _log.debug("changed_files: {0}".format(changed_files))
     return (changed_files, changes_dirs)
 
 
@@ -265,7 +265,7 @@ def file_copy(src, dest):
     if not path_exists(src, "f"): return False
     command = ["cp", "--force", src, dest]
     (stdout, stderr, rc) = subprocess_run(command)
-    subprocess_log(logger, stdout, stderr, rc, prefix="file_copy", debug=True)
+    subprocess_log(_log, stdout, stderr, rc, debug=args.debug)
     return (rc == 0)
 
 
@@ -274,20 +274,20 @@ def file_hash(path):
     # Using SHA-2 hash check (more secure than MD5|SHA-1)
     command = ["sha256sum", path]
     (stdout, stderr, rc) = subprocess_run(command)
-    subprocess_log(logger, stdout, stderr, rc, prefix="file_hash", debug=True)
+    subprocess_log(_log, stdout, stderr, rc, debug=args.debug)
     results = stdout.split()
-    # logger.debug("(file_hash): results: {0}".format(results))
+    # _log.debug("results: {0}".format(results))
     return results[0]
 
 
 # Uses hash to validate file integrity
 def file_match(path1, path2):
-    logger.debug("(file_match): path1: {0}".format(path1))
-    logger.debug("(file_match): path2: {0}".format(path2))
+    _log.debug("path1: {0}".format(path1))
     hash1 = file_hash(path1)
+    _log.debug("hash1: {0}".format(hash1))
+    _log.debug("path2: {0}".format(path2))
     hash2 = file_hash(path2)
-    logger.debug("(file_match): hash1: {0}".format(hash1))
-    logger.debug("(file_match): hash2: {0}".format(hash2))
+    _log.debug("hash2: {0}".format(hash2))
     if len(hash1) > 0 and len(hash2) > 0:
         return (hash1 == hash2)
     else:
@@ -305,30 +305,24 @@ def subprocess_run(command, path="", env=""):
     return (stdout, stderr, rc)
 
 
-# Log the subprocess output provided; prefix only for stderr|rc unless debug=True
-def subprocess_log(logger, stdout=None, stderr=None, rc=None, prefix="", debug=False):
-    if not is_logger(logger): raise TypeError("subprocess_log() expects 'logger' parameter as logging.Logger instance")
-    log_prefix = "({0}): ".format(prefix) if prefix else ""
+# Log the subprocess output provided
+def subprocess_log(_log, stdout=None, stderr=None, rc=None, debug=False):
+    if not is_logger(_log): raise TypeError("subprocess_log() expects '_log' parameter as logging.Logger instance")
     if isinstance(stdout, str) and len(stdout) > 0:
-        log_stdout = "{0}stdout: {1}".format(log_prefix, stdout) if debug else stdout
-        logger.info(log_stdout)
+        log_stdout = "stdout: {0}".format(stdout) if debug else stdout
+        _log.info(log_stdout)
     if isinstance(stderr, str) and len(stdout) > 0:
-        log_stderr = "{0}stderr: {1}".format(log_prefix, stderr) if debug else "{0}{1}".format(log_prefix, stderr)
-        # logger.error(log_stderr)
-        logger.info(log_stderr) # INFO so message is below WARN level (default on import)
-    if isinstance(rc, int):
-        log_rc = "{0}rc: {1}".format(log_prefix, rc) if debug else "{0}{1}".format(log_prefix, rc)
-        logger.debug(log_rc)
+        log_stderr = "stderr: {0}".format(stderr) if debug else stderr
+        # _log.error(log_stderr)
+        _log.info(log_stderr) # INFO so message is below WARN level (default on import)
+    if isinstance(rc, int) and debug:
+        log_rc = "rc: {0}".format(rc) if debug else rc
+        _log.debug(log_rc)
 
-    # Example :: prefix="example_prefix", debug=False
-    # [Info]  "{0}"
-    # [Info]  "(example_prefix): {0}"
-    # [Debug] "(example_prefix): {0}"
-
-    # Example :: prefix="example_prefix", debug=True
-    # [Info]  "(example_prefix): stdout: {0}"
-    # [Info]  "(example_prefix): stderr: {0}"
-    # [Debug] "(example_prefix): rc: {0}"
+    # debug=False           debug=True
+    # [Info]  "{0}"         "stdout: {0}"
+    # [Info]  "{0}"         "stderr: {0}"
+    # [Debug]               "rc: {0}"
 
 
 # --- Signal Commands ---
@@ -430,8 +424,9 @@ class SubProcess(object):
 
 # Initialize the logger
 basename = "shell_boilerplate"
+args = LogArgs() # for external modules
 log_options = LogOptions(basename)
-logger = get_logger(log_options)
+_log = get_logger(log_options)
 
 if __name__ == "__main__":
     # Returns argparse.Namespace; to pass into function, use **vars(self.args)
@@ -439,16 +434,18 @@ if __name__ == "__main__":
         import argparse
         parser = argparse.ArgumentParser()
         parser.add_argument("--debug", action="store_true")
+        parser.add_argument("--log-path", default="")
         parser.add_argument("--test", choices=["subprocess", "multiprocess", "xml"])
         return parser.parse_args()
-    args = parse_arguments
+    args = parse_arguments()
 
-    # Configure the logger
-    log_level = 20                  # logging.INFO
-    if args.debug: log_level = 10   # logging.DEBUG
-    logger.setLevel(log_level)
-    logger.debug("(__main__): args: {0}".format(args))
-    logger.debug("(__main__): ------------------------------------------------")
+    #  Configure the main logger
+    log_handlers = gen_basic_handlers(args.debug, args.log_path)
+    set_handlers(_log, log_handlers)
+
+    _log.debug("args: {0}".format(args))
+    _log.debug("------------------------------------------------")
+
 
     # -------- XML Test --------
     if args.test == "xml":
@@ -456,22 +453,22 @@ if __name__ == "__main__":
         xml_path = "$HOME/configuration.xml"
         schema_path = "$HOME/configuration.xsd"
         validator_command = ["/usr/bin/xmllint", "--noout", "--schema {0}".format(schema_path), xml_path]
-        logger.debug("(__main__): validation command => {0}".format(validator_command))
+        _log.debug("validation command => {0}".format(validator_command))
 
         # Validate configuration against the schema
         (stdout, stderr, rc) = subprocess_run(validator_command)
         if rc != 0:
-            logger.error("(__main__): XML file ({0}) failed to validate against schema ({1})".format(config_xml, config_xsd))
-            subprocess_log(logger, stdout, stderr, rc, prefix="__main__", debug=True)
+            _log.error("XML file ({0}) failed to validate against schema ({1})".format(config_xml, config_xsd))
+            subprocess_log(_log, stdout, stderr, rc, debug=args.debug)
         else:
-            logger.debug("(__main__): {0} was successfully validated".format(xml_path))
+            _log.debug("{0} was successfully validated".format(xml_path))
 
     # -------- SubProcess Test --------
     elif args.test == "subprocess":
         test_command = ["ls", "-la", "/var"]
-        logger.debug("(__main__): test command => {0}".format(test_command))
+        _log.debug("test command => {0}".format(test_command))
         (stdout, stderr, rc) = subprocess_run(test_command)
-        subprocess_log(logger, stdout, stderr, rc, prefix="__main__", debug=True)
+        subprocess_log(_log, stdout, stderr, rc, debug=args.debug)
 
         # Test writing to files
         test_file = "/tmp/ewertz"
@@ -480,15 +477,15 @@ if __name__ == "__main__":
         for i in inputs:
             file_write(test_file, i)
             (stdout, stderr, rc) = subprocess_run(test_command)
-            subprocess_log(logger, stdout, stderr, rc, prefix="__main__", debug=True)
+            subprocess_log(_log, stdout, stderr, rc, debug=args.debug)
         file_delete(test_file)
 
     # -------- SubProcess (simple) Test --------
     else:
         test_command = ["ls", "-la", "/tmp"]
-        logger.debug("(__main__): test command => {0}".format(test_command))
+        _log.debug("test command => {0}".format(test_command))
         (stdout, stderr, rc) = subprocess_run(test_command)
-        subprocess_log(logger, stdout, stderr, rc, prefix="__main__", debug=True)
+        subprocess_log(_log, stdout, stderr, rc, debug=args.debug)
 
 
     # --- Usage Example ---
