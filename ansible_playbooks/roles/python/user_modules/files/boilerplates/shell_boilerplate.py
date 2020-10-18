@@ -8,9 +8,9 @@
 # --- Global Shell Commands ---
 # Utility:          directory_shift, directory_change, is_list_of_strings, list_differences
 # Process:          process_exit, process_fail, process_id, process_parent_id
-# Path:             path_current, path_expand, path_join, path_exists, path_dirname, path_basename, path_filename
+# Path:             path_current, path_expand, path_join, path_exists, path_dir, path_basename, path_filename
 # Directory:        directory_list, directory_create, directory_delete, directory_copy, directory_sync
-# File:             file_read, file_write, file_delete, file_copy, file_hash, file_match
+# File:             file_read, file_write, file_delete, file_rename, file_copy, file_hash, file_match, file_backup
 # Signal:           signal_max, signal_handler, signal_send
 # SubProcess:       subprocess_run, subprocess_log
 
@@ -18,7 +18,7 @@
 # await_results, is_done, format_output
 
 from logging_boilerplate import *
-import sys, os, subprocess, signal
+import sys, os, subprocess, signal, time
 from contextlib import contextmanager
 import distutils.dir_util
 # import distutils.file_util
@@ -106,6 +106,7 @@ def path_join(path, *paths):
 
 # Pass either "f" (file) or 'd' (directory) to file_type
 def path_exists(path, file_type=""):
+    path = path_expand(path)
     if not (path and isinstance(path, str)): raise TypeError("path_exists() expects 'path' parameter as string")
     if file_type == "d":
         return os.path.isdir(path)
@@ -116,7 +117,7 @@ def path_exists(path, file_type=""):
 
 
 # Returns '/foo/bar' from /foo/bar/item
-def path_dirname(name):
+def path_dir(name):
     return os.path.dirname(name)
 
 
@@ -232,6 +233,10 @@ def file_write(path, content=None, append=False):
     # Ensure path is specified
     if not isinstance(path, str): raise TypeError("file_write() expects 'path' parameter as string")
     strategy = "a" if (append) else "w"
+    # open() only accepts absolute paths, not relative
+    path = path_expand(path)
+    # Ensure containing directory exists
+    if not path_exists(path, "d"): directory_create(path_dir(path))
     f = open(path, strategy)
     # Accept content as string or sequence of strings
     if content:
@@ -248,7 +253,8 @@ def file_read(path, oneline=False):
     data = ""
     if not (path or path_exists(path, "f")): return data
     try:
-        # Open file; never use deprecated file()
+        path = path_expand(path)
+        # Open with file(); file() is deprecated
         f = open(path, "r")
         data = f.readline().rstrip() if (oneline) else f.read().strip()
         f.close()
@@ -258,7 +264,14 @@ def file_read(path, oneline=False):
 
 
 def file_delete(path):
+    path = path_expand(path)
     if path_exists(path, "f"): os.unlink(path)
+
+
+def file_rename(src, dest):
+    src = path_expand(src)
+    dest = path_expand(dest)
+    if path_exists(src, "f"): os.rename(src, dest)
 
 
 def file_copy(src, dest):
@@ -292,6 +305,14 @@ def file_match(path1, path2):
         return (hash1 == hash2)
     else:
         return False
+
+
+def file_backup(path, ext="bak", time_format="%Y%m%d-%H%M%S"):
+    current_time = time.strftime(time_format)
+    backup_path = "{0}.{1}.{2}".format(path, current_time, ext)
+    file_rename(path, backup_path)
+    return backup_path
+
 
 
 # --- Process Commands ---
