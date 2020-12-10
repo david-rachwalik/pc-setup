@@ -63,7 +63,8 @@ chocolatey_packages:
   - name: k-litecodecpackmega
   - name: 4k-video-downloader
   - name: streamlabs-obs
-  - name: jubler
+  # - name: jubler
+  # - name: chatterino
 
   # --- Videogames ---
   - name: directx
