@@ -10,12 +10,15 @@
 # ServicePrincipal:             name, appId, password
 
 # --- Global Azure Methods ---
-# :-Helper-:                    json_parse, format_resource, print_command, get_random_password
+# :-Helper-:                    json_parse, format_resource, get_random_password
 # account:                      account_get, account_list, account_logout, account_login, account_set
 # service principal:            service_principal_get, service_principal_rbac_set, service_principal_save
 # resource group:               resource_group_get, resource_group_set, resource_group_delete
 # key vault:                    key_vault_get, key_vault_set
 # key vault secret:             key_vault_secret_get, key_vault_secret_set, key_vault_secret_download
+# active directory:             active_directory_application_get, active_directory_application_set
+
+
 
 # TODO:
 # devops authentication:        devops_login, devops_config
@@ -24,6 +27,7 @@
 # resource manager:             rm_set, rm_get
 # pipelines:                    pipeline_set, pipeline_get
 # SQL database:                 sql_db_set, sql_db_get
+
 
 from logging_boilerplate import *
 import shell_boilerplate as sh
@@ -112,6 +116,29 @@ class ServicePrincipal(AzureBase):
             if ("password" in keys): self.password = obj.password
 
 
+class ResourceGroup(AzureBase):
+    def __init__(self, obj=""):
+        self.location = ""
+        self.name = ""
+
+        # Business logic for parsing
+        if obj and isinstance(obj, str): obj = json_parse(obj)
+        if isinstance(obj, _dict2obj):
+            self.location = obj.location
+            self.name = obj.name
+            self.is_valid = bool(self.location and self.name)
+
+
+class ActiveDirectoryApplication(AzureBase):
+    def __init__(self, obj=""):
+        self.appId = "" # client_id
+
+        # Business logic for parsing
+        if obj and isinstance(obj, str): obj = json_parse(obj)
+        if isinstance(obj, _dict2obj):
+            self.appId = obj.appId
+
+
 
 # ------------------------ Global Methods ------------------------
 
@@ -134,17 +161,6 @@ def format_resource(raw_name):
     name = re.sub('[^a-zA-Z0-9 \n\.]', '-', raw_name)
     # _log.debug("name: {0}".format(name))
     return name
-
-
-# Provide beginning text of command option to 'secure' and remaining will be hidden
-# TODO: consider moving into shell_boilerplate if need for this logging arises
-def print_command(command, secure=""):
-    if not (command and isinstance(command, list)): TypeError("'command' parameter expected as string")
-    if secure:
-        # Print password-safe version of command
-        for line in command:
-            if line.startswith(secure): line = "{0}*".format(secure)
-    _log.debug("command => {0}".format(str.join(" ", command)))
 
 
 # https://pynative.com/python-generate-random-string
@@ -174,7 +190,7 @@ def get_random_password(length=16):
 def account_get(subscription):
     if not (subscription and isinstance(subscription, str)): TypeError("'subscription' parameter expected as string")
     command = ["az", "account", "show", "--subscription={0}".format(subscription)]
-    print_command(command)
+    sh.print_command(command)
     (stdout, stderr, rc) = sh.subprocess_run(command)
     # sh.subprocess_log(_log, stdout, stderr, rc, debug=args.debug)
     if (rc != 0): return Account()
@@ -186,7 +202,7 @@ def account_get(subscription):
 
 def account_list():
     command = ["az", "account", "list", "--all"]
-    print_command(command)
+    sh.print_command(command)
     (stdout, stderr, rc) = sh.subprocess_run(command)
     # sh.subprocess_log(_log, stdout, stderr, rc, debug=args.debug)
     if (rc != 0): return Account()
@@ -198,7 +214,7 @@ def account_list():
 
 def account_logout():
     command = ["az", "logout"]
-    print_command(command)
+    sh.print_command(command)
     (stdout, stderr, rc) = sh.subprocess_run(command)
     # sh.subprocess_log(_log, stdout, stderr, rc, debug=args.debug)
     return (rc == 0)
@@ -216,7 +232,7 @@ def account_login(organization="", name="", password=""):
         command.append("--password={0}".format(password))
         command.append("--allow-no-subscriptions")
     # Print password-safe version of command
-    print_command(command, "--password=")
+    sh.print_command(command, "--password=")
     (stdout, stderr, rc) = sh.subprocess_run(command)
     # sh.subprocess_log(_log, stdout, stderr, rc, debug=args.debug)
     if (rc != 0): return Account()
@@ -229,7 +245,7 @@ def account_login(organization="", name="", password=""):
 def account_set(subscription):
     if not (subscription and isinstance(subscription, str)): TypeError("'subscription' parameter expected as string")
     command = ["az", "account", "set", "--subscription={0}".format(subscription)]
-    print_command(command)
+    sh.print_command(command)
     (stdout, stderr, rc) = sh.subprocess_run(command)
     # sh.subprocess_log(_log, stdout, stderr, rc, debug=args.debug)
     return (rc == 0)
@@ -253,7 +269,7 @@ def service_principal_get(sp_name, sp_dir=""):
         _log.debug("gathering service principal from Azure...")
         # if not sp_name.startswith("http://"): sp_name = "http://{0}".format(sp_name)
         command = ["az", "ad", "sp", "show", "--id=http://{0}".format(sp_name)]
-        print_command(command)
+        sh.print_command(command)
         (stdout, stderr, rc) = sh.subprocess_run(command)
         # sh.subprocess_log(_log, stdout, stderr, rc, debug=args.debug)
         if (rc != 0): return None
@@ -280,7 +296,7 @@ def service_principal_rbac_set(key_vault, sp_name, reset=False):
     command.append("--name={0}".format("http://{0}".format(sp_name)))
     if not reset:
         command.append("--skip-assignment")
-    print_command(command)
+    sh.print_command(command)
     (stdout, stderr, rc) = sh.subprocess_run(command)
     sh.subprocess_log(_log, stdout, stderr, rc, debug=args.debug)
     if rc == 0 and stdout:
@@ -300,7 +316,7 @@ def service_principal_rbac_set(key_vault, sp_name, reset=False):
 #     command.append("--create-cert")
 #     command.append("--cert={0}".format(cert))
 #     command.append("--keyvault={0}".format(key_vault))
-#     print_command(command)
+#     sh.print_command(command)
 #     (stdout, stderr, rc) = sh.subprocess_run(command)
 #     # sh.subprocess_log(_log, stdout, stderr, rc, debug=args.debug)
 #     service_principal = json_parse(stdout)
@@ -330,32 +346,27 @@ def service_principal_save(path, service_principal):
 
 def resource_group_get(name=""):
     command = ["az", "group", "show", "--name={0}".format(name)]
-    print_command(command)
+    sh.print_command(command)
     (stdout, stderr, rc) = sh.subprocess_run(command)
     # sh.subprocess_log(_log, stdout, stderr, rc, debug=args.debug)
-    results = json_parse(stdout)
-    # _log.debug("results: {0}".format(results))
-    return results
+    resource_group = ResourceGroup(stdout)
+    _log.debug("resource_group: {0}".format(resource_group))
+    return resource_group
 
 
 def resource_group_set(name="", location=""):
-    rg_info = resource_group_get(name)
-    # _log.debug("rg_info: {0}".format(rg_info))
-
-    if rg_info:
-        _log.debug("resource group exists, gathering info...")
-        # TODO: parse resource group into class and return
-    else:
-        _log.error("resource group doesn't exists, creating...")
+    resource_group = resource_group_get(name)
+    rg_changed = False
+    if not resource_group:
+        _log.warning("resource group doesn't exists, creating...")
         command = ["az", "group", "create", "--name={0}".format(name), "--location={0}".format(location)]
-        print_command(command)
+        sh.print_command(command)
         (stdout, stderr, rc) = sh.subprocess_run(command)
         # sh.subprocess_log(_log, stdout, stderr, rc, debug=args.debug)
-        rg_info = json_parse(stdout)
-        # _log.debug("rg_info: {0}".format(rg_info))
-        # return (rc == 0)
-    
-    return rg_info
+        resource_group = ResourceGroup(stdout)
+        _log.debug("resource_group: {0}".format(resource_group))
+        rg_changed = True
+    return (resource_group, rg_changed)
 
 
 # --- Key Vault Commands ---
@@ -363,7 +374,7 @@ def resource_group_set(name="", location=""):
 
 def key_vault_get(name="", resource_group=""):
     command = ["az", "keyvault", "show", "--name={0}".format(name), "--resource-group={0}".format(resource_group)]
-    print_command(command)
+    sh.print_command(command)
     (stdout, stderr, rc) = sh.subprocess_run(command)
     # sh.subprocess_log(_log, stdout, stderr, rc, debug=args.debug)
     results = json_parse(stdout)
@@ -379,9 +390,9 @@ def key_vault_set(name="", resource_group=""):
         _log.debug("key vault exists, gathering info...")
         # TODO: parse key vault into class and return
     else:
-        _log.error("key vault doesn't exists, creating...")
+        _log.warning("key vault doesn't exists, creating...")
         command = ["az", "keyvault", "create", "--name={0}".format(name), "--location={0}".format(location)]
-        print_command(command)
+        sh.print_command(command)
         (stdout, stderr, rc) = sh.subprocess_run(command)
         # sh.subprocess_log(_log, stdout, stderr, rc, debug=args.debug)
         key_vault_info = json_parse(stdout)
@@ -396,7 +407,7 @@ def key_vault_set(name="", resource_group=""):
 
 def key_vault_secret_get(key_vault, secret_key):
     command = ["az", "keyvault", "secret", "show", "--vault-name={0}".format(key_vault), "--name={0}".format(secret_key)]
-    print_command(command)
+    sh.print_command(command)
     (stdout, stderr, rc) = sh.subprocess_run(command)
     # sh.subprocess_log(_log, stdout, stderr, rc, debug=args.debug)
     if (rc != 0): return ""
@@ -415,7 +426,7 @@ def key_vault_secret_set(key_vault, secret_key, secret_value):
     # _log.debug("command => {0}".format(command_str))
 
     # Print password-safe version of command
-    print_command(command, "--value=")
+    sh.print_command(command, "--value=")
     (stdout, stderr, rc) = sh.subprocess_run(command)
     # sh.subprocess_log(_log, stdout, stderr, rc, debug=args.debug)
     if (rc != 0): return ""
@@ -439,7 +450,7 @@ def key_vault_secret_download(cert_path, key_vault, secret_key):
     command = ["az", "keyvault", "secret", "download",
         "--file={0}".format(temp_cert_path), "--encoding=base64",
         "--vault-name={0}".format(key_vault), "--name={0}".format(secret_key)]
-    print_command(command)
+    sh.print_command(command)
     (stdout, stderr, rc) = sh.subprocess_run(command)
     sh.subprocess_log(_log, stdout, stderr, rc, debug=args.debug)
     if (rc != 0): return False
@@ -447,7 +458,7 @@ def key_vault_secret_download(cert_path, key_vault, secret_key):
     # https://www.openssl.org/docs/man1.1.1/man1/openssl.html
     # command = ["openssl", "pkcs12", "-in={0}".format(temp_cert_path), "-out={0}".format(cert_path), "-passout"]
     command = ["openssl", "pkcs12", "-in={0}".format(temp_cert_path), "-out={0}".format(cert_path), "-nodes", "-password pass:''"]
-    print_command(command)
+    sh.print_command(command)
     (stdout, stderr, rc) = sh.subprocess_run(command)
     sh.subprocess_log(_log, stdout, stderr, rc, debug=args.debug)
 
@@ -457,6 +468,40 @@ def key_vault_secret_download(cert_path, key_vault, secret_key):
         if match: sh.file_delete(backup_path)
 
     return (rc == 0)
+
+
+
+# --- Active Directory Application Commands ---
+# https://docs.microsoft.com/en-us/cli/azure/ad/app
+
+def active_directory_application_get(app_name):
+    command = ["az", "ad", "app", "list", "--query=[?displayName=='{0}'] | [0]".format(app_name)]
+
+    sh.print_command(command)
+    (stdout, stderr, rc) = sh.subprocess_run(command)
+    sh.subprocess_log(_log, stdout, stderr, rc, debug=args.debug)
+    # if (rc != 0): return None
+    # results = json_parse(stdout)
+    # _log.debug("results: {0}".format(results))
+    # return results.value
+    ad_app = ActiveDirectoryApplication(stdout)
+    _log.debug("resource_group: {0}".format(resource_group))
+    return ad_app
+
+
+def active_directory_application_set(app_name, secret_key, secret_value):
+    _log.info("storing key vault secret...")
+    command = ["az", "keyvault", "secret", "set", "--vault-name={0}".format(app_name), "--name={0}".format(secret_key), "--value={0}".format(secret_value)]
+    # Print password-safe version of command
+    sh.print_command(command, "--value=")
+    (stdout, stderr, rc) = sh.subprocess_run(command)
+    sh.subprocess_log(_log, stdout, stderr, rc, debug=args.debug)
+    if (rc != 0): return ""
+    results = json_parse(stdout)
+    _log.debug("results: {0}".format(results))
+    return results
+
+
 
 
 

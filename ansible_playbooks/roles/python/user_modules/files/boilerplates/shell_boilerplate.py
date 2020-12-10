@@ -6,7 +6,7 @@
 # VersionDate: 21 Sep 2020
 
 # --- Global Shell Commands ---
-# Utility:          directory_shift, directory_change, is_list_of_strings, list_differences
+# Utility:          directory_shift, directory_change, is_list_of_strings, list_differences, print_command
 # Process:          process_exit, process_fail, process_id, process_parent_id
 # Path:             path_current, path_expand, path_join, path_exists, path_dir, path_basename, path_filename
 # Directory:        directory_list, directory_create, directory_delete, directory_copy, directory_sync
@@ -68,6 +68,22 @@ def list_differences(first, second):
     return [item for item in first if item not in second]
 
 
+# Provide beginning text of command option to 'secure' and remaining will be hidden
+# TODO: consider moving into shell_boilerplate if need for this logging arises
+def print_command(command, secure=""):
+    if not (command and is_list_of_strings(command)): TypeError("'command' parameter expected as list of strings")
+    display_command = command.copy()
+    if secure:
+        # Print password-safe version of command
+        for (i, line) in enumerate(display_command):
+            if line.startswith(secure):
+                display_command[i] = "{0}*".format(secure)
+    display_command = "command => {0}".format(str.join(" ", display_command))
+    _log.debug(display_command)
+    return display_command
+
+
+
 # --- Process (List State) Commands ---
 
 def process_exit():
@@ -84,6 +100,7 @@ def process_id():
 
 def process_parent_id():
     return os.getppid()
+
 
 
 # --- Path Commands ---
@@ -132,6 +149,7 @@ def path_filename(name):
     extension_trimmed = os.path.splitext(name)[0]
     filename = path_basename(extension_trimmed)
     return filename
+
 
 
 # --- Directory Commands ---
@@ -224,6 +242,7 @@ def directory_sync(src, dest, recursive=True, purge=True, cut=False, include=(),
 
     _log.debug("changed_files: {0}".format(changed_files))
     return (changed_files, changes_dirs)
+
 
 
 # --- File Commands ---
@@ -346,6 +365,7 @@ def subprocess_log(_log, stdout=None, stderr=None, rc=None, debug=False):
     # [Debug]               "rc: {0}"
 
 
+
 # --- Signal Commands ---
 
 def signal_max():
@@ -369,6 +389,7 @@ def signal_send(pid, signal_num=signal.SIGTERM):
     if not (pid and isinstance(pid, int)): raise TypeError("signal_send() expects 'pid' parameter as positive integer")
     if not isinstance(signal_num, int): raise TypeError("signal_send() expects 'signal_num' parameter as integer")
     os.kill(pid, signal_num)
+
 
 
 # ------------------------ SubProcess Class ------------------------
