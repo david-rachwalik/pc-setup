@@ -4,7 +4,7 @@ os_family: Linux
 bash_user_command_dir: ~/.local/bin
 bash_user_alias: ~/.bash_aliases
 bash_user_commands:
-- az_iterate.sh
+- app_iterate.sh
 # - up.sh
 # - tester.sh
 ...

@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 
-# Basename: azure
-# Description: A service to control Azure resources
-# Version: 0.1.1
-# VersionDate: 15 Sep 2020
+# Basename: app
+# Description: A service to control application resources (Azure, ASP.NET Core)
+# Version: 0.2.0
+# VersionDate: 4 Nov 2020
 
 #       *** Resources ***
 # account:          Will only pair with 'login'; sign-in/config for 'az' & 'az devops'
@@ -32,6 +32,7 @@
 from logging_boilerplate import *
 import shell_boilerplate as sh
 import azure_boilerplate as az
+import dotnet_boilerplate as net
 
 try:
     # Python 2 has both 'str' (bytes) and 'unicode' text
@@ -44,17 +45,23 @@ except NameError:
 
 # ------------------------ Global Azure Commands ------------------------
 
-# --- Strategy  Commands ---
+# --- Strategies ---
 
-def resource_group_strategy(subscription, resource_group):
+def resource_group_strategy(subscription, rg_name, location):
     if not _az.is_signed_in: return (False, False)
     if not (subscription and isinstance(subscription, str)): TypeError("resource_group_strategy() expects 'subscription' parameter as string")
-    if not (resource_group and isinstance(resource_group, str)): TypeError("resource_group_strategy() expects 'resource_group' parameter as string")
+    if not (rg_name and isinstance(rg_name, str)): TypeError("resource_group_strategy() expects 'rg_name' parameter as string")
     rg_changed = False
 
     # Ensure resource group exists
+    resource_group = resource_group_get(rg_name)
 
-    return (True, rg_changed)
+    if not resource_group:
+        _log.warning("resource group doesn't exists, creating...")
+        resource_group = _az.resource_group_set(rg_name, location)
+        rg_changed = True
+
+    return (resource_group, rg_changed)
 
 
 def key_vault_strategy(subscription, resource_group, key_vault):
@@ -65,6 +72,8 @@ def key_vault_strategy(subscription, resource_group, key_vault):
     kv_changed = False
 
     # Ensure key vault exists
+    
+    # key_vault = az.key_vault_list(resource_group, key_vault)
 
     return (True, kv_changed)
 
@@ -83,7 +92,7 @@ def service_principal_strategy(subscription, resource_group, key_vault, sp_name,
     # Ensure service principal exists in Azure and local
     if sh.path_exists(sp_path, "f"):
         # Gather login info from service principal JSON
-        _log.debug("service principal file found, gathering credentials...")
+        _log.debug("service principal file exists, checking file...")
         service_principal = az.service_principal_get(sp_name, sp_dir)
     else:
         _log.debug("service principal file missing, checking Azure...")
@@ -108,18 +117,6 @@ def service_principal_strategy(subscription, resource_group, key_vault, sp_name,
             service_principal = az.service_principal_rbac_set(key_vault, sp_name)
 
         # Last chance to have service principal
-        # if not service_principal:    
-        #     _log.error("failed to retrieve service principal, exiting...")
-        #     sh.process_fail()
-
-        # if not service_principal:
-        #     _log.error("failed to retrieve service principal, likely due to insufficient privileges on account, signing out...")
-        #     az.account_logout()
-        #     # Calling 'az login' in script works but the prompt in subprocess causes display issues
-        #     _log.error("not signed-in, enter 'az login' to manually login before repeating your previous command")
-        #     sh.process_fail()
-
-        # Last chance to have service principal
         if not service_principal: return (False, False)
 
         # Store password/credentials in JSON file
@@ -132,7 +129,10 @@ def service_principal_strategy(subscription, resource_group, key_vault, sp_name,
         # use 'az role assignment create' on groups, not service principals
         # https://docs.microsoft.com/en-us/cli/azure/create-an-azure-service-principal-azure-cli#manage-service-principal-roles
         
-        # TODO: manage service principal security access to key vaults
+        # TODO: manage service principal security access to Key Vault:
+        # - manually enabled ARM for template deployment in Portal
+        # - manually added the service principal as access policy in Portal
+        # - examine key_vault returned from strategy
 
         sp_changed = True
 
@@ -142,9 +142,9 @@ def service_principal_strategy(subscription, resource_group, key_vault, sp_name,
 def login_strategy(organization, subscription, resource_group, key_vault, sp_name, sp_dir, retry=True):
     global _az
     if not (organization and isinstance(organization, str)): TypeError("'organization' parameter expected as string")
-    if not (subscription and isinstance(subscription, str)): TypeError("login_strategy() expects 'subscription' parameter as string")
-    if not (sp_name and isinstance(sp_name, str)): TypeError("login_strategy() expects 'sp_name' parameter as string")
-    if not (sp_dir and isinstance(sp_dir, str)): TypeError("login_strategy() expects 'sp_dir' parameter as string")
+    if not (subscription and isinstance(subscription, str)): TypeError("'subscription' parameter expected as string")
+    if not (sp_name and isinstance(sp_name, str)): TypeError("'sp_name' parameter expected as string")
+    if not (sp_dir and isinstance(sp_dir, str)): TypeError("'sp_dir' parameter expected as string")
     # Full filepath to service principal data
     sp_name = az.format_resource(sp_name)
     sp_path = sh.path_join(sh.path_expand(sp_dir), "{0}.json".format(sp_name))
@@ -155,6 +155,7 @@ def login_strategy(organization, subscription, resource_group, key_vault, sp_nam
 
     # Ensure service principal credentials exist
     (service_principal, sp_changed) = service_principal_strategy(subscription, resource_group, key_vault, sp_name, sp_dir)
+
     if _az.is_signed_in and not service_principal:
         _log.error("failed to retrieve service principal, likely due to insufficient privileges on account, signing out...")
         az.account_logout()
@@ -177,6 +178,7 @@ def login_strategy(organization, subscription, resource_group, key_vault, sp_nam
                     sh.process_fail()
         else:
             # Calling 'az login' in script works but the prompt in subprocess causes display issues
+            # - this can occur when signed-in with service principal and needing to change own credentials
             _log.error("not signed-in, enter 'az login' to manually login before repeating your previous command")
             sh.process_fail()
 
@@ -196,41 +198,126 @@ def login_strategy(organization, subscription, resource_group, key_vault, sp_nam
             _log.error("failed to activate subscription")
             sh.process_fail()
 
-    _log.info("successfully signed into Azure!")
+    _log.info("you are successfully signed-in Azure!")
     return _az
 
 
+# ASP.NET Core NuGet Packages (https://www.nuget.org/packages/*)
+def _project_packages(strat):
+    if not (strat and isinstance(strat, str)): TypeError("'strat' parameter expected as string")
+    # Development Packages
+    dotnet_packages = [
+        "Microsoft.VisualStudio.Web.BrowserLink",
+        "Microsoft.CodeAnalysis.FxCopAnalyzers"
+    ]
+    # Database Packages
+    if strat == "database" or strat == "identity":
+        dotnet_packages.append([
+            # Database provider automatically includes Microsoft.EntityFrameworkCore
+            "Microsoft.EntityFrameworkCore.SqlServer", # Install SQL Server database provider
+            "Microsoft.EntityFrameworkCore.Design", # Install EF Core design package
+            "Microsoft.EntityFrameworkCore.Tools",
+            "Microsoft.VisualStudio.Web.CodeGeneration.Design",
+            "Microsoft.Extensions.Logging.Debug",
+            "NSwag.AspNetCore" # Swagger / OpenAPI
+        ])
+    # Authentication Packages
+    if strat == "identity":
+        dotnet_packages.append([
+            "Microsoft.AspNetCore.Authentication.AzureAD.UI"
+            # "Install-Package Microsoft.Owin.Security.OpenIdConnect",
+            # "Install-Package Microsoft.Owin.Security.Cookies",
+            # "Install-Package Microsoft.Owin.Host.SystemWeb"
+        ])
+    _log.debug("NuGet packages: {0}".format(dotnet_packages))
+    return dotnet_packages
 
-# --- Subscription Commands ---
 
-def login():
-    # az.login_strategy(args.subscription, args.cert_path, args.tenant, args.key_vault)
-    # _log.debug("1st random password: {0}".format(az.get_random_password()))
-    # _log.debug("2nd random password: {0}".format(az.get_random_password()))
-    # _log.debug("3rd random password: {0}".format(az.get_random_password()))
+def application_strategy(dotnet_dir, application, projects, strat):
+    if not _az.is_signed_in: return (False, False)
+    if not (dotnet_dir and isinstance(dotnet_dir, str)): TypeError("'dotnet_dir' parameter expected as string")
+    if not (application and isinstance(application, str)): TypeError("'application' parameter expected as string")
+    if not isinstance(projects, list): TypeError("'projects' parameter expected as list")
+    if not (strat and isinstance(strat, str)): TypeError("'strat' parameter expected as string")
+    app_changed = False
 
-    # az.login_strategy(args.organization, args.subscription, args.login_resource_group, args.login_key_vault, args.login_service_principal, args.login_service_principal_dir)
-    login_strategy(args.organization, args.subscription, args.login_resource_group, args.login_key_vault, args.login_service_principal, args.login_service_principal_dir)
+    # Create application/repository directory
+    app_dir = sh.path_join(dotnet_dir, application)
+    _log.debug("checking for application dir ({0})...".format(app_dir))
+    app_dir_exists = sh.path_exists(app_dir, "d")
+    if not app_dir_exists:
+        _log.warning("could not locate application directory, creating...")
+        sh.directory_create(app_dir)
+        _log.info("successfully created application directory: {0}".format(app_dir))
+
+    # Create ASP.NET Core solution
+    solution_file = sh.path_join(dotnet_dir, application, "{0}.sln".format(application))
+    _log.debug("checking for solution ({0})...".format(solution_file))
+    solution_exists = sh.path_exists(solution_file, "f")
+    if not solution_exists:
+        _log.warning("could not locate solution, creating...")
+        sln_succeeded = net.solution_new(dotnet_dir, application)
+        _log.info("successfully created solution: {0}".format(sln_succeeded))
+        if not sln_succeeded:
+            _log.error("solution failed to be created, exiting...")
+            sh.process_fail()
+
+    for project in projects:
+        _log.debug("Project Name: {0}".format(project))
+
+        # Create project directory
+        project_dir = sh.path_join(dotnet_dir, application, project)
+        _log.debug("checking for project dir ({0})...".format(project_dir))
+        project_dir_exists = sh.path_exists(project_dir, "d")
+        if not project_dir_exists:
+            _log.warning("could not locate application directory, creating...")
+            sh.directory_create(project_dir)
+            _log.info("successfully created application directory: {0}".format(project_dir))
+
+        # Create ASP.NET Core project
+        project_file = sh.path_join(project_dir, "{0}.csproj".format(project))
+        _log.debug("checking for project ({0})...".format(project_file))
+        project_exists = sh.path_exists(project_file, "f")
+        if not project_exists:
+            _log.warning("could not locate project, creating...")
+            project_succeeded = net.project_new(dotnet_dir, application, project, strat)
+            _log.info("successfully created project: {0}".format(project_succeeded))
+            if not project_succeeded:
+                _log.error("project failed to be created, exiting...")
+                sh.process_fail()
+
+        # Add NuGet packages to ASP.NET Core project
+        # project_packages = net.project_package_list(dotnet_dir, application, project)
+        # _log.debug("project packages: {0}".format(project_packages))
+        packages_to_install = _project_packages(strat)
+        for package in packages_to_install:
+            package_succeeded = net.project_package_add(dotnet_dir, application, project, package)
+            if not package_succeeded:
+                _log.error("failed to add package: {0}".format(package))
+                sh.process_fail()
+
+        # Add ASP.NET Core project to solution
+        project_added = net.solution_project_add(dotnet_dir, application, project)
+        if not project_added:
+            _log.error("failed to add project: {0}".format(project))
+            sh.process_fail()
+
+    return (True, app_changed)
 
 
-# --- Deploy Commands ---
+    # Register Azure Active Directory application for project
+    # ad_application = az.active_directory_application_get()
 
-def app_create():
-    _log.debug("<mock 'app_create' group>")
-    # Register application object in Azure AD
-    # Create new ASP.NET Core web app
-    
-    login()
+    # rg_good = az.resource_group_set(args.resource_group, args.location)
+    # if not rg_good:
+    #     _log.error("failed to create resource group")
+    #     sh.process_fail()
+    # # Create a hardened container (a vault) in Azure
+    # az.key_vault_set(args.key_vault, args.resource_group)
+    # # Add a [key, secret, certificate] to the key vault
+    # az.key_vault_secret_set(args.key_vault, args.secret_key, args.secret_value)
 
-    rg_good = az.resource_group_set(args.resource_group, args.location)
-    if not rg_good:
-        _log.error("failed to create resource group")
-        sh.process_fail()
-    # Create a hardened container (a vault) in Azure
-    az.key_vault_set(args.key_vault, args.resource_group)
-    # Add a [key, secret, certificate] to the key vault
-    az.key_vault_secret_set(args.key_vault, args.secret_key, args.secret_value)
-    # Register an application with Azure Active Directory (AD)
+
     # Authorize an application to use a key or secret
     # Set key vault advanced access policies
     # Work with Hardware security modules (HSMs)
@@ -238,20 +325,37 @@ def app_create():
     # Miscellaneous Azure Cross-Platform Command-line Interface Commands
 
 
+
+# --- Commands ---
+
+# Login Azure Active Directory subscription
+def login():
+    # az.login_strategy(args.subscription, args.cert_path, args.tenant, args.key_vault)
+    # _log.debug("1st random password: {0}".format(az.get_random_password()))
+    # _log.debug("2nd random password: {0}".format(az.get_random_password()))
+    # _log.debug("3rd random password: {0}".format(az.get_random_password()))
+    login_strategy(args.organization, args.subscription, args.login_resource_group, args.login_key_vault, args.login_service_principal, args.login_service_principal_dir)
+
+
 def secret():
     login()
 
-    _log.debug("<mock 'secret' group>")
     # Create resource group, key vault, key vault secret
     rg_good = az.resource_group_set(args.resource_group, args.location)
     if not rg_good:
         _log.error("failed to create resource group")
         sh.process_fail()
+    
     # Create a hardened container (a vault) in Azure
     az.key_vault_set(args.key_vault, args.resource_group)
     # Add a [key, secret, certificate] to the key vault
     az.key_vault_secret_set(args.key_vault, args.secret_key, args.secret_value)
     # Set key vault advanced access policies
+
+
+def app_create():
+    login()
+    application_strategy(args.dotnet_dir, args.application, args.project, args.strat)
 
 
 def deploy():
@@ -275,7 +379,7 @@ def pipeline():
 # ------------------------ Main program ------------------------
 
 # Initialize the logger
-basename = "azure"
+basename = "app"
 args = LogArgs() # for external modules
 # log_file = "/var/log/{0}.log".format(basename)
 log_options = LogOptions(basename)
@@ -286,26 +390,15 @@ if __name__ == "__main__":
     def parse_arguments():
         import argparse
         parser = argparse.ArgumentParser()
-        # Use Subcommands
-        subparser = parser.add_subparsers(dest="group")
-
-        # Create parser for 'login' command
-        parser_login = subparser.add_parser("login")
-        # parser_login.set_defaults(func=login)
-
-        # Create parser for 'secret' command
-        parser_secret = subparser.add_parser("secret")
-        # parser_secret.set_defaults(func=secret)
-
-        # Create parser for 'deploy' command
-        parser_deploy = subparser.add_parser("deploy")
-        # parser_deploy.set_defaults(func=deploy)
-
-        # Create parser for 'pipeline' command
-        parser_pipeline = subparser.add_parser("pipeline")
-        # parser_pipeline.set_defaults(func=pipeline)
-
+        # --- Subcommands of 'group' ---
+        # group_subparser = parser.add_subparsers(dest="group")
+        # group_subparser.add_parser("login")
+        # group_subparser.add_parser("secret")
+        # group_subparser.add_parser("client")
+        # group_subparser.add_parser("deploy")
+        # group_subparser.add_parser("pipeline")
         # --- Global defaults ---
+        parser.add_argument("group", default="login", const="login", nargs="?", choices=["login", "secret", "client", "deploy", "pipeline"])
         parser.add_argument("action", default="get", const="get", nargs="?", choices=["get", "set", "remove"])
         parser.add_argument("--debug", action="store_true")
         parser.add_argument("--log-path", default="")
@@ -323,12 +416,17 @@ if __name__ == "__main__":
         parser.add_argument("--login-resource-group", "-G", default="Main")
         parser.add_argument("--login-key-vault", "-V", default="main-keyvault")
         # --- Resource defaults ---
-        # parser.add_argument("--environment", "-e", default="Dev")
+        parser.add_argument("--environment", "-e", default="Dev")
         parser.add_argument("--location", "-l", default="southcentralus") # az account list-locations
         parser.add_argument("--resource-group", "-g", default="")
         parser.add_argument("--key-vault", "-v", default="")
         parser.add_argument("--secret-key")
         parser.add_argument("--secret-value")
+        # --- ASP.NET Core Application defaults ---
+        parser.add_argument("--dotnet-dir", default="/mnt/d/Repos")
+        parser.add_argument("--application", "-a", default="") # solution
+        parser.add_argument('--project', nargs="*")
+        parser.add_argument("--strat", default="basic", const="basic", nargs="?", choices=["basic", "database", "identity"])
         return parser.parse_args()
     args = parse_arguments()
 
@@ -362,6 +460,9 @@ if __name__ == "__main__":
     elif args.group == "secret":
         secret()
     
+    elif args.group == "client":
+        app_create()
+    
     elif args.group == "deploy":
         deploy()
     
@@ -376,5 +477,5 @@ if __name__ == "__main__":
 
     # :: Usage Example ::
     # setup --tags "py" --skip-tags "windows"
-    # azure --debug login
-    # azure --debug --secret-key="AutoTestKey" --secret-value="007" secret
+    # app --debug login
+    # app --debug --secret-key="AutoTestKey" --secret-value="007" secret
