@@ -72,13 +72,14 @@ def list_differences(first, second):
 # TODO: consider moving into shell_boilerplate if need for this logging arises
 def print_command(command, secure=""):
     if not (command and is_list_of_strings(command)): TypeError("'command' parameter expected as list of strings")
-    display_command = command.copy()
+    _command = command.copy()
     if secure:
         # Print password-safe version of command
-        for (i, line) in enumerate(display_command):
+        for (i, line) in enumerate(_command):
             if line.startswith(secure):
-                display_command[i] = "{0}*".format(secure)
-    display_command = "command => {0}".format(str.join(" ", display_command))
+                _command[i] = "{0}*".format(secure)
+    # display_command = "command => {0}".format(str.join(" ", _command))
+    display_command = " ".join(map(str, _command)) # using list comprehension
     _log.debug(display_command)
     return display_command
 
@@ -339,7 +340,8 @@ def file_backup(path, ext="bak", time_format="%Y%m%d-%H%M%S"):
 # Creates asyncronous process and immediately awaits the tuple results
 # NOTE: Only accepting 'command' as list; argument options can have spaces
 def subprocess_run(command, path="", env=""):
-    if not isinstance(command, list): raise TypeError("subprocess_run() expects 'command' parameter as list")
+    # if not isinstance(command, list): raise TypeError("subprocess_run() expects 'command' parameter as list")
+    if not is_list_of_strings(command): raise TypeError("subprocess_run() expects 'command' parameter as list")
     process = SubProcess(command, path, env)
     (stdout, stderr, rc) = process.await_results()
     return (stdout, stderr, rc)
@@ -410,6 +412,7 @@ class SubProcess(object):
         if is_list_of_strings(command):
             self.command = command
         else:
+            _log.error("command provided: {0}".format(command))
             raise TypeError("SubProcess 'command' property expects a list/sequence of strings")
 
         # Build arguments and environment variables to support command
