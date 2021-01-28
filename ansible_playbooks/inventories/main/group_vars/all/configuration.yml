@@ -6,7 +6,7 @@ git_work_repo: ~/pc-setup
 git_config: ~/.gitconfig
 
 az_subscriptions: [Pay-As-You-Go]
-az_active_directory: davidrachwalikoutlook
+az_ad_tenant: davidrachwalikoutlook
 az_organization: david-rachwalik
 
 az_managed_identities:
