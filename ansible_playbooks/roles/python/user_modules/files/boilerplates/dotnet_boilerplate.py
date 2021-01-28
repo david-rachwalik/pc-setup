@@ -25,6 +25,15 @@ except NameError:
 
 # ------------------------ Global Methods ------------------------
 
+def format_application_name(project, environment=""):
+    if not (project and isinstance(project, str)): TypeError("'project' parameter expected as string")
+    if not (isinstance(environment, str)): TypeError("'environment' parameter expected as string")
+    app_name = "{0}-{1}".format(project, environment) if environment else project # concat
+    app_name = app_name.lower() # lowercase
+    app_name = re.sub("[^a-zA-Z0-9-]", "-", app_name) # replace
+    return app_name
+
+
 # --- Solution Commands ---
 
 # https://docs.microsoft.com/en-us/dotnet/core/tools/dotnet-new
@@ -63,14 +72,13 @@ def solution_project_add(dotnet_dir, application, project):
 
 # 'dotnet new' automatically calls build and restore
 # https://docs.microsoft.com/en-us/dotnet/core/tools/dotnet-new
-def project_new(dotnet_dir, application, project, strat):
+def project_new(dotnet_dir, application, project, strat, framework="net5.0"):
     client_id = ""
     if not (dotnet_dir and isinstance(dotnet_dir, str)): TypeError("'dotnet_dir' parameter expected as string")
     if not (application and isinstance(application, str)): TypeError("'application' parameter expected as string")
     if not (project and isinstance(project, str)): TypeError("'project' parameter expected as string")
     if not (strat and isinstance(strat, str)): TypeError("'strat' parameter expected as string")
     template = "webapp"
-    framework = "netcoreapp3.1"
     domain = "https://localhost:5001"
     project_dir = sh.path_join(dotnet_dir, application, project)
 
@@ -115,6 +123,7 @@ def project_package_list(dotnet_dir, application, project):
     return results
 
 
+# https://docs.microsoft.com/en-us/dotnet/core/tools/dotnet-add
 def project_package_add(dotnet_dir, application, project, package):
     if not (dotnet_dir and isinstance(dotnet_dir, str)): TypeError("'dotnet_dir' parameter expected as string")
     if not (application and isinstance(application, str)): TypeError("'application' parameter expected as string")
@@ -128,87 +137,6 @@ def project_package_add(dotnet_dir, application, project, package):
     (stdout, stderr, rc) = sh.subprocess_run(command)
     sh.subprocess_log(_log, stdout, stderr, rc, debug=args.debug)
     return bool(rc == 0)
-
-
-def project_package_set(template, dotnet_dir, application, project, strat):
-    if not (template and isinstance(template, str)): TypeError("'template' parameter expected as string")
-    auth = "None"
-    # --- .NET NuGet Packages (https://www.nuget.org/packages/*) ---
-    # Development Packages
-    dotnet_packages = [
-        "Microsoft.VisualStudio.Web.BrowserLink",
-        "Microsoft.CodeAnalysis.FxCopAnalyzers"
-    ]
-    if strat == "database":
-        dotnet_packages.append([
-            # Database provider automatically includes Microsoft.EntityFrameworkCore
-            "Microsoft.EntityFrameworkCore.SqlServer", # Install SQL Server database provider
-            "Microsoft.EntityFrameworkCore.Design", # Install EF Core design package
-            "Microsoft.EntityFrameworkCore.Tools",
-            "Microsoft.VisualStudio.Web.CodeGeneration.Design",
-            "Microsoft.Extensions.Logging.Debug",
-            "NSwag.AspNetCore" # Swagger / OpenAPI
-        ])
-    if strat == "identity":
-        dotnet_packages.append([
-            "Microsoft.AspNetCore.Authentication.AzureAD.UI"
-            # "Install-Package Microsoft.Owin.Security.OpenIdConnect",
-            # "Install-Package Microsoft.Owin.Security.Cookies",
-            # "Install-Package Microsoft.Owin.Host.SystemWeb"
-        ])
-
-    
-    # https://docs.microsoft.com/en-us/dotnet/core/tools/dotnet-add
-    # https://docs.ansible.com/ansible/latest/modules/command_module.html
-    # https://docs.microsoft.com/en-us/ef/core/miscellaneous/cli/dotnet
-    _log.debug("installing packages to ASP.NET Core project")
-    for package in dotnet_packages:
-        project_package_add(package)
-        if not package_succeeded:
-            _log.error("failed to add package: {0}".format(package))
-            sh.process_fail()
-
-
-    # dotnet_database_tools:
-    # # https://docs.microsoft.com/en-us/aspnet/core/data/ef-rp
-    # - dotnet-ef                                 # Install Entity Framework Core
-    # # https://docs.microsoft.com/en-us/aspnet/core/security/authentication/scaffold-identity
-    # - dotnet-aspnet-codegenerator               # Install Code Generator (Scaffold)
-
-    # # https://www.nuget.org/packages/*
-    # dotnet_development_packages:
-    # - Microsoft.VisualStudio.Web.BrowserLink
-    # - Microsoft.CodeAnalysis.FxCopAnalyzers
-
-    # # https://docs.microsoft.com/en-us/aspnet/core/data/ef-rp/intro#scaffold-student-pages
-    # # The Microsoft.VisualStudio.Web.CodeGeneration.Design package is required for scaffolding.
-    # # Although the app won't use SQL Server, the scaffolding tool needs the SQL Server package.
-    # dotnet_database_packages:
-    # # Automatically includes Microsoft.EntityFrameworkCore as dependency
-    # # - Microsoft.EntityFrameworkCore.Sqlite      # Install SQLite database provider
-    # - Microsoft.EntityFrameworkCore.SqlServer   # Install SQL Server database provider
-    # - Microsoft.EntityFrameworkCore.Design      # Install EF Core design package
-    # - Microsoft.EntityFrameworkCore.Tools
-    # - Microsoft.VisualStudio.Web.CodeGeneration.Design
-    # - Microsoft.Extensions.Logging.Debug
-    # - NSwag.AspNetCore                          # Swagger / OpenAPI
-
-    # dotnet_identity_packages:
-    # - Microsoft.AspNetCore.Authentication.AzureAD.UI
-    # # Install-Package Microsoft.Owin.Security.OpenIdConnect
-    # # Install-Package Microsoft.Owin.Security.Cookies
-    # # Install-Package Microsoft.Owin.Host.SystemWeb
-
-
-    sh.print_command(command)
-    (stdout, stderr, rc) = sh.subprocess_run(command)
-    # sh.subprocess_log(_log, stdout, stderr, rc, debug=args.debug)
-    if (rc != 0): return Account()
-    # Return the parsed account data
-    results = Account(stdout)
-    # _log.debug("results: {0}".format(results))
-    _log.debug("Successfully created ASP.NET Core project")
-    return results
 
 
 
