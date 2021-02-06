@@ -9,10 +9,11 @@
 # --- Global Methods ---
 # solution:                     solution_new, solution_project_list, solution_project_add
 # project:                      project_new, project_package_list, project_package_add
+# identity:                     project_identity_scaffold
 
 from logging_boilerplate import *
 import shell_boilerplate as sh
-import json, time, re
+# import json, time
 
 try:
     # Python 2 has both 'str' (bytes) and 'unicode' text
@@ -24,15 +25,6 @@ except NameError:
     unicode = str
 
 # ------------------------ Global Methods ------------------------
-
-def format_application_name(project, environment=""):
-    if not (project and isinstance(project, str)): TypeError("'project' parameter expected as string")
-    if not (isinstance(environment, str)): TypeError("'environment' parameter expected as string")
-    app_name = "{0}-{1}".format(project, environment) if environment else project # concat
-    app_name = app_name.lower() # lowercase
-    app_name = re.sub("[^a-zA-Z0-9-]", "-", app_name) # replace
-    return app_name
-
 
 # --- Solution Commands ---
 
@@ -46,7 +38,7 @@ def solution_new(dotnet_dir, application):
     # command.append("--dry-run")
     sh.print_command(command)
     (stdout, stderr, rc) = sh.subprocess_run(command)
-    sh.subprocess_log(_log, stdout, stderr, rc, debug=args.debug)
+    # sh.subprocess_log(_log, stdout, stderr, rc, debug=args.debug)
     return bool(rc == 0)
 
 
@@ -63,7 +55,7 @@ def solution_project_add(dotnet_dir, application, project):
     command = ["dotnet", "sln", app_sln, "add", app_csproj]
     sh.print_command(command)
     (stdout, stderr, rc) = sh.subprocess_run(command)
-    sh.subprocess_log(_log, stdout, stderr, rc, debug=args.debug)
+    # sh.subprocess_log(_log, stdout, stderr, rc, debug=args.debug)
     return bool(rc == 0)
 
 
@@ -95,14 +87,8 @@ def project_new(dotnet_dir, application, project, strat, framework="net5.0"):
 
     sh.print_command(command)
     (stdout, stderr, rc) = sh.subprocess_run(command)
-    sh.subprocess_log(_log, stdout, stderr, rc, debug=args.debug)
-
-    # if (rc != 0): return Account()
-    # # Return the parsed account data
-    # results = Account(stdout)
-    # # _log.debug("results: {0}".format(results))
+    # sh.subprocess_log(_log, stdout, stderr, rc, debug=args.debug)
     # _log.debug("Successfully created ASP.NET Core project")
-    # return results
     return bool(rc == 0)
 
 
@@ -112,14 +98,22 @@ def project_package_list(dotnet_dir, application, project):
     if not (dotnet_dir and isinstance(dotnet_dir, str)): TypeError("'dotnet_dir' parameter expected as string")
     if not (application and isinstance(application, str)): TypeError("'application' parameter expected as string")
     if not (project and isinstance(project, str)): TypeError("'project' parameter expected as string")
+    results = []
     project_dir = sh.path_join(dotnet_dir, application, project)
-
     command = ["dotnet", "list", project_dir, "package"]
     sh.print_command(command)
     (stdout, stderr, rc) = sh.subprocess_run(command)
-    sh.subprocess_log(_log, stdout, stderr, rc, debug=args.debug)
-    results = stdout
+    # sh.subprocess_log(_log, stdout, stderr, rc, debug=args.debug)
+    # Parse project package list
+    if (rc == 0 and stdout):
+        stdout_lines = stdout.splitlines()
+        for line in stdout_lines:
+            line_edit = line.lstrip()
+            if line_edit.startswith("> "):
+                line_edit_list = line_edit.split()
+                results.append(line_edit_list[1])
     # _log.debug("results: {0}".format(results))
+    results.sort()
     return results
 
 
@@ -130,9 +124,22 @@ def project_package_add(dotnet_dir, application, project, package):
     if not (project and isinstance(project, str)): TypeError("'project' parameter expected as string")
     if not (package and isinstance(package, str)): TypeError("'package' parameter expected as string")
     project_dir = sh.path_join(dotnet_dir, application, project)
-
     command = ["dotnet", "add", project_dir, "package", package]
+    sh.print_command(command)
+    (stdout, stderr, rc) = sh.subprocess_run(command)
+    # sh.subprocess_log(_log, stdout, stderr, rc, debug=args.debug)
+    return bool(rc == 0)
 
+
+
+# --- Scaffold Commands ---
+
+# https://docs.microsoft.com/en-us/aspnet/core/fundamentals/tools/dotnet-aspnet-codegenerator
+def project_identity_scaffold(project_dir):
+    if not (project_dir and isinstance(project_dir, str)): TypeError("'project_dir' parameter expected as string")
+    command = ["dotnet", "aspnet-codegenerator", "identity", "--useDefaultUI",
+        "--project={0}".format(project_dir)
+    ]
     sh.print_command(command)
     (stdout, stderr, rc) = sh.subprocess_run(command)
     sh.subprocess_log(_log, stdout, stderr, rc, debug=args.debug)
