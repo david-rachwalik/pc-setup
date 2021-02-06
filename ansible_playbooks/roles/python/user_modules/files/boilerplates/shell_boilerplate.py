@@ -2,10 +2,11 @@
 
 # Basename: shell_boilerplate
 # Description: Common business logic for *nix shell interactions
-# Version: 1.6.1
-# VersionDate: 21 Sep 2020
+# Version: 1.7.0
+# VersionDate: 5 Feb 2021
 
 # --- Global Shell Commands ---
+# :-Helper-:        is_json_parse, is_json, json_parse, json_save, format_resource, valid_resource, get_random_password
 # Utility:          directory_shift, directory_change, is_list_of_strings, list_differences, print_command
 # Process:          process_exit, process_fail, process_id, process_parent_id
 # Path:             path_current, path_expand, path_join, path_exists, path_dir, path_basename, path_filename
@@ -18,10 +19,11 @@
 # await_results, is_done, format_output
 
 from logging_boilerplate import *
-import sys, os, subprocess, signal, time
+import sys, os, subprocess, signal
 from contextlib import contextmanager
 import distutils.dir_util
 # import distutils.file_util
+import json, time, re
 
 # --- Module Key ---
 # subprocess        Pipe a service command like you would ad hoc
@@ -37,7 +39,105 @@ except NameError:
     basestring = str
     unicode = str
 
+# ------------------------ Classes ------------------------
+
+# https://goodcode.io/articles/python-dict-object
+# Access dictionary items as object attributes
+class _dict2obj(dict):
+    def __getattr__(self, name):
+        if name in self:
+            return self[name]
+        else:
+            raise AttributeError("No such attribute: " + name)
+
+    def __setattr__(self, name, value):
+        self[name] = value
+
+    def __delattr__(self, name):
+        if name in self:
+            del self[name]
+        else:
+            raise AttributeError("No such attribute: " + name)
+
+
+
 # ------------------------ Global Shell Commands ------------------------
+
+# --- Helper Commands ---
+
+# https://realpython.com/python-json
+def _decode_dict(dct):
+    return _dict2obj(dct)
+
+
+def is_json_parse(obj):
+    return isinstance(obj, _dict2obj)
+
+
+def is_json(myjson):
+    try:
+        json_object = json.loads(myjson)
+    except ValueError as e:
+        return False
+    return True
+
+
+# Deserialize JSON data: https://docs.python.org/2/library/json.html
+def json_parse(raw_string):
+    if not (raw_string and is_json(raw_string)): return ""
+    results = json.loads(raw_string, object_hook=_decode_dict)
+    return results
+
+
+def json_save(path, json_str, indent=4):
+    if not (path and isinstance(path, str)): TypeError("'path' parameter expected as string")
+    if not (json_str and isinstance(json_str, str)): TypeError("'json_str' parameter expected as string")
+    if not (indent and isinstance(indent, int)): TypeError("'indent' parameter expected as integer")
+    # Handle previous service principal if found
+    if path_exists(path, "f"): backup_path = file_backup(path)
+    # https://stackoverflow.com/questions/39491420/python-jsonexpecting-property-name-enclosed-in-double-quotes
+    # Valid JSON syntax uses quotation marks; single quotes only valid in string
+    # https://stackoverflow.com/questions/43509448/building-json-file-out-of-python-objects
+    file_ready = json.dumps(json_str, indent=indent)
+    file_write(path, file_ready)
+
+
+# Must conform to the following pattern: '^[0-9a-zA-Z-]+$'
+def format_resource(raw_name, lowercase=True):
+    if not (raw_name and isinstance(raw_name, str)): TypeError("'raw_name' parameter expected as string")
+    name = raw_name.lower() if lowercase else raw_name # lowercase
+    # name = re.sub('[^a-zA-Z0-9 \n\.]', '-', raw_name) # old, ignores '.'
+    name = re.sub("[^a-zA-Z0-9-]", "-", name) # replace
+    return name
+
+
+# Must conform to the following pattern: '^[0-9a-zA-Z-]+$'
+def valid_resource(raw_name, lowercase=True):
+    og_name = str(raw_name)
+    formatted_name = format_resource(raw_name, lowercase)
+    return bool(og_name == formatted_name)
+
+
+# https://pynative.com/python-generate-random-string
+def get_random_password(length=16):
+    import random, string
+    # Load all lower/upper case letters, digits, and special characters
+    random_source = string.ascii_letters + string.digits + string.punctuation
+    # Guarantee at least 1 of each
+    password = random.choice(string.ascii_lowercase)
+    password += random.choice(string.ascii_uppercase)
+    password += random.choice(string.digits)
+    password += random.choice(string.punctuation)
+    # Fill in the remaining length
+    for i in range(length - 4):
+        password += random.choice(random_source)
+    # Randomly shuffle all the characters
+    password_list = list(password)
+    random.SystemRandom().shuffle(password_list)
+    password = "".join(password_list)
+    return password
+
+
 
 # --- Utility Commands ---
 
@@ -298,7 +398,7 @@ def file_copy(src, dest):
     if not path_exists(src, "f"): return False
     command = ["cp", "--force", src, dest]
     (stdout, stderr, rc) = subprocess_run(command)
-    subprocess_log(_log, stdout, stderr, rc, debug=args.debug)
+    # subprocess_log(_log, stdout, stderr, rc, debug=args.debug)
     return (rc == 0)
 
 
@@ -307,7 +407,7 @@ def file_hash(path):
     # Using SHA-2 hash check (more secure than MD5|SHA-1)
     command = ["sha256sum", path]
     (stdout, stderr, rc) = subprocess_run(command)
-    subprocess_log(_log, stdout, stderr, rc, debug=args.debug)
+    # subprocess_log(_log, stdout, stderr, rc, debug=args.debug)
     results = stdout.split()
     # _log.debug("results: {0}".format(results))
     return results[0]
@@ -315,12 +415,12 @@ def file_hash(path):
 
 # Uses hash to validate file integrity
 def file_match(path1, path2):
-    _log.debug("path1: {0}".format(path1))
+    # _log.debug("path1: {0}".format(path1))
     hash1 = file_hash(path1)
-    _log.debug("hash1: {0}".format(hash1))
-    _log.debug("path2: {0}".format(path2))
+    # _log.debug("hash1: {0}".format(hash1))
+    # _log.debug("path2: {0}".format(path2))
     hash2 = file_hash(path2)
-    _log.debug("hash2: {0}".format(hash2))
+    # _log.debug("hash2: {0}".format(hash2))
     if len(hash1) > 0 and len(hash2) > 0:
         return (hash1 == hash2)
     else:

@@ -2,23 +2,22 @@
 
 # Basename: azure_boilerplate
 # Description: Common business logic for Azure resources
-# Version: 0.1.1
-# VersionDate: 15 Sep 2020
+# Version: 0.2.0
+# VersionDate: 5 Feb 2021
 
 # --- Global Azure Classes ---
 # Account:                      is_signed_in, tenant_id, account_user, subscription, subscription_id, subscription_is_default
 # ServicePrincipal:             name, appId, password
 
 # --- Global Azure Methods ---
-# :-Helper-:                    json_parse, format_resource, get_random_password
 # account:                      account_get, account_list, account_logout, account_login, account_set
+# active directory group:       ad_group_get, ad_group_set
+# active directory role:        ad_role_get, ad_role_set
 # service principal:            service_principal_get, service_principal_rbac_set, service_principal_save
 # resource group:               resource_group_get, resource_group_set, resource_group_delete
 # key vault:                    key_vault_get, key_vault_set
 # key vault secret:             key_vault_secret_get, key_vault_secret_set, key_vault_secret_download
 # active directory:             active_directory_application_get, active_directory_application_set
-
-
 
 # TODO:
 # devops authentication:        devops_login, devops_config
@@ -31,7 +30,7 @@
 
 from logging_boilerplate import *
 import shell_boilerplate as sh
-import json, time, re
+# import json, time, re
 
 try:
     # Python 2 has both 'str' (bytes) and 'unicode' text
@@ -43,25 +42,6 @@ except NameError:
     unicode = str
 
 # ------------------------ Classes ------------------------
-
-# https://goodcode.io/articles/python-dict-object
-# Access dictionary items as object attributes
-class _dict2obj(dict):
-    def __getattr__(self, name):
-        if name in self:
-            return self[name]
-        else:
-            raise AttributeError("No such attribute: " + name)
-
-    def __setattr__(self, name, value):
-        self[name] = value
-
-    def __delattr__(self, name):
-        if name in self:
-            del self[name]
-        else:
-            raise AttributeError("No such attribute: " + name)
-
 
 class AzureBase(object):
     def __repr__(self):
@@ -81,11 +61,11 @@ class Account(AzureBase):
         self.is_signed_in = False
 
         # Business logic for parsing
-        if obj and isinstance(obj, str): obj = json_parse(obj)
+        if obj and isinstance(obj, str): obj = sh.json_parse(obj)
         # Sometimes the output is a list (e.g. 'az login')
         # TODO: search by subscription name instead of always first result
         if obj and isinstance(obj, list): obj = obj[0]
-        if isinstance(obj, _dict2obj):
+        if sh.is_json_parse(obj):
             self.tenant_id = obj.tenantId
             self.account_user = obj.user.name
             self.subscription = obj.name
@@ -94,16 +74,32 @@ class Account(AzureBase):
             self.is_signed_in = bool(self.tenant_id and self.subscription_id)
 
 
-# Attribute names match stdout for consistent JSON serialization
+class AdGroup(AzureBase):
+    def __init__(self, obj=""):
+        self.is_valid = False
+        self.name = ""
+
+        # Business logic for parsing
+        if obj and isinstance(obj, str): obj = sh.json_parse(obj)
+        if sh.is_json_parse(obj):
+            self.name = obj.displayName
+            self.mail_nickname = obj.mailNickname
+            self.type = obj.objectType # Group
+            self.id = obj.objectId
+            self.is_valid = bool(self.name)
+
+
+# NOTE: match attribute names to stdout for consistent JSON serialization
 class ServicePrincipal(AzureBase):
     def __init__(self, obj="", sp_name=""):
         self.name = sp_name
         self.appId = ""
+        self.objectId = ""
         self.password = ""
 
         # Business logic for parsing
-        if obj and isinstance(obj, str): obj = json_parse(obj)
-        if isinstance(obj, _dict2obj):
+        if obj and isinstance(obj, str): obj = sh.json_parse(obj)
+        if sh.is_json_parse(obj):
             keys = obj.keys()
 
             # keys for 'az ad sp show', 'az ad sp create-for-rbac', 'az ad sp credential reset'
@@ -113,6 +109,7 @@ class ServicePrincipal(AzureBase):
 
             if ("name" in keys): self.name = sh.path_basename(obj.name)
             if ("appId" in keys): self.appId = obj.appId
+            if ("objectId" in keys): self.objectId = obj.objectId
             if ("password" in keys): self.password = obj.password
 
 
@@ -122,8 +119,8 @@ class ResourceGroup(AzureBase):
         self.name = ""
 
         # Business logic for parsing
-        if obj and isinstance(obj, str): obj = json_parse(obj)
-        if isinstance(obj, _dict2obj):
+        if obj and isinstance(obj, str): obj = sh.json_parse(obj)
+        if sh.is_json_parse(obj):
             self.location = obj.location
             self.name = obj.name
             self.is_valid = bool(self.location and self.name)
@@ -132,57 +129,25 @@ class ResourceGroup(AzureBase):
 class ActiveDirectoryApplication(AzureBase):
     def __init__(self, obj=""):
         self.appId = "" # client_id
+        self.name = ""
 
         # Business logic for parsing
-        if obj and isinstance(obj, str): obj = json_parse(obj)
-        if isinstance(obj, _dict2obj):
+        if obj and isinstance(obj, str): obj = sh.json_parse(obj)
+        if sh.is_json_parse(obj):
             self.appId = obj.appId
+            self.name = obj.displayName
+            self.domain = obj.homepage
+            self.identifierUri = obj.identifierUris[0]
+            self.objectId = obj.objectId
+            self.objectType = obj.objectType
+            self.publisherDomain = obj.publisherDomain
+            self.replyUrl = obj.replyUrls[0]
+            self.signInAudience = obj.signInAudience
+            self.wwwHomepage = obj.wwwHomepage
 
 
 
 # ------------------------ Global Methods ------------------------
-
-# --- Helper Commands ---
-
-# https://realpython.com/python-json
-def _decode_dict(dct):
-    return _dict2obj(dct)
-
-
-# Deserialize JSON data: https://docs.python.org/2/library/json.html
-def json_parse(raw_string):
-    if not raw_string: return ""
-    results = json.loads(raw_string, object_hook=_decode_dict)
-    return results
-
-
-# Must conform to the following pattern: '^[0-9a-zA-Z-]+$'
-def format_resource(raw_name):
-    name = re.sub('[^a-zA-Z0-9 \n\.]', '-', raw_name)
-    # _log.debug("name: {0}".format(name))
-    return name
-
-
-# https://pynative.com/python-generate-random-string
-def get_random_password(length=16):
-    import random, string
-    # Load all lower/upper case letters, digits, and special characters
-    random_source = string.ascii_letters + string.digits + string.punctuation
-    # Guarantee at least 1 of each
-    password = random.choice(string.ascii_lowercase)
-    password += random.choice(string.ascii_uppercase)
-    password += random.choice(string.digits)
-    password += random.choice(string.punctuation)
-    # Fill in the remaining length
-    for i in range(length - 4):
-        password += random.choice(random_source)
-    # Randomly shuffle all the characters
-    password_list = list(password)
-    random.SystemRandom().shuffle(password_list)
-    password = "".join(password_list)
-    return password
-
-
 
 # --- Account/Subscription Commands ---
 # https://docs.microsoft.com/en-us/cli/azure/account
@@ -222,12 +187,12 @@ def account_logout():
 
 # https://docs.microsoft.com/en-us/cli/azure/reference-index#az_login
 # Login with username (service principal) and password (client secret/certificate)
-def account_login(organization="", name="", password=""):
+def account_login(tenant="", name="", password=""):
     command = ["az", "login"]
     # az login --service-principal -u <app-url> -p <password-or-cert> --tenant <tenant>
-    if organization and name and password:
+    if tenant and name and password:
         command.append("--service-principal")
-        command.append("--tenant={0}.onmicrosoft.com".format(organization))
+        command.append("--tenant={0}.onmicrosoft.com".format(tenant))
         command.append("--username=http://{0}".format(name))
         command.append("--password={0}".format(password))
         command.append("--allow-no-subscriptions")
@@ -252,14 +217,103 @@ def account_set(subscription):
 
 
 
+# --- Active Directory (AD) Group Commands ---
+# https://docs.microsoft.com/en-us/cli/azure/ad/group
+
+def ad_group_get(name=""):
+    command = ["az", "ad", "group", "show", "--group={0}".format(name)]
+    sh.print_command(command)
+    (stdout, stderr, rc) = sh.subprocess_run(command)
+    # sh.subprocess_log(_log, stdout, stderr, rc, debug=args.debug)
+    ad_group = AdGroup(stdout)
+    _log.debug("ad_group: {0}".format(ad_group))
+    return ad_group
+
+
+def ad_group_set(name=""):
+    ad_group = AdGroup()
+    group_changed = False
+    command = ["az", "ad", "group", "create", "--display-name={0}".format(name), "--mail-nickname={0}".format(name)]
+    sh.print_command(command)
+    (stdout, stderr, rc) = sh.subprocess_run(command)
+    # sh.subprocess_log(_log, stdout, stderr, rc, debug=args.debug)
+    if rc == 0:
+        ad_group = AdGroup(stdout)
+        group_changed = True
+    _log.debug("ad_group: {0}".format(ad_group))
+    return (ad_group, group_changed)
+
+
+
+# --- Active Directory (AD) Group Member Commands ---
+# https://docs.microsoft.com/en-us/cli/azure/ad/group/member
+
+def ad_group_member_get(name, member_id):
+    if not (name and isinstance(name, str)): TypeError("'name' parameter expected as string")
+    if not (member_id and isinstance(member_id, str)): TypeError("'member_id' parameter expected as string")
+    command = ["az", "ad", "group", "member", "check", "--group={0}".format(name), "--member-id={0}".format(member_id), "--query=value"]
+    sh.print_command(command, "--member-id=")
+    (stdout, stderr, rc) = sh.subprocess_run(command)
+    # sh.subprocess_log(_log, stdout, stderr, rc, debug=args.debug)
+    return bool(rc == 0 and stdout == "true")
+
+
+def ad_group_member_set(name, member_id):
+    if not (name and isinstance(name, str)): TypeError("'name' parameter expected as string")
+    if not (member_id and isinstance(member_id, str)): TypeError("'member_id' parameter expected as string")
+    command = ["az", "ad", "group", "member", "add", "--group={0}".format(name), "--member-id={0}".format(member_id)]
+    sh.print_command(command, "--member-id=")
+    (stdout, stderr, rc) = sh.subprocess_run(command)
+    # sh.subprocess_log(_log, stdout, stderr, rc, debug=args.debug)
+    return bool(rc == 0)
+
+
+
+# --- Role Assignment Commands ---
+# https://docs.microsoft.com/en-us/cli/azure/role/assignment
+# https://docs.microsoft.com/en-us/azure/role-based-access-control/built-in-roles
+# https://docs.microsoft.com/en-us/azure/role-based-access-control/role-assignments-cli
+
+def role_assign_get(assignee_id, scope="", role="Contributor"):
+    if not (assignee_id and isinstance(assignee_id, str)): TypeError("'assignee_id' parameter expected as string")
+    if not (scope and isinstance(scope, str)): TypeError("'scope' parameter expected as string")
+    # NOTE: do not wrap --role value in '', gets evaluated as part of string
+    command = ["az", "role", "assignment", "list",
+        "--assignee={0}".format(assignee_id),
+        "--role={0}".format(role), "--scope={0}".format(scope),
+        "--include-inherited", "--include-groups", "--query=[0]"
+    ]
+    sh.print_command(command, "--scope=")
+    (stdout, stderr, rc) = sh.subprocess_run(command)
+    # sh.subprocess_log(_log, stdout, stderr, rc, debug=args.debug)
+    return bool(rc == 0)
+
+
+def role_assign_set(assignee_id, scope="", role="Contributor"):
+    if not (assignee_id and isinstance(assignee_id, str)): TypeError("'assignee_id' parameter expected as string")
+    if not (scope and isinstance(scope, str)): TypeError("'scope' parameter expected as string")
+    # NOTE: do not wrap --role value in '', gets evaluated as part of string
+    command = ["az", "role", "assignment", "create",
+        "--assignee={0}".format(assignee_id),
+        "--role={0}".format(role), "--scope={0}".format(scope)
+    ]
+    sh.print_command(command, "--scope=")
+    (stdout, stderr, rc) = sh.subprocess_run(command)
+    sh.subprocess_log(_log, stdout, stderr, rc, debug=args.debug)
+    return bool(rc == 0)
+
+
+
 # --- Service Principal Commands ---
 # https://docs.microsoft.com/en-us/cli/azure/ad/sp
 
 # Always use service principal name (not id)
-def service_principal_get(sp_name, sp_dir=""):
+def service_principal_get(sp_name, sp_dir="", tenant=""):
     if not (sp_name and isinstance(sp_name, str)): TypeError("'sp_name' parameter expected as string")
     # Full filepath to service principal data
-    sp_name = format_resource(sp_name)
+    if not sh.valid_resource(sp_name):
+        _log.error("'sp_name' parameter expected as valid resource name")
+        sh.process_fail()
     sp_path = sh.path_join(sh.path_expand(sp_dir), "{0}.json".format(sp_name))
     # Gather login info from service principal
     if sp_dir:
@@ -268,16 +322,33 @@ def service_principal_get(sp_name, sp_dir=""):
     else:
         _log.debug("gathering service principal from Azure...")
         # if not sp_name.startswith("http://"): sp_name = "http://{0}".format(sp_name)
-        command = ["az", "ad", "sp", "show", "--id=http://{0}".format(sp_name)]
+        if tenant:
+            command = ["az", "ad", "sp", "show", "--id=https://{0}.onmicrosoft.com/{1}".format(tenant, sp_name)]
+        else:
+            command = ["az", "ad", "sp", "show", "--id=http://{0}".format(sp_name)]
         sh.print_command(command)
         (stdout, stderr, rc) = sh.subprocess_run(command)
         # sh.subprocess_log(_log, stdout, stderr, rc, debug=args.debug)
         if (rc != 0): return None
     # Return the parsed service principal data
-    # service_principal = _service_principal_parse(stdout, sp_name)
     service_principal = ServicePrincipal(stdout, sp_name)
     # _log.debug("service_principal: {0}".format(service_principal))
     return service_principal
+
+
+def service_principal_set(sp_name, obj_id):
+    if not (sp_name and isinstance(sp_name, str)): TypeError("'sp_name' parameter expected as string")
+    if not (obj_id and isinstance(obj_id, str)): TypeError("'obj_id' parameter expected as string")
+    # Using '--sdk-auth' produces better output but not available for reset
+    command = ["az", "ad", "sp", "create", "--id={0}".format(obj_id)]
+    sh.print_command(command)
+    (stdout, stderr, rc) = sh.subprocess_run(command)
+    sh.subprocess_log(_log, stdout, stderr, rc, debug=args.debug)
+    if rc == 0 and stdout:
+        service_principal = ServicePrincipal(stdout, sp_name)
+        return service_principal
+    else:
+        return None
 
 
 # https://docs.microsoft.com/en-us/cli/azure/ad/sp#az_ad_sp_create_for_rbac
@@ -301,7 +372,6 @@ def service_principal_rbac_set(key_vault, sp_name, reset=False):
     sh.subprocess_log(_log, stdout, stderr, rc, debug=args.debug)
     if rc == 0 and stdout:
         _log.info("successfully {0} service principal credentials!".format("reset" if reset else "created"))
-        # service_principal = _service_principal_parse(stdout, sp_name)
         service_principal = ServicePrincipal(stdout, sp_name)
         return service_principal
     else:
@@ -319,23 +389,31 @@ def service_principal_rbac_set(key_vault, sp_name, reset=False):
 #     sh.print_command(command)
 #     (stdout, stderr, rc) = sh.subprocess_run(command)
 #     # sh.subprocess_log(_log, stdout, stderr, rc, debug=args.debug)
-#     service_principal = json_parse(stdout)
+#     service_principal = sh.json_parse(stdout)
 #     # _log.debug("service_principal: {0}".format(service_principal))
 #     # Same output as key vault secret
 #     return service_principal
 
 
+# def service_principal_save(path, service_principal):
+#     if not (path and isinstance(path, str)): TypeError("'path' parameter expected as string")
+#     if not isinstance(service_principal, ServicePrincipal): TypeError("'service_principal' parameter expected as ServicePrincipal")
+#     # Handle previous service principal if found
+#     if sh.path_exists(path, "f"): backup_path = sh.file_backup(path)
+#     # https://stackoverflow.com/questions/39491420/python-jsonexpecting-property-name-enclosed-in-double-quotes
+#     # Valid JSON syntax uses quotation marks; single quotes only valid in string
+#     # https://stackoverflow.com/questions/43509448/building-json-file-out-of-python-objects
+#     _log.info("storing service principal credentials...")
+#     file_ready = json.dumps(service_principal.__dict__, indent=4)
+#     sh.file_write(path, file_ready)
+#     _log.info("successfully saved service principal credentials!")
+
+
 def service_principal_save(path, service_principal):
     if not (path and isinstance(path, str)): TypeError("'path' parameter expected as string")
     if not isinstance(service_principal, ServicePrincipal): TypeError("'service_principal' parameter expected as ServicePrincipal")
-    # Handle previous service principal if found
-    if sh.path_exists(path, "f"): backup_path = sh.file_backup(path)
-    # https://stackoverflow.com/questions/39491420/python-jsonexpecting-property-name-enclosed-in-double-quotes
-    # Valid JSON syntax uses quotation marks; single quotes only valid in string
-    # https://stackoverflow.com/questions/43509448/building-json-file-out-of-python-objects
     _log.info("storing service principal credentials...")
-    file_ready = json.dumps(service_principal.__dict__, indent=4)
-    sh.file_write(path, file_ready)
+    sh.json_save(path, service_principal.__dict__)
     _log.info("successfully saved service principal credentials!")
 
 
@@ -377,7 +455,7 @@ def key_vault_get(name="", resource_group=""):
     sh.print_command(command)
     (stdout, stderr, rc) = sh.subprocess_run(command)
     # sh.subprocess_log(_log, stdout, stderr, rc, debug=args.debug)
-    results = json_parse(stdout)
+    results = sh.json_parse(stdout)
     # _log.debug("results: {0}".format(results))
     return results
 
@@ -395,7 +473,7 @@ def key_vault_set(name="", resource_group=""):
         sh.print_command(command)
         (stdout, stderr, rc) = sh.subprocess_run(command)
         # sh.subprocess_log(_log, stdout, stderr, rc, debug=args.debug)
-        key_vault_info = json_parse(stdout)
+        key_vault_info = sh.json_parse(stdout)
         # _log.debug("key_vault_info: {0}".format(key_vault_info))
         # return (rc == 0)
     
@@ -411,7 +489,7 @@ def key_vault_secret_get(key_vault, secret_key):
     (stdout, stderr, rc) = sh.subprocess_run(command)
     # sh.subprocess_log(_log, stdout, stderr, rc, debug=args.debug)
     if (rc != 0): return ""
-    results = json_parse(stdout)
+    results = sh.json_parse(stdout)
     # _log.debug("results: {0}".format(results))
     return results.value
 
@@ -430,7 +508,7 @@ def key_vault_secret_set(key_vault, secret_key, secret_value):
     (stdout, stderr, rc) = sh.subprocess_run(command)
     # sh.subprocess_log(_log, stdout, stderr, rc, debug=args.debug)
     if (rc != 0): return ""
-    results = json_parse(stdout)
+    results = sh.json_parse(stdout)
     # _log.debug("results: {0}".format(results))
     return results
 
@@ -476,32 +554,51 @@ def key_vault_secret_download(cert_path, key_vault, secret_key):
 
 def active_directory_application_get(app_name):
     command = ["az", "ad", "app", "list", "--query=[?displayName=='{0}'] | [0]".format(app_name)]
-
     sh.print_command(command)
     (stdout, stderr, rc) = sh.subprocess_run(command)
-    sh.subprocess_log(_log, stdout, stderr, rc, debug=args.debug)
-    # if (rc != 0): return None
-    # results = json_parse(stdout)
-    # _log.debug("results: {0}".format(results))
-    # return results.value
+    # sh.subprocess_log(_log, stdout, stderr, rc, debug=args.debug)
     ad_app = ActiveDirectoryApplication(stdout)
-    _log.debug("resource_group: {0}".format(resource_group))
+    _log.debug("ad_app: {0}".format(ad_app))
     return ad_app
 
 
-def active_directory_application_set(app_name, secret_key, secret_value):
-    _log.info("storing key vault secret...")
-    command = ["az", "keyvault", "secret", "set", "--vault-name={0}".format(app_name), "--name={0}".format(secret_key), "--value={0}".format(secret_value)]
-    # Print password-safe version of command
-    sh.print_command(command, "--value=")
+def active_directory_application_set(tenant, app_name, app_id=""):
+    if not (tenant and isinstance(tenant, str)): TypeError("'tenant' parameter expected as string")
+    if not (app_name and isinstance(app_name, str)): TypeError("'app_name' parameter expected as string")
+    if not (isinstance(app_id, str)): TypeError("'app_id' parameter expected as string")
+    az_ad_domain = "https://{0}.onmicrosoft.com".format(tenant)
+    az_ad_identifier_url = "{0}/{1}".format(az_ad_domain, app_name)
+    app_domain = "https://localhost:5001"
+    az_ad_reply_url = "{0}/signin-oidc".format(app_domain)
+
+    if app_id:
+        _log.info("updating Azure AD application object registration...")
+        command = ["az", "ad", "app", "update", "--id={0}".format(app_id)]
+    else:
+        _log.info("creating Azure AD application object registration...")
+        command = ["az", "ad", "app", "create"]
+    
+    # --display-name {{az_app_registration}}
+    # --homepage {{app_domain}}
+    # --identifier-uris {{az_ad_identifier_urls | join(' ')}}
+    # --reply-urls {{az_ad_reply_urls | join(' ')}}
+    # --available-to-other-tenants {{app_authentication == 'MultiOrg'}}
+    # # --required-resource-accesses {{az_ad_app_permissions | to_json}}
+    # # --oauth2-allow-implicit-flow true
+    # # TODO: add --app-roles once authentication testing is further
+    command.extend([
+        "--display-name={0}".format(app_name),
+        "--homepage={0}".format(app_domain),
+        "--identifier-uris={0}".format(az_ad_identifier_url),
+        "--reply-urls={0}".format(az_ad_reply_url),
+        "--available-to-other-tenants=true"
+    ])
+    sh.print_command(command)
     (stdout, stderr, rc) = sh.subprocess_run(command)
-    sh.subprocess_log(_log, stdout, stderr, rc, debug=args.debug)
-    if (rc != 0): return ""
-    results = json_parse(stdout)
-    _log.debug("results: {0}".format(results))
-    return results
-
-
+    # sh.subprocess_log(_log, stdout, stderr, rc, debug=args.debug)
+    ad_app = ActiveDirectoryApplication(stdout)
+    _log.debug("ad_app: {0}".format(ad_app))
+    return ad_app
 
 
 

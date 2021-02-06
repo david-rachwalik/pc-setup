@@ -33,6 +33,7 @@ from logging_boilerplate import *
 import shell_boilerplate as sh
 import azure_boilerplate as az
 import dotnet_boilerplate as net
+import git_boilerplate as git
 
 try:
     # Python 2 has both 'str' (bytes) and 'unicode' text
@@ -57,7 +58,7 @@ def resource_group_strategy(subscription, rg_name, location):
     resource_group = resource_group_get(rg_name)
 
     if not resource_group:
-        _log.warning("resource group doesn't exists, creating...")
+        _log.warning("resource group is missing, creating...")
         resource_group = _az.resource_group_set(rg_name, location)
         rg_changed = True
 
@@ -78,15 +79,63 @@ def key_vault_strategy(subscription, resource_group, key_vault):
     return (True, kv_changed)
 
 
-def service_principal_strategy(subscription, resource_group, key_vault, sp_name, sp_dir):
-    if not (subscription and isinstance(subscription, str)): TypeError("service_principal_strategy() expects 'subscription' parameter as string")
-    if not (sp_name and isinstance(sp_name, str)): TypeError("service_principal_strategy() expects 'sp_name' parameter as string")
-    if not (sp_dir and isinstance(sp_dir, str)): TypeError("service_principal_strategy() expects 'sp_dir' parameter as string")
+def ad_group_strategy(subscription, member_id, group_name="main-ad-group"):
+    if not _az.is_signed_in: return (False, False)
+    if not (subscription and isinstance(subscription, str)): TypeError("'subscription' parameter expected as string")
+    if not (member_id and isinstance(member_id, str)): TypeError("'member_id' parameter expected as string")
+    if not (group_name and isinstance(group_name, str)): TypeError("'group_name' parameter expected as string")
+
+    # Ensure active directory group exists
+    ad_group = az.ad_group_get(group_name)
+    group_changed = False
+    if not ad_group.is_valid:
+        _log.warning("active directory group is missing, creating...")
+        (ad_group, group_changed) = az.ad_group_set(group_name)
+
+    # Ensure active directory group member exists
+    ad_group_member_exists = az.ad_group_member_get(group_name, member_id)
+    if not ad_group_member_exists:
+        _log.warning("active directory group member is missing, adding...")
+        ad_group_member_exists = az.ad_group_member_set(group_name, member_id)
+
+    # Ensure role is assigned to active directory group
+    scope = "/subscriptions/{0}".format(_az.subscription_id)
+    role_assigned = az.role_assign_get(ad_group.id, scope)
+    if not role_assigned:
+        _log.warning("role is not assigned to active directory group, adding...")
+        role_assigned = az.role_assign_set(ad_group.id, scope)
+
+    return (ad_group, group_changed)
+
+
+def service_principal_strategy(tenant, sp_name, app_id):
+    if not (tenant and isinstance(tenant, str)): TypeError("'tenant' parameter expected as string")
+    if not (sp_name and isinstance(sp_name, str)): TypeError("'sp_name' parameter expected as string")
     sp_changed = False
     service_principal = None
     kv_secret_value = ""
     # Full filepath to service principal data
-    sp_name = az.format_resource(sp_name)
+    sp_name = sh.format_resource(sp_name)
+    # Ensure service principal exists
+    service_principal = az.service_principal_get(sp_name, tenant=tenant)
+    if not service_principal.appId:
+        _log.debug("service principal credentials not found, creating...")
+        service_principal = az.service_principal_set(sp_name, app_id)
+        sp_changed = True
+    return (service_principal, sp_changed)
+
+
+def login_service_principal_strategy(subscription, resource_group, key_vault, sp_name, sp_dir):
+    if not (subscription and isinstance(subscription, str)): TypeError("'subscription' parameter expected as string")
+    if not (resource_group and isinstance(resource_group, str)): TypeError("'resource_group' parameter expected as string")
+    if not (key_vault and isinstance(key_vault, str)): TypeError("'key_vault' parameter expected as string")
+    if not (sp_name and isinstance(sp_name, str)): TypeError("'sp_name' parameter expected as string")
+    if not (sp_dir and isinstance(sp_dir, str)): TypeError("'sp_dir' parameter expected as string")
+    sp_changed = False
+    service_principal = None
+    kv_secret_value = ""
+    # Full filepath to service principal data
+    sp_name = sh.format_resource(sp_name)
     sp_path = sh.path_join(sh.path_expand(sp_dir), "{0}.json".format(sp_name))
 
     # Ensure service principal exists in Azure and local
@@ -139,40 +188,45 @@ def service_principal_strategy(subscription, resource_group, key_vault, sp_name,
     return (service_principal, sp_changed)
 
 
-def login_strategy(organization, subscription, resource_group, key_vault, sp_name, sp_dir, retry=True):
+def login_strategy(tenant, subscription, resource_group, key_vault, sp_name, sp_dir, retry=True):
     global _az
-    if not (organization and isinstance(organization, str)): TypeError("'organization' parameter expected as string")
+    if not (tenant and isinstance(tenant, str)): TypeError("'tenant' parameter expected as string")
     if not (subscription and isinstance(subscription, str)): TypeError("'subscription' parameter expected as string")
     if not (sp_name and isinstance(sp_name, str)): TypeError("'sp_name' parameter expected as string")
     if not (sp_dir and isinstance(sp_dir, str)): TypeError("'sp_dir' parameter expected as string")
     # Full filepath to service principal data
-    sp_name = az.format_resource(sp_name)
+    sp_name = sh.format_resource(sp_name)
     sp_path = sh.path_join(sh.path_expand(sp_dir), "{0}.json".format(sp_name))
     # Check if account subscription exists
     _log.info("checking if already signed-in...")
     # First chance to be signed-in
     _az = az.account_get(subscription)
+    # _log.debug("_az: {0}".format(_az))
 
     # Ensure service principal credentials exist
-    (service_principal, sp_changed) = service_principal_strategy(subscription, resource_group, key_vault, sp_name, sp_dir)
+    (service_principal, sp_changed) = login_service_principal_strategy(subscription, resource_group, key_vault, sp_name, sp_dir)
+
+    # Ensure active directory groups/roles exist
+    if sp_changed:
+        (ad_group, group_changed) = ad_group_strategy(subscription, service_principal.objectId)
 
     if _az.is_signed_in and not service_principal:
         _log.error("failed to retrieve service principal, likely due to insufficient privileges on account, signing out...")
         az.account_logout()
         _az.is_signed_in = False
         # Prompt manual 'az login' indirectly
-        _az = login_strategy(organization, subscription, resource_group, key_vault, sp_name, sp_dir)
+        _az = login_strategy(tenant, subscription, resource_group, key_vault, sp_name, sp_dir)
 
     if not _az.is_signed_in:
         if service_principal:
             # Attempt login with service principal credentials found, last chance to be signed-in
-            _az = az.account_login(organization, service_principal.name, service_principal.password)
+            _az = az.account_login(tenant, service_principal.name, service_principal.password)
             if not _az.is_signed_in:
                 if retry:
                     # Will retry recursively only once
                     _log.warning("Azure login with service principal failed, saving backup and retrying...")
                     sh.file_backup(sp_path)
-                    _az = login_strategy(organization, subscription, resource_group, key_vault, sp_name, sp_dir, False)
+                    _az = login_strategy(tenant, subscription, resource_group, key_vault, sp_name, sp_dir, False)
                 else:
                     _log.error("Azure login with service principal failed again, exiting...")
                     sh.process_fail()
@@ -188,7 +242,7 @@ def login_strategy(organization, subscription, resource_group, key_vault, sp_nam
         _log.debug("attempting login with service principal...")
         az.account_logout()
         _az.is_signed_in = False
-        _az = login_strategy(organization, subscription, resource_group, key_vault, sp_name, sp_dir)
+        _az = login_strategy(tenant, subscription, resource_group, key_vault, sp_name, sp_dir)
         # No need to rename/backup SP credentials here if failed - it'll occur recursively
     elif not _az.subscription_is_default:
         # Ensure subscription is currently active
@@ -208,11 +262,13 @@ def _project_packages(strat):
     # Development Packages
     dotnet_packages = [
         "Microsoft.VisualStudio.Web.BrowserLink",
-        "Microsoft.CodeAnalysis.FxCopAnalyzers"
+        # https://github.com/dotnet/roslyn-analyzers
+        # "Microsoft.CodeAnalysis.FxCopAnalyzers", # 3.x
+        "Microsoft.CodeAnalysis.NetAnalyzers" # 5.x+
     ]
     # Database Packages
     if strat == "database" or strat == "identity":
-        dotnet_packages.append([
+        dotnet_packages.extend([
             # Database provider automatically includes Microsoft.EntityFrameworkCore
             "Microsoft.EntityFrameworkCore.SqlServer", # Install SQL Server database provider
             "Microsoft.EntityFrameworkCore.Design", # Install EF Core design package
@@ -223,23 +279,54 @@ def _project_packages(strat):
         ])
     # Authentication Packages
     if strat == "identity":
-        dotnet_packages.append([
-            "Microsoft.AspNetCore.Authentication.AzureAD.UI"
+        dotnet_packages.extend([
+            # "Microsoft.AspNetCore.Authentication.AzureAD.UI", # 3.x
+            "Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore",
+            "Microsoft.AspNetCore.Identity.EntityFrameworkCore",
+            "Microsoft.AspNetCore.Identity.UI"
             # "Install-Package Microsoft.Owin.Security.OpenIdConnect",
             # "Install-Package Microsoft.Owin.Security.Cookies",
             # "Install-Package Microsoft.Owin.Host.SystemWeb"
         ])
-    _log.debug("NuGet packages: {0}".format(dotnet_packages))
+    dotnet_packages.sort()
     return dotnet_packages
 
 
-def application_strategy(dotnet_dir, application, projects, strat):
+def application_strategy(tenant, dotnet_dir, application, project, strat, environment, framework, secret_key, secret_value):
     if not _az.is_signed_in: return (False, False)
+    if not (tenant and isinstance(tenant, str)): TypeError("'tenant' parameter expected as string")
     if not (dotnet_dir and isinstance(dotnet_dir, str)): TypeError("'dotnet_dir' parameter expected as string")
     if not (application and isinstance(application, str)): TypeError("'application' parameter expected as string")
-    if not isinstance(projects, list): TypeError("'projects' parameter expected as list")
+    # if not isinstance(project, list): TypeError("'project' parameter expected as list")
+    if not (project and isinstance(project, str)): TypeError("'project' parameter expected as string")
     if not (strat and isinstance(strat, str)): TypeError("'strat' parameter expected as string")
+    if not (environment and isinstance(environment, str)): TypeError("'environment' parameter expected as string")
+    if not (framework and isinstance(framework, str)): TypeError("'framework' parameter expected as string")
     app_changed = False
+
+    # _log.info("secret_key: {0}".format(secret_key))
+    # _log.info("secret_value: {0}".format(secret_value))
+
+    # strat: [basic, database, identity]
+    if strat == "identity":
+        _log.info("verifying authentication...")
+        # Format name for application object registration
+        raw_app_name = "{0}-{1}".format(project, environment)
+        app_name = sh.format_resource(raw_app_name)
+        _log.info("app registration name: {0}".format(app_name))
+
+        # Register Azure Active Directory application for project
+        ad_app = az.active_directory_application_get(app_name)
+        if not ad_app.appId:
+            ad_app = az.active_directory_application_set(tenant, app_name)
+            if not ad_app.appId:
+                _log.error("failed to register active directory application")
+                sh.process_fail()
+
+        # Ensure service principal credentials exist for AD application object registration
+        (service_principal, sp_changed) = service_principal_strategy(tenant, app_name, ad_app.appId)
+        # _log.debug("service_principal: {0}".format(service_principal))
+        # TODO: might need additional test iterations linking AD app to SP with CLI instead of portal
 
     # Create application/repository directory
     app_dir = sh.path_join(dotnet_dir, application)
@@ -262,51 +349,54 @@ def application_strategy(dotnet_dir, application, projects, strat):
             _log.error("solution failed to be created, exiting...")
             sh.process_fail()
 
-    for project in projects:
-        _log.debug("Project Name: {0}".format(project))
+    _log.debug("Project Name: {0}".format(project))
 
-        # Create project directory
-        project_dir = sh.path_join(dotnet_dir, application, project)
-        _log.debug("checking for project dir ({0})...".format(project_dir))
-        project_dir_exists = sh.path_exists(project_dir, "d")
-        if not project_dir_exists:
-            _log.warning("could not locate application directory, creating...")
-            sh.directory_create(project_dir)
-            _log.info("successfully created application directory: {0}".format(project_dir))
+    # Create project directory
+    project_dir = sh.path_join(dotnet_dir, application, project)
+    _log.debug("checking for project dir ({0})...".format(project_dir))
+    project_dir_exists = sh.path_exists(project_dir, "d")
+    if not project_dir_exists:
+        _log.warning("could not locate application directory, creating...")
+        sh.directory_create(project_dir)
+        _log.info("successfully created application directory: {0}".format(project_dir))
 
-        # Create ASP.NET Core project
-        project_file = sh.path_join(project_dir, "{0}.csproj".format(project))
-        _log.debug("checking for project ({0})...".format(project_file))
-        project_exists = sh.path_exists(project_file, "f")
-        if not project_exists:
-            _log.warning("could not locate project, creating...")
-            project_succeeded = net.project_new(dotnet_dir, application, project, strat)
-            _log.info("successfully created project: {0}".format(project_succeeded))
-            if not project_succeeded:
-                _log.error("project failed to be created, exiting...")
-                sh.process_fail()
-
-        # Add NuGet packages to ASP.NET Core project
-        # project_packages = net.project_package_list(dotnet_dir, application, project)
-        # _log.debug("project packages: {0}".format(project_packages))
-        packages_to_install = _project_packages(strat)
-        for package in packages_to_install:
-            package_succeeded = net.project_package_add(dotnet_dir, application, project, package)
-            if not package_succeeded:
-                _log.error("failed to add package: {0}".format(package))
-                sh.process_fail()
-
-        # Add ASP.NET Core project to solution
-        project_added = net.solution_project_add(dotnet_dir, application, project)
-        if not project_added:
-            _log.error("failed to add project: {0}".format(project))
+    # Create ASP.NET Core project
+    project_file = sh.path_join(project_dir, "{0}.csproj".format(project))
+    _log.debug("checking for project ({0})...".format(project_file))
+    project_exists = sh.path_exists(project_file, "f")
+    if not project_exists:
+        _log.warning("could not locate project, creating...")
+        project_succeeded = net.project_new(dotnet_dir, application, project, strat, framework)
+        _log.info("successfully created project: {0}".format(project_succeeded))
+        if not project_succeeded:
+            _log.error("project failed to be created, exiting...")
             sh.process_fail()
+
+    # Add ASP.NET Core project to solution
+    project_added = net.solution_project_add(dotnet_dir, application, project)
+    if not project_added:
+        _log.error("failed to add project: {0}".format(project))
+        sh.process_fail()
+
+    # Add NuGet packages to ASP.NET Core project
+    packages_expected = _project_packages(strat)
+    _log.debug("NuGet packages_expected: {0}".format(packages_expected))
+    packages_installed = net.project_package_list(dotnet_dir, application, project)
+    _log.debug("NuGet packages_installed: {0}".format(packages_installed))
+    packages_to_install = sh.list_differences(packages_expected, packages_installed)
+    _log.debug("NuGet packages_to_install: {0}".format(packages_to_install))
+    for package in packages_to_install:
+        package_succeeded = net.project_package_add(dotnet_dir, application, project, package)
+        if not package_succeeded:
+            _log.error("failed to add package: {0}".format(package))
+            sh.process_fail()
+
+    # https://docs.microsoft.com/en-us/aspnet/core/security/authentication/scaffold-identity#scaffold-identity-into-a-razor-project-without-existing-authorization
+    if strat == "identity":
+        identity_scaffolded = net.project_identity_scaffold(project_dir)
 
     return (True, app_changed)
 
-
-    # Register Azure Active Directory application for project
-    # ad_application = az.active_directory_application_get()
 
     # rg_good = az.resource_group_set(args.resource_group, args.location)
     # if not rg_good:
@@ -325,16 +415,103 @@ def application_strategy(dotnet_dir, application, projects, strat):
     # Miscellaneous Azure Cross-Platform Command-line Interface Commands
 
 
+def repository_strategy(organization, dotnet_dir, application, source="", gitignore_path="", remote_alias="origin"):
+    if not (organization and isinstance(organization, str)): TypeError("'organization' parameter expected as string")
+    if not (dotnet_dir and isinstance(dotnet_dir, str)): TypeError("'dotnet_dir' parameter expected as string")
+    if not (application and isinstance(application, str)): TypeError("'application' parameter expected as string")
+    if not isinstance(source, str): TypeError("'source' parameter expected as string")
+    if not isinstance(gitignore_path, str): TypeError("'gitignore_path' parameter expected as string")
+    if not (remote_alias and isinstance(remote_alias, str)): TypeError("'remote_alias' parameter expected as string")
+
+    if source == "github":
+        remote_path = "https://github.com/{0}/{1}".format(organization, application)
+        _log.debug("source repository (GitHub): {0}".format(remote_path))
+    elif source == "tfsgit":
+        remote_path = "https://dev.azure.com/{0}/{1}".format(organization, application)
+        _log.debug("source repository (Azure): {0}".format(remote_path))
+        sh.process_fail()
+    else:
+        _log.error("no source repository")
+        sh.process_fail()
+
+    is_bare = not bool(remote_path)
+    repo_descriptor = "remote, bare" if is_bare else "local, work"
+    repo_changed = False
+
+    # Create application/repository directory
+    app_dir = sh.path_join(dotnet_dir, application)
+    _log.debug("checking for application directory ({0})...".format(app_dir))
+    app_dir_exists = sh.path_exists(app_dir, "d")
+    if not app_dir_exists:
+        _log.warning("could not locate application directory, creating...")
+        sh.directory_create(app_dir)
+        _log.info("successfully created application directory: {0}".format(app_dir))
+
+    # Initialize Git repository directory
+    repo_dir_exists = git.repo_exists(app_dir, is_bare)
+    if repo_dir_exists:
+        _log.debug("Successfully found {0} repository".format(repo_descriptor))
+    else:
+        _log.debug("Unable to locate {0} repository".format(repo_descriptor))
+        display_path = app_dir if (is_bare) else "{0}/.git".format(app_dir)
+        _log.info("Repository not found ({0}), initializing...".format(display_path))
+        # Initialize the repository
+        (repo_exists, changed) = git.repo_create(app_dir, is_bare)
+        if repo_exists:
+            _log.info("successfully created {0} repository!".format(repo_descriptor))
+        else:
+            _log.error("Unable to create {0} repository".format(repo_descriptor))
+            sh.process_fail()
+
+    # Set work repo's remote path to bare repo
+    remote_result = git.work_remote(app_dir, remote_path, remote_alias)
+    if not remote_result:
+        _log.error("Error occurred updating remote path")
+        sh.process_fail()
+
+    # Fetch the latest meta data; increases '.git' directory size
+    # git.work_fetch(app_dir)
+
+    # Update '.gitignore' based on hash check
+    if len(gitignore_path) > 0:
+        file_src = gitignore_path
+        file_dest = sh.path_join(app_dir, ".gitignore")
+        if sh.path_exists(file_dest, "f"):
+            hash_result = sh.file_match(file_src, file_dest)
+            if not hash_result:
+                _log.debug("'.gitignore' hashes don't match, updating...")
+                update_result = sh.file_copy(file_src, file_dest)
+                if update_result:
+                    _log.debug("'.gitignore' was successfully updated!")
+                else:
+                    _log.debug("'.gitignore' failed to be updated")
+                    sh.process_fail()
+            else:
+                _log.debug("'.gitignore' is already up-to-date")
+        else:
+            _log.debug("'.gitignore' is missing, adding...")
+            add_result = sh.file_copy(file_src, file_dest)
+            if add_result:
+                _log.debug("'.gitignore' was successfully added!")
+            else:
+                _log.debug("'.gitignore' failed to be added")
+                sh.process_fail()
+    else:
+        _log.debug("skipping '.gitignore' file check")
+
+    return True
+
+
 
 # --- Commands ---
 
 # Login Azure Active Directory subscription
 def login():
     # az.login_strategy(args.subscription, args.cert_path, args.tenant, args.key_vault)
-    # _log.debug("1st random password: {0}".format(az.get_random_password()))
-    # _log.debug("2nd random password: {0}".format(az.get_random_password()))
-    # _log.debug("3rd random password: {0}".format(az.get_random_password()))
-    login_strategy(args.organization, args.subscription, args.login_resource_group, args.login_key_vault, args.login_service_principal, args.login_service_principal_dir)
+    # _log.debug("1st random password: {0}".format(sh.get_random_password()))
+    # _log.debug("2nd random password: {0}".format(sh.get_random_password()))
+    # _log.debug("3rd random password: {0}".format(sh.get_random_password()))
+    login_strategy(args.tenant, args.subscription, args.login_resource_group, args.login_key_vault, args.login_service_principal, args.login_service_principal_dir)
 
 
 def secret():
@@ -355,7 +532,9 @@ def secret():
 
 def app_create():
     login()
-    application_strategy(args.dotnet_dir, args.application, args.project, args.strat)
+    application_strategy(args.tenant, args.dotnet_dir, args.application, args.project, args.strat, args.environment, args.framework, args.secret_key, args.secret_value)
+    gitignore_path = "/home/david/pc-setup/ansible_playbooks/roles/linux/apps/git/init/files/.gitignore"
+    repository_strategy(args.organization, args.dotnet_dir, args.application, args.source, gitignore_path, args.remote_alias)
 
 
 def deploy():
@@ -403,7 +582,8 @@ if __name__ == "__main__":
         parser.add_argument("--debug", action="store_true")
         parser.add_argument("--log-path", default="")
         # --- Account defaults ---
-        parser.add_argument("--organization", "-o", default="davidrachwalikoutlook")
+        parser.add_argument("--tenant", "-t", default="davidrachwalikoutlook")
+        parser.add_argument("--organization", "-o", default="david-rachwalik")
         parser.add_argument("--subscription", "-s", default="Pay-As-You-Go")
         # parser.add_argument("--cert-path", default="~/.local/az_cert.pem")
         # ~/.local/az_service_principals/{service-principal}.json
@@ -425,8 +605,15 @@ if __name__ == "__main__":
         # --- ASP.NET Core Application defaults ---
         parser.add_argument("--dotnet-dir", default="/mnt/d/Repos")
         parser.add_argument("--application", "-a", default="") # solution
-        parser.add_argument('--project', nargs="*")
+        # parser.add_argument('--project', nargs="*")
+        parser.add_argument('--project', default="")
+        parser.add_argument('--framework', default="net5.0") # "netcoreapp3.1"
         parser.add_argument("--strat", default="basic", const="basic", nargs="?", choices=["basic", "database", "identity"])
+        # --- Git Repository defaults ---
+        parser.add_argument('--source', default="", const="", nargs="?", choices=["github", "tfsgit"]) # tfsgit=Azure
+        parser.add_argument("--remote-alias", default="origin")
+        parser.add_argument("--remote-path", default="~/my_origin_repo.git")
+        parser.add_argument("--gitignore-path", default="")
         return parser.parse_args()
     args = parse_arguments()
 
@@ -438,6 +625,10 @@ if __name__ == "__main__":
         _sh_log = get_logger("shell_boilerplate")
         set_handlers(_sh_log, log_handlers)
         sh.args.debug = args.debug
+        # Configure the dotnet_boilerplate logger
+        _net_log = get_logger("dotnet_boilerplate")
+        set_handlers(_net_log, log_handlers)
+        net.args.debug = args.debug
         # Configure the azure_boilerplate logger
         _az_log = get_logger("azure_boilerplate")
         set_handlers(_az_log, log_handlers)
@@ -462,7 +653,7 @@ if __name__ == "__main__":
     
     elif args.group == "client":
         app_create()
-    
+
     elif args.group == "deploy":
         deploy()
     
