@@ -64,12 +64,13 @@ def solution_project_add(dotnet_dir, application, project):
 
 # 'dotnet new' automatically calls build and restore
 # https://docs.microsoft.com/en-us/dotnet/core/tools/dotnet-new
-def project_new(dotnet_dir, application, project, strat, framework="net5.0"):
+def project_new(dotnet_dir, application, project, strat, framework):
     client_id = ""
     if not (dotnet_dir and isinstance(dotnet_dir, str)): TypeError("'dotnet_dir' parameter expected as string")
     if not (application and isinstance(application, str)): TypeError("'application' parameter expected as string")
     if not (project and isinstance(project, str)): TypeError("'project' parameter expected as string")
     if not (strat and isinstance(strat, str)): TypeError("'strat' parameter expected as string")
+    if not (framework and isinstance(framework, str)): TypeError("'framework' parameter expected as string")
     template = "webapp"
     domain = "https://localhost:5001"
     project_dir = sh.path_join(dotnet_dir, application, project)

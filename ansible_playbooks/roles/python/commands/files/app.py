@@ -257,15 +257,22 @@ def login_strategy(tenant, subscription, resource_group, key_vault, sp_name, sp_
 
 
 # ASP.NET Core NuGet Packages (https://www.nuget.org/packages/*)
-def _project_packages(strat):
+def _project_packages(strat, framework):
     if not (strat and isinstance(strat, str)): TypeError("'strat' parameter expected as string")
+    if not (framework and isinstance(framework, str)): TypeError("'framework' parameter expected as string")
     # Development Packages
-    dotnet_packages = [
-        "Microsoft.VisualStudio.Web.BrowserLink",
-        # https://github.com/dotnet/roslyn-analyzers
-        # "Microsoft.CodeAnalysis.FxCopAnalyzers", # 3.x
-        "Microsoft.CodeAnalysis.NetAnalyzers" # 5.x+
-    ]
+    if framework == "netcoreapp3.1":
+        dotnet_packages = [
+            "Microsoft.VisualStudio.Web.BrowserLink",
+            "Microsoft.CodeAnalysis.FxCopAnalyzers", # 3.x
+        ]
+    else:
+        dotnet_packages = [
+            "Microsoft.VisualStudio.Web.BrowserLink",
+            # https://docs.microsoft.com/en-us/visualstudio/code-quality/migrate-from-fxcop-analyzers-to-net-analyzers
+            # https://github.com/dotnet/roslyn-analyzers
+            "Microsoft.CodeAnalysis.NetAnalyzers" # 5.x+
+        ]
     # Database Packages
     if strat == "database" or strat == "identity":
         dotnet_packages.extend([
@@ -379,7 +386,7 @@ def application_strategy(tenant, dotnet_dir, application, project, strat, enviro
         sh.process_fail()
 
     # Add NuGet packages to ASP.NET Core project
-    packages_expected = _project_packages(strat)
+    packages_expected = _project_packages(strat, framework)
     _log.debug("NuGet packages_expected: {0}".format(packages_expected))
     packages_installed = net.project_package_list(dotnet_dir, application, project)
     _log.debug("NuGet packages_installed: {0}".format(packages_installed))
@@ -429,10 +436,10 @@ def repository_strategy(organization, dotnet_dir, application, source="", gitign
     elif source == "tfsgit":
         remote_path = "https://dev.azure.com/{0}/{1}".format(organization, application)
         _log.debug("source repository (Azure): {0}".format(remote_path))
-        sh.process_fail()
+        return False
     else:
         _log.error("no source repository")
-        sh.process_fail()
+        return False
 
     is_bare = not bool(remote_path)
     repo_descriptor = "remote, bare" if is_bare else "local, work"
@@ -484,7 +491,7 @@ def repository_strategy(organization, dotnet_dir, application, source="", gitign
                 if update_result:
                     _log.debug("'.gitignore' was successfully updated!")
                 else:
-                    _log.debug("'.gitignore' failed to be updated")
+                    _log.error("'.gitignore' failed to be updated")
                     sh.process_fail()
             else:
                 _log.debug("'.gitignore' is already up-to-date")
@@ -494,7 +501,7 @@ def repository_strategy(organization, dotnet_dir, application, source="", gitign
             if add_result:
                 _log.debug("'.gitignore' was successfully added!")
             else:
-                _log.debug("'.gitignore' failed to be added")
+                _log.error("'.gitignore' failed to be added")
                 sh.process_fail()
     else:
         _log.debug("skipping '.gitignore' file check")
