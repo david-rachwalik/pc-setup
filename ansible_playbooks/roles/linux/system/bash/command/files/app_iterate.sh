@@ -1,5 +1,10 @@
 #!/bin/bash
 
+# --- Example Commands ---
+# setup --tags sh
+# app_iterate
+
+
 # --- Script to quickly iterate upon 'app' command for development ---
 
 cd ~/pc-setup/ansible_playbooks
