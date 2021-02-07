@@ -260,40 +260,51 @@ def login_strategy(tenant, subscription, resource_group, key_vault, sp_name, sp_
 def _project_packages(strat, framework):
     if not (strat and isinstance(strat, str)): TypeError("'strat' parameter expected as string")
     if not (framework and isinstance(framework, str)): TypeError("'framework' parameter expected as string")
-    # Development Packages
+    # --- Development Packages ---
+    dotnet_packages = [
+        "Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore",
+        "Microsoft.VisualStudio.Web.BrowserLink"
+    ]
     if framework == "netcoreapp3.1":
-        dotnet_packages = [
-            "Microsoft.VisualStudio.Web.BrowserLink",
-            "Microsoft.CodeAnalysis.FxCopAnalyzers", # 3.x
-        ]
+        dotnet_packages.extend([
+            "Microsoft.CodeAnalysis.FxCopAnalyzers" # 3.x
+        ])
     else:
-        dotnet_packages = [
-            "Microsoft.VisualStudio.Web.BrowserLink",
-            # https://docs.microsoft.com/en-us/visualstudio/code-quality/migrate-from-fxcop-analyzers-to-net-analyzers
+        dotnet_packages.extend([
             # https://github.com/dotnet/roslyn-analyzers
+            # https://docs.microsoft.com/en-us/visualstudio/code-quality/migrate-from-fxcop-analyzers-to-net-analyzers
             "Microsoft.CodeAnalysis.NetAnalyzers" # 5.x+
-        ]
-    # Database Packages
+        ])
+    # --- Database Packages ---
+    # Packages needed for scaffolding: [Microsoft.VisualStudio.Web.CodeGeneration.Design, Microsoft.EntityFrameworkCore.SqlServer]
     if strat == "database" or strat == "identity":
         dotnet_packages.extend([
+            "Microsoft.Extensions.Logging.Debug",
+            "Microsoft.EntityFrameworkCore.Tools",
+            "Microsoft.EntityFrameworkCore.Design", # Install EF Core design package
+            "Microsoft.VisualStudio.Web.CodeGeneration.Design",
             # Database provider automatically includes Microsoft.EntityFrameworkCore
             "Microsoft.EntityFrameworkCore.SqlServer", # Install SQL Server database provider
-            "Microsoft.EntityFrameworkCore.Design", # Install EF Core design package
-            "Microsoft.EntityFrameworkCore.Tools",
-            "Microsoft.VisualStudio.Web.CodeGeneration.Design",
-            "Microsoft.Extensions.Logging.Debug",
-            "NSwag.AspNetCore" # Swagger / OpenAPI
+            "Microsoft.EntityFrameworkCore.Sqlite" # Install SQLite database provider
         ])
-    # Authentication Packages
+    # --- Authentication Packages ---
     if strat == "identity":
+        # "Microsoft.Owin.Security.OpenIdConnect",
+        # "Microsoft.Owin.Security.Cookies",
+        # "Microsoft.Owin.Host.SystemWeb"
+        if framework == "netcoreapp3.1":
+            dotnet_packages.extend([
+                "Microsoft.AspNetCore.Authentication.AzureAD.UI" # 3.x
+            ])
+        else:
+            dotnet_packages.extend([
+                "Microsoft.AspNetCore.Identity.EntityFrameworkCore",
+                "Microsoft.AspNetCore.Identity.UI"
+            ])
+    # --- API Packages ---
+    if strat == "api":
         dotnet_packages.extend([
-            # "Microsoft.AspNetCore.Authentication.AzureAD.UI", # 3.x
-            "Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore",
-            "Microsoft.AspNetCore.Identity.EntityFrameworkCore",
-            "Microsoft.AspNetCore.Identity.UI"
-            # "Install-Package Microsoft.Owin.Security.OpenIdConnect",
-            # "Install-Package Microsoft.Owin.Security.Cookies",
-            # "Install-Package Microsoft.Owin.Host.SystemWeb"
+            "NSwag.AspNetCore" # Swagger / OpenAPI
         ])
     dotnet_packages.sort()
     return dotnet_packages

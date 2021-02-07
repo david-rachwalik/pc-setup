@@ -1,11 +1,12 @@
 ---
-dotnet_default_framework: netcoreapp3.1
+dotnet_default_framework: net5.0 # netcoreapp3.1
 
-dotnet_database_tools:
+dotnet_tools_expected:
 # https://docs.microsoft.com/en-us/aspnet/core/data/ef-rp
 - dotnet-ef                                 # Install Entity Framework Core
 # https://docs.microsoft.com/en-us/aspnet/core/security/authentication/scaffold-identity
 - dotnet-aspnet-codegenerator               # Install Code Generator (Scaffold)
+
 
 # https://www.nuget.org/packages/*
 dotnet_development_packages:
