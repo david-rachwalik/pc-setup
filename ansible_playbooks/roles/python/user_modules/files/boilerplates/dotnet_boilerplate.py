@@ -9,6 +9,7 @@
 # --- Global Methods ---
 # solution:                     solution_new, solution_project_list, solution_project_add
 # project:                      project_new, project_package_list, project_package_add
+# user-secrets:                 secrets_init, secrets_list, secrets_set
 # identity:                     project_identity_scaffold
 
 from logging_boilerplate import *
@@ -129,6 +130,51 @@ def project_package_add(dotnet_dir, application, project, package):
     sh.print_command(command)
     (stdout, stderr, rc) = sh.subprocess_run(command)
     # sh.subprocess_log(_log, stdout, stderr, rc, debug=args.debug)
+    return bool(rc == 0)
+
+
+
+# --- User-Secrets Commands ---
+# https://docs.microsoft.com/en-us/aspnet/core/security/app-secrets
+
+def secrets_init(dotnet_dir, application, project):
+    if not (dotnet_dir and isinstance(dotnet_dir, str)): TypeError("'dotnet_dir' parameter expected as string")
+    if not (application and isinstance(application, str)): TypeError("'application' parameter expected as string")
+    if not (project and isinstance(project, str)): TypeError("'project' parameter expected as string")
+    app_dir = sh.path_dir(dotnet_dir, application)
+    project_path = sh.path_dir(app_dir, project)
+    command = ["dotnet", "user-secrets", "init", "--project={0}".format(project_path)]
+    sh.print_command(command)
+    (stdout, stderr, rc) = sh.subprocess_run(command)
+    sh.subprocess_log(_log, stdout, stderr, rc, debug=args.debug)
+    return bool(rc == 0)
+
+
+def secrets_list(dotnet_dir, application, project):
+    if not (dotnet_dir and isinstance(dotnet_dir, str)): TypeError("'dotnet_dir' parameter expected as string")
+    if not (application and isinstance(application, str)): TypeError("'application' parameter expected as string")
+    if not (project and isinstance(project, str)): TypeError("'project' parameter expected as string")
+    app_dir = sh.path_dir(dotnet_dir, application)
+    project_path = sh.path_dir(app_dir, project)
+    command = ["dotnet", "user-secrets", "list", "--project={0}".format(project_path)]
+    sh.print_command(command)
+    (stdout, stderr, rc) = sh.subprocess_run(command)
+    sh.subprocess_log(_log, stdout, stderr, rc, debug=args.debug)
+    return bool(rc == 0)
+
+
+def secrets_set(dotnet_dir, application, project, secret_key, secret_value):
+    if not (dotnet_dir and isinstance(dotnet_dir, str)): TypeError("'dotnet_dir' parameter expected as string")
+    if not (application and isinstance(application, str)): TypeError("'application' parameter expected as string")
+    if not (project and isinstance(project, str)): TypeError("'project' parameter expected as string")
+    if not (secret_key and isinstance(secret_key, str)): TypeError("'secret_key' parameter expected as string")
+    if not (secret_value and isinstance(secret_value, str)): TypeError("'secret_value' parameter expected as string")
+    app_dir = sh.path_dir(dotnet_dir, application)
+    project_path = sh.path_dir(app_dir, project)
+    command = ["dotnet", "user-secrets", "set", secret_key, secret_value, "--project={0}".format(project_path)]
+    sh.print_command(command)
+    (stdout, stderr, rc) = sh.subprocess_run(command)
+    sh.subprocess_log(_log, stdout, stderr, rc, debug=args.debug)
     return bool(rc == 0)
 
 

@@ -18,9 +18,9 @@
 # key vault:                    key_vault_get, key_vault_set
 # key vault secret:             key_vault_secret_get, key_vault_secret_set, key_vault_secret_download
 # active directory:             active_directory_application_get, active_directory_application_set
+# deployment group:             deployment_group_valid, deployment_group_get, deployment_group_set
 
 # TODO:
-# devops authentication:        devops_login, devops_config
 # webapp service:               app_set, app_get
 # app service plan:             plan_set, plan_get
 # resource manager:             rm_set, rm_get
@@ -59,6 +59,7 @@ class Account(AzureBase):
         self.subscription_id = ""
         self.subscription_is_default = False
         self.is_signed_in = False
+        self.devops_pat = ""
 
         # Business logic for parsing
         if obj and isinstance(obj, str): obj = sh.json_parse(obj)
@@ -117,6 +118,7 @@ class ResourceGroup(AzureBase):
     def __init__(self, obj=""):
         self.location = ""
         self.name = ""
+        self.is_valid = False
 
         # Business logic for parsing
         if obj and isinstance(obj, str): obj = sh.json_parse(obj)
@@ -144,6 +146,22 @@ class ActiveDirectoryApplication(AzureBase):
             self.replyUrl = obj.replyUrls[0]
             self.signInAudience = obj.signInAudience
             self.wwwHomepage = obj.wwwHomepage
+
+
+class ArmParameters(AzureBase):
+    def __init__(self, obj=""):
+        self.content = {}
+        # Business logic for parsing
+        if obj and isinstance(obj, str): obj = sh.json_parse(obj)
+        if sh.is_json_parse(obj):
+            self.content = obj.parameters
+            if not self.content: self.content = {}
+
+    def __repr__(self):
+        return self.content
+
+    def __str__(self):
+        return str(self.content)
 
 
 
@@ -314,10 +332,10 @@ def service_principal_get(sp_name, sp_dir="", tenant=""):
     if not sh.valid_resource(sp_name):
         _log.error("'sp_name' parameter expected as valid resource name")
         sh.process_fail()
-    sp_path = sh.path_join(sh.path_expand(sp_dir), "{0}.json".format(sp_name))
     # Gather login info from service principal
     if sp_dir:
         _log.debug("gathering service principal credentials from file...")
+        sp_path = sh.path_join(sh.path_expand(sp_dir), "{0}.json".format(sp_name))
         stdout = sh.file_read(sp_path)
     else:
         _log.debug("gathering service principal from Azure...")
@@ -428,30 +446,28 @@ def resource_group_get(name=""):
     (stdout, stderr, rc) = sh.subprocess_run(command)
     # sh.subprocess_log(_log, stdout, stderr, rc, debug=args.debug)
     resource_group = ResourceGroup(stdout)
-    _log.debug("resource_group: {0}".format(resource_group))
+    # _log.debug("resource_group: {0}".format(resource_group))
     return resource_group
 
 
 def resource_group_set(name="", location=""):
-    resource_group = resource_group_get(name)
-    rg_changed = False
-    if not resource_group:
-        _log.warning("resource group doesn't exists, creating...")
-        command = ["az", "group", "create", "--name={0}".format(name), "--location={0}".format(location)]
-        sh.print_command(command)
-        (stdout, stderr, rc) = sh.subprocess_run(command)
-        # sh.subprocess_log(_log, stdout, stderr, rc, debug=args.debug)
-        resource_group = ResourceGroup(stdout)
-        _log.debug("resource_group: {0}".format(resource_group))
-        rg_changed = True
-    return (resource_group, rg_changed)
+    command = ["az", "group", "create", "--name={0}".format(name), "--location={0}".format(location)]
+    sh.print_command(command)
+    (stdout, stderr, rc) = sh.subprocess_run(command)
+    # sh.subprocess_log(_log, stdout, stderr, rc, debug=args.debug)
+    resource_group = ResourceGroup(stdout)
+    # _log.debug("resource_group: {0}".format(resource_group))
+    return resource_group
+
 
 
 # --- Key Vault Commands ---
 # https://docs.microsoft.com/en-us/cli/azure/keyvault
 
-def key_vault_get(name="", resource_group=""):
-    command = ["az", "keyvault", "show", "--name={0}".format(name), "--resource-group={0}".format(resource_group)]
+def key_vault_get(resource_group, key_vault):
+    if not (resource_group and isinstance(resource_group, str)): TypeError("'resource_group' parameter expected as string")
+    if not (key_vault and isinstance(key_vault, str)): TypeError("'key_vault' parameter expected as string")
+    command = ["az", "keyvault", "show", "--name={0}".format(key_vault), "--resource-group={0}".format(resource_group)]
     sh.print_command(command)
     (stdout, stderr, rc) = sh.subprocess_run(command)
     # sh.subprocess_log(_log, stdout, stderr, rc, debug=args.debug)
@@ -460,24 +476,17 @@ def key_vault_get(name="", resource_group=""):
     return results
 
 
-def key_vault_set(name="", resource_group=""):
-    key_vault_info = key_vault_get(name)
-    # _log.debug("key_vault_info: {0}".format(key_vault_info))
+def key_vault_set(resource_group, key_vault):
+    if not (resource_group and isinstance(resource_group, str)): TypeError("'resource_group' parameter expected as string")
+    if not (key_vault and isinstance(key_vault, str)): TypeError("'key_vault' parameter expected as string")
+    command = ["az", "keyvault", "create", "--name={0}".format(key_vault), "--resource-group={0}".format(resource_group)]
+    sh.print_command(command)
+    (stdout, stderr, rc) = sh.subprocess_run(command)
+    # sh.subprocess_log(_log, stdout, stderr, rc, debug=args.debug)
+    results = sh.json_parse(stdout)
+    # _log.debug("results: {0}".format(results))
+    return results
 
-    if key_vault_info:
-        _log.debug("key vault exists, gathering info...")
-        # TODO: parse key vault into class and return
-    else:
-        _log.warning("key vault doesn't exists, creating...")
-        command = ["az", "keyvault", "create", "--name={0}".format(name), "--location={0}".format(location)]
-        sh.print_command(command)
-        (stdout, stderr, rc) = sh.subprocess_run(command)
-        # sh.subprocess_log(_log, stdout, stderr, rc, debug=args.debug)
-        key_vault_info = sh.json_parse(stdout)
-        # _log.debug("key_vault_info: {0}".format(key_vault_info))
-        # return (rc == 0)
-    
-    return key_vault_info
 
 
 # --- Key Vault Secret Commands ---
@@ -600,6 +609,72 @@ def active_directory_application_set(tenant, app_name, app_id=""):
     _log.debug("ad_app: {0}".format(ad_app))
     return ad_app
 
+
+
+# --- Deployment Group Commands ---
+# https://docs.microsoft.com/en-us/cli/azure/deployment/group
+
+def deployment_group_valid(rg_name, template_path, parameters=[], deploy_name="Main"):
+    if not (rg_name and isinstance(rg_name, str)): TypeError("'rg_name' parameter expected as string")
+    if not (template_path and isinstance(template_path, str)): TypeError("'template_path' parameter expected as string")
+    # if not (parameters and isinstance(parameters, str)): TypeError("'parameters' parameter expected as string")
+    if not sh.is_list_of_strings(parameters): TypeError("'parameters' parameter expected as list of strings")
+    if not (deploy_name and isinstance(deploy_name, str)): TypeError("'deploy_name' parameter expected as string")
+    command = ["az", "deployment", "group", "validate",
+        "--name={0}".format(deploy_name),
+        "--resource-group={0}".format(rg_name),
+        "--template-file={0}".format(template_path),
+        # "--parameters={0}".format(parameters),
+    ]
+    if parameters:
+        command.append("--parameters")
+        command.extend(parameters)
+    sh.print_command(command)
+    (stdout, stderr, rc) = sh.subprocess_run(command)
+    # sh.subprocess_log(_log, stdout, stderr, rc, debug=args.debug)
+    return (rc == 0)
+
+
+def deployment_group_get(rg_name, template_path, parameters=[], deploy_name="Main"):
+    if not (rg_name and isinstance(rg_name, str)): TypeError("'rg_name' parameter expected as string")
+    if not (template_path and isinstance(template_path, str)): TypeError("'template_path' parameter expected as string")
+    # if not (parameters and isinstance(parameters, str)): TypeError("'parameters' parameter expected as string")
+    if not sh.is_list_of_strings(parameters): TypeError("'parameters' parameter expected as list of strings")
+    if not (deploy_name and isinstance(deploy_name, str)): TypeError("'deploy_name' parameter expected as string")
+    command = ["az", "deployment", "group", "show",
+        "--name={0}".format(deploy_name),
+        "--resource-group={0}".format(rg_name),
+        "--template-file={0}".format(template_path),
+        # "--parameters={0}".format(parameters),
+    ]
+    if parameters:
+        command.append("--parameters")
+        command.extend(parameters)
+    sh.print_command(command)
+    (stdout, stderr, rc) = sh.subprocess_run(command)
+    sh.subprocess_log(_log, stdout, stderr, rc, debug=args.debug)
+    return (rc == 0)
+
+
+def deployment_group_set(rg_name, template_path, parameters=[], deploy_name="Main"):
+    if not (rg_name and isinstance(rg_name, str)): TypeError("'rg_name' parameter expected as string")
+    if not (template_path and isinstance(template_path, str)): TypeError("'template_path' parameter expected as string")
+    # if not isinstance(parameters, str): TypeError("'parameters' parameter expected as string")
+    if not sh.is_list_of_strings(parameters): TypeError("'parameters' parameter expected as list of strings")
+    if not (deploy_name and isinstance(deploy_name, str)): TypeError("'deploy_name' parameter expected as string")
+    command = ["az", "deployment", "group", "create",
+        "--name={0}".format(deploy_name),
+        "--resource-group={0}".format(rg_name),
+        "--template-file={0}".format(template_path)
+        # "--parameters={0}".format(parameters)
+    ]
+    if parameters:
+        command.append("--parameters")
+        command.extend(parameters)
+    sh.print_command(command)
+    (stdout, stderr, rc) = sh.subprocess_run(command)
+    # sh.subprocess_log(_log, stdout, stderr, rc, debug=args.debug)
+    return (rc == 0)
 
 
 # # Certificate method ended up more trouble with no gain compared to letting service principal make its own passphrase
