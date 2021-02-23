@@ -6,7 +6,8 @@
 # VersionDate: 5 Feb 2021
 
 # --- Global Shell Commands ---
-# :-Helper-:        is_json_parse, is_json, json_parse, json_save, format_resource, valid_resource, get_random_password
+# :-Helper-:        format_resource, valid_resource, get_random_password
+# JSON:             is_json_parse, is_json, json_parse, json_convert, json_save
 # Utility:          directory_shift, directory_change, is_list_of_strings, list_differences, print_command
 # Process:          process_exit, process_fail, process_id, process_parent_id
 # Path:             path_current, path_expand, path_join, path_exists, path_dir, path_basename, path_filename
@@ -63,7 +64,7 @@ class _dict2obj(dict):
 
 # ------------------------ Global Shell Commands ------------------------
 
-# --- Helper Commands ---
+# --- JSON Commands ---
 
 # https://realpython.com/python-json
 def _decode_dict(dct):
@@ -75,17 +76,32 @@ def is_json_parse(obj):
 
 
 def is_json(myjson):
+    # _log.debug("myjson: {0}".format(myjson))
+    if isinstance(myjson, _dict2obj): return True
     try:
+        # _log.debug("attempting json load")
         json_object = json.loads(myjson)
+        # _log.debug("json_object: {0}".format(json_object))
     except ValueError as e:
         return False
     return True
 
 
 # Deserialize JSON data: https://docs.python.org/2/library/json.html
-def json_parse(raw_string):
-    if not (raw_string and is_json(raw_string)): return ""
-    results = json.loads(raw_string, object_hook=_decode_dict)
+def json_parse(json_str):
+    # _log.debug("json_str: {0}".format(json_str))
+    # _log.debug("json_str type: {0}".format(type(json_str)))
+    if not (json_str and is_json(json_str)): return ""
+    results = json.loads(json_str, object_hook=_decode_dict)
+    return results
+
+
+# Serialize Python string into JSON
+def json_convert(raw_str, indent=4):
+    # _log.debug("raw_str: {0}".format(raw_str))
+    if not (raw_str and is_json(raw_str)): return ""
+    results = json.dumps(raw_str, indent=indent)
+    # _log.debug("results: {0}".format(results))
     return results
 
 
@@ -96,11 +112,15 @@ def json_save(path, json_str, indent=4):
     # Handle previous service principal if found
     if path_exists(path, "f"): backup_path = file_backup(path)
     # https://stackoverflow.com/questions/39491420/python-jsonexpecting-property-name-enclosed-in-double-quotes
-    # Valid JSON syntax uses quotation marks; single quotes only valid in string
+    # Valid JSON syntax uses quotation marks; single quotes are only valid in string
     # https://stackoverflow.com/questions/43509448/building-json-file-out-of-python-objects
-    file_ready = json.dumps(json_str, indent=indent)
+    # file_ready = json.dumps(json_str, indent=indent)
+    file_ready = json_convert(json_str, indent)
     file_write(path, file_ready)
 
+
+
+# --- Helper Commands ---
 
 # Must conform to the following pattern: '^[0-9a-zA-Z-]+$'
 def format_resource(raw_name, lowercase=True):
@@ -159,7 +179,9 @@ def directory_change(path):
 
 def is_list_of_strings(obj):
     if not isinstance(obj, list): return False
-    return bool(obj) and all(isinstance(elem, str) for elem in obj)
+    # return bool(obj) and all(isinstance(elem, str) for elem in obj)
+    if not obj: return True # empty list
+    return all(isinstance(elem, str) for elem in obj)
 
 
 # Return items from first list that aren't in second
@@ -439,10 +461,12 @@ def file_backup(path, ext="bak", time_format="%Y%m%d-%H%M%S"):
 
 # Creates asyncronous process and immediately awaits the tuple results
 # NOTE: Only accepting 'command' as list; argument options can have spaces
-def subprocess_run(command, path="", env=""):
-    # if not isinstance(command, list): raise TypeError("subprocess_run() expects 'command' parameter as list")
-    if not is_list_of_strings(command): raise TypeError("subprocess_run() expects 'command' parameter as list")
-    process = SubProcess(command, path, env)
+def subprocess_run(command, path="", env=None, shell=False):
+    if not is_list_of_strings(command): raise TypeError("'command' parameter expected as list/sequence of strings")
+    if not isinstance(path, str): raise TypeError("'path' parameter expected as string")
+    if not (env is None or isinstance(env, dict)): raise TypeError("'env' parameter expected as dictionary")
+    if not isinstance(shell, bool): raise TypeError("'shell' parameter expected as boolean")
+    process = SubProcess(command, path, env, shell)
     (stdout, stderr, rc) = process.await_results()
     return (stdout, stderr, rc)
 
@@ -499,21 +523,18 @@ def signal_send(pid, signal_num=signal.SIGTERM):
 # Only accepts 'command' parameter as a list/sequence of strings
 # - Cannot string split because any argument options with values use spaces
 class SubProcess(object):
-    def __init__(self, command, path="", env=None):
+    def __init__(self, command, chdir="", env=None, shell=False):
+        if not is_list_of_strings(command): raise TypeError("'command' property expected as list/sequence of strings")
+        if not isinstance(chdir, str): raise TypeError("'chdir' property expected as string")
+        if not (env is None or isinstance(env, dict)): raise TypeError("'env' property expected as dictionary")
+        if not isinstance(shell, bool): raise TypeError("'shell' property expected as boolean")
         # Initial values
+        self.command = command
+        self.chdir = str(chdir)
+        self.env = env
         self.rc = int()
         self.stdout = str()
         self.stderr = str()
-        self.command = []
-        self.path = str(path)
-        self.env = env
-
-        # Ensure command was provided as text or a sequence/list
-        if is_list_of_strings(command):
-            self.command = command
-        else:
-            _log.error("command provided: {0}".format(command))
-            raise TypeError("SubProcess 'command' property expects a list/sequence of strings")
 
         # Build arguments and environment variables to support command
         command_args = {
@@ -522,12 +543,28 @@ class SubProcess(object):
             "stdout": subprocess.PIPE,
             "stderr": subprocess.PIPE
         }
-        if self.env: command_args["env"] = self.env
+
+        if env or shell:
+            # _log.debug("evaluating subprocess as shell")
+            command_args["shell"] = True
+
+        if env:
+            # _log.debug("implementing environment variables")
+            # https://stackoverflow.com/questions/2231227/python-subprocess-popen-with-a-modified-environment
+            # Combine current environment variables with those provided
+            current_env = os.environ.copy()
+            # _log.debug("current_env: {0}".format(current_env))
+            current_env.update(env) # update for dict, extend for list
+            # _log.debug("current_env: {0}".format(current_env))
+            # command_args["shell"] = True
+            command_args["env"] = current_env
+            self.env = current_env
 
         # Create an async process to await
+        # https://docs.python.org/3.9/library/subprocess.html#subprocess.Popen
         self.process = None
-        if self.path:
-            with directory_shift(self.path):
+        if self.chdir:
+            with directory_shift(self.chdir):
                 self.process = subprocess.Popen(self.command, **command_args)
         else:
             self.process = subprocess.Popen(self.command, **command_args)
