@@ -2,8 +2,8 @@
 
 # Basename: logging_boilerplate
 # Description: Common logic for Python logging
-# Version: 1.4.1
-# VersionDate: 21 Sep 2020
+# Version: 1.5.0
+# VersionDate: 2 Mar 2021
 
 # --- Global Logging Commands ---
 # validation:           is_logger, is_handler
@@ -18,6 +18,7 @@
 # * Providing 'path' to LogHandlerOptions toggles handler from stream to file
 
 import logging, datetime, pytz, sys
+import colorlog
 
 try:
     # Python 2 has both 'str' (bytes) and 'unicode' text
@@ -91,11 +92,13 @@ def get_logger(log):
         set_handlers(logger, log.handlers)
     elif log and isinstance(log, str):
         # Obtain instance of logging.Logger based on name (idempotent)
-        logger = logging.getLogger(log)
+        # logger = logging.getLogger(log)
+        logger = colorlog.getLogger(log)
     else:
         # Obtain root instance of logging.Logger
-        logger = logging.getLogger()
         # logger = logging.getLogger(__name__)
+        # logger = logging.getLogger()
+        logger = colorlog.getLogger()
     return logger
 
 
@@ -106,10 +109,12 @@ def get_handler(options=LogHandlerOptions):
         handler = logging.FileHandler(filename=options.path)
     else:
         # Setup a stream handler for live console output (stdout/stderr); stderr is default
-        handler = logging.StreamHandler(sys.stdout)
         # handler = logging.StreamHandler()
+        # handler = logging.StreamHandler(sys.stdout)
+        handler = colorlog.StreamHandler(sys.stdout)
     # Create formatter to attach to handler
-    log_formatter = logging.Formatter(fmt=options.message_format, datefmt=options.time_format)
+    # log_formatter = logging.Formatter(fmt=options.message_format, datefmt=options.time_format)
+    log_formatter = colorlog.ColoredFormatter(options.message_format, datefmt=options.time_format)
     log_formatter.converter = _get_timezone_converter(options.timezone)
     # Configure handler with log format and level
     handler.setFormatter(log_formatter)
@@ -145,7 +150,8 @@ def gen_basic_handlers(debug=False, log_path=""):
     # _message_format = "%(asctime)s [%(levelname)s] %(message)s"
     if debug:
         log_level = 10 # logging.DEBUG
-        log_format = "%(asctime)s [%(levelname).1s] (%(module)s:%(funcName)s): %(message)s"
+        # log_format = "%(asctime)s [%(levelname).1s] (%(module)s:%(funcName)s): %(message)s"
+        log_format = "%(log_color)s%(asctime)s [%(levelname).1s] (%(module)s:%(funcName)s): %(message)s"
     else:
         log_level = 20 # logging.INFO
         log_format = "%(message)s"
