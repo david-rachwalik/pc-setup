@@ -43,7 +43,7 @@ def socket_hostport(sock):
         address = sock.getsockname() # returns tuple(IP, port) for server
         # address = sock.getpeername() # returns tuple(IP, port) for client connection
         return address[1]
-    except:
+    except Exception:
         return 0
 
 

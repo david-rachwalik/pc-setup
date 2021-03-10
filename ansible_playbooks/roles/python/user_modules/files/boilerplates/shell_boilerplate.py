@@ -400,7 +400,7 @@ def file_read(path, oneline=False):
         f = open(path, "r")
         data = f.readline().rstrip() if (oneline) else f.read().strip()
         f.close()
-    except:
+    except Exception:
         data = ""
     return data
 
@@ -587,7 +587,7 @@ class SubProcess(object):
             self.stdout = self.format_output(stdout)
             self.stderr = self.format_output(stderr)
             return (self.stdout, self.stderr, self.rc)
-        except:
+        except Exception:
             return (None, None, -1)
 
 

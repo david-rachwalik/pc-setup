@@ -45,7 +45,7 @@ class XmlManager(object):
         logger.debug("(XmlManager:Parse): parsing {0}...".format(path))
         try:
             elementTree = EL.parse(path)
-        except:
+        except Exception:
             elementTree = None
             logger.error("(XmlManager:Parse): error with parsing")
         return elementTree
@@ -91,7 +91,7 @@ class XmlManager(object):
     #     element = self.ToElement(element)
     #     try:
     #         matches = element.findall(tag)
-    #     except:
+    #     except Exception:
     #         matches = []
     #     return matches
 
@@ -102,7 +102,7 @@ class XmlManager(object):
     #     element = self.ToElement(element)
     #     try:
     #         match = element.find(tag)
-    #     except:
+    #     except Exception:
     #         match = []
     #     return match
 
