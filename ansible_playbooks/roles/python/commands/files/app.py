@@ -337,14 +337,12 @@ def login_devops_strategy(user, location, resource_group, key_vault, auth_dir, r
     # Check if user is signed-in DevOps
     _log.info("checking if already signed-in Azure DevOps...")
     # First chance to be signed-in
-    user_signed_in = az_devops.user_get(pat_data, user)
+    user_signed_in = az_devops.user_get(_az.devops_pat, user)
 
     if not user_signed_in:
-        # if pat_data:
         if _az.devops_pat:
             # Attempt login with user PAT/credentials found, last chance to be signed-in
             _log.debug("attempting DevOps login with PAT (personal access token)...")
-            # user_signed_in = az_devops.user_login(pat_data)
             user_signed_in = az_devops.user_login(_az.devops_pat)
             if not user_signed_in:
                 if retry:
@@ -378,7 +376,7 @@ def _project_packages(strat, framework):
     if not (framework and isinstance(framework, str)): TypeError("'framework' parameter expected as string")
     # --- Development Packages ---
     dotnet_packages = [
-        "Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore",
+        # "Microsoft.Extensions.Logging.Debug", # No longer required; included in 'Microsoft.AspNetCore.App'
         "Microsoft.VisualStudio.Web.BrowserLink"
     ]
     if framework == "netcoreapp3.1":
@@ -395,7 +393,7 @@ def _project_packages(strat, framework):
     # Packages needed for scaffolding: [Microsoft.VisualStudio.Web.CodeGeneration.Design, Microsoft.EntityFrameworkCore.SqlServer]
     if strat == "database" or strat == "identity":
         dotnet_packages.extend([
-            "Microsoft.Extensions.Logging.Debug",
+            "Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore",
             "Microsoft.EntityFrameworkCore.Tools",
             "Microsoft.EntityFrameworkCore.Design", # Install EF Core design package
             "Microsoft.VisualStudio.Web.CodeGeneration.Design",

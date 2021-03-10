@@ -11,13 +11,7 @@ cd ~/pc-setup/ansible_playbooks
 ansible-playbook system_setup.yml --tags "py" --skip-tags "windows"
 
 
-# --- Test Azure login with service principal ---
-# app login --debug
-
-# --- Test creating a secret in Azure Key Vault ---
-# app secret --debug --resource-group="Main" --key-vault="main-keyvault" --secret-key="AutoTestKey" --secret-value="007"
-
-# --- Test creating an ASP.NET Core WebApp ---
+# -------- (old, transfer to templates) Test creating an ASP.NET Core WebApp --------
 # app client --debug --application "Examples" --project "Blank.WebApp" --source "github"
 # app client --debug --application "Examples" --project "SqlDb.WebApp" --source "github" --strat "database" # template: webapp
 # https://docs.microsoft.com/en-us/azure/active-directory/develop/tutorial-v2-asp-webapp
@@ -29,26 +23,39 @@ ansible-playbook system_setup.yml --tags "py" --skip-tags "windows"
 # app client --debug --application "Examples" --project "Identity.API"
 # app client --debug --application "Examples" --project "Identity.UnitTests"
 
-# https://docs.microsoft.com/en-us/aspnet/core/tutorials/razor-pages
+# -------- (old, remove) Test deploying an ARM template to development environment --------
+# app deploy --debug --application "ArmMock" --arm "all/blank"
+# app deploy --debug --application "ArmMock" --arm "linux/webapp_blank"
+
+
+# --- Test Azure login with service principal ---
+# app login --debug
+
+# --- Test creating a secret in Azure Key Vault ---
+# app secret --debug --resource-group="Main" --key-vault="main-keyvault" --secret-key="AutoTestKey" --secret-value="007"
+
+# --- Test creating an ASP.NET Core WebApp ---
 # app client --debug --application "Tutorials-net3-1-WebApps-RazorPages" --project "RazorPagesMovie" --source "github" --framework "netcoreapp3.1"
 # app client --debug --application "Tutorials-net3-1-DataAccess-RazorPages" --project "ContosoUniversity" --source "github" --framework "netcoreapp3.1" --strat "database"
 # app client --debug --application "Tutorials-net5-0-WebApps-RazorPages" --project "RazorPagesMovie" --source "github"
 # app client --debug --application "Tutorials-net5-0-DataAccess-RazorPages" --project "ContosoUniversity" --source "github" --strat "database"
-# app client --debug --application "Tutorials-WebApiApps" --project "WebApiApps.API" --source "github" --strat "api" # authentication: MultiOrg
+app client --debug --application "Templates-net5-0" --project "Templates-net5-0.Base.WebApp" --source "github"
+app client --debug --application "Templates-net5-0" --project "Templates-net5-0.SqlDb.WebApp" --source "github" --strat "database"
+# app client --debug --application "Templates-net5-0" --project "Templates-net5-0.Identity.WebApp" --source "github" --strat "identity"
+# app client --debug --application "Tutorials-net5-0-WebApiApps" --project "WebApiApps.API" --source "github" --strat "api" # authentication: MultiOrg
 
 # app client --debug --application "DMR" --project "DMR.WebApp" --strat "identity"
 # app client --debug --application "SexBound" --project "SexBound.WebApp" --strat "identity" --source=tfsgit
 # app client --debug --application "CorruptionOfChampions" --project "CorruptionOfChampions.Conversion" --strat "identity" --source=tfsgit
 # app client --debug --application "CorruptionOfChampions" --project "CorruptionOfChampions.WebApp" --strat "identity" --source=tfsgit
 
-# --- Test deploying an ARM template to development environment ---
-# app deploy --debug --application "ArmMock" --arm "all/blank"
-# app deploy --debug --application "ArmMock" --arm "linux/webapp_blank"
-# app deploy --debug --application "ArmMock" --arm "linux/webapp"
-app deploy --debug --application "ArmMock" --arm "linux/key_vault"
+# --- Test deploying ARM template to 'Development' environment ---
+# app deploy --debug --application "ArmMock" --arm "linux/key_vault"
 # app deploy --debug --application "ArmMock" --arm "linux/key_vault_secret"
+# app deploy --debug --application "Templates-net5-0" --project "Templates-net5-0.Base.WebApp" --arm "linux/webapp"
 # app deploy --debug --application "ArmMock" --arm "linux/sql"
-# app deploy --debug --application "ArmMock" --arm "linux/webapp_sql"
+# app deploy --debug --application "Templates-WebApp-Sql" --project "Templates-WebApp-Sql.WebApp" --arm "linux/webapp_sql"
+# app deploy --debug --application "Templates-WebApi-Sql" --project "Templates-WebApi-Sql.API" --arm "linux/webapi_sql"
 
-# --- Test deploying an ARM template to release environment ---
+# --- Test deploying ARM template to 'Release' environment ---
 # app deploy --debug --resource-group="Main" --environment="Prod"
