@@ -91,7 +91,9 @@ chocolatey_packages:
 
 
 pip_packages:
+- pip
 - pytz
+- colorlog
 
 
 vscode_extensions:

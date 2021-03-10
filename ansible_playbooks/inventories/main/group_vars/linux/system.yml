@@ -33,6 +33,7 @@ pip_packages:
 - ansible==2.9.15 # https://pypi.org/project/ansible/2.9.15
 - jmespath        # for 'json_query' filter
 - pytz
+- colorlog        # https://pypi.org/project/colorlog
 
 # https://azure.microsoft.com/en-us/resources/samples/ansible-playbooks
 # https://docs.ansible.com/ansible/latest/scenario_guides/guide_azure.html
