@@ -37,7 +37,7 @@ class ProcessEvent(object):
     def Run(self):
         try:
             self.event.set()
-        except:
+        except Exception:
             return False
         return True
 
@@ -67,7 +67,7 @@ class ProcessPool(object):
             # map_async recommended over apply_async (not used in Python3)
             self.processes = pool.map_async(func, args_list)
             self.running = True
-        except:
+        except Exception:
             self.running = False
         return self.running
 
@@ -119,7 +119,7 @@ def rando(args):
 
     try:
         data[in_num] = num
-    except:
+    except Exception:
         print("rando nope!")
     
     result = dict()
@@ -133,7 +133,7 @@ def rng_generate(in_num, tester):
     print("{0} '{1}' in with rng_generate: {2}".format(in_num, tester, num))
     try:
         data[in_num] = num
-    except:
+    except Exception:
         print("rng_generate): Nope!")
     
     result = dict()

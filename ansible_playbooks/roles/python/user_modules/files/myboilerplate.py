@@ -99,13 +99,13 @@ class ShellBoilerplate(LoggingBoilerplate):
 		if path == "":
 			try:
 				return subprocess.Popen(command, close_fds=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-			except:
+			except Exception:
 				return None
 		else:
 			with self.ChangeDirectory(path):
 				try:
 					return subprocess.Popen(command, close_fds=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-				except:
+				except Exception:
 					return None
 
 
@@ -115,7 +115,7 @@ class ShellBoilerplate(LoggingBoilerplate):
 		stdout, sterr = process.communicate()
 		rc = process.returncode
 		return (rc, self.FormatPipe(stdout), self.FormatPipe(stderr))
-	except:
+	except Exception:
 		return (-1, None, None)
 
 
@@ -124,7 +124,7 @@ class ShellBoilerplate(LoggingBoilerplate):
 		try:
 			process = self.ProcessAsync(command, path)
 			return self.AwaitAsync(process)
-		except:
+		except Exception:
 			return (-1, None, None)
 
 
@@ -144,7 +144,7 @@ class ShellBoilerplate(LoggingBoilerplate):
 		if self.DirectoryExists(path) == True:
 			try:
 				shutil.rmtree(path)
-			except:
+			except Exception:
 				self.log.error("Experienced an exception trying to remove " + path)
 
 
