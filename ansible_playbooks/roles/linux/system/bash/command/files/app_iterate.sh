@@ -39,12 +39,15 @@ ansible-playbook system_setup.yml --tags "py" --skip-tags "windows"
 # app client --debug --application "Tutorials-net3-1-DataAccess-RazorPages" --project "ContosoUniversity" --source "github" --framework "netcoreapp3.1" --strat "database"
 # app client --debug --application "Tutorials-net5-0-WebApps-RazorPages" --project "RazorPagesMovie" --source "github"
 # app client --debug --application "Tutorials-net5-0-DataAccess-RazorPages" --project "ContosoUniversity" --source "github" --strat "database"
-app client --debug --application "Templates-net5-0" --project "Templates-net5-0.Base.WebApp" --source "github"
-app client --debug --application "Templates-net5-0" --project "Templates-net5-0.SqlDb.WebApp" --source "github" --strat "database"
-# app client --debug --application "Templates-net5-0" --project "Templates-net5-0.Identity.WebApp" --source "github" --strat "identity"
-# app client --debug --application "Tutorials-net5-0-WebApiApps" --project "WebApiApps.API" --source "github" --strat "api" # authentication: MultiOrg
+# app client --debug --application "Tutorials-net5-0-WebApiApps" --project "TodoApi" --source "github" --strat "api"
 
-# app client --debug --application "DMR" --project "DMR.WebApp" --strat "identity"
+# app client --debug --application "Templates-net5-0" --project "Templates-net5-0.Base.WebApp" --source "github"
+# app client --debug --application "Templates-net5-0" --project "Templates-net5-0.SqlDb.WebApp" --source "github" --strat "database"
+# app client --debug --application "Templates-net5-0" --project "Templates-net5-0.Identity.WebApp" --source "github" --strat "identity"
+# app client --debug --application "Templates-net5-0" --project "Templates-net5-0.Base.WebApi" --source "github" --strat "api"
+
+app client --debug --application "DMR" --project "DMR.WebApp" --source "github" --strat "database"
+# app client --debug --application "DMR" --project "DMR.WebApp" --source "github" --strat "identity"
 # app client --debug --application "SexBound" --project "SexBound.WebApp" --strat "identity" --source=tfsgit
 # app client --debug --application "CorruptionOfChampions" --project "CorruptionOfChampions.Conversion" --strat "identity" --source=tfsgit
 # app client --debug --application "CorruptionOfChampions" --project "CorruptionOfChampions.WebApp" --strat "identity" --source=tfsgit

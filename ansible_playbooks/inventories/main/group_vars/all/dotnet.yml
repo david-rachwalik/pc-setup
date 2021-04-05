@@ -24,7 +24,6 @@ dotnet_database_packages:
 - Microsoft.EntityFrameworkCore.Tools
 - Microsoft.VisualStudio.Web.CodeGeneration.Design
 - Microsoft.Extensions.Logging.Debug
-- NSwag.AspNetCore                          # Swagger / OpenAPI
 
 dotnet_identity_packages:
 - Microsoft.AspNetCore.Authentication.AzureAD.UI

@@ -65,14 +65,18 @@ def solution_project_add(dotnet_dir, application, project):
 
 # 'dotnet new' automatically calls build and restore
 # https://docs.microsoft.com/en-us/dotnet/core/tools/dotnet-new
-def project_new(dotnet_dir, application, project, strat, framework):
-    client_id = ""
+def project_new(tenant, dotnet_dir, application, project, strat, framework):
+    if not (tenant and isinstance(tenant, str)): TypeError("'tenant' parameter expected as string")
     if not (dotnet_dir and isinstance(dotnet_dir, str)): TypeError("'dotnet_dir' parameter expected as string")
     if not (application and isinstance(application, str)): TypeError("'application' parameter expected as string")
     if not (project and isinstance(project, str)): TypeError("'project' parameter expected as string")
     if not (strat and isinstance(strat, str)): TypeError("'strat' parameter expected as string")
     if not (framework and isinstance(framework, str)): TypeError("'framework' parameter expected as string")
     template = "webapp"
+    client_id = ""
+
+    if strat == "api":
+        template = "webapi"
     domain = "https://localhost:5001"
     project_dir = sh.path_join(dotnet_dir, application, project)
 
@@ -82,6 +86,11 @@ def project_new(dotnet_dir, application, project, strat, framework):
     if strat == "identity":
         command.append("--auth={0}".format("MultiOrg"))
         command.append("--client-id={0}".format(client_id))
+    # elif strat == "api" and strat == "identity":
+    #     command.append("--auth={0}".format("SingleOrg"))
+    #     command.append("--client-id={0}".format(client_id))
+    #     command.append("--tenant={0}".format("tenant"))
+    #     command.append("--domain={0}".format(domain))
     else:
         # command.append("--auth={0}".format("None"))
         command.append("--domain={0}".format(domain))
