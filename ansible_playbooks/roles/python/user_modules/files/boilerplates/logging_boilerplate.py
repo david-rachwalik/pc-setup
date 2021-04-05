@@ -132,9 +132,9 @@ def add_handler(logger, options=None):
 
 # Apply batch of handlers to logger based on list of LogHandlerOptions
 def set_handlers(logger, handlers=None):
-    if not isinstance(handlers, type(None)): handlers = []
-    if not is_logger(logger): raise TypeError("set_handlers() expects parameter 'logger' as instance of logging.Logger")
-    if not _valid_handlers(handlers): raise TypeError("set_handlers() expects parameter 'handlers' as list of LogHandlerOptions instances")
+    if isinstance(handlers, type(None)): handlers = []
+    if not is_logger(logger): raise TypeError("parameter 'logger' expected as instance of logging.Logger")
+    if not _valid_handlers(handlers): raise TypeError("parameter 'handlers' expected as list of LogHandlerOptions instances")
     # Clear all pre-existing handlers attached to logger
     for handler in logger.handlers:
         logger.removeHandler(handler)
@@ -180,7 +180,7 @@ def _get_timezone_converter(timezone="UTC"):
 
 # Validate a list of LogHandlerOptions instances was passed
 def _valid_handlers(handlers=None):
-    if not isinstance(handlers, type(None)): handlers = []
+    if isinstance(handlers, type(None)): handlers = []
     invalid = False
     if isinstance(handlers, list):
         for handler in handlers:
