@@ -391,7 +391,7 @@ def _project_packages(strat, framework):
         ])
     # --- Database Packages ---
     # Packages needed for scaffolding: [Microsoft.VisualStudio.Web.CodeGeneration.Design, Microsoft.EntityFrameworkCore.SqlServer]
-    if strat == "database" or strat == "identity":
+    if strat == "database" or strat == "identity" or strat == "api":
         dotnet_packages.extend([
             "Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore",
             "Microsoft.EntityFrameworkCore.Tools",
@@ -418,7 +418,8 @@ def _project_packages(strat, framework):
     # --- API Packages ---
     if strat == "api":
         dotnet_packages.extend([
-            "NSwag.AspNetCore" # Swagger / OpenAPI
+            # "NSwag.AspNetCore" # Swagger / OpenAPI
+            "Swashbuckle.AspNetCore"
         ])
     dotnet_packages.sort()
     return dotnet_packages
@@ -439,7 +440,7 @@ def application_strategy(tenant, dotnet_dir, application, project, strat, enviro
     # _log.info("secret_key: {0}".format(secret_key))
     # _log.info("secret_value: {0}".format(secret_value))
 
-    # strat: [basic, database, identity]
+    # strat: [basic, database, identity, api]
     if strat == "identity":
         _log.info("verifying authentication...")
         # Format name for application object registration
@@ -498,7 +499,7 @@ def application_strategy(tenant, dotnet_dir, application, project, strat, enviro
     project_exists = sh.path_exists(project_file, "f")
     if not project_exists:
         _log.warning("could not locate project, creating...")
-        project_succeeded = net.project_new(dotnet_dir, application, project, strat, framework)
+        project_succeeded = net.project_new(tenant, dotnet_dir, application, project, strat, framework)
         _log.info("successfully created project: {0}".format(project_succeeded))
         if not project_succeeded:
             _log.error("project failed to be created, exiting...")
@@ -812,7 +813,9 @@ if __name__ == "__main__":
         # parser.add_argument('--project', nargs="*")
         parser.add_argument('--project', default="")
         parser.add_argument('--framework', default="net5.0") # "netcoreapp3.1"
-        parser.add_argument("--strat", default="basic", const="basic", nargs="?", choices=["basic", "database", "identity"])
+        parser.add_argument("--strat", default="basic", const="basic", nargs="?", choices=["basic", "database", "identity", "api"])
+        # parser.add_argument('--template', default="console", const="console", nargs="?", choices=, ["console", "webapp", "webapi", "xunit"])
+        # parser.add_argument('--identity', default="None", const="None", nargs="?", choices=, ["None", "SingleOrg", "MultiOrg"])
         # --- Git Repository defaults ---
         parser.add_argument('--source', default="", const="", nargs="?", choices=["github", "tfsgit"]) # tfsgit=Azure
         parser.add_argument("--remote-alias", default="origin")
