@@ -49,16 +49,6 @@
                 "description": "Specifies whether Azure Resource Manager is permitted to retrieve secrets from the key vault."
             }
         },
-        "enableSoftDelete": {
-            "type": "bool",
-            "defaultValue": true,
-            "allowedValues": [
-                true
-            ],
-            "metadata": {
-                "description": "Specifies whether 'soft delete' functionality is enabled for the key vault."
-            }
-        },
         "tenantId": {
             "type": "string",
             "defaultValue": "[subscription().tenantId]",
@@ -104,6 +94,20 @@
                 "description": "Specifies whether the key vault is a standard vault or a premium vault."
             }
         }
+        // "secretName": {
+        //     "type": "string",
+        //     "defaultValue": "[concat(resourceGroup().name, '-sql-admin')]",
+        //     "metadata": {
+        //         "description": "Specifies the name of the secret that you want to create."
+        //     }
+        // },
+        // "secretValue": {
+        //     "type": "securestring",
+        //     "defaultValue": "[guid(resourceGroup().id, deployment().name)]",
+        //     "metadata": {
+        //         "description": "Specifies the value of the secret that you want to create."
+        //     }
+        // }
     },
     "functions": [],
     "variables": {},
@@ -114,10 +118,9 @@
             "name": "[parameters('keyVaultName')]",
             "location": "[parameters('location')]",
             "properties": {
-                "sku": {
-                    "name": "[parameters('skuName')]",
-                    "family": "A"
-                },
+                "enabledForDeployment": "[parameters('enabledForDeployment')]",
+                "enabledForDiskEncryption": "[parameters('enabledForDiskEncryption')]",
+                "enabledForTemplateDeployment": "[parameters('enabledForTemplateDeployment')]",
                 "tenantId": "[parameters('tenantId')]",
                 "accessPolicies": [
                     {
@@ -129,10 +132,10 @@
                         }
                     }
                 ],
-                "enabledForDeployment": "[parameters('enabledForDeployment')]",
-                "enabledForDiskEncryption": "[parameters('enabledForDiskEncryption')]",
-                "enabledForTemplateDeployment": "[parameters('enabledForTemplateDeployment')]",
-                "enableSoftDelete": "[parameters('enableSoftDelete')]",
+                "sku": {
+                    "name": "[parameters('skuName')]",
+                    "family": "A"
+                },
                 "networkAcls": {
                     "defaultAction": "Allow",
                     "bypass": "AzureServices"
@@ -141,7 +144,27 @@
             "tags": {
                 "displayName": "[parameters('keyVaultName')]"
             }
+            // "resources": [
+            //     {
+            //         "type": "secrets",
+            //         "apiVersion": "2016-10-01",
+            //         // "name": "[concat(parameters('keyVaultName'), '/', parameters('secretName'))]",
+            //         "name": "[concat(parameters('keyVaultName'), '/', parameters('secretsObject').secrets[copyIndex()].secretName)]",
+            //         "location": "[parameters('location')]",
+            //         "dependsOn": [
+            //             "[resourceId('Microsoft.KeyVault/vaults', parameters('keyVaultName'))]"
+            //         ],
+            //         "properties": {
+            //             "value": "[parameters('secretValue')]"
+            //         }
+            //     }
+            // ]
         }
     ],
-    "outputs": {}
+    "outputs": {
+        "vault_result": {
+            "type": "String",
+            "value": "[base64(string(reference(parameters('keyVaultName')).outputs))]"
+        }
+    }
 }
