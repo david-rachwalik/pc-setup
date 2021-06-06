@@ -36,8 +36,11 @@ class FilterModule(object):
         if len(stdout_lines) > 2:
             # Parse .NET tools list (skip beginning 2 lines)
             for line in stdout_lines[2:]:
-                line_edit_list = line.split()
-                results.append(line_edit_list[0])
+                if line:
+                    # Split string on space; separates package name from version, etc.
+                    line_edit_list = line.split()
+                    if line_edit_list:
+                        results.append(line_edit_list[0])
         results.sort()
         return results
 
