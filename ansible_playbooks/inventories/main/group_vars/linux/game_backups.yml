@@ -49,8 +49,9 @@ game_backups:
   setting: " "
   # setting_opts: ["--include=*.cfg", "--exclude=*"]
   setting_opts: [
-    "--include=FFXIV_CHR004000174B3A4759/", "--include=FFXIV_CHR004000174B3A4759/*",
-    "--include=FFXIV_CHR0040002E932D4F80/", "--include=FFXIV_CHR0040002E932D4F80/*",
+    "--include=FFXIV_CHR004000174BCC982B/", "--include=FFXIV_CHR004000174BCC982B/*",  # Goo Clone
+    "--include=FFXIV_CHR0040002E933812EA/", "--include=FFXIV_CHR0040002E933812EA/*",  # Zaiba Igawa
+    "--include=FFXIV_CHR004000174B3A4759/", "--include=FFXIV_CHR004000174B3A4759/*",  # Callia Denma
     "--exclude=log/", "--exclude=log/*", "--exclude=*/"
   ]
 
