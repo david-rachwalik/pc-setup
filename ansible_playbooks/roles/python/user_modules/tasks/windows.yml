@@ -1,5 +1,10 @@
 ---
 - block:
+  - name: Find Python site package directory
+    win_command: python -m site --user-site
+    register: py_user_site_results
+    changed_when: false
+
   # https://docs.ansible.com/ansible/latest/modules/win_file_module.html
   - name: Ensure Python module directory exists
     win_file:
