@@ -46,7 +46,7 @@ chocolatey_packages:
   - name: nodejs
   - name: vscode
   - name: postman
-  - name: sqlitebrowser
+  # - name: sqlitebrowser
   
   # --- Media ---
   - name: geforce-experience
@@ -54,7 +54,7 @@ chocolatey_packages:
   - name: AdobeAIR
   - name: adobeshockwaveplayer
   - name: spotify
-  - name: paint.net
+  # - name: paint.net
   # - name: blender
 
   # --- Video Editing ---
@@ -63,7 +63,6 @@ chocolatey_packages:
   - name: handbrake
   - name: k-litecodecpackmega
   - name: 4k-video-downloader
-  - name: streamlabs-obs
   # - name: jubler
   # - name: chatterino
 
@@ -71,8 +70,7 @@ chocolatey_packages:
   - name: directx
   - name: steam
   - name: discord
-  - name: twitch
-  - name: autohotkey
+  # - name: autohotkey
 
   uninstall:
   - name: python2
@@ -88,6 +86,8 @@ chocolatey_packages:
   - name: dart-sdk # sass dependency
   # - name: jekyll
   # - name: microsoftazurestorageexplorer
+  - name: streamlabs-obs
+  - name: twitch
 
 
 pip_packages:
