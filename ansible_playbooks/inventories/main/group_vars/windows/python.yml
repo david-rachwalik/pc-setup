@@ -3,7 +3,7 @@
 python_user_base_dir: C:\Users\david\AppData\Roaming\Python
 python_user_command_dir: "{{python_user_base_dir}}\\bin"
 # python_user_site_dir: "{{python_user_base_dir}}\\Python38\\site-packages"
-python_user_site_dir: "{{py_user_site_results.stdout}}"
+python_user_site_dir: "{{py_user_site_results.stdout | trim}}" # trim newline
 
 python_user_modules:
 # --- Boilerplates ---

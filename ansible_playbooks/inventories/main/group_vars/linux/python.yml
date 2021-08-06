@@ -3,7 +3,7 @@
 python_user_base_dir: $HOME/.local
 python_user_command_dir: "{{python_user_base_dir}}/bin"
 # python_user_site_dir: "{{python_user_base_dir}}/lib/python3.6/site-packages"
-python_user_site_dir: "{{py_user_site_results.stdout}}"
+python_user_site_dir: "{{py_user_site_results.stdout | trim}}" # trim newline
 
 python_user_modules:
 # --- Boilerplates ---
