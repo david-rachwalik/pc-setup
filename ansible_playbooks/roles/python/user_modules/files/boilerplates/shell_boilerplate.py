@@ -7,7 +7,7 @@
 
 # --- Global Shell Commands ---
 # :-Helper-:        format_resource, valid_resource, get_random_password
-# JSON:             is_json_parse, is_json, json_parse, json_convert, json_save
+# JSON:             is_json_parse, is_json_str, json_parse, json_convert, json_save
 # Utility:          directory_shift, directory_change, is_list_of_strings, list_differences, print_command
 # Process:          process_exit, process_fail, process_id, process_parent_id
 # Path:             path_current, path_expand, path_join, path_exists, path_dir, path_basename, path_filename
@@ -75,32 +75,36 @@ def is_json_parse(obj):
     return isinstance(obj, _dict2obj)
 
 
-def is_json(myjson):
-    # _log.debug("myjson: {0}".format(myjson))
-    if isinstance(myjson, _dict2obj): return True
-    try:
-        # _log.debug("attempting json load")
-        json_object = json.loads(myjson)
-        # _log.debug("json_object: {0}".format(json_object))
-    except ValueError as e:
-        return False
-    return True
+def is_json_str(json_str):
+    if not (json_str and isinstance(json_str, str)): return False
+    results = json_parse(json_str)
+    return bool(results)
 
 
-# Deserialize JSON data: https://docs.python.org/2/library/json.html
+# Deserialize JSON string to Python dictionary: https://docs.python.org/2/library/json.html
 def json_parse(json_str):
+    results = None
+    if not (json_str and isinstance(json_str, str)): return results
+    # _log.debug("attempting json.loads")
     # _log.debug("json_str: {0}".format(json_str))
-    # _log.debug("json_str type: {0}".format(type(json_str)))
-    if not (json_str and is_json(json_str)): return ""
-    results = json.loads(json_str, object_hook=_decode_dict)
+    try:
+        results = json.loads(json_str, object_hook=_decode_dict) # convert to dict
+    except ValueError as e:
+        results = None
+    # _log.debug("results: {0}".format(results))
     return results
 
 
-# Serialize Python string into JSON
-def json_convert(raw_str, indent=4):
-    # _log.debug("raw_str: {0}".format(raw_str))
-    if not (raw_str and is_json(raw_str)): return ""
-    results = json.dumps(raw_str, indent=indent)
+# Serialize Python dictionary into JSON string
+def json_convert(data, indent=4):
+    results = ""
+    if not (data and isinstance(data, dict)): return results
+    # _log.debug("attempting json.dumps")
+    # _log.debug("data: {0}".format(data))
+    try:
+        results = json.dumps(data, indent=indent) # convert to json
+    except ValueError as e:
+        results = ""
     # _log.debug("results: {0}".format(results))
     return results
 
@@ -114,7 +118,6 @@ def json_save(path, json_str, indent=4):
     # https://stackoverflow.com/questions/39491420/python-jsonexpecting-property-name-enclosed-in-double-quotes
     # Valid JSON syntax uses quotation marks; single quotes are only valid in string
     # https://stackoverflow.com/questions/43509448/building-json-file-out-of-python-objects
-    # file_ready = json.dumps(json_str, indent=indent)
     file_ready = json_convert(json_str, indent)
     file_write(path, file_ready)
 
