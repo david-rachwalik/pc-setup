@@ -49,160 +49,158 @@ except NameError:
 
 # --- Strategies ---
 
-def resource_group_strategy(rg_name, location):
+def resource_group_strategy(resource_group, location):
     if not _az.is_signed_in: return (az.ResourceGroup(), False)
-    if not (rg_name and isinstance(rg_name, str)): TypeError("'rg_name' parameter expected as string")
-    rg_changed = False
+    if not (resource_group and isinstance(resource_group, str)): TypeError("'resource_group' parameter expected as string")
+    if not (location and isinstance(location, str)): TypeError("'location' parameter expected as string")
+    resource_group_changed = False
     # Ensure resource group exists
-    resource_group = az.resource_group_get(rg_name)
-    if not resource_group.is_valid:
+    resource_group_data = az.resource_group_get(resource_group)
+    if not resource_group_data.is_valid:
         _log.warning("resource group is missing, creating...")
-        resource_group = az.resource_group_set(rg_name, location)
-        rg_changed = True
-    _log.debug("resource_group: {0}".format(resource_group))
-    return (resource_group, rg_changed)
+        resource_group_data = az.resource_group_set(resource_group, location)
+        resource_group_changed = True
+    _log.debug("resource_group_data: {0}".format(resource_group_data))
+    return (resource_group_data, resource_group_changed)
 
 
 def key_vault_strategy(location, resource_group, key_vault):
-    if not _az.is_signed_in: return (False, False)
+    if not _az.is_signed_in: return (None, False)
     if not (location and isinstance(location, str)): TypeError("'location' parameter expected as string")
     if not (resource_group and isinstance(resource_group, str)): TypeError("'resource_group' parameter expected as string")
     if not (key_vault and isinstance(key_vault, str)): TypeError("'key_vault' parameter expected as string")
-    kv_changed = False
+    key_vault_changed = False
 
-    # Create resource group
-    (resource_group, rg_changed) = resource_group_strategy(args.resource_group, args.location)
-    _log.debug("resource_group: {0}".format(args.resource_group))
-    if not resource_group.is_valid:
+    # Ensure resource group exists
+    (resource_group_data, resource_group_changed) = resource_group_strategy(resource_group, location)
+    _log.debug("resource_group_data: {0}".format(resource_group_data))
+    if not resource_group_data.is_valid:
         _log.error("failed to create resource group")
         sh.process_fail()
-    # Create a hardened container (vault) in Azure
-    az.key_vault_set(args.key_vault, args.resource_group)
-
-
 
     # Ensure key vault exists
     key_vault_data = az.key_vault_get(resource_group, key_vault)
-    # _log.debug("key_vault_data: {0}".format(key_vault_data))
+    _log.debug("key_vault_data: {0}".format(key_vault_data))
     if not key_vault_data:
         _log.warning("key vault doesn't exists, creating...")
         key_vault_data = az.key_vault_set(resource_group, key_vault)
-        kv_changed = True
+        key_vault_changed = True
 
-    return (key_vault_data, kv_changed)
+    return (key_vault_data, key_vault_changed)
 
 
-def ad_group_strategy(member_id, group_name="main-ad-group"):
-    if not _az.is_signed_in: return (False, False)
-    if not (member_id and isinstance(member_id, str)): TypeError("'member_id' parameter expected as string")
-    if not (group_name and isinstance(group_name, str)): TypeError("'group_name' parameter expected as string")
+def ad_group_strategy(ad_member_id, ad_group="main-ad-group"):
+    if not _az.is_signed_in: return (None, False)
+    if not (ad_member_id and isinstance(ad_member_id, str)): TypeError("'ad_member_id' parameter expected as string")
+    if not (ad_group and isinstance(ad_group, str)): TypeError("'ad_group' parameter expected as string")
 
     # Ensure active directory group exists
-    ad_group = az.ad_group_get(group_name)
-    group_changed = False
-    if not ad_group.is_valid:
+    ad_group_data = az.ad_group_get(ad_group)
+    ad_group_changed = False
+    if not ad_group_data.is_valid:
         _log.warning("active directory group is missing, creating...")
-        (ad_group, group_changed) = az.ad_group_set(group_name)
+        (ad_group_data, ad_group_changed) = az.ad_group_set(ad_group)
 
     # Ensure active directory group member exists
-    ad_group_member_exists = az.ad_group_member_get(group_name, member_id)
+    ad_group_member_exists = az.ad_group_member_get(ad_group, ad_member_id)
     if not ad_group_member_exists:
         _log.warning("active directory group member is missing, adding...")
-        ad_group_member_exists = az.ad_group_member_set(group_name, member_id)
+        ad_group_member_exists = az.ad_group_member_set(ad_group, ad_member_id)
 
     # Ensure role is assigned to active directory group
     scope = "/subscriptions/{0}".format(_az.subscription_id)
-    role_assigned = az.role_assign_get(ad_group.id, scope)
+    role_assigned = az.role_assign_get(ad_group_data.id, scope)
     if not role_assigned:
         _log.warning("role is not assigned to active directory group, adding...")
-        role_assigned = az.role_assign_set(ad_group.id, scope)
+        role_assigned = az.role_assign_set(ad_group_data.id, scope)
 
-    return (ad_group, group_changed)
+    return (ad_group_data, ad_group_changed)
 
 
-def service_principal_strategy(tenant, sp_name, app_id):
+def service_principal_strategy(tenant, service_principal, app_id):
+    if not _az.is_signed_in: return (None, False)
     if not (tenant and isinstance(tenant, str)): TypeError("'tenant' parameter expected as string")
-    if not (sp_name and isinstance(sp_name, str)): TypeError("'sp_name' parameter expected as string")
+    if not (service_principal and isinstance(service_principal, str)): TypeError("'service_principal' parameter expected as string")
     if not (app_id and isinstance(app_id, str)): TypeError("'app_id' parameter expected as string")
-    sp_changed = False
-    service_principal = None
-    kv_secret_value = ""
+    service_principal_changed = False
     # Full filepath to service principal data
-    sp_name = sh.format_resource(sp_name)
+    service_principal = sh.format_resource(service_principal)
     # Ensure service principal exists
-    service_principal = az.service_principal_get(sp_name, tenant=tenant)
-    if not service_principal.appId:
+    service_principal_data = az.service_principal_get(service_principal, tenant=tenant)
+    if not service_principal_data.appId:
         _log.debug("service principal credentials not found, creating...")
-        service_principal = az.service_principal_set(sp_name, app_id)
-        sp_changed = True
-    return (service_principal, sp_changed)
+        service_principal_data = az.service_principal_set(service_principal, app_id)
+        service_principal_changed = True
+    return (service_principal_data, service_principal_changed)
 
 
-def login_service_principal_strategy(location, resource_group, key_vault, sp_name, auth_dir):
+def login_service_principal_strategy(location, resource_group, key_vault, service_principal, auth_dir):
     if not (location and isinstance(location, str)): TypeError("'location' parameter expected as string")
     if not (resource_group and isinstance(resource_group, str)): TypeError("'resource_group' parameter expected as string")
     if not (key_vault and isinstance(key_vault, str)): TypeError("'key_vault' parameter expected as string")
-    if not (sp_name and isinstance(sp_name, str)): TypeError("'sp_name' parameter expected as string")
+    if not (service_principal and isinstance(service_principal, str)): TypeError("'service_principal' parameter expected as string")
     if not (auth_dir and isinstance(auth_dir, str)): TypeError("'auth_dir' parameter expected as string")
-    sp_changed = False
-    service_principal = None
-    kv_secret_value = ""
+    service_principal_changed = False
+    service_principal_data = None
+    key_vault_secret_value = ""
     # Full filepath to service principal data
-    sp_name = sh.format_resource(sp_name)
-    sp_path = sh.path_join(sh.path_expand(auth_dir), "{0}.json".format(sp_name))
+    service_principal = sh.format_resource(service_principal)
+    service_principal_path = sh.path_join(sh.path_expand(auth_dir), "{0}.json".format(service_principal))
 
     # Ensure service principal exists in Azure and local
-    if sh.path_exists(sp_path, "f"):
+    if sh.path_exists(service_principal_path, "f"):
         # Gather login info from service principal JSON
         _log.debug("service principal file exists, checking file...")
-        service_principal = az.service_principal_get(sp_name, auth_dir)
+        service_principal_data = az.service_principal_get(service_principal, auth_dir)
     else:
         _log.debug("service principal file missing, checking Azure...")
         if not _az.is_signed_in: return (False, False)
 
-        # Ensure key vault and service principal exists
-        service_principal = az.service_principal_get(sp_name)
-        (kv_succeeded, kv_changed) = key_vault_strategy(location, resource_group, key_vault)
-        if service_principal and kv_succeeded:
+        # Ensure service principal & key vault exists
+        service_principal_data = az.service_principal_get(service_principal)
+        _log.debug("service_principal_data: {0}".format(service_principal_data))
+        (key_vault_data, kv_changed) = key_vault_strategy(location, resource_group, key_vault)
+        _log.debug("key_vault_data: {0}".format(key_vault_data))
+        if service_principal_data and key_vault_data:
             # Check for passphrase as key vault secret (to share across systems)
-            kv_secret_value = az.key_vault_secret_get(key_vault, sp_name)
-            # _log.debug("kv_secret_value: {0}".format(kv_secret_value))
-            if kv_secret_value:
+            key_vault_secret_value = az.key_vault_secret_get(key_vault, service_principal)
+            # _log.debug("key_vault_secret_value: {0}".format(key_vault_secret_value))
+            if key_vault_secret_value:
                 _log.debug("service principal password found in key vault, saving credentials...")
-                service_principal.password = kv_secret_value
+                service_principal_data.password = key_vault_secret_value
             else:
                 # Service principal in Azure but not local file, must reset pass to regain access
                 _log.debug("service principal successfully found, resetting credentials...")
-                service_principal = az.service_principal_rbac_set(key_vault, sp_name, True)
+                service_principal_data = az.service_principal_rbac_set(key_vault, service_principal, True)
         else:
             _log.debug("service principal credentials not found, creating...")
-            service_principal = az.service_principal_rbac_set(key_vault, sp_name)
+            service_principal_data = az.service_principal_rbac_set(key_vault, service_principal)
 
         # Last chance to have service principal
-        if not service_principal: return (False, False)
+        if not service_principal_data: return (False, False)
 
         # Store password/credentials in JSON file
-        az.service_principal_save(sp_path, service_principal)
-        if not kv_secret_value:
+        az.service_principal_save(service_principal_path, service_principal_data)
+        if not key_vault_secret_value:
             # Store password/credentials in key vault
-            az.key_vault_secret_set(key_vault, sp_name, service_principal.password)
+            az.key_vault_secret_set(key_vault, service_principal, service_principal_data.password)
 
-        sp_changed = True
+        service_principal_changed = True
 
         # TODO: manage service principal security groups
         # use 'az role assignment create' on groups, not service principals
         # https://docs.microsoft.com/en-us/cli/azure/create-an-azure-service-principal-azure-cli#manage-service-principal-roles
         
         # Ensure active directory groups/roles exist
-        if sp_changed:
-            (ad_group, group_changed) = ad_group_strategy(service_principal.objectId)
+        if service_principal_changed:
+            (ad_group_data, ad_group_changed) = ad_group_strategy(service_principal_data.objectId)
 
         # TODO: manage service principal security access to Key Vault:
         # - manually enabled ARM for template deployment in Portal
         # - manually added the service principal as access policy in Portal
         # - examine key_vault returned from strategy
 
-    return (service_principal, sp_changed)
+    return (service_principal_data, service_principal_changed)
 
 
 def login_strategy(tenant, subscription, location, resource_group, key_vault, sp_name, auth_dir, retry=True):
@@ -217,7 +215,7 @@ def login_strategy(tenant, subscription, location, resource_group, key_vault, sp
     if not (retry and isinstance(retry, bool)): TypeError("'retry' parameter expected as boolean")
     # Full filepath to service principal data
     sp_name = sh.format_resource(sp_name)
-    sp_path = sh.path_join(sh.path_expand(auth_dir), "{0}.json".format(sp_name))
+    service_principal_path = sh.path_join(sh.path_expand(auth_dir), "{0}.json".format(sp_name))
     # Check if account subscription exists
     _log.info("checking if already signed-in Azure...")
     # First chance to be signed-in
@@ -225,7 +223,7 @@ def login_strategy(tenant, subscription, location, resource_group, key_vault, sp
     # _log.debug("_az: {0}".format(_az))
 
     # Ensure service principal credentials exist
-    (service_principal, sp_changed) = login_service_principal_strategy(location, resource_group, key_vault, sp_name, auth_dir)
+    (service_principal, service_principal_changed) = login_service_principal_strategy(location, resource_group, key_vault, sp_name, auth_dir)
 
     if _az.is_signed_in and not service_principal:
         _log.error("failed to retrieve service principal, likely due to insufficient privileges on account, signing out...")
@@ -243,7 +241,7 @@ def login_strategy(tenant, subscription, location, resource_group, key_vault, sp
                 if retry:
                     # Will retry recursively only once
                     _log.warning("Azure login with service principal failed, saving backup and retrying...")
-                    sh.file_backup(sp_path)
+                    sh.file_backup(service_principal_path)
                     _az = login_strategy(tenant, subscription, location, resource_group, key_vault, sp_name, auth_dir, False)
                 else:
                     _log.error("Azure login with service principal failed again, exiting...")
@@ -255,7 +253,7 @@ def login_strategy(tenant, subscription, location, resource_group, key_vault, sp
             sh.process_fail()
 
     # elif used to limit recursive activity
-    if sp_changed:
+    if service_principal_changed:
         # Confirm updated service principal login connects
         az.account_logout()
         _az.is_signed_in = False
@@ -281,7 +279,7 @@ def login_devops_pat_strategy(location, resource_group, key_vault, auth_dir):
     secret_key = "main-devops-pat"
     pat_changed = False
     pat_data = None
-    kv_secret_value = ""
+    key_vault_secret_value = ""
     # Full filepath to PAT (personal access token)
     pat_path = sh.path_join(sh.path_expand(auth_dir), "ado.pat")
 
@@ -296,10 +294,10 @@ def login_devops_pat_strategy(location, resource_group, key_vault, auth_dir):
         _log.debug("PAT (personal access token) file missing, checking Azure...")
 
         # Ensure PAT exists in key vault as secret
-        kv_secret_value = az.key_vault_secret_get(key_vault, secret_key)
-        if kv_secret_value:
+        key_vault_secret_value = az.key_vault_secret_get(key_vault, secret_key)
+        if key_vault_secret_value:
             _log.debug("PAT successfully found in key vault")
-            pat_data = kv_secret_value
+            pat_data = key_vault_secret_value
         # TODO: be able to create/reset credentials similar to login_service_principal_strategy()
         # TODO: - if missing: create PAT and save to local file
         # TODO: - if invalid/expired: revoke the PAT and delete from local file
@@ -457,7 +455,7 @@ def application_strategy(tenant, dotnet_dir, application, project, strat, enviro
                 sh.process_fail()
 
         # Ensure service principal credentials exist for AD application object registration
-        (service_principal, sp_changed) = service_principal_strategy(tenant, app_name, ad_app.appId)
+        (service_principal, service_principal_changed) = service_principal_strategy(tenant, app_name, ad_app.appId)
         # _log.debug("service_principal: {0}".format(service_principal))
         # TODO: might need additional test iterations linking AD app to SP with CLI instead of portal
 
@@ -650,7 +648,7 @@ def deployment_group_strategy(tenant, sp_name, application, environment, locatio
     _log.debug("rg_name: {0}".format(rg_name))
 
     # Ensure resource group exists
-    (resource_group, rg_changed) = resource_group_strategy(rg_name, location)
+    (resource_group, resource_group_changed) = resource_group_strategy(rg_name, location)
     if not resource_group.is_valid:
         _log.error("failed to create resource group")
         sh.process_fail()
@@ -725,8 +723,8 @@ def login():
 def secret():
     login()
     key_vault_strategy(args.location, args.resource_group, args.key_vault)
-    # Add a [key, secret, certificate] to vault
-    az.key_vault_secret_set(args.key_vault, args.secret_key, args.secret_value)
+    # Add a [key, secret, certificate] to vault (certificates have annual renewal costs)
+    # az.key_vault_secret_set(args.key_vault, args.secret_key, args.secret_value)
     # Set key vault advanced access policies
 
 
