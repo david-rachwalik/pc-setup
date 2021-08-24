@@ -476,6 +476,7 @@ def key_vault_get(resource_group, key_vault):
     return results
 
 
+# Create a hardened container (vault) in Azure
 def key_vault_set(resource_group, key_vault):
     if not (resource_group and isinstance(resource_group, str)): TypeError("'resource_group' parameter expected as string")
     if not (key_vault and isinstance(key_vault, str)): TypeError("'key_vault' parameter expected as string")
