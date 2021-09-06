@@ -618,7 +618,7 @@ def active_directory_application_set(tenant, app_name, app_id=""):
 def deployment_group_valid(rg_name, template_path, parameters=None, deploy_name="Main"):
     if not (rg_name and isinstance(rg_name, str)): TypeError("'rg_name' parameter expected as string")
     if not (template_path and isinstance(template_path, str)): TypeError("'template_path' parameter expected as string")
-    if not isinstance(parameters, type(None)): parameters = []
+    if isinstance(parameters, type(None)): parameters = []
     # if not (parameters and isinstance(parameters, str)): TypeError("'parameters' parameter expected as string")
     if not sh.is_list_of_strings(parameters): TypeError("'parameters' parameter expected as list of strings")
     if not (deploy_name and isinstance(deploy_name, str)): TypeError("'deploy_name' parameter expected as string")
@@ -640,7 +640,7 @@ def deployment_group_valid(rg_name, template_path, parameters=None, deploy_name=
 def deployment_group_get(rg_name, template_path, parameters=None, deploy_name="Main"):
     if not (rg_name and isinstance(rg_name, str)): TypeError("'rg_name' parameter expected as string")
     if not (template_path and isinstance(template_path, str)): TypeError("'template_path' parameter expected as string")
-    if not isinstance(parameters, type(None)): parameters = []
+    if isinstance(parameters, type(None)): parameters = []
     # if not (parameters and isinstance(parameters, str)): TypeError("'parameters' parameter expected as string")
     if not sh.is_list_of_strings(parameters): TypeError("'parameters' parameter expected as list of strings")
     if not (deploy_name and isinstance(deploy_name, str)): TypeError("'deploy_name' parameter expected as string")
@@ -662,7 +662,7 @@ def deployment_group_get(rg_name, template_path, parameters=None, deploy_name="M
 def deployment_group_set(rg_name, template_path, parameters=None, deploy_name="Main"):
     if not (rg_name and isinstance(rg_name, str)): TypeError("'rg_name' parameter expected as string")
     if not (template_path and isinstance(template_path, str)): TypeError("'template_path' parameter expected as string")
-    if not isinstance(parameters, type(None)): parameters = []
+    if isinstance(parameters, type(None)): parameters = []
     # if not isinstance(parameters, str): TypeError("'parameters' parameter expected as string")
     if not sh.is_list_of_strings(parameters): TypeError("'parameters' parameter expected as list of strings")
     if not (deploy_name and isinstance(deploy_name, str)): TypeError("'deploy_name' parameter expected as string")
