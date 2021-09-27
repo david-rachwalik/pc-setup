@@ -46,19 +46,21 @@ ansible-playbook system_setup.yml --tags "py" --skip-tags "windows"
 # app client --debug --application "Templates-net5-0" --project "Templates-net5-0.Identity.WebApp" --source "github" --strat "identity"
 # app client --debug --application "Templates-net5-0" --project "Templates-net5-0.Base.WebApi" --source "github" --strat "api"
 
-app client --debug --application "DMR" --project "DMR.WebApp" --source "github" --strat "database"
+# app client --debug --application "DMR" --project "DMR.WebApp" --source "github" --strat "database"
 # app client --debug --application "DMR" --project "DMR.WebApp" --source "github" --strat "identity"
 # app client --debug --application "SexBound" --project "SexBound.WebApp" --strat "identity" --source=tfsgit
 # app client --debug --application "CorruptionOfChampions" --project "CorruptionOfChampions.Conversion" --strat "identity" --source=tfsgit
 # app client --debug --application "CorruptionOfChampions" --project "CorruptionOfChampions.WebApp" --strat "identity" --source=tfsgit
 
+
 # --- Test deploying ARM template to 'Development' environment ---
-# app deploy --debug --application "ArmMock" --arm "linux/key_vault"
-# app deploy --debug --application "ArmMock" --arm "linux/key_vault_secret"
-# app deploy --debug --application "Templates-net5-0" --project "Templates-net5-0.Base.WebApp" --arm "linux/webapp"
-# app deploy --debug --application "ArmMock" --arm "linux/sql"
-# app deploy --debug --application "Templates-WebApp-Sql" --project "Templates-WebApp-Sql.WebApp" --arm "linux/webapp_sql"
-# app deploy --debug --application "Templates-WebApi-Sql" --project "Templates-WebApi-Sql.API" --arm "linux/webapi_sql"
+# app deploy --debug --application "ArmTemplates" --arm "linux/key_vault"
+# app deploy --debug --application "ArmTemplates" --arm "linux/key_vault_secret"
+app deploy --debug --application "ArmTemplates" --arm "linked/key_vault_secret"
+
+# app deploy --debug --application "ArmTemplates" --arm "linux/sql"
+# app deploy --debug --application "ArmTemplates" --arm "linux/webapp_sql"
+# app deploy --debug --application "ArmTemplates" --arm "linux/webapi_sql"
 
 # --- Test deploying ARM template to 'Release' environment ---
 # app deploy --debug --resource-group="Main" --environment="Prod"
