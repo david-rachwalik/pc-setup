@@ -54,6 +54,7 @@ chocolatey_packages:
   - name: AdobeAIR
   - name: adobeshockwaveplayer
   - name: spotify
+  - name: comicrack
   # - name: paint.net
   # - name: blender
 
