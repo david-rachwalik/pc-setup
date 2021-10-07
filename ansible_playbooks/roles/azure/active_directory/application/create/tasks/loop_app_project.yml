@@ -1,0 +1,13 @@
+---
+# https://docs.ansible.com/ansible/latest/modules/include_role_module.html
+- include_role:
+    name: azure/active_directory/application/create
+    tasks_from: loop_app_environment
+  loop: "{{app_project_names}}"
+  loop_control:
+    loop_var: app_project
+  when:
+  - app_project_item.authentication is defined
+  - app_project_item.authentication in application_authentication_choices
+  tags: [azure, az, active_directory, ad, application, identity]
+...

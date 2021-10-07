@@ -1,0 +1,37 @@
+---
+# https://docs.microsoft.com/en-us/azure/architecture/best-practices/naming-conventions
+
+# --- Azure Defaults ---
+az_location: "{{app_repo_item.az_location | default(az_default_location)}}"
+az_resource_group: "{{(app_repo + '-' + app_environment) | regex_replace('[^a-zA-Z0-9-]', '-')}}"
+az_app_registration: "{{(app_project + '-' + app_environment) | regex_replace('[^a-zA-Z0-9-]', '-')}}"
+az_app_branch: master
+az_app_repository_type: github # [github, tfsgit]
+az_app_repo_url: https://github.com/Azure-Samples/function-image-upload-resize
+az_app_deploy_user_parse: "{{(az_webapp_deploy_user_facts.stdout | from_json).publishingUserName}}"
+az_app_source: "{{app_repo_item.source | default('')}}"
+az_app_yml_path: azure-pipelines.yml
+
+# --- Azure Resource Manager ---
+az_rm_root_path: ~/pc-setup/ansible_playbooks/roles/azure/resource_manager/deploy/templates
+az_rm_template_path: "{{az_rm_root_path}}/{{app_repo_item.az_resource_manager}}/azuredeploy.json"
+az_rm_parameters_path: "{{az_rm_root_path}}/{{app_repo_item.az_resource_manager}}/azuredeploy.parameters.json"
+az_rm_parameters_file: "{{lookup('template', az_rm_parameters_path)}}"
+az_rm_template: "{{lookup('template', az_rm_template_path)}}"
+az_rm_parameters: "{{(az_rm_parameters_file is defined) | ternary(az_rm_parameters_file.parameters, {})}}"
+
+# --- Azure Resources ---
+# 'az_plan' must be between 3-24 chars, only lowercase or numbers
+# TODO: replace() will use regex to strip ALL special characters
+# az_service_plan: "plan-{{az_app_registration | replace('_', '') | truncate(19) | lower}}"
+# app must be globally unique with valid characters a-z, 0-9, and -
+az_service_plan: "{{az_app_registration}}-plan"
+az_service_plan_id: "{{az_appserviceplan_facts | json_query('appserviceplans[0].id')}}"
+az_app_service: "{{az_app_registration}}-app"
+# sql_server name must contain only lowercase letters, numbers, and hyphens; must be 3-50 characters long
+az_sql_server: "{{az_app_registration}}-sql"
+az_sql_database: "{{az_app_registration}}-sqldb"
+az_storage_account: "{{az_app_registration}}-sa"
+# database username must be unique within Azure; must not contain the '@' symbol for local Git pushes
+# database password must contain at least 2 of the 3 elements: letters, numbers, and symbols; must be >= 8 characters long
+...

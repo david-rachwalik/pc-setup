@@ -1,7 +1,6 @@
 ---
 apt_repository_packages:
-- ppa:git-core/ppa
-# - universe
+- ppa:git-core/ppa # https://git-scm.com/download/linux
 
 
 apt_packages:
@@ -9,16 +8,13 @@ apt_packages:
 - python3-pip
 - python3-winrm
 - git
-# - libffi-dev
-# - libssl-dev
-# --- Miscellaneous ---
-# Tool to convert Windows files to Linux format
-# - dos2unix
 # --- .NET Core SDK ---
-# https://docs.microsoft.com/en-us/dotnet/core/install/linux-package-manager-ubuntu-1804
+# https://docs.microsoft.com/en-us/dotnet/core/install/linux-ubuntu
 - apt-transport-https
-- dotnet-sdk-3.1
-- aspnetcore-runtime-3.1
+# - dotnet-sdk-3.1
+# - aspnetcore-runtime-3.1
+- dotnet-sdk-5.0
+- aspnetcore-runtime-5.0
 # https://docs.microsoft.com/en-us/cli/azure/install-azure-cli-apt
 - azure-cli
 # --- NPM ---
@@ -32,20 +28,19 @@ apt_packages:
 
 
 pip_packages:
+- pip
 # --- Ansible ---
-- ansible
+- ansible==2.9.15 # https://pypi.org/project/ansible/2.9.15
 - jmespath        # for 'json_query' filter
 - pytz
-# - pywinrm
-# - packaging       # for Azure (maybe)
-# - msrestazure     # for Azure (maybe)
-# - azure           # for Azure (maybe)
-- ansible[azure]  # for Azure
+- colorlog        # https://pypi.org/project/colorlog
 
-# https://azure.microsoft.com/en-us/resources/samples/ansible-playbooks/
-# pip install ansible[azure]
-# ansible-galaxy install azure.azure_preview_modules
-# pip install -r ~/.ansible/roles/azure.azure_preview_modules/files/requirements-azure.txt
+# https://azure.microsoft.com/en-us/resources/samples/ansible-playbooks
+# https://docs.ansible.com/ansible/latest/scenario_guides/guide_azure.html
+# - ansible[azure]  # for Azure Resource Manager
+# https://docs.microsoft.com/en-us/azure/developer/python/azure-sdk-library-package-index
+# - azure-identity
+# - azure-core
 
 
 # ------------------------ System Package Parsing ------------------------

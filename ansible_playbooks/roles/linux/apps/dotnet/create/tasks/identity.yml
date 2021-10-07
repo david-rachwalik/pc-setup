@@ -1,0 +1,6 @@
+---
+# https://docs.microsoft.com/en-us/azure/active-directory/develop/azure-ad-endpoint-comparison
+- name: Set up web app to use Microsoft Identity platform
+  command: ""
+  tags: [repository, repo, dotnet, ef, database, db, identity]
+...

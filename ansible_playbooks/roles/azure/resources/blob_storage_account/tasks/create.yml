@@ -1,0 +1,26 @@
+---
+# https://docs.microsoft.com/en-us/azure/storage/blobs/storage-blob-static-website
+# This role is useful for static, client-side apps (e.g. Angular, React)
+
+- include_role:
+    name: azure/resource_group/create
+
+# https://docs.ansible.com/ansible/latest/modules/azure_rm_storageaccount_module.html
+- name: Create blob storage account
+  azure_rm_storageaccount:
+    name: "{{az_storage_account}}"
+    resource_group: "{{az_resource_group}}"
+    account_type: Standard_LRS
+    https_only: true
+    kind: StorageV2
+    state: present
+
+# https://azure.microsoft.com/en-us/pricing/details/storage/
+# - Standard_LRS
+# - Standard_ZRS
+# - Standard_GRS
+# - Standard_RAGRS
+# - StandardSSD_LRS
+# - Premium_LRS
+# - Premium_ZRS
+...

@@ -1,0 +1,18 @@
+---
+# ansible linux -m include_role -a "name=python/commands"
+# setup --tags py
+
+- block:
+  # https://docs.ansible.com/ansible/latest/modules/include_role_module.html
+  - include_role:
+      name: python/commands
+      tasks_from: windows
+    when: os_family == 'Windows'
+
+  - include_role:
+      name: python/commands
+      tasks_from: linux
+    when: os_family == 'Linux'
+
+  tags: [python, py]
+...

@@ -1,0 +1,17 @@
+---
+- block:
+  # https://docs.ansible.com/ansible/latest/modules/include_role_module.html
+  - include_role:
+      name: linux/apps/dotnet/create
+      tasks_from: solution
+    tags: [solution, sln]
+
+  - include_role:
+      name: linux/apps/dotnet/create
+    loop: "{{app_project_names}}"
+    loop_control:
+      loop_var: app_project
+    tags: [project]
+
+  tags: [repository, repo, dotnet]
+...

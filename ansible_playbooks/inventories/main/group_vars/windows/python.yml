@@ -1,13 +1,27 @@
 ---
-# Find with command: python -m site
+# Find with command: 'python3 -m site' or 'python -m site --user-site'
 python_user_base_dir: C:\Users\david\AppData\Roaming\Python
-python_user_site_dir: "{{python_user_base_dir}}\\Python38\\site-packages"
-
-python_boilerplate_modules:
-- logging_boilerplate.py
-- shell_boilerplate.py
+python_user_command_dir: "{{python_user_base_dir}}\\bin"
+# python_user_site_dir: "{{python_user_base_dir}}\\Python38\\site-packages"
+python_user_site_dir: "{{py_user_site_results.stdout | trim}}" # trim newline
 
 python_user_modules:
+# --- Boilerplates ---
+- boilerplates/logging_boilerplate.py
+- boilerplates/shell_boilerplate.py
+- boilerplates/azure_boilerplate.py
+- boilerplates/azure_devops_boilerplate.py
+- boilerplates/dotnet_boilerplate.py
+- boilerplates/git_boilerplate.py
+# - boilerplates/xml_boilerplate.py
+# - boilerplates/multiprocess_boilerplate.py
+# - boilerplates/daemon_boilerplate.py
+# - boilerplates/socket_boilerplate.py
+# --- Misc. ---
 - file_backup.py
-- mytest.py
+# - mytest.py
+
+python_user_commands:
+- mygit.py
+- app.py
 ...

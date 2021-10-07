@@ -1,9 +1,12 @@
 ---
-dotnet_database_tools:
+dotnet_default_framework: net5.0 # netcoreapp3.1
+
+dotnet_tools_expected:
 # https://docs.microsoft.com/en-us/aspnet/core/data/ef-rp
 - dotnet-ef                                 # Install Entity Framework Core
 # https://docs.microsoft.com/en-us/aspnet/core/security/authentication/scaffold-identity
 - dotnet-aspnet-codegenerator               # Install Code Generator (Scaffold)
+
 
 # https://www.nuget.org/packages/*
 dotnet_development_packages:
@@ -15,13 +18,12 @@ dotnet_development_packages:
 # Although the app won't use SQL Server, the scaffolding tool needs the SQL Server package.
 dotnet_database_packages:
 # Automatically includes Microsoft.EntityFrameworkCore as dependency
-- Microsoft.EntityFrameworkCore.Sqlite      # Install SQLite database provider
+# - Microsoft.EntityFrameworkCore.Sqlite      # Install SQLite database provider
 - Microsoft.EntityFrameworkCore.SqlServer   # Install SQL Server database provider
 - Microsoft.EntityFrameworkCore.Design      # Install EF Core design package
 - Microsoft.EntityFrameworkCore.Tools
 - Microsoft.VisualStudio.Web.CodeGeneration.Design
 - Microsoft.Extensions.Logging.Debug
-- NSwag.AspNetCore                          # Swagger / OpenAPI
 
 dotnet_identity_packages:
 - Microsoft.AspNetCore.Authentication.AzureAD.UI

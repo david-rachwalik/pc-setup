@@ -1,0 +1,8 @@
+---
+- include_role:
+    name: azure/pipelines/deploy
+  loop: "{{app_environments}}"
+  loop_control:
+    loop_var: app_environment
+  tags: [azure, az, deploy, pipelines]
+...

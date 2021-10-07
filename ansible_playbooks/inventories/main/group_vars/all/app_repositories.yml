@@ -1,125 +1,160 @@
 ---
-# https://docs.microsoft.com/en-us/dotnet/core/tools/dotnet-new
-# Application Repository Options:   [solution, source, host, projects]
-# Application Project Options:      [name, template, authentication, port]
-# - template choices:               [webapp, webapi, xunit, console]
-# - authentication choices:         [Individual, SingleOrg, MultiOrg]
-# * always prefer MultiOrg for most and SingleOrg for APIs
+# -------- Application Repository Options --------
+# --- requires 'dotnet_projects' to create solution directory ---
+# ------------------------------------------------
+# name:                   repository directory, dotnet solution
+# source:                 [github, tfsgit]
+# dotnet_projects:        list of .NET project configurations
+# -------- ASP.NET Core Project Options --------
+# name:                   dotnet project name within solution
+# template:               [webapp, webapi, xunit, console]
+# database_context:       DbContext to generate; activates SQL database
+# authentication:         [Individual, SingleOrg, MultiOrg]
+# -------- Host Options --------
+# az_resource_manager:    relative path to Azure Resource Manager (ARM) template
+# az_pipeline:            path to Azure Pipelines file
+# ------------------------------------------------
 
-# possible modes: [nodb, sqlserver, identity, docker]
+# .NET project 'name':
+# - *.WebApp              triggers pipeline task Deploy App Service 
+# - *.UnitTests           triggers pipeline task Run Tests
+# - *.SQL                 triggers pipeline task Deploy SQL Database
+# - *.API                 triggers pipeline task Deploy App Service
 
-# app_repo_name = app_repositories[*].solution
-app_repositories:
-- solution: pc-setup
-  source: GitHub
+# .NET project 'authentication' is typically MultiOrg (SingleOrg for APIs)
+# ARM template mode plans: [nodb, sqlserver, identity, docker]
 
-- solution: DMR
-  source: GitHub
-  host: Azure
-  projects:
+
+# Development, Staging Area, Production
+# - using abbreviations to allow more namespace for resources
+application_environment_choices: [Dev, SA, Prod]
+application_authentication_choices: [Individual, SingleOrg, MultiOrg]
+
+# app_repo = application_repositories[*].name
+application_repositories:
+# --- Primary Repositories ---
+
+- name: pc-setup
+  source: github
+
+- name: DMR
+  source: github
+  dotnet_projects:
   - name: DMR.WebApp
     template: webapp
-    authentication: MultiOrg
-  - name: DMR.UnitTests
-    template: xunit
+    # database_context: MainContext
+    # authentication: MultiOrg
+    # az_pipelines: true
+    # az_resource_manager: all/webapp_sql
+    # az_resource_manager: linux/webapp_blank
+  # - name: DMR.UnitTests
+  #   template: xunit
+  # - name: DMR.API
+  #   template: webapi
+  #   authentication: SingleOrg
+  az_environments: [Dev]
+  # az_resource_manager: all/webapp_sql
+  az_resource_manager: linux/webapp_blank
+  az_pipelines: linux/basic
 
-- solution: SexBound
-  source: Azure
-  host: Azure
-  projects:
-  - name: SexBound.WebApp
+- name: david-rachwalik.github.io
+  source: github
+
+
+# --- Test Repositories ---
+
+- name: Test-Basic
+  source: github
+  dotnet_projects:
+  - name: Test-Basic.WebApp
+    template: webapp
+    database_context: MainContext
+    authentication: MultiOrg
+  # - name: Test-Basic.UnitTests
+  #   template: xunit
+  az_resource_manager: linux/webapp_blank
+  az_pipelines: true
+
+- name: Test-Database
+  source: github
+  dotnet_projects:
+  - name: Test-Database.WebApp
+    template: webapp
+    database_context: MainContext
+  az_resource_manager: all/webapp_sql
+  az_pipelines: true
+
+- name: Test-Identity
+  source: github
+  dotnet_projects:
+  - name: Test-Identity.WebApp
+    template: webapp
+    database_context: MainContext
+    authentication: MultiOrg
+  az_resource_manager: all/webapp_sql
+  az_pipelines: true
+
+
+# --- Tutorial Repositories ---
+
+- name: Tutorials-WebApiApps
+  source: github
+  dotnet_projects:
+  - name: WebApiApps.WebApp
+    template: webapp
+    authentication: MultiOrg
+
+# https://docs.microsoft.com/en-us/aspnet/core/tutorials/razor-pages
+- name: Tutorials-WebApps-RazorPages
+  source: github
+  dotnet_projects:
+  - name: RazorPagesMovie
     template: webapp
 
-- solution: CorruptionOfChampions
-  source: Azure
-  projects:
+- name: Tutorials-DataAccess-RazorPages
+  source: github
+  dotnet_projects:
+  - name: ContosoUniversity
+    template: webapp
+
+
+# --- Backup Repositories ---
+
+- name: SexBound
+  source: tfsgit # Azure
+  dotnet_projects:
+  - name: SexBound.WebApp
+    template: webapp
+  # az_resource_manager: all/webapp_sql
+
+- name: CorruptionOfChampions
+  source: tfsgit # Azure
+  dotnet_projects:
   - name: CorruptionOfChampions.Conversion
     template: webapp
   - name: CorruptionOfChampions.WebApp
     template: webapp
 
-- solution: WorldOfWarcraftAddonDev
-  source: Azure
-
-- solution: Tutorials-WebApiApps
-  source: GitHub
-  projects:
-  - name: WebApiApps.WebApp
-    template: webapp
-    authentication: SingleOrg
-  - name: WebApiApps.UnitTests
-    template: xunit
-
-# https://docs.microsoft.com/en-us/aspnet/core/tutorials/razor-pages
-- solution: Tutorials-WebApps-RazorPages
-  source: GitHub
-  projects:
-  - name: RazorPagesMovie
-    template: webapp
-
-- solution: Tutorials-DataAccess-RazorPages
-  source: GitHub
-  projects:
-  - name: ContosoUniversity
-    template: webapp
-
-# https://docs.microsoft.com/en-us/aspnet/core/razor-pages/index
-
-- solution: david-rachwalik.github.io
-  source: GitHub
-  host: GitHub
-
-- solution: Tester
-  source: GitHub
-  host: Azure
-  projects:
-  - name: Tester.Api
-    template: webapi
-    authentication: SingleOrg
-  
-  # arm_template: 201-web-app-github-deploy/azuredeploy.json
-  # arm_parameters: 201-web-app-github-deploy/azuredeploy.parameters.json
-  
-  arm_template: linux/webapp_blank/azuredeploy.json
-  arm_parameters: linux/webapp_blank/azuredeploy.parameters.json
-
-  # arm_template_url: https://raw.githubusercontent.com/Azure/azure-quickstart-templates/master/201-web-app-github-deploy/azuredeploy.json
-
-  # template_url: https://github.com/Azure/azure-quickstart-templates/blob/master/201-web-app-github-deploy/azuredeploy.json
-  # parameter_url: https://github.com/Azure/azure-quickstart-templates/blob/master/201-web-app-github-deploy/azuredeploy.parameters.json
-
-  # - name: Tester.WebApp
-  #   template: webapp
-  #   authentication: MultiOrg
-  # - name: Tester.UnitTests
-  #   template: xunit
-  use_extras: true
-
-- solution: Main
-  host: Azure
-  arm_template: all/managed_identity/azuredeploy.json
-  arm_parameters: all/managed_identity/azuredeploy.parameters.json
-
-- solution: WebAppTest
-  host: Azure
-  arm_template: all/webapp_sql/azuredeploy.json
-  arm_parameters: all/webapp_sql/azuredeploy.parameters.json
-  arm_parameter_inputs:
-  - name: sql_administrator_login
-    prompt: "What is the database administrator username?"
-  - name: sql_administrator_login_password
-    prompt: "What is the database administrator password?"
+- name: WorldOfWarcraftAddonDev
+  source: tfsgit # Azure
 
 
 # ------------------------ Application Repository/Project Parsing ------------------------
 
 # Application repository/project names must be unique
-app_repo_names: "{{app_repositories | json_query('[*].solution')}}"
-app_project_names: "{{app_repo | json_query('projects[*].name')}}"
+app_repo_names: "{{application_repositories | json_query('[*].name')}}"
+app_project_names: "{{app_repo_item | json_query('dotnet_projects[*].name')}}"
 
-app_repo_query: "[?solution=='{{app_repo_name}}']"
-app_repo: "{{app_repositories | json_query(app_repo_query) | first}}"
+app_repo_query: "[?name=='{{app_repo}}']"
+app_repo_item: "{{application_repositories | json_query(app_repo_query) | first}}"
 
-app_project_query: "[*].projects[?name=='{{app_project_name}}']"
-app_project: "{{app_repositories | json_query(app_project_query) | flatten | first}}"
+app_project_query: "[*].dotnet_projects[?name=='{{app_project}}']"
+app_project_item: "{{application_repositories | json_query(app_project_query) | flatten | first}}"
+
+# --- Configuration Defaults ---
+app_environments: "{{app_repo_item.az_environments | default(application_environment_choices)}}"
+app_environment: "{{app_environments | first}}"
+app_domain: "https://localhost:5001"
+app_database_context: "{{app_project_item.database_context | default('None')}}"
+app_authentication: "{{app_project_item.authentication | default('None')}}"
 ...

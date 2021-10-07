@@ -1,12 +1,12 @@
 ---
 app_repo_root_dir: /mnt/d/Repos
-app_solution_dir: "{{app_repo_root_dir}}/{{app_repo.solution}}"
-app_project_dir: "{{app_solution_dir}}/{{app_project.name}}"
+app_solution_dir: "{{app_repo_root_dir}}/{{app_repo}}"
+app_project_dir: "{{app_solution_dir}}/{{app_project}}"
 
-app_sln: "{{app_solution_dir}}/{{app_repo.solution}}.sln"
+app_sln: "{{app_solution_dir}}/{{app_repo}}.sln"
 app_readme: "{{app_solution_dir}}/README.md"
 app_license: "{{app_solution_dir}}/LICENSE"
-app_csproj: "{{app_project_dir}}/{{app_project.name}}.csproj"
+app_csproj: "{{app_project_dir}}/{{app_project}}.csproj"
 app_git_repo_dir: "{{app_solution_dir}}/.git"
 app_gitignore: "{{app_solution_dir}}/.gitignore"
 app_gitattributes: "{{app_solution_dir}}/.gitattributes"

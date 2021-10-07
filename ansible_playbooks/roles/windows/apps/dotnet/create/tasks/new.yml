@@ -1,0 +1,47 @@
+---
+# appc --tags repo -e "app_repo_names=['Tester']"
+
+- block:
+  # Dependency for 'az_ad_app_client_id'
+  - name: Refresh Azure AD application registration for project
+    include_role:
+      name: azure/active_directory/application/show
+  
+  
+  # 'dotnet new' automatically calls build and restore
+  # https://docs.microsoft.com/en-us/dotnet/core/tools/dotnet-new
+  - name: Create .NET Core project
+    win_shell: >-
+      dotnet new {{app_project_item.template}}
+      --framework {{app_project_item.framework | default(dotnet_default_framework)}}
+      --output {{app_project_dir}}
+      --auth {{app_authentication}}
+      --client-id {{hostvars['localhost']['az_ad_app_client_id']}}
+      --org-read-access
+      --domain 'davidrachwalikoutlook.onmicrosoft.com'
+      --tenant-id {{hostvars['localhost']['az_ad_app_tenant_id']}}
+    args:
+      creates: "{{app_csproj}}"
+    register: dotnet_new_facts
+    when: app_authentication == 'MultiOrg'
+
+
+  - name: Create .NET Core project
+    win_shell: >-
+      dotnet new {{app_project_item.template}}
+      --framework {{app_project_item.framework | default(dotnet_default_framework)}}
+      --output {{app_project_dir}}
+      --auth {{app_authentication}}
+      --domain {{app_domain}}
+      --org-read-access
+    args:
+      creates: "{{app_csproj}}"
+    register: dotnet_new_facts
+    when: app_authentication != 'MultiOrg'
+
+
+  - fail:
+      msg: break point
+
+  tags: [dotnet, new]
+...

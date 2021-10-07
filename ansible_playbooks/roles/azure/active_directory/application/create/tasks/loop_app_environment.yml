@@ -1,0 +1,9 @@
+---
+# https://docs.ansible.com/ansible/latest/modules/include_role_module.html
+- include_role:
+    name: azure/active_directory/application/create
+  loop: "{{app_environments}}"
+  loop_control:
+    loop_var: app_environment
+  tags: [azure, az, active_directory, ad, application, identity]
+...

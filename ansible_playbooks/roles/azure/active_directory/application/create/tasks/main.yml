@@ -1,13 +1,76 @@
 ---
-# ansible-playbook app_create.yml --tags ad -e "app_repo_names=['DMR']"
-# appc --tags ad -e "app_repo_names=['DMR']"
+# active directory (1):(many) app subscriptions / app limited to 1 directory at a time
+# Using Microsoft Identity platform (v2.0), not Azure Active Directory (v1.0) endpoints
+# https://docs.microsoft.com/en-us/azure/active-directory/develop/azure-ad-endpoint-comparison
+# --- Accounts in any Azure AD directory and personal Microsoft accounts - Multi-tenant
+# https://docs.microsoft.com/en-us/azure/active-directory/develop/quickstart-v2-aspnet-core-webapp
+# https://docs.microsoft.com/en-us/azure/active-directory/develop/app-objects-and-service-principals
 
-# https://docs.ansible.com/ansible/latest/modules/include_role_module.html
-- include_role:
-    name: azure/active_directory/application/create
-    tasks_from: create
-  loop: "{{app_project_names}}"
-  loop_control:
-    loop_var: app_project_name
-  tags: [azure, az, active_directory, ad, identity, create]
+# OAuth 2.0 implicit grant flow for single-page apps (Angular, Ember.js, React.js, etc.)
+# https://docs.microsoft.com/en-us/azure/active-directory/develop/v2-oauth2-implicit-grant-flow
+
+# https://docs.microsoft.com/en-us/cli/azure/ad/app
+- block:
+  - debug:
+      msg: "Azure AD application: {{az_app_registration}}"
+
+
+  - include_role:
+      name: azure/active_directory/application/show
+  
+
+  # Neither the create nor update action returns output
+  - name: Create Azure AD application object registration
+    command: >-
+      az ad app create
+      --display-name {{az_app_registration}}
+      --homepage {{app_domain}}
+      --identifier-uris {{az_ad_identifier_urls | join(' ')}}
+      --reply-urls {{az_ad_reply_urls | join(' ')}}
+      --available-to-other-tenants {{app_authentication == 'MultiOrg'}}
+    # --required-resource-accesses {{az_ad_app_permissions | to_json}}
+    # --oauth2-allow-implicit-flow true
+    # TODO: add --app-roles once authentication testing is further
+    when: az_ad_app_client_id == ''
+    no_log: true
+
+  - name: Update Azure AD application object registration
+    command: >-
+      az ad app update
+      --id {{az_ad_identifier_urls | first}}
+      --display-name {{az_app_registration}}
+      --homepage {{app_domain}}
+      --identifier-uris {{az_ad_identifier_urls | join(' ')}}
+      --reply-urls {{az_ad_reply_urls | join(' ')}}
+      --available-to-other-tenants {{app_authentication == 'MultiOrg'}}
+    # --required-resource-accesses {{az_ad_app_permissions | to_json}}
+    # --oauth2-allow-implicit-flow true
+    # TODO: add --app-roles once authentication testing is further
+    when: az_ad_app_client_id != ''
+    register: az_ad_app_update_facts
+    changed_when: az_ad_app_update_facts.stdout != ""
+    no_log: true
+
+
+  - name: List active AD application object registrations
+    command: az ad app list
+    register: az_ad_app_list_facts
+    changed_when: false # query only
+    no_log: true
+
+  # - debug:
+  #     var: az_ad_app_display_names
+  - debug:
+      msg: "application registration count: {{az_ad_app_display_names | count}}"
+
+  
+  - include_role:
+      name: azure/active_directory/service_principal/create
+  
+
+  - include_role:
+      name: azure/active_directory/application/create
+      tasks_from: permissions
+  
+  tags: [azure, az, active_directory, ad, application, identity]
 ...

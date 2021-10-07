@@ -1,85 +1,44 @@
 ---
-# ansible-playbook app_create.yml -e "app_repo_name=DMR"
-# repoc -e "app_repo_name=DMR"
-# appc --tags ad
+# ansible-playbook app_create.yml -e "app_repo_names=['DMR']"
+# appc -e "app_repo_names=['DMR']" --skip-tags "deploy"
+# appc -e "app_repo_names=['DMR']" --skip-tags "ad,repo,arm"
+# appc -e "app_repo_names=['DMR']" --skip-tags "ad,repo,pipelines"
 
-- name: Configure Azure Active Directory account
-  hosts: azure
+
+- hosts: azure
   tasks:
-  - include_role:
+  - name: Login Azure Active Directory subscription
+    include_role:
       name: azure/active_directory/subscription
-  # create key vault to store service principals, passwords, connection strings, etc.
-  # create credential file if missing
-  tags: [azure, az, active_directory, ad, subscription, login]
+    tags: [azure, az, active_directory, ad, subscription, login]
 
-
-- name: Create Azure Active Directory application
-  hosts: azure
-  tasks:
-  - include_role:
+  - name: Register Azure Active Directory application
+    include_role:
       name: azure/active_directory/application/create
-    loop: "{{app_repo_names}}"
-    loop_control:
-      loop_var: app_repo_name
-  tags: [azure, az, active_directory, ad, application]
+      tasks_from: loop_app_repo
+    tags: [azure, az, active_directory, ad, application, identity]
 
+  - name: Create .NET Core application
+    include_role:
+      name: linux/apps/dotnet/create
+      tasks_from: loop_app_repo
+    tags: [repository, repo, dotnet]
 
-- name: Create .NET Core application repository
-  hosts: windows
-  tasks:
-  - include_role:
-      name: windows/apps/dotnet/create
-    loop: "{{app_repo_names}}"
-    loop_control:
-      loop_var: app_repo_name
-    tags: [new, git, add, entity_framework, ef]
-  tags: [repository, repo, dotnet]
+  - name: Initialize Git repository
+    include_role:
+      name: linux/apps/git/init
+      tasks_from: loop_app_repo
+    tags: [repository, repo, git]
 
-
-# Modes: [nodb, sqlserver, docker] (when F1, ignore custom domain)
-
-# https://docs.microsoft.com/en-us/azure/ansible/ansible-create-configure-azure-web-apps
-# https://docs.microsoft.com/en-us/learn/paths/deploy-a-website-with-azure-app-service/
-# https://www.youtube.com/playlist?list=PLdo4fOcmZ0oW8nviYduHq7bmKode-p8Wy
-# https://docs.microsoft.com/en-us/azure/ansible/ansible-overview
-# https://docs.ansible.com/ansible/latest/modules/list_of_cloud_modules.html#azure
-
-# - name: Create Azure WebApp Service
-#   hosts: azure
-#   tasks:
-#   - include_role:
-#       name: azure/app_service/create
-#     loop: "{{app_repo_names}}"
-#     loop_control:
-#       loop_var: app_repo_name
-#   tags: [azure, az, app_service, publish, host]
-
-
-# Modes: [blob, website] (when F1, ignore custom domain)
-
-# https://docs.microsoft.com/en-us/azure/ansible/ansible-overview
-# https://docs.ansible.com/ansible/latest/modules/list_of_cloud_modules.html#azure
-
-# https://www.youtube.com/watch?v=G_gDYlRBAZw
-# https://docs.microsoft.com/en-us/azure/storage/blobs/storage-blob-static-website
-# - name: Create Azure Static App Service (blog storage)
-#   hosts: azure
-#   vars:
-#     resource_group: StaticWebsite
-#     storage_account: superfancysitename
-#   roles:
-#   - azure/storage_account/create
-
-
-- name: Deploy Azure Resource Manager Template
-  hosts: azure
-  tasks:
-  # - include_role:
-  #     name: azure/resources/managed_identity
-  # - include_role:
-  #     name: azure/resources/service_principal
-  - include_role:
+  - name: Deploy Azure Resource Manager Template
+    include_role:
       name: azure/resource_manager/deploy
       tasks_from: loop_app_repo
-  tags: [azure, az, deploy, resource_manager, arm]
+    tags: [azure, az, deploy, resource_manager, arm]
+
+  - name: Deploy Azure Pipelines
+    include_role:
+      name: azure/pipelines/deploy
+      tasks_from: loop_app_repo
+    tags: [azure, az, deploy, pipelines]
 ...

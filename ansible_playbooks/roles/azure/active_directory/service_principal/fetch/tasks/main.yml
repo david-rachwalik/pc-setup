@@ -1,0 +1,44 @@
+---
+# Use as singleton of service provider IDs
+- block:
+  - name: Fetch service provider IDs
+    command: >-
+      az ad sp list
+      --query "[].{key: appDisplayName, value: appId} | []"
+      --all
+    # command: >-
+    #   az ad sp list
+    #   --query "[?appDisplayName=='{{item}}'].{key: appDisplayName, value: appId} | [0]"
+    #   --all
+    # loop: [Microsoft Graph]
+    register: az_ad_sp_list_facts
+    changed_when: false # query only
+    no_log: true
+  
+  # - debug:
+  #     var: az_ad_sp_service_providers
+  # - debug:
+  #     msg: "Count: {{az_ad_sp_service_providers | count}}"
+
+
+  - name: Fetch application permission IDs
+    command: >-
+      az ad sp show
+      --id {{az_ad_sp_service_providers['Microsoft Graph']}}
+      --query "oauth2Permissions[].{key: value, value: id} | []"
+    # command: >-
+    #   az ad sp show
+    #   --id {{az_ad_sp_service_providers['Microsoft Graph']}}
+    #   --query "oauth2Permissions[?value=='{{item}}'].{key: value, value: id} | [0]"
+    # loop: [openid, profile, User.Read, Group.Read.All]
+    register: az_ad_sp_permission_facts
+    changed_when: false # query only
+    no_log: true
+  
+  # - debug:
+  #     var: az_ad_sp_permissions
+  # - debug:
+  #     msg: "Count: {{az_ad_sp_permissions | count}}"
+
+  tags: [azure, az, active_directory, ad, application, identity, service_principal, sp]
+...

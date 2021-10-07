@@ -1,0 +1,25 @@
+---
+# TODO: requires DbContext to be templated before
+
+# https://docs.microsoft.com/en-us/aspnet/core/data/ef-rp
+# https://docs.ansible.com/ansible/latest/modules/command_module.html
+- name: Update database
+  command: dotnet ef database update
+  args:
+    chdir: "{{app_project_dir}}"
+  when: app_use_database
+  register: out_database_update
+  ignore_errors: true
+  tags: [repository, repo, dotnet, ef, database, db]
+
+
+# - name: Create initial database migration
+#   command: "dotnet ef migrations add {{migration_message|default('Initial')}}"
+
+# --- Fresh app migrations already up-to-date; TODO: turn this into alias
+# - name: Update database with latest migrations
+#   command: "dotnet ef database update"
+#   args:
+#     chdir: "{{app_project_dir}}"
+#   register: out_database_update
+...

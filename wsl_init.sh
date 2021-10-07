@@ -1,5 +1,14 @@
 #!/bin/sh
 
+# tested for Linux Ubuntu versions: [18.04, 20.04]
+distro=$(lsb_release --id --short) # Ubuntu
+release=$(lsb_release --release --short) # [18.04, 20.04]
+
+if test "${distro}" != "Ubuntu"; then
+    echo "This script currently only supports Ubuntu distributions"
+    exit 1
+fi
+
 if test "${SUDO_USER}" != ""; then
     run_user="${SUDO_USER}"
 else
@@ -11,10 +20,10 @@ fi
 # Grant user nopasswd sudo access
 # https://gist.github.com/carlessanagustin/922711701b1cfcc5c7a056c7018e8fe2
 if ! test -f /etc/sudoers.d/${run_user}; then
-    touch /etc/sudoers.d/${run_user}
+    # touch /etc/sudoers.d/${run_user}
+    usermod -a -G sudo ${run_user} # add user to sudoers group
     bash -c "echo '%${run_user} ALL=NOPASSWD:ALL' > /etc/sudoers.d/${run_user}"
     chmod 440 /etc/sudoers.d/${run_user}
-    usermod -a -G sudo ${run_user}
 fi
 
 # Upgrade Linux distribution
@@ -27,14 +36,19 @@ apt-get install -y python3-pip
 apt-get install -y python3-winrm
 pip3 install ansible
 
-# Register Microsoft repository key and feed (prep for .NET SDK and Azure CLI)
-# https://docs.microsoft.com/en-us/dotnet/core/install/linux-package-manager-ubuntu-1804
-ubuntu_src="https://packages.microsoft.com/config/ubuntu/18.04/packages-microsoft-prod.deb"
-ubuntu_tmp="/var/cache/apt/archives/packages-microsoft-prod.deb"
-if ! test -f ${ubuntu_tmp}; then
-    wget -q ${ubuntu_src} -O ${ubuntu_tmp}
-    dpkg -i ${ubuntu_tmp}
+# Register Microsoft to trusted keys and add package repository (for .NET SDK and Azure CLI)
+# https://docs.microsoft.com/en-us/dotnet/core/install/linux-ubuntu
+$microsoft_repository_src="https://packages.microsoft.com/config/ubuntu/${release}/packages-microsoft-prod.deb"
+$microsoft_repository_tmp="/var/cache/apt/archives/packages-microsoft-prod.deb"
+if ! test -f ${microsoft_repository_tmp}; then
+    wget -q ${microsoft_repository_src} -O ${microsoft_repository_tmp}
+    dpkg -i ${microsoft_repository_tmp}
 fi
+
+# Install .NET SDK
+dotnet_install_path=https://raw.githubusercontent.com/dotnet/runtime/master/eng/common/dotnet-install.sh
+version="3.1" # default is 'Current'
+curl -sSL $dotnet_install_path | bash /dev/stdin -c $version
 
 # Install Azure CLI
 # https://docs.microsoft.com/en-us/cli/azure/install-azure-cli-apt

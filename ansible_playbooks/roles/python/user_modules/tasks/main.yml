@@ -1,17 +1,18 @@
 ---
-# ansible windows -m include_role -a "name=python/user_modules"
+- block:
+  # ansible linux -m include_role -a "name=python/user_modules"
+  # setup --tags py
 
-# https://docs.ansible.com/ansible/latest/modules/include_role_module.html
-- include_role:
-    name: python/boilerplate
+  # https://docs.ansible.com/ansible/latest/modules/include_role_module.html
+  - include_role:
+      name: python/user_modules
+      tasks_from: windows
+    when: os_family == 'Windows'
 
-- include_role:
-    name: python/user_modules
-    tasks_from: windows
-  when: os_family == 'Windows'
+  - include_role:
+      name: python/user_modules
+      tasks_from: linux
+    when: os_family == 'Linux'
 
-- include_role:
-    name: python/user_modules
-    tasks_from: linux
-  when: os_family == 'Linux'
+  tags: [python, py]
 ...

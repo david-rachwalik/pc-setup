@@ -9,6 +9,6 @@
     tasks_from: create
   loop: "{{app_project_names}}"
   loop_control:
-    loop_var: app_project_name
+    loop_var: app_project
   tags: [azure, az, app_service, publish, host]
 ...

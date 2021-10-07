@@ -1,0 +1,27 @@
+---
+- block:
+  # https://docs.ansible.com/ansible/latest/modules/file_module.html
+  - name: Ensure Python module directory exists
+    file:
+      path: "{{python_user_command_dir}}"
+      state: directory
+      mode: 0775
+
+  # https://docs.ansible.com/ansible/latest/modules/copy_module.html
+  - name: Deploy Python module
+    copy:
+      src: "{{item}}"
+      # dest: "{{python_user_command_dir}}/{{(item | splitext)[0]}}"
+      # remove extension from filename (e.g. test.file.name.txt to test.file.name.csv)
+      dest: "{{python_user_command_dir}}/{{(item | splitext)[:-1] | join('.')}}"
+      mode: 0770
+    loop: "{{python_user_commands}}"
+
+  # - name: Install boilerplate package
+  #   copy:
+  #     src: /srv/myfiles/foo.conf
+  #     dest: /etc/foo.conf
+  #     mode: '0644'
+
+  tags: [python, py]
+...

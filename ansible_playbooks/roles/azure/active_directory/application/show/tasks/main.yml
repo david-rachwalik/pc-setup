@@ -1,0 +1,24 @@
+---
+- block:
+  # same output if exists; list returns rc=0, stdout="" if missing
+  # - az ad app list --query "[?displayName=='{{az_app_registration}}'] | [0]"
+  # - az ad app show --id {{az_ad_identifier_urls | first}}
+  # https://docs.microsoft.com/en-us/cli/azure/ad/app
+  - name: Check Azure AD application registration
+    command: >-
+      az ad app list
+      --query "[?displayName=='{{az_app_registration}}'] | [0]"
+    # command: >-
+    #   az ad app show
+    #   --id {{az_ad_identifier_urls | first}}
+    register: az_ad_app_show_facts
+    changed_when: false # query only
+    failed_when:  false # query only
+    ignore_errors: true
+    no_log: true
+ 
+  - debug:
+      var: az_ad_app_client_id
+
+  tags: [azure, az, active_directory, ad, application, identity]
+...

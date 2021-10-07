@@ -14,11 +14,12 @@ app_backups:
   setting: " "
   setting_opts: ["--include=presets.json", "--include=settings.json", "--exclude=*"]
 
+# Test Command: rsync -a --dry-run --verbose --exclude=*.bak --include=global.ini --include=basic/ --include=basic/**/ --include=basic/**/* --exclude=* /mnt/c/Users/david/AppData/Roaming/obs-studio/ /mnt/d/OneDrive/Backups/Apps/obs-studio
 - id: obs
   root: /mnt/c/Users/david/AppData/Roaming
   name: obs-studio
   setting: " "
-  setting_opts: ["--include=global.ini", "--include=basic/", "--exclude=*"]
+  setting_opts: ["--exclude=*.bak", "--include=global.ini", "--include=basic/", "--include=basic/**/", "--include=basic/**/*", "--exclude=*"]
 
 - id: vscode
   root: /mnt/c/Users/david/AppData/Roaming

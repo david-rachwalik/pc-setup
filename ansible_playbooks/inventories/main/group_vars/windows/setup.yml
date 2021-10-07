@@ -65,10 +65,10 @@ scheduled_tasks:
 #     start_boundary: "2020-01-01T06:00:00-06:00"
 #   - type: boot
 
-- name: AutoHotkey World of Warcraft
-  actions:
-  - path: C:\Program Files\AutoHotkey\AutoHotkey.exe
-    arguments: D:\OneDrive\Documents\WorldOfWarcraft_SpamButton.ahk
-  triggers:
-  - type: boot
+# - name: AutoHotkey World of Warcraft
+#   actions:
+#   - path: C:\Program Files\AutoHotkey\AutoHotkey.exe
+#     arguments: D:\OneDrive\Documents\WorldOfWarcraft_SpamButton.ahk
+#   triggers:
+#   - type: boot
 ...

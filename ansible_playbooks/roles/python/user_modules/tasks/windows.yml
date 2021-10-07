@@ -1,8 +1,30 @@
 ---
-# https://docs.ansible.com/ansible/latest/modules/win_copy_module.html
-- name: Deploy Python module
-  win_copy:
-    src: "{{item}}"
-    dest: "{{python_user_site_dir}}\\{{item}}"
-  loop: "{{python_user_modules}}"
+- block:
+  - name: Find Python site package directory
+    win_command: python -m site --user-site
+    register: py_user_site_results
+    changed_when: false
+
+  # https://docs.ansible.com/ansible/latest/modules/win_file_module.html
+  - name: Ensure Python module directory exists
+    win_file:
+      path: "{{python_user_site_dir}}"
+      state: directory
+      mode: 0775
+
+  # https://docs.ansible.com/ansible/latest/modules/win_copy_module.html
+  - name: Deploy Python module
+    win_copy:
+      src: "{{item}}"
+      dest: "{{python_user_site_dir}}\\{{item | basename}}"
+      mode: 0660
+    loop: "{{python_user_modules}}"
+
+  # - name: Install boilerplate package
+  #   copy:
+  #     src: /srv/myfiles/foo.conf
+  #     dest: /etc/foo.conf
+  #     mode: '0644'
+
+  tags: [python, py]
 ...

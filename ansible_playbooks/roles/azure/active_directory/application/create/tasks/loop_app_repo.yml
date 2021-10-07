@@ -1,0 +1,14 @@
+---
+# ansible-playbook app_create.yml --tags ad -e "app_repo_names=['DMR']"
+# appc --tags ad -e "app_repo_names=['DMR']"
+
+# https://docs.ansible.com/ansible/latest/modules/include_role_module.html
+- include_role:
+    name: azure/active_directory/application/create
+    tasks_from: loop_app_project
+  loop: "{{app_repo_names}}"
+  loop_control:
+    loop_var: app_repo
+  when: app_repo_item.dotnet_projects is defined
+  tags: [azure, az, active_directory, ad, application, identity]
+...

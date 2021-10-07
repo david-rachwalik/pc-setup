@@ -1,0 +1,31 @@
+---
+# https://docs.microsoft.com/en-us/azure/devops/pipelines/create-first-pipeline-cli
+# https://docs.microsoft.com/en-us/cli/azure/ext/azure-devops/pipelines
+- block:
+  - name: Create Azure Pipelines
+    command: >-
+      az pipelines create
+      --name '{{az_app_registration}}-CI'
+      --description 'Pipeline for {{az_resource_group}} app'
+      --repository {{az_organization}}/{{app_repo}}
+      --project {{app_project}}
+      --branch {{az_app_branch}}
+      --yml-path {{az_app_yml_path}}
+      --service-connection {{az_default_service_connection}}
+    register: az_pipelines_create_facts
+    when: app_repo_item.source == 'github'
+
+  - name: Create Azure Pipelines
+    command: >-
+      az pipelines create
+      --name '{{az_app_registration}}-CI'
+      --description 'Pipeline for {{az_resource_group}} app'
+      --repository {{az_organization}}/{{app_repo}}
+      --project {{app_project}}
+      --branch {{az_app_branch}}
+      --yml-path {{az_app_yml_path}}
+    register: az_pipelines_create_facts
+    when: app_repo_item.source == 'tfsgit'
+
+  tags: [azure, az, deploy, pipelines]
+...

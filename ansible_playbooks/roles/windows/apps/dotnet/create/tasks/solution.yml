@@ -1,10 +1,7 @@
 ---
 - block:
   - debug:
-      msg: "App .NET solution: {{app_repo.solution}}"
-
-  # - debug:
-  #     var: app_repo
+      msg: "ASP.NET solution: {{app_repo}}"
 
   # https://docs.microsoft.com/en-us/dotnet/core/tools/dotnet-new
   # https://docs.ansible.com/ansible/latest/modules/win_shell_module.html
@@ -12,24 +9,24 @@
     win_shell: "dotnet new sln --output {{app_solution_dir}}"
     args:
       creates: "{{app_sln}}"
-    register: out_webapp_create
+    register: dotnet_new_facts
 
-  # https://docs.ansible.com/ansible/latest/modules/win_copy_module.html
-  - name: Ensure solution has readme
-    win_copy:
-      src: "{{app_readme | win_basename}}"
-      dest: "{{app_readme}}"
-      force: false # only when dest doesn't exist
-    when: app_use_extras
-    tags: [extras, readme]
+  # # https://docs.ansible.com/ansible/latest/modules/win_copy_module.html
+  # - name: Ensure solution has readme
+  #   win_copy:
+  #     src: "{{app_readme | win_basename}}"
+  #     dest: "{{app_readme}}"
+  #     force: false # only when dest doesn't exist
+  #   when: app_use_extras
+  #   tags: [extras, readme]
 
-  - name: Ensure solution has license
-    win_copy:
-      src: "{{app_license | win_basename}}"
-      dest: "{{app_license}}"
-      force: false # only when dest doesn't exist
-    when: app_use_extras
-    tags: [extras, license]
+  # - name: Ensure solution has license
+  #   win_copy:
+  #     src: "{{app_license | win_basename}}"
+  #     dest: "{{app_license}}"
+  #     force: false # only when dest doesn't exist
+  #   when: app_use_extras
+  #   tags: [extras, license]
 
   tags: [repository, repo, dotnet, new, solution, sln]
 ...

@@ -46,9 +46,7 @@ chocolatey_packages:
   - name: nodejs
   - name: vscode
   - name: postman
-  - name: sqlitebrowser
-  # - name: microsoftazurestorageexplorer
-  # - name: jekyll
+  # - name: sqlitebrowser
   
   # --- Media ---
   - name: geforce-experience
@@ -56,38 +54,47 @@ chocolatey_packages:
   - name: AdobeAIR
   - name: adobeshockwaveplayer
   - name: spotify
-  - name: paint.net
+  - name: comicrack
+  # - name: paint.net
+  # - name: blender
 
   # --- Video Editing ---
+  - name: mkvtoolnix # https://mkvtoolnix.download/doc/mkvmerge.html
   - name: MakeMKV
   - name: handbrake
   - name: k-litecodecpackmega
   - name: 4k-video-downloader
-  - name: streamlabs-obs
+  # - name: jubler
+  # - name: chatterino
 
   # --- Videogames ---
   - name: directx
   - name: steam
   - name: discord
-  - name: twitch
-  - name: autohotkey
+  # - name: autohotkey
 
   uninstall:
   - name: python2
   - name: mitkerberos
-  - name: docker-desktop
+  # - name: docker-desktop
   # - name: unity
   # - name: obs-studio
-  - name: gimp
+  # - name: gimp
   - name: vlc
   - name: passkey
   - name: typescript
   - name: sass
   - name: dart-sdk # sass dependency
+  # - name: jekyll
+  # - name: microsoftazurestorageexplorer
+  - name: streamlabs-obs
+  - name: twitch
 
 
 pip_packages:
+- pip
 - pytz
+- colorlog
 
 
 vscode_extensions:

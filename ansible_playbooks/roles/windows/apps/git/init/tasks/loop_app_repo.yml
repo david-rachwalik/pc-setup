@@ -1,0 +1,15 @@
+---
+# ansible-playbook app_create.yml --tags repo -e "app_repo_names=['DMR']"
+# appc --tags repo -e "app_repo_names=['DMR']"
+# appc --tags repo -e "app_repo_names=['Tester']"
+
+# https://docs.ansible.com/ansible/latest/modules/include_role_module.html
+- include_role:
+    name: windows/apps/git/init
+  loop: "{{app_repo_names}}"
+  loop_control:
+    loop_var: app_repo
+  vars:
+    path: "{{app_solution_dir}}"
+  tags: [repository, repo, git]
+...
