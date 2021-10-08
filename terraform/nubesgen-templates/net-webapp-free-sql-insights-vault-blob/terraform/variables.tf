@@ -1,13 +1,7 @@
 variable "application_name" {
   type        = string
   description = "The name of your application"
-  default     = "serverless-basic"
-}
-
-variable "terraform_storage_account" {
-  type        = string
-  description = "When using an Azure back-end, the name of the Azure Storage Account that stores the Terraform state"
-  default     = ""
+  default     = "net-webapp-free-sql-insights-vault-blob"
 }
 
 variable "environment" {

@@ -1,7 +1,7 @@
 variable "application_name" {
   type        = string
   description = "The name of your application"
-  default     = "webapp-sql-base"
+  default     = "net-webapp-free-base"
 }
 
 variable "environment" {
