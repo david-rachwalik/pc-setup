@@ -37,13 +37,13 @@
                 "description": "The collation (sorting rules) of the database."
             }
         }
-        // "aadUserObjectId": {
-        //     "type": "string",
+        // "sqlAdminAadGroupId": {
+        //     "type": "securestring",
         //     "metadata": {
         //         "description": "Object Id of your AAD user or whoever needs access to resources such as KeyVault."
         //     }
         // },
-        // "aadUsername": {
+        // "sqlAdminAadGroup": {
         //     "type": "string",
         //     "metadata": {
         //         "description": "Name of your AAD user or whoever needs access to resources such as Azure SQL."
@@ -102,8 +102,8 @@
                 //     ],
                 //     "properties": {
                 //         "administratorType": "ActiveDirectory",
-                //         "login": "[parameters('aadUsername')]",
-                //         "sid": "[parameters('aadUserObjectId')]",
+                //         "login": "[parameters('sqlAdminAadGroup')]",
+                //         "sid": "[parameters('sqlAdminAadGroupId')]",
                 //         "tenantId": "[subscription().tenantId]"
                 //     }
                 // }
