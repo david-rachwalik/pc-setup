@@ -264,3 +264,6 @@ __pycache__/
 # Custom additions
 **/.azure/credentials
 *vault.yml
+
+# Terraform
+.terraform.lock.*
