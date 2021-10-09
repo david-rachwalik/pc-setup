@@ -10,69 +10,68 @@
             }
         },
         // https://stackoverflow.com/questions/59924995/what-are-the-constraints-for-the-azure-sql-server-administrator-login-name
-        "sqlAdminName": {
+        "sqlAdministratorUsername": {
             "type": "string",
             "metadata": {
                 "description": "Administrator username of the SQL Server"
             }
         },
-        "sqlAdminPass": {
+        "sqlAdministratorPassword": {
             "type": "securestring",
             "metadata": {
                 "description": "Administrator password of the SQL Server"
             }
         },
-        "sqlServerName": {
+        "databaseSkuName": {
             "type": "string",
-            "defaultValue": "[concat('sql-', uniqueString('server', resourceGroup().id))]",
+            "defaultValue": "Free",
+            "allowedValues": [ "Free", "Basic", "Standard", "Premium" ],
             "metadata": {
-                "description": "Name of the SQL logical server"
+                "description": "The edition (pricing tier) of the database."
             }
         },
-        "databaseName": {
+        "databaseCollation": {
             "type": "string",
-            "defaultValue": "[concat('sqldb-', uniqueString('database', resourceGroup().id))]",
+            "defaultValue": "SQL_Latin1_General_CP1_CI_AS",
             "metadata": {
-                "description": "Name of the SQL Database"
+                "description": "The collation (sorting rules) of the database."
             }
         }
+        // "aadUserObjectId": {
+        //     "type": "string",
+        //     "metadata": {
+        //         "description": "Object Id of your AAD user or whoever needs access to resources such as KeyVault."
+        //     }
+        // },
+        // "aadUsername": {
+        //     "type": "string",
+        //     "metadata": {
+        //         "description": "Name of your AAD user or whoever needs access to resources such as Azure SQL."
+        //     }
+        // }
     },
     "functions": [],
     "variables": {
-        // "sqlserverName": "[concat('sqlserver', uniqueString(resourceGroup().id))]"
-        // "vnetName": "[concat(parameters('stackName'), '-vnet')]",
-        // "databaseName": "appdb",
-        // "databaseEdition": "Basic",
-        "databaseEdition": "Free",
-        "databaseCapacity": 1
-        // "databaseCollation": "SQL_Latin1_General_CP1_CI_AS",
-        // "databaseServiceObjectiveName": "Basic",
-        // "workerPool": "[parameters('workerPool')]",
-        // "numberOfWorkersFromWorkerPool": 1,
-        // "nicName": "[concat( parameters('stackName'),'vmnic')]",
-        // "privateDbEndpointName": "[concat( parameters('stackName'),'pvenp')]",
-        // "privateDbDnsZoneName": "[parameters('privateDbDnsZoneName')]",
-        // "privateDbDnsGroupName": "[concat(variables('privateDbEndpointName'),'/mydnsgroupname')]",
-        // "privateHost1DnsZoneName": "[concat(parameters('stackName'),'.appserviceenvironment.net') ]",
-        // "gatewayPublicIPName": "[concat( parameters('stackName'),'gwpip')]",
-        // "gatewayName": "[concat( parameters('stackName'),'gw')]",
-        // "vpnClientAddressPoolPrefix": "172.15.0.0/24",
-        // "vmName": "[substring(parameters('stackName'),0,10)]",
-        // "loginUser": "[substring(parameters('loginUser'),0,8)]"
+        // "sqlServerName": "[concat('sql-', uniqueString('server', resourceGroup().id))]",
+        "sqlServerName": "[concat('sql-', resourceGroup().name)]",
+        // "databaseName": "[concat('sqldb-', uniqueString('database', resourceGroup().id))]",
+        "databaseName": "[concat('sqldb-', resourceGroup().name)]"
+        // "databaseEdition": "Free"
     },
     "resources": [
         {
             // https://docs.microsoft.com/en-us/azure/templates/microsoft.sql/servers
             "type": "Microsoft.Sql/servers",
             "apiVersion": "2021-02-01-preview",
-            "name": "[parameters('sqlserverName')]",
+            "name": "[variables('sqlServerName')]",
             "location": "[parameters('location')]",
             "identity": {
                 "type": "SystemAssigned"
             },
             "properties": {
-                "administratorLogin": "[parameters('sqlAdminName')]",
-                "administratorLoginPassword": "[parameters('sqlAdminPass')]",
+                "administratorLogin": "[parameters('sqlAdministratorUsername')]",
+                "administratorLoginPassword": "[parameters('sqlAdministratorPassword')]",
+                "minimalTlsVersion": "1.2",
                 "version": "12.0"
             },
             "tags": {
@@ -80,60 +79,12 @@
             },
             "resources": [
                 {
-                    // https://docs.microsoft.com/en-us/azure/templates/microsoft.sql/servers/databases
-                    "type": "databases",
-                    "apiVersion": "2021-02-01-preview",
-                    "name": "[parameters('databaseName')]",
-                    "location": "[parameters('location')]",
-                    "tags": {
-                        "displayName": "Database"
-                    },
-                    "sku": {
-                        "name": "[variables('databaseEdition')]",
-                        "tier": "[variables('databaseEdition')]",
-                        "capacity": "[variables('databaseCapacity')]"
-                    },
-                    "dependsOn": [
-                        "[resourceId('Microsoft.Sql/servers', concat(parameters('sqlserverName')))]"
-                    ],
-                    "properties": {},
-                    "resources": [
-                        {
-                            // https://docs.microsoft.com/en-us/azure/templates/microsoft.sql/servers/databases/transparentdataencryption
-                            "type": "databases/transparentDataEncryption",
-                            "apiVersion": "2021-02-01-preview",
-                            "name": "current",
-                            "dependsOn": [
-                                // "[parameters('databaseName')]"
-                                "[resourceId('Microsoft.Sql/servers', parameters('sqlserverName'), 'databases', parameters('databaseName'))]"
-                            ],
-                            "properties": {
-                                "state": "Enabled"
-                            }
-                        },
-                        {
-                            // https://docs.microsoft.com/en-us/azure/templates/microsoft.sql/servers/databases/backupshorttermretentionpolicies
-                            "type": "databases/backupShortTermRetentionPolicies",
-                            "apiVersion": "2021-02-01-preview",
-                            "name": "default",
-                            "dependsOn": [
-                                "[resourceId('Microsoft.Sql/servers', parameters('sqlserverName'), 'databases', parameters('databaseName'))]"
-                            ],
-                            "properties": {
-                                "diffBackupIntervalInHours": 24,
-                                "retentionDays": 7
-                            }
-                        }
-                    ]
-                },
-                {
                     // https://docs.microsoft.com/en-us/azure/templates/microsoft.sql/servers/firewallrules
                     "type": "firewallrules",
                     "apiVersion": "2021-02-01-preview",
                     "name": "AllowAllMicrosoftAzureIps",
-                    "location": "[parameters('location')]",
                     "dependsOn": [
-                        "[resourceId('Microsoft.Sql/servers', parameters('sqlserverName'))]"
+                        "[resourceId('Microsoft.Sql/servers', variables('sqlServerName'))]"
                     ],
                     "properties": {
                         "endIpAddress": "0.0.0.0",
@@ -141,24 +92,13 @@
                     }
                 }
                 // {
-                //     // https://docs.microsoft.com/en-us/azure/templates/microsoft.sql/servers/virtualnetworkrules
-                //     "type": "Microsoft.Sql/servers/virtualNetworkRules",
-                //     "apiVersion": "2021-02-01-preview",
-                //     "name": "[concat(parameters('sqlserverName'), '/allow-', parameters('frontendSubnet'))]",
-                //     "dependsOn": [ "[resourceId('Microsoft.Sql/servers', parameters('sqlserverName'))]" ],
-                //     "properties": {
-                //         "virtualNetworkSubnetId": "[resourceId('Microsoft.Network/virtualNetworks/subnets', variables('vnetName'), parameters('frontendSubnet'))]",
-                //         "ignoreMissingVnetServiceEndpoint": false
-                //     }
-                // },
-                // {
                 //     // https://docs.microsoft.com/en-us/azure/templates/microsoft.sql/servers/administrators
                 //     "type": "administrators",
                 //     "apiVersion": "2021-02-01-preview",
                 //     "name": "activeDirectory",
                 //     "location": "[parameters('location')]",
                 //     "dependsOn": [
-                //         "[resourceId('Microsoft.Sql/servers/', parameters('sqlserverName'))]"
+                //         "[resourceId('Microsoft.Sql/servers', variables('sqlserverName'))]"
                 //     ],
                 //     "properties": {
                 //         "administratorType": "ActiveDirectory",
@@ -168,6 +108,71 @@
                 //     }
                 // }
             ]
+        },
+        {
+            // https://docs.microsoft.com/en-us/azure/templates/microsoft.sql/servers/databases
+            "type": "Microsoft.Sql/servers/databases",
+            "apiVersion": "2021-02-01-preview",
+            // "name": "[variables('databaseName')]",
+            "name": "[concat(variables('sqlServerName'), '/', variables('databaseName'))]",
+            "location": "[parameters('location')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Sql/servers', variables('sqlServerName'))]"
+            ],
+            "sku": {
+                // "name": "[variables('databaseEdition')]"
+                "name": "[parameters('databaseSkuName')]"
+            },
+            "properties": {
+                "collation": "[parameters('databaseCollation')]"
+            },
+            "tags": {
+                "displayName": "Database"
+            },
+            "resources": [
+                {
+                    // https://docs.microsoft.com/en-us/azure/templates/microsoft.sql/servers/databases/transparentdataencryption
+                    "type": "transparentDataEncryption",
+                    "apiVersion": "2021-02-01-preview",
+                    "name": "current",
+                    "dependsOn": [
+                        // "[variables('databaseName')]"
+                        // "[resourceId('Microsoft.Sql/servers', variables('sqlServerName'), 'databases', variables('databaseName'))]"
+                        // "[resourceId('Microsoft.Sql/servers/databases', variables('databaseName'))]"
+                        // "[concat('Microsoft.Sql/servers/', variables('sqlServerName'), '/databases/', variables('databaseName'))]"
+                        "[resourceId('Microsoft.Sql/servers/databases', variables('sqlServerName'), variables('databaseName'))]"
+                    ],
+                    "properties": {
+                        "state": "Enabled"
+                    }
+                }
+                // {
+                //     // https://docs.microsoft.com/en-us/azure/templates/microsoft.sql/servers/databases/backupshorttermretentionpolicies
+                //     "type": "backupShortTermRetentionPolicies",
+                //     "apiVersion": "2021-02-01-preview",
+                //     "name": "default",
+                //     "dependsOn": [
+                //         // "[variables('databaseName')]"
+                //         // "[resourceId('Microsoft.Sql/servers', variables('sqlServerName'), 'databases', variables('databaseName'))]"
+                //         // "[resourceId('Microsoft.Sql/servers/databases', variables('databaseName'))]"
+                //         "[concat('Microsoft.Sql/servers/', variables('sqlServerName'), '/databases/', variables('databaseName'))]"
+                //     ],
+                //     "properties": {
+                //         "diffBackupIntervalInHours": 24,
+                //         "retentionDays": 7
+                //     }
+                // }
+            ]
         }
-    ]
+    ],
+    "outputs": {
+        "sqlServerFqdn": {
+            "type": "string",
+            "value": "[reference(resourceId('Microsoft.Sql/servers/', variables('sqlServerName'))).fullyQualifiedDomainName]"
+        },
+        "databaseName": {
+            "type": "string",
+            "value": "[variables('databaseName')]"
+        }
+    }
 }

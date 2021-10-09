@@ -3,13 +3,13 @@
     "contentVersion": "1.0.0.0",
     "parameters": {
         // https://stackoverflow.com/questions/59924995/what-are-the-constraints-for-the-azure-sql-server-administrator-login-name
-        "sqlAdministratorLogin": {
+        "sqlAdministratorUsername": {
             "type": "string",
             "metadata": {
                 "description": "The admin user of the SQL Server"
             }
         },
-        "sqlAdministratorLoginPassword": {
+        "sqlAdministratorPassword": {
             "type": "securestring",
             "metadata": {
                 "description": "The password of the admin user of the SQL Server"
@@ -25,27 +25,136 @@
     },
     "functions": [],
     "variables": {
-        // "sqlserverName": "[concat('sqlserver', uniqueString(resourceGroup().id))]"
-        "sqlserverName": "[concat('sql-', resourceGroup().name)]"
+        // "sqlServerName": "[concat('sqlserver', uniqueString(resourceGroup().id))]"
+        "sqlServerName": "[concat('sql-', resourceGroup().name)]"
     },
     "resources": [
         {
             // https://docs.microsoft.com/en-us/azure/templates/microsoft.sql/servers
             "type": "Microsoft.Sql/servers",
             "apiVersion": "2021-02-01-preview",
-            "name": "[variables('sqlserverName')]",
+            "name": "[variables('sqlServerName')]",
             "location": "[parameters('location')]",
             "identity": {
                 "type": "SystemAssigned"
             },
             "properties": {
-                "administratorLogin": "[parameters('sqlAdministratorLogin')]",
-                "administratorLoginPassword": "[parameters('sqlAdministratorLoginPassword')]",
+                "administratorLogin": "[parameters('sqlAdministratorUsername')]",
+                "administratorLoginPassword": "[parameters('sqlAdministratorPassword')]",
+                "minimalTlsVersion": "1.2",
                 "version": "12.0"
             },
             "tags": {
                 "displayName": "SqlServer"
-            }
+            },
+            "resources": [
+                // {
+                //     // https://docs.microsoft.com/en-us/azure/templates/microsoft.sql/servers/administrators
+                //     "type": "administrators",
+                //     "apiVersion": "2021-02-01-preview",
+                //     "name": "activeDirectory",
+                //     "dependsOn": [
+                //         "[resourceId('Microsoft.Sql/servers', variables('sqlServerName'))]"
+                //     ],
+                //     "properties": {
+                //         "administratorType": "ActiveDirectory",
+                //         "login": "[parameters('aadUsername')]",
+                //         "sid": "[parameters('aadUserObjectId')]",
+                //         "tenantId": "[subscription().tenantId]"
+                //     }
+                // },
+                // {
+                //     "type": "elasticpools",
+                //     "apiVersion": "2021-02-01-preview",
+                //     "name": "[parameters('elasticPoolPrimaryName')]",
+                //     "dependsOn": [
+                //         "[resourceId('Microsoft.Sql/servers',variables('sqlServerName'))]"
+                //     ],
+                //     "location": "[parameters('location')]",
+                //     "sku": {
+                //         "name": "[parameters('sqlDatabaseServiceObjective')]",
+                //         "tier": "[parameters('sqlDatabaseEdition')]",
+                //         "capacity": "[parameters('elasticPoolvCoreLimit')]"
+                //     },
+                //     "properties": {
+                //         "perDatabaseSettings": {
+                //             "minCapacity": "[parameters('elasticPoolPerDatabasePerformanceMin')]",
+                //             "maxCapacity": "[parameters('elasticPoolPerDatabasePerformanceMax')]"
+                //         },
+                //         "maxSizeBytes": "[parameters('elasticPoolStorageSize')]",
+                //         "zoneRedundant": "[parameters('zoneRedundant')]",
+                //         "licenseType": "[parameters('licenseType')]"
+                //     }
+                // },
+                // {
+                //     "apiVersion": "2021-02-01-preview",
+                //     "type": "failoverGroups",
+                //     "name": "[parameters('sqlFailoverGroupName')]",
+                //     "properties": {
+                //         "serverName": "[variables('sqlServerName')]",
+                //         "partnerServers": [
+                //             {
+                //                 "id": "[resourceId('Microsoft.Sql/servers/', parameters('sqlServerSecondaryName'))]"
+                //             }
+                //         ],
+                //         "readWriteEndpoint": {
+                //             "failoverPolicy": "Automatic",
+                //             "failoverWithDataLossGracePeriodMinutes": 60
+                //         },
+                //         "readOnlyEndpoint": {
+                //             "failoverPolicy": "Enabled"
+                //         },
+                //         "databases": "[variables('fgDatabases')]"
+                //     },
+                //     "dependsOn": [
+                //         "[variables('sqlServerName')]",
+                //         "[parameters('elasticPoolPrimaryName')]",
+                //         "databaseCopy"
+                //     ]
+                // },
+                {
+                    // https://docs.microsoft.com/en-us/azure/templates/microsoft.sql/servers/firewallrules
+                    "type": "firewallrules",
+                    "apiVersion": "2021-02-01-preview",
+                    "name": "AllowAllMicrosoftAzureIps",
+                    "dependsOn": [
+                        "[resourceId('Microsoft.Sql/servers', variables('sqlServerName'))]"
+                    ],
+                    "properties": {
+                        "endIpAddress": "0.0.0.0",
+                        "startIpAddress": "0.0.0.0"
+                    }
+                }
+                // {
+                //     "type": "firewallRules",
+                //     "name": "AllowExpressRouteIPsPrimary",
+                //     "apiVersion": "2021-02-01-preview",
+                //     "dependsOn": [
+                //         "[resourceId('Microsoft.Sql/servers',variables('sqlServerName'))]"
+                //     ],
+                //     "properties": {
+                //         "startIpAddress": "100.60.70.141",
+                //         "endIpAddress": "100.60.70.145"
+                //     }
+                // },
+                // {
+                //     // https://docs.microsoft.com/en-us/azure/templates/microsoft.sql/servers/virtualnetworkrules
+                //     "type": "virtualNetworkRules",
+                //     "apiVersion": "2021-02-01-preview",
+                //     "name": "[concat(variables('sqlServerName'), '/allow-', parameters('frontendSubnet'))]",
+                //     "dependsOn": [ "[resourceId('Microsoft.Sql/servers', variables('sqlServerName'))]" ],
+                //     "properties": {
+                //         "virtualNetworkSubnetId": "[resourceId('Microsoft.Network/virtualNetworks/subnets', variables('vnetName'), parameters('frontendSubnet'))]",
+                //         "ignoreMissingVnetServiceEndpoint": false
+                //     }
+                // }
+            ]
         }
-    ]
+    ],
+    "outputs": {
+        "sqlServerFqdn": {
+            "type": "string",
+            "value": "[reference(resourceId('Microsoft.Sql/servers/', variables('sqlServerName'))).fullyQualifiedDomainName]"
+        }
+    }
 }
