@@ -48,7 +48,13 @@ resource "azurerm_mssql_database" "database" {
   # sku_name                    = "GP_S_Gen5_1"
   # min_capacity                = 0.5
   # auto_pause_delay_in_minutes = 60
+  # sku_name                    = "GP_Gen5_2"
   sku_name                    = var.sku_name
+
+  # Only short term retention available for Free tier
+  short_term_retention_policy {
+    retention_days = 7
+  }
 }
 
 resource "azurecaf_name" "sql_firewall_rule" {
