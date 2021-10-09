@@ -56,9 +56,12 @@ ansible-playbook system_setup.yml --tags "py" --skip-tags "windows"
 # --- Test deploying ARM template to 'Development' environment ---
 # app deploy --debug --application "ArmTemplates" --arm "linux/key_vault"
 # app deploy --debug --application "ArmTemplates" --arm "linux/key_vault_secret"
-app deploy --debug --application "ArmTemplates" --arm "linked/key_vault_secret"
+# app deploy --debug --application "ArmTemplates" --arm "linked/key_vault_secret"
 
-# app deploy --debug --application "ArmTemplates" --arm "linux/sql"
+# app deploy --debug --application "ArmTemplates" --arm "linux/sql_server"
+app deploy --debug --application "ArmTemplates" --arm "linux/sql_database"
+
+# app deploy --debug --application "ArmTemplates" --arm "linux/app_service_plan"
 # app deploy --debug --application "ArmTemplates" --arm "linux/webapp_sql"
 # app deploy --debug --application "ArmTemplates" --arm "linux/webapi_sql"
 

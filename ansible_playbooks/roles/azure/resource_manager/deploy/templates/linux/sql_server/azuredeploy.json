@@ -25,13 +25,14 @@
     },
     "functions": [],
     "variables": {
-        "sqlserverName": "[concat('sqlserver', uniqueString(resourceGroup().id))]"
+        // "sqlserverName": "[concat('sqlserver', uniqueString(resourceGroup().id))]"
+        "sqlserverName": "[concat('sql-', resourceGroup().name)]"
     },
     "resources": [
         {
             // https://docs.microsoft.com/en-us/azure/templates/microsoft.sql/servers
             "type": "Microsoft.Sql/servers",
-            "apiVersion": "2020-02-02-preview",
+            "apiVersion": "2021-02-01-preview",
             "name": "[variables('sqlserverName')]",
             "location": "[parameters('location')]",
             "identity": {

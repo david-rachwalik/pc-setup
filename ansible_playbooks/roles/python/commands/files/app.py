@@ -511,9 +511,9 @@ def application_strategy(tenant, dotnet_dir, application, project, strat, enviro
 
     # Add NuGet packages to ASP.NET Core project
     packages_expected = _project_packages(strat, framework)
-    _log.debug("NuGet packages_expected: {0}".format(packages_expected))
+    # _log.debug("NuGet packages_expected: {0}".format(packages_expected))
     packages_installed = net.project_package_list(dotnet_dir, application, project)
-    _log.debug("NuGet packages_installed: {0}".format(packages_installed))
+    # _log.debug("NuGet packages_installed: {0}".format(packages_installed))
     packages_to_install = sh.list_differences(packages_expected, packages_installed)
     _log.debug("NuGet packages_to_install: {0}".format(packages_to_install))
     for package in packages_to_install:
@@ -539,10 +539,10 @@ def repository_strategy(organization, dotnet_dir, application, source="", gitign
 
     if source == "github":
         remote_path = "https://github.com/{0}/{1}".format(organization, application)
-        _log.debug("source repository (GitHub): {0}".format(remote_path))
+        _log.debug("source repository (GitHub) remote: {0}".format(remote_path))
     elif source == "tfsgit":
         remote_path = "https://dev.azure.com/{0}/{1}".format(organization, application)
-        _log.debug("source repository (Azure): {0}".format(remote_path))
+        _log.debug("source repository (Azure) remote: {0}".format(remote_path))
         return False
     else:
         _log.error("no source repository")
@@ -570,7 +570,7 @@ def repository_strategy(organization, dotnet_dir, application, source="", gitign
         display_path = app_dir if (is_bare) else "{0}/.git".format(app_dir)
         _log.info("Repository not found ({0}), initializing...".format(display_path))
         # Initialize the repository
-        (repo_exists, changed) = git.repo_create(app_dir, is_bare)
+        (repo_exists, repo_changed) = git.repo_create(app_dir, is_bare)
         if repo_exists:
             _log.info("successfully created {0} repository!".format(repo_descriptor))
         else:
@@ -641,7 +641,7 @@ def deployment_group_strategy(tenant, sp_name, application, environment, locatio
     if not (location and isinstance(location, str)): TypeError("'location' parameter expected as string")
     if not (arm and isinstance(arm, str)): TypeError("'arm' parameter expected as string")
     deployment_group = False
-    deploy_changed = False
+    deployment_changed = False
     sp_id = ""
 
     rg_name = sh.format_resource("{0}-{1}".format(application, environment))
@@ -682,6 +682,7 @@ def deployment_group_strategy(tenant, sp_name, application, environment, locatio
     parameters = _json_to_parameters(parameters_json)
     _log.debug("parameters: {0}".format(parameters))
 
+
     # Ensure deployment group template is valid
     deploy_valid = az.deployment_group_valid(resource_group.name, template_path, parameters)
     # _log.debug("deployment is valid: {0}".format(deploy_valid))
@@ -695,14 +696,14 @@ def deployment_group_strategy(tenant, sp_name, application, environment, locatio
         #     _log.warning("deployment group is missing, creating...")
         #     deployment_group = az.deployment_group_set(resource_group.name, template_path, parameters)
         #     _log.debug("deployment_group: {0}".format(deployment_group))
-        #     deploy_changed = True
+        #     deployment_changed = True
 
         deployment_group = az.deployment_group_set(resource_group.name, template_path, parameters)
         _log.debug("deployment_group result: {0}".format(deployment_group))
-        deploy_changed = True
+        deployment_changed = True
     else:
         _log.warning("deployment validation has failed")
-    return (deployment_group, deploy_changed)
+    return (deployment_group, deployment_changed)
 
 
 

@@ -24,14 +24,14 @@
         },
         "sqlServerName": {
             "type": "string",
-            "defaultValue": "[concat('sql-svr-', uniqueString('server', resourceGroup().id))]",
+            "defaultValue": "[concat('sql-', uniqueString('server', resourceGroup().id))]",
             "metadata": {
                 "description": "Name of the SQL logical server"
             }
         },
         "databaseName": {
             "type": "string",
-            "defaultValue": "[concat('sql-db-', uniqueString('database', resourceGroup().id))]",
+            "defaultValue": "[concat('sqldb-', uniqueString('database', resourceGroup().id))]",
             "metadata": {
                 "description": "Name of the SQL Database"
             }
@@ -42,7 +42,8 @@
         // "sqlserverName": "[concat('sqlserver', uniqueString(resourceGroup().id))]"
         // "vnetName": "[concat(parameters('stackName'), '-vnet')]",
         // "databaseName": "appdb",
-        "databaseEdition": "Basic",
+        // "databaseEdition": "Basic",
+        "databaseEdition": "Free",
         "databaseCapacity": 1
         // "databaseCollation": "SQL_Latin1_General_CP1_CI_AS",
         // "databaseServiceObjectiveName": "Basic",
@@ -103,10 +104,24 @@
                             "apiVersion": "2021-02-01-preview",
                             "name": "current",
                             "dependsOn": [
-                                "[parameters('databaseName')]"
+                                // "[parameters('databaseName')]"
+                                "[resourceId('Microsoft.Sql/servers', parameters('sqlserverName'), 'databases', parameters('databaseName'))]"
                             ],
                             "properties": {
-                                "status": "Enabled"
+                                "state": "Enabled"
+                            }
+                        },
+                        {
+                            // https://docs.microsoft.com/en-us/azure/templates/microsoft.sql/servers/databases/backupshorttermretentionpolicies
+                            "type": "databases/backupShortTermRetentionPolicies",
+                            "apiVersion": "2021-02-01-preview",
+                            "name": "default",
+                            "dependsOn": [
+                                "[resourceId('Microsoft.Sql/servers', parameters('sqlserverName'), 'databases', parameters('databaseName'))]"
+                            ],
+                            "properties": {
+                                "diffBackupIntervalInHours": 24,
+                                "retentionDays": 7
                             }
                         }
                     ]
