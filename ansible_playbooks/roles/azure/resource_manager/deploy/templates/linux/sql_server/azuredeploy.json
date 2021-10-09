@@ -2,6 +2,7 @@
     "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
     "contentVersion": "1.0.0.0",
     "parameters": {
+        // https://stackoverflow.com/questions/59924995/what-are-the-constraints-for-the-azure-sql-server-administrator-login-name
         "sqlAdministratorLogin": {
             "type": "string",
             "metadata": {
@@ -30,9 +31,12 @@
         {
             // https://docs.microsoft.com/en-us/azure/templates/microsoft.sql/servers
             "type": "Microsoft.Sql/servers",
-            "apiVersion": "2019-06-01-preview",
+            "apiVersion": "2020-02-02-preview",
             "name": "[variables('sqlserverName')]",
             "location": "[parameters('location')]",
+            "identity": {
+                "type": "SystemAssigned"
+            },
             "properties": {
                 "administratorLogin": "[parameters('sqlAdministratorLogin')]",
                 "administratorLoginPassword": "[parameters('sqlAdministratorLoginPassword')]",

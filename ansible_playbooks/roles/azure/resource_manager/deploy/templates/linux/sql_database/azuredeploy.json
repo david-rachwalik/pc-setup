@@ -1,0 +1,158 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "location": {
+            "type": "string",
+            "defaultValue": "[resourceGroup().location]",
+            "metadata": {
+                "description": "Location for all resources"
+            }
+        },
+        // https://stackoverflow.com/questions/59924995/what-are-the-constraints-for-the-azure-sql-server-administrator-login-name
+        "sqlAdminName": {
+            "type": "string",
+            "metadata": {
+                "description": "Administrator username of the SQL Server"
+            }
+        },
+        "sqlAdminPass": {
+            "type": "securestring",
+            "metadata": {
+                "description": "Administrator password of the SQL Server"
+            }
+        },
+        "sqlServerName": {
+            "type": "string",
+            "defaultValue": "[concat('sql-svr-', uniqueString('server', resourceGroup().id))]",
+            "metadata": {
+                "description": "Name of the SQL logical server"
+            }
+        },
+        "databaseName": {
+            "type": "string",
+            "defaultValue": "[concat('sql-db-', uniqueString('database', resourceGroup().id))]",
+            "metadata": {
+                "description": "Name of the SQL Database"
+            }
+        }
+    },
+    "functions": [],
+    "variables": {
+        // "sqlserverName": "[concat('sqlserver', uniqueString(resourceGroup().id))]"
+        // "vnetName": "[concat(parameters('stackName'), '-vnet')]",
+        // "databaseName": "appdb",
+        "databaseEdition": "Basic",
+        "databaseCapacity": 1
+        // "databaseCollation": "SQL_Latin1_General_CP1_CI_AS",
+        // "databaseServiceObjectiveName": "Basic",
+        // "workerPool": "[parameters('workerPool')]",
+        // "numberOfWorkersFromWorkerPool": 1,
+        // "nicName": "[concat( parameters('stackName'),'vmnic')]",
+        // "privateDbEndpointName": "[concat( parameters('stackName'),'pvenp')]",
+        // "privateDbDnsZoneName": "[parameters('privateDbDnsZoneName')]",
+        // "privateDbDnsGroupName": "[concat(variables('privateDbEndpointName'),'/mydnsgroupname')]",
+        // "privateHost1DnsZoneName": "[concat(parameters('stackName'),'.appserviceenvironment.net') ]",
+        // "gatewayPublicIPName": "[concat( parameters('stackName'),'gwpip')]",
+        // "gatewayName": "[concat( parameters('stackName'),'gw')]",
+        // "vpnClientAddressPoolPrefix": "172.15.0.0/24",
+        // "vmName": "[substring(parameters('stackName'),0,10)]",
+        // "loginUser": "[substring(parameters('loginUser'),0,8)]"
+    },
+    "resources": [
+        {
+            // https://docs.microsoft.com/en-us/azure/templates/microsoft.sql/servers
+            "type": "Microsoft.Sql/servers",
+            "apiVersion": "2021-02-01-preview",
+            "name": "[parameters('sqlserverName')]",
+            "location": "[parameters('location')]",
+            "identity": {
+                "type": "SystemAssigned"
+            },
+            "properties": {
+                "administratorLogin": "[parameters('sqlAdminName')]",
+                "administratorLoginPassword": "[parameters('sqlAdminPass')]",
+                "version": "12.0"
+            },
+            "tags": {
+                "displayName": "SqlServer"
+            },
+            "resources": [
+                {
+                    // https://docs.microsoft.com/en-us/azure/templates/microsoft.sql/servers/databases
+                    "type": "databases",
+                    "apiVersion": "2021-02-01-preview",
+                    "name": "[parameters('databaseName')]",
+                    "location": "[parameters('location')]",
+                    "tags": {
+                        "displayName": "Database"
+                    },
+                    "sku": {
+                        "name": "[variables('databaseEdition')]",
+                        "tier": "[variables('databaseEdition')]",
+                        "capacity": "[variables('databaseCapacity')]"
+                    },
+                    "dependsOn": [
+                        "[resourceId('Microsoft.Sql/servers', concat(parameters('sqlserverName')))]"
+                    ],
+                    "properties": {},
+                    "resources": [
+                        {
+                            // https://docs.microsoft.com/en-us/azure/templates/microsoft.sql/servers/databases/transparentdataencryption
+                            "type": "databases/transparentDataEncryption",
+                            "apiVersion": "2021-02-01-preview",
+                            "name": "current",
+                            "dependsOn": [
+                                "[parameters('databaseName')]"
+                            ],
+                            "properties": {
+                                "status": "Enabled"
+                            }
+                        }
+                    ]
+                },
+                {
+                    // https://docs.microsoft.com/en-us/azure/templates/microsoft.sql/servers/firewallrules
+                    "type": "firewallrules",
+                    "apiVersion": "2021-02-01-preview",
+                    "name": "AllowAllMicrosoftAzureIps",
+                    "location": "[parameters('location')]",
+                    "dependsOn": [
+                        "[resourceId('Microsoft.Sql/servers', parameters('sqlserverName'))]"
+                    ],
+                    "properties": {
+                        "endIpAddress": "0.0.0.0",
+                        "startIpAddress": "0.0.0.0"
+                    }
+                }
+                // {
+                //     // https://docs.microsoft.com/en-us/azure/templates/microsoft.sql/servers/virtualnetworkrules
+                //     "type": "Microsoft.Sql/servers/virtualNetworkRules",
+                //     "apiVersion": "2021-02-01-preview",
+                //     "name": "[concat(parameters('sqlserverName'), '/allow-', parameters('frontendSubnet'))]",
+                //     "dependsOn": [ "[resourceId('Microsoft.Sql/servers', parameters('sqlserverName'))]" ],
+                //     "properties": {
+                //         "virtualNetworkSubnetId": "[resourceId('Microsoft.Network/virtualNetworks/subnets', variables('vnetName'), parameters('frontendSubnet'))]",
+                //         "ignoreMissingVnetServiceEndpoint": false
+                //     }
+                // },
+                // {
+                //     // https://docs.microsoft.com/en-us/azure/templates/microsoft.sql/servers/administrators
+                //     "type": "administrators",
+                //     "apiVersion": "2021-02-01-preview",
+                //     "name": "activeDirectory",
+                //     "location": "[parameters('location')]",
+                //     "dependsOn": [
+                //         "[resourceId('Microsoft.Sql/servers/', parameters('sqlserverName'))]"
+                //     ],
+                //     "properties": {
+                //         "administratorType": "ActiveDirectory",
+                //         "login": "[parameters('aadUsername')]",
+                //         "sid": "[parameters('aadUserObjectId')]",
+                //         "tenantId": "[subscription().tenantId]"
+                //     }
+                // }
+            ]
+        }
+    ]
+}
