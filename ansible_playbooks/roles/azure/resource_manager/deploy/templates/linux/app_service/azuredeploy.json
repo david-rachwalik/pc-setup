@@ -2,13 +2,6 @@
     "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
     "contentVersion": "1.0.0.0",
     "parameters": {
-        "siteName": {
-           "type": "string",
-           "defaultValue": "[concat('WebApp-', uniqueString(resourceGroup().id))]",
-            "metadata": {
-                "description": "Name of web app service"
-            }
-        },
         "location": {
             "type": "string",
             "defaultValue": "[resourceGroup().location]",
@@ -18,6 +11,7 @@
         },
         "sku": {
             "type": "string",
+            "defaultValue": "F1",
             "allowedValues": [
                 "F1",
                 "D1",
@@ -32,9 +26,8 @@
                 "P3",
                 "P4"
             ],
-            "defaultValue": "F1",
             "metadata": {
-                "description": "Pricing tier for the hosting plan"
+                "description": "Pricing tier and instance size for the hosting plan"
             }
         },
         "linuxFxVersion" : {
@@ -54,12 +47,14 @@
     },
     "functions": [],
     "variables": {
-        "hostingPlanName": "[concat('hpn-', resourceGroup().name)]"
+        "hostingPlanName": "[concat('plan-', resourceGroup().name)]",
+        "appName": "[concat('app-', uniqueString(resourceGroup().id))]"
     },
     "resources": [
         {
+            // https://docs.microsoft.com/en-us/azure/templates/microsoft.web/serverfarms
             "type": "Microsoft.Web/serverfarms",
-            "apiVersion": "2018-02-01",
+            "apiVersion": "2021-02-01",
             "name": "[variables('hostingPlanName')]",
             "location": "[parameters('location')]",
             "kind": "linux",
@@ -74,32 +69,40 @@
             }
         },
         {
+            // https://docs.microsoft.com/en-us/azure/templates/microsoft.web/sites
             "type": "Microsoft.Web/sites",
-            "apiVersion": "2018-11-01",
-            "name": "[parameters('siteName')]",
+            "apiVersion": "2021-02-01",
+            "name": "[variables('appName')]",
             "location": "[parameters('location')]",
+            "kind": "app,linux",
+            "identity": {
+                "type": "SystemAssigned"
+            },
             "dependsOn": [
                 "[resourceId('Microsoft.Web/serverfarms', variables('hostingPlanName'))]"
             ],
             "properties": {
+                "httpsOnly": true,
                 "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', variables('hostingPlanName'))]",
                 "siteConfig": {
-                    "linuxFxVersion": "[parameters('linuxFxVersion')]"
+                    "linuxFxVersion": "[parameters('linuxFxVersion')]",
+                    "minTlsVersion": "1.2"
                 }
             },
             "tags": {
                 "[concat('hidden-related:', resourceGroup().id, '/providers/Microsoft.Web/serverfarms/', variables('hostingPlanName'))]": "Resource",
-                "displayName": "[parameters('siteName')]"
+                "displayName": "[variables('appName')]"
             },
             "resources": [
                 {
+                    // https://docs.microsoft.com/en-us/azure/templates/microsoft.web/sourcecontrols
                     "type": "sourcecontrols",
-                    "apiVersion": "2018-11-01",
+                    "apiVersion": "2021-02-01",
                     "name": "web",
                     "location": "[parameters('location')]",
                     "condition": "[contains(parameters('repoUrl'), 'http')]",
                     "dependsOn": [
-                        "[resourceId('Microsoft.Web/sites', parameters('siteName'))]"
+                        "[resourceId('Microsoft.Web/sites', variables('appName'))]"
                     ],
                     "properties": {
                         "repoUrl": "[parameters('repoUrl')]",
