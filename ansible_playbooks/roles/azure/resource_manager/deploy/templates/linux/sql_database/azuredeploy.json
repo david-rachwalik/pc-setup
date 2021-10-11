@@ -56,7 +56,6 @@
         "sqlServerName": "[concat('sql-', resourceGroup().name)]",
         // "databaseName": "[concat('sqldb-', uniqueString('database', resourceGroup().id))]",
         "databaseName": "[concat('sqldb-', resourceGroup().name)]"
-        // "databaseEdition": "Free"
     },
     "resources": [
         {
@@ -120,7 +119,6 @@
                 "[resourceId('Microsoft.Sql/servers', variables('sqlServerName'))]"
             ],
             "sku": {
-                // "name": "[variables('databaseEdition')]"
                 "name": "[parameters('databaseSkuName')]"
             },
             "properties": {
@@ -137,9 +135,6 @@
                     "name": "current",
                     "dependsOn": [
                         // "[variables('databaseName')]"
-                        // "[resourceId('Microsoft.Sql/servers', variables('sqlServerName'), 'databases', variables('databaseName'))]"
-                        // "[resourceId('Microsoft.Sql/servers/databases', variables('databaseName'))]"
-                        // "[concat('Microsoft.Sql/servers/', variables('sqlServerName'), '/databases/', variables('databaseName'))]"
                         "[resourceId('Microsoft.Sql/servers/databases', variables('sqlServerName'), variables('databaseName'))]"
                     ],
                     "properties": {
@@ -153,9 +148,7 @@
                 //     "name": "default",
                 //     "dependsOn": [
                 //         // "[variables('databaseName')]"
-                //         // "[resourceId('Microsoft.Sql/servers', variables('sqlServerName'), 'databases', variables('databaseName'))]"
-                //         // "[resourceId('Microsoft.Sql/servers/databases', variables('databaseName'))]"
-                //         "[concat('Microsoft.Sql/servers/', variables('sqlServerName'), '/databases/', variables('databaseName'))]"
+                //         "[resourceId('Microsoft.Sql/servers/databases', variables('sqlServerName'), variables('databaseName'))]"
                 //     ],
                 //     "properties": {
                 //         "diffBackupIntervalInHours": 24,

@@ -62,6 +62,7 @@ ansible-playbook system_setup.yml --tags "py" --skip-tags "windows"
 app deploy --debug --application "ArmTemplates" --arm "linux/sql_database"
 
 # app deploy --debug --application "ArmTemplates" --arm "linux/app_service_plan"
+app deploy --debug --application "ArmTemplates" --arm "linux/app_service"
 # app deploy --debug --application "ArmTemplates" --arm "linux/webapp_sql"
 # app deploy --debug --application "ArmTemplates" --arm "linux/webapi_sql"
 
