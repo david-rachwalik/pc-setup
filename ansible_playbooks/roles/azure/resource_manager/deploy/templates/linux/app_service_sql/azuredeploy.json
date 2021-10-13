@@ -70,7 +70,8 @@
     "functions": [],
     "variables": {
         "hostingPlanName": "[concat('plan-', resourceGroup().name)]",
-        "appName": "[concat('app-', uniqueString(resourceGroup().id))]",
+        // "appName": "[concat('app-', uniqueString(resourceGroup().id))]",
+        "appName": "[concat('app-', resourceGroup().name)]",
         "sqlServerName": "[concat('sql-', resourceGroup().name)]",
         "databaseName": "[concat('sqldb-', resourceGroup().name)]"
     },
