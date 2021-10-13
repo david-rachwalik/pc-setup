@@ -32,7 +32,8 @@
         },
         "linuxFxVersion" : {
             "type": "string",
-            "defaultValue" : "DOTNETCORE|5.0",
+            // az webapp list-runtimes --linux
+            "defaultValue" : "DOTNET|5.0",
             "metadata": {
                 "description": "Runtime stack of web app"
             }

@@ -1,0 +1,199 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "location": {
+            "type": "string",
+            "defaultValue": "[resourceGroup().location]",
+            "metadata": {
+                "description": "Location for all resources"
+            }
+        },
+        "sku": {
+            "type": "string",
+            "defaultValue": "F1",
+            "allowedValues": [
+                "F1",
+                "D1",
+                "B1",
+                "B2",
+                "B3",
+                "S1",
+                "S2",
+                "S3",
+                "P1",
+                "P2",
+                "P3",
+                "P4"
+            ],
+            "metadata": {
+                "description": "Pricing tier and instance size for the hosting plan"
+            }
+        },
+        "linuxFxVersion" : {
+            "type": "string",
+            // az webapp list-runtimes --linux
+            "defaultValue" : "DOTNET|5.0",
+            "metadata": {
+                "description": "Runtime stack of web app"
+            }
+        },
+        // https://stackoverflow.com/questions/59924995/what-are-the-constraints-for-the-azure-sql-server-administrator-login-name
+        "sqlAdministratorUsername": {
+            "type": "string",
+            "metadata": {
+                "description": "Administrator username of the SQL Server"
+            }
+        },
+        "sqlAdministratorPassword": {
+            "type": "securestring",
+            "metadata": {
+                "description": "Administrator password of the SQL Server"
+            }
+        },
+        "databaseSkuName": {
+            "type": "string",
+            "defaultValue": "Free",
+            "allowedValues": [ "Free", "Basic", "Standard", "Premium" ],
+            "metadata": {
+                "description": "The edition (pricing tier) of the database."
+            }
+        },
+        "databaseCollation": {
+            "type": "string",
+            "defaultValue": "SQL_Latin1_General_CP1_CI_AS",
+            "metadata": {
+                "description": "The collation (sorting rules) of the database."
+            }
+        }
+    },
+    "functions": [],
+    "variables": {
+        "hostingPlanName": "[concat('plan-', resourceGroup().name)]",
+        "appName": "[concat('app-', uniqueString(resourceGroup().id))]",
+        "sqlServerName": "[concat('sql-', resourceGroup().name)]",
+        "databaseName": "[concat('sqldb-', resourceGroup().name)]"
+    },
+    "resources": [
+        {
+            // https://docs.microsoft.com/en-us/azure/templates/microsoft.web/serverfarms
+            "type": "Microsoft.Web/serverfarms",
+            "apiVersion": "2020-12-01",
+            "name": "[variables('hostingPlanName')]",
+            "location": "[parameters('location')]",
+            "kind": "linux",
+            "sku": {
+                "name": "[parameters('sku')]"
+            },
+            "properties": {
+                "reserved": true
+            },
+            "tags": {
+                "displayName": "[variables('hostingPlanName')]"
+            }
+        },
+        {
+            // https://docs.microsoft.com/en-us/azure/templates/microsoft.sql/servers
+            "type": "Microsoft.Sql/servers",
+            "apiVersion": "2021-02-01-preview",
+            "name": "[variables('sqlServerName')]",
+            "location": "[parameters('location')]",
+            "identity": {
+                "type": "SystemAssigned"
+            },
+            "properties": {
+                "administratorLogin": "[parameters('sqlAdministratorUsername')]",
+                "administratorLoginPassword": "[parameters('sqlAdministratorPassword')]",
+                "minimalTlsVersion": "1.2",
+                "version": "12.0"
+            },
+            "tags": {
+                "displayName": "SqlServer"
+            },
+            "resources": [
+                {
+                    // https://docs.microsoft.com/en-us/azure/templates/microsoft.sql/servers/firewallrules
+                    "type": "firewallrules",
+                    "apiVersion": "2021-02-01-preview",
+                    "name": "AllowAllMicrosoftAzureIps",
+                    "dependsOn": [
+                        "[resourceId('Microsoft.Sql/servers', variables('sqlServerName'))]"
+                    ],
+                    "properties": {
+                        "endIpAddress": "0.0.0.0",
+                        "startIpAddress": "0.0.0.0"
+                    }
+                }
+            ]
+        },
+        {
+            // https://docs.microsoft.com/en-us/azure/templates/microsoft.sql/servers/databases
+            "type": "Microsoft.Sql/servers/databases",
+            "apiVersion": "2021-02-01-preview",
+            "name": "[concat(variables('sqlServerName'), '/', variables('databaseName'))]",
+            "location": "[parameters('location')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Sql/servers', variables('sqlServerName'))]"
+            ],
+            "sku": {
+                "name": "[parameters('databaseSkuName')]"
+            },
+            "properties": {
+                "collation": "[parameters('databaseCollation')]"
+            },
+            "tags": {
+                "displayName": "Database"
+            },
+            "resources": [
+                {
+                    // https://docs.microsoft.com/en-us/azure/templates/microsoft.sql/servers/databases/transparentdataencryption
+                    "type": "transparentDataEncryption",
+                    "apiVersion": "2021-02-01-preview",
+                    "name": "current",
+                    "dependsOn": [
+                        "[resourceId('Microsoft.Sql/servers/databases', variables('sqlServerName'), variables('databaseName'))]"
+                    ],
+                    "properties": {
+                        "state": "Enabled"
+                    }
+                }
+            ]
+        },
+        {
+            // https://docs.microsoft.com/en-us/azure/templates/microsoft.web/sites
+            "type": "Microsoft.Web/sites",
+            "apiVersion": "2020-12-01",
+            "name": "[variables('appName')]",
+            "location": "[parameters('location')]",
+            "kind": "app,linux",
+            "identity": {
+                "type": "SystemAssigned"
+            },
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/serverfarms', variables('hostingPlanName'))]"
+            ],
+            "properties": {
+                "httpsOnly": true,
+                "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', variables('hostingPlanName'))]",
+                "siteConfig": {
+                    "linuxFxVersion": "[parameters('linuxFxVersion')]",
+                    "minTlsVersion": "1.2"
+                }
+            },
+            "tags": {
+                "[concat('hidden-related:', resourceGroup().id, '/providers/Microsoft.Web/serverfarms/', variables('hostingPlanName'))]": "Resource",
+                "displayName": "[variables('appName')]"
+            }
+        }
+    ],
+    "outputs": {
+        "sqlServerFqdn": {
+            "type": "string",
+            "value": "[reference(resourceId('Microsoft.Sql/servers/', variables('sqlServerName'))).fullyQualifiedDomainName]"
+        },
+        "databaseName": {
+            "type": "string",
+            "value": "[variables('databaseName')]"
+        }
+    }
+}
