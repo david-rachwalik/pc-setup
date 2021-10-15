@@ -9,7 +9,7 @@
                 "description": "Location for all resources"
             }
         },
-        "sku": {
+        "appSku": {
             "type": "string",
             "defaultValue": "F1",
             "allowedValues": [
@@ -32,8 +32,6 @@
         },
         "linuxFxVersion" : {
             "type": "string",
-            // az webapp list-runtimes --linux
-            // "defaultValue" : "DOTNET|5.0", // is apparently wrong, use template export
             "defaultValue" : "DOTNETCORE|5.0",
             "metadata": {
                 "description": "Runtime stack of web app"
@@ -42,8 +40,14 @@
     },
     "functions": [],
     "variables": {
-        "hostingPlanName": "[concat('plan-', resourceGroup().name)]",
-        "appName": "[concat('app-', uniqueString(resourceGroup().id))]"
+        //"hostingPlanName": "[concat('plan-', resourceGroup().name)]",
+        // "appName": "[concat('app-', uniqueString(resourceGroup().id))]",
+        //"appName": "[concat('app-', resourceGroup().name)]",
+        "projectName": "[resourceGroup().name]",
+        // https://docs.microsoft.com/en-us/azure/azure-resource-manager/management/resource-name-rules
+        // https://docs.microsoft.com/en-us/azure/azure-resource-manager/templates/template-functions-string
+        "hostingPlanName": "[take(replace(variables('projectName'), '.', '-'), 40)]",
+        "appName": "[take(replace(variables('projectName'), '.', '-'), 60)]"
     },
     "resources": [
         {
@@ -54,11 +58,11 @@
             "location": "[parameters('location')]",
             "kind": "linux",
             "sku": {
-                "name": "[parameters('sku')]"
+                "name": "[parameters('appSku')]"
             },
             "properties": {
                 // https://stackoverflow.com/questions/59901840/what-is-the-reserved-argument-in-azure-app-service-plan-terraform-config
-                "reserved": true // Must have for Linux app
+                "reserved": true // Required for Linux app
             },
             "tags": {
                 "displayName": "[variables('hostingPlanName')]"
@@ -86,7 +90,7 @@
                 "siteConfig": {
                     "linuxFxVersion": "[parameters('linuxFxVersion')]",
                     "minTlsVersion": "1.2",
-                    "alwaysOn": "[if(equals(parameters('sku'), 'F1'), 'false', 'true')]"
+                    "alwaysOn": "[if(equals(parameters('appSku'), 'F1'), 'false', 'true')]"
                 }
             },
             "tags": {
