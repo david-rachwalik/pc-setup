@@ -79,7 +79,7 @@
         {
             // https://docs.microsoft.com/en-us/azure/templates/microsoft.web/serverfarms
             "type": "Microsoft.Web/serverfarms",
-            "apiVersion": "2020-12-01",
+            "apiVersion": "2021-02-01",
             "name": "[variables('hostingPlanName')]",
             "location": "[parameters('location')]",
             "kind": "linux",
@@ -163,7 +163,7 @@
         {
             // https://docs.microsoft.com/en-us/azure/templates/microsoft.web/sites
             "type": "Microsoft.Web/sites",
-            "apiVersion": "2020-12-01",
+            "apiVersion": "2021-02-01",
             "name": "[variables('appName')]",
             "location": "[parameters('location')]",
             "kind": "app,linux",
@@ -184,6 +184,22 @@
             "tags": {
                 "[concat('hidden-related:', resourceGroup().id, '/providers/Microsoft.Web/serverfarms/', variables('hostingPlanName'))]": "Resource",
                 "displayName": "[variables('appName')]"
+            }
+        },
+        {
+            // https://docs.microsoft.com/en-us/azure/templates/microsoft.web/sites/config-connectionstrings
+            "type": "Microsoft.Web/sites/config",
+            "apiVersion": "2021-02-01",
+            "name": "[format('{0}/{1}', variables('appName'), 'connectionstrings')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Sql/servers', variables('sqlServerName'))]",
+                "[resourceId('Microsoft.Web/sites', variables('appName'))]"
+            ],
+            "properties": {
+                "DefaultConnection": {
+                    "value": "[format('Data Source=tcp:{0},1433;Initial Catalog={1};User Id={2}@{3};Password={4};', reference(resourceId('Microsoft.Sql/servers', variables('sqlServerName'))).fullyQualifiedDomainName, variables('databaseName'), parameters('sqlAdministratorUsername'), reference(resourceId('Microsoft.Sql/servers', variables('sqlServerName'))).fullyQualifiedDomainName, parameters('sqlAdministratorPassword'))]",
+                    "type": "SQLAzure"
+                }
             }
         }
     ],

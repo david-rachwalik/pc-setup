@@ -33,16 +33,10 @@
         "linuxFxVersion" : {
             "type": "string",
             // az webapp list-runtimes --linux
-            "defaultValue" : "DOTNET|5.0",
+            // "defaultValue" : "DOTNET|5.0", // is apparently wrong, use template export
+            "defaultValue" : "DOTNETCORE|5.0",
             "metadata": {
                 "description": "Runtime stack of web app"
-            }
-        },
-        "repoUrl": {
-            "type": "string",
-            "defaultValue": " ",
-            "metadata": {
-                "description": "Optional Git Repo URL"
             }
         }
     },
@@ -63,7 +57,8 @@
                 "name": "[parameters('sku')]"
             },
             "properties": {
-                "reserved": true
+                // https://stackoverflow.com/questions/59901840/what-is-the-reserved-argument-in-azure-app-service-plan-terraform-config
+                "reserved": true // Must have for Linux app
             },
             "tags": {
                 "displayName": "[variables('hostingPlanName')]"
@@ -75,6 +70,7 @@
             "apiVersion": "2021-02-01",
             "name": "[variables('appName')]",
             "location": "[parameters('location')]",
+            // https://stackoverflow.com/questions/62397476/arm-microsoft-web-sites-kind-possible-values
             "kind": "app,linux",
             "identity": {
                 "type": "SystemAssigned"
@@ -83,34 +79,20 @@
                 "[resourceId('Microsoft.Web/serverfarms', variables('hostingPlanName'))]"
             ],
             "properties": {
+                "enabled": true,
                 "httpsOnly": true,
+                "reserved": true,
                 "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', variables('hostingPlanName'))]",
                 "siteConfig": {
                     "linuxFxVersion": "[parameters('linuxFxVersion')]",
-                    "minTlsVersion": "1.2"
+                    "minTlsVersion": "1.2",
+                    "alwaysOn": "[if(equals(parameters('sku'), 'F1'), 'false', 'true')]"
                 }
             },
             "tags": {
                 "[concat('hidden-related:', resourceGroup().id, '/providers/Microsoft.Web/serverfarms/', variables('hostingPlanName'))]": "Resource",
                 "displayName": "[variables('appName')]"
-            },
-            "resources": [
-                {
-                    // https://docs.microsoft.com/en-us/azure/templates/microsoft.web/sourcecontrols
-                    "type": "sourcecontrols",
-                    "apiVersion": "2021-02-01",
-                    "name": "web",
-                    "location": "[parameters('location')]",
-                    "condition": "[contains(parameters('repoUrl'), 'http')]",
-                    "dependsOn": [
-                        "[resourceId('Microsoft.Web/sites', variables('appName'))]"
-                    ],
-                    "properties": {
-                        "repoUrl": "[parameters('repoUrl')]",
-                        "branch": "master"
-                    }
-                }
-            ]
+            }
         }
     ]
 }
