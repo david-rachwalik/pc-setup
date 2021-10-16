@@ -632,11 +632,11 @@ def _json_to_parameters(parameters):
     return out_parameters
 
 
-def deployment_group_strategy(tenant, sp_name, application, environment, location, arm):
+def deployment_group_strategy(tenant, sp_name, project, environment, location, arm):
     # if not _az.is_signed_in: return (az.ResourceGroup(), False)
     if not (tenant and isinstance(tenant, str)): TypeError("'tenant' parameter expected as string")
     if not (sp_name and isinstance(sp_name, str)): TypeError("'sp_name' parameter expected as string")
-    if not (application and isinstance(application, str)): TypeError("'application' parameter expected as string")
+    if not (project and isinstance(project, str)): TypeError("'project' parameter expected as string")
     if not (environment and isinstance(environment, str)): TypeError("'environment' parameter expected as string")
     if not (location and isinstance(location, str)): TypeError("'location' parameter expected as string")
     if not (arm and isinstance(arm, str)): TypeError("'arm' parameter expected as string")
@@ -644,7 +644,7 @@ def deployment_group_strategy(tenant, sp_name, application, environment, locatio
     deployment_changed = False
     sp_id = ""
 
-    rg_name = sh.format_resource("{0}-{1}".format(application, environment))
+    rg_name = sh.format_resource("{0}-{1}".format(project, environment))
     _log.debug("rg_name: {0}".format(rg_name))
 
     # Ensure resource group exists
@@ -738,9 +738,9 @@ def app_create():
 
 def deploy():
     login()
-    # deployment_group_strategy(args.application, args.project, args.environment, args.location, args.arm)
-    deployment_group_strategy(args.tenant, args.login_service_principal, args.application, args.environment, args.location, args.arm)
-    # Deploy ARM templates:
+    # Deploy ARM templates to resource group
+    deployment_group_strategy(args.tenant, args.login_service_principal, args.project, args.environment, args.location, args.arm)
+    # Example deployment resource scenarios:
     # - resource group, app service plan, web app service
     # - resource group, app service plan, web app service, sql server, sql database, connection
 
@@ -790,11 +790,11 @@ if __name__ == "__main__":
         # parser.add_argument("--cert-path", default="~/.local/az_cert.pem")
         # ~/.local/az_service_principals/{service-principal}.json
         service_principal_dir = "~/.local/az_service_principals"
-        parser.add_argument("--service-principal-dir", "-d", default=service_principal_dir)
-        parser.add_argument("--service-principal", "-p", default="")
+        parser.add_argument("--service-principal-dir", default=service_principal_dir)
+        parser.add_argument("--service-principal", default="")
         # --- Login defaults ---
-        parser.add_argument("--login-service-principal-dir", "-D", default=service_principal_dir)
-        parser.add_argument("--login-service-principal", "-P", default="main-rbac-sp")
+        parser.add_argument("--login-service-principal-dir", default=service_principal_dir)
+        parser.add_argument("--login-service-principal", default="main-rbac-sp")
         parser.add_argument("--login-resource-group", "-G", default="Main")
         parser.add_argument("--login-key-vault", "-V", default="main-keyvault")
         parser.add_argument("--login-devops-user", "-U", default="david-rachwalik@outlook.com")
@@ -809,12 +809,11 @@ if __name__ == "__main__":
         # --- ASP.NET Core Application defaults ---
         parser.add_argument("--dotnet-dir", default="/mnt/d/Repos")
         parser.add_argument("--application", "-a", default="") # solution
-        # parser.add_argument('--project', nargs="*")
-        parser.add_argument('--project', default="")
-        parser.add_argument('--framework', default="net5.0") # "netcoreapp3.1"
+        parser.add_argument("--project", "p", default="")
+        parser.add_argument("--framework", "f", default="net5.0") # "netcoreapp3.1"
         parser.add_argument("--strat", default="basic", const="basic", nargs="?", choices=["basic", "database", "identity", "api"])
-        # parser.add_argument('--template', default="console", const="console", nargs="?", choices=, ["console", "webapp", "webapi", "xunit"])
-        # parser.add_argument('--identity', default="None", const="None", nargs="?", choices=, ["None", "SingleOrg", "MultiOrg"])
+        # parser.add_argument("--template", default="console", const="console", nargs="?", choices=, ["console", "webapp", "webapi", "xunit"])
+        # parser.add_argument("--identity", default="None", const="None", nargs="?", choices=, ["None", "SingleOrg", "MultiOrg"])
         # --- Git Repository defaults ---
         parser.add_argument('--source', default="", const="", nargs="?", choices=["github", "tfsgit"]) # tfsgit=Azure
         parser.add_argument("--remote-alias", default="origin")
