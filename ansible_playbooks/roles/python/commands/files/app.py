@@ -747,8 +747,8 @@ def deploy():
 
 def pipeline():
     login()
-    _log.debug("<mock 'pipeline' group>")
-    # Create pipeline for project
+    _log.debug("<mock 'pipeline' action> -- to be added later if az command gains more pipelines methods")
+    # Project pipeline example scenarios:
     # - build csproj, deploy Python (pip) packages
     # - build csproj, deploy NuGet packages
     # - build csproj, deploy ARM templates
