@@ -10,5 +10,8 @@
     // https://devblogs.microsoft.com/commandline/tips-and-tricks-for-linux-development-with-wsl-and-visual-studio-code/
     "remote.WSL.fileWatcher.polling": true,
     "remote.WSL.fileWatcher.pollingInterval": 5000, // default (every 5s)
-    "editor.formatOnSave": true
+    "editor.formatOnSave": true,
+    "[python]": {
+        "editor.formatOnSave": false
+    }
 }
