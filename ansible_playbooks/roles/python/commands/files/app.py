@@ -423,11 +423,11 @@ def _project_packages(strat, framework):
     return dotnet_packages
 
 
-def application_strategy(tenant, dotnet_dir, application, project, strat, environment, framework, secret_key, secret_value):
+def application_strategy(tenant, root_dir, solution, project, strat, environment, framework, secret_key, secret_value):
     if not _az.is_signed_in: return (False, False)
     if not (tenant and isinstance(tenant, str)): TypeError("'tenant' parameter expected as string")
-    if not (dotnet_dir and isinstance(dotnet_dir, str)): TypeError("'dotnet_dir' parameter expected as string")
-    if not (application and isinstance(application, str)): TypeError("'application' parameter expected as string")
+    if not (root_dir and isinstance(root_dir, str)): TypeError("'root_dir' parameter expected as string")
+    if not (solution and isinstance(solution, str)): TypeError("'solution' parameter expected as string")
     # if not isinstance(project, list): TypeError("'project' parameter expected as list")
     if not (project and isinstance(project, str)): TypeError("'project' parameter expected as string")
     if not (strat and isinstance(strat, str)): TypeError("'strat' parameter expected as string")
@@ -459,22 +459,22 @@ def application_strategy(tenant, dotnet_dir, application, project, strat, enviro
         # _log.debug("service_principal: {0}".format(service_principal))
         # TODO: might need additional test iterations linking AD app to SP with CLI instead of portal
 
-    # Create application/repository directory
-    app_dir = sh.path_join(dotnet_dir, application)
-    _log.debug("checking for application dir ({0})...".format(app_dir))
+    # Create solution/repository directory
+    app_dir = sh.path_join(root_dir, solution)
+    _log.debug("checking for solution dir ({0})...".format(app_dir))
     app_dir_exists = sh.path_exists(app_dir, "d")
     if not app_dir_exists:
-        _log.warning("could not locate application directory, creating...")
+        _log.warning("could not locate solution directory, creating...")
         sh.directory_create(app_dir)
-        _log.info("successfully created application directory: {0}".format(app_dir))
+        _log.info("successfully created solution directory: {0}".format(app_dir))
 
     # Create ASP.NET Core solution
-    solution_file = sh.path_join(dotnet_dir, application, "{0}.sln".format(application))
+    solution_file = sh.path_join(root_dir, solution, "{0}.sln".format(solution))
     _log.debug("checking for solution ({0})...".format(solution_file))
     solution_exists = sh.path_exists(solution_file, "f")
     if not solution_exists:
         _log.warning("could not locate solution, creating...")
-        sln_succeeded = net.solution_new(dotnet_dir, application)
+        sln_succeeded = net.solution_new(root_dir, solution)
         _log.info("successfully created solution: {0}".format(sln_succeeded))
         if not sln_succeeded:
             _log.error("solution failed to be created, exiting...")
@@ -483,13 +483,13 @@ def application_strategy(tenant, dotnet_dir, application, project, strat, enviro
     _log.debug("Project Name: {0}".format(project))
 
     # Create project directory
-    project_dir = sh.path_join(dotnet_dir, application, project)
+    project_dir = sh.path_join(root_dir, solution, project)
     _log.debug("checking for project dir ({0})...".format(project_dir))
     project_dir_exists = sh.path_exists(project_dir, "d")
     if not project_dir_exists:
-        _log.warning("could not locate application directory, creating...")
+        _log.warning("could not locate project directory, creating...")
         sh.directory_create(project_dir)
-        _log.info("successfully created application directory: {0}".format(project_dir))
+        _log.info("successfully created project directory: {0}".format(project_dir))
 
     # Create ASP.NET Core project
     project_file = sh.path_join(project_dir, "{0}.csproj".format(project))
@@ -497,14 +497,14 @@ def application_strategy(tenant, dotnet_dir, application, project, strat, enviro
     project_exists = sh.path_exists(project_file, "f")
     if not project_exists:
         _log.warning("could not locate project, creating...")
-        project_succeeded = net.project_new(tenant, dotnet_dir, application, project, strat, framework)
+        project_succeeded = net.project_new(tenant, root_dir, solution, project, strat, framework)
         _log.info("successfully created project: {0}".format(project_succeeded))
         if not project_succeeded:
             _log.error("project failed to be created, exiting...")
             sh.process_fail()
 
     # Add ASP.NET Core project to solution
-    project_added = net.solution_project_add(dotnet_dir, application, project)
+    project_added = net.solution_project_add(root_dir, solution, project)
     if not project_added:
         _log.error("failed to add project: {0}".format(project))
         sh.process_fail()
@@ -512,12 +512,12 @@ def application_strategy(tenant, dotnet_dir, application, project, strat, enviro
     # Add NuGet packages to ASP.NET Core project
     packages_expected = _project_packages(strat, framework)
     # _log.debug("NuGet packages_expected: {0}".format(packages_expected))
-    packages_installed = net.project_package_list(dotnet_dir, application, project)
+    packages_installed = net.project_package_list(root_dir, solution, project)
     # _log.debug("NuGet packages_installed: {0}".format(packages_installed))
     packages_to_install = sh.list_differences(packages_expected, packages_installed)
     _log.debug("NuGet packages_to_install: {0}".format(packages_to_install))
     for package in packages_to_install:
-        package_succeeded = net.project_package_add(dotnet_dir, application, project, package)
+        package_succeeded = net.project_package_add(root_dir, solution, project, package)
         if not package_succeeded:
             _log.error("failed to add package: {0}".format(package))
             sh.process_fail()
@@ -529,19 +529,19 @@ def application_strategy(tenant, dotnet_dir, application, project, strat, enviro
     return (True, app_changed)
 
 
-def repository_strategy(organization, dotnet_dir, application, source="", gitignore_path="", remote_alias="origin"):
+def repository_strategy(organization, root_dir, repo_dir, source="", gitignore_path="", remote_alias="origin"):
     if not (organization and isinstance(organization, str)): TypeError("'organization' parameter expected as string")
-    if not (dotnet_dir and isinstance(dotnet_dir, str)): TypeError("'dotnet_dir' parameter expected as string")
-    if not (application and isinstance(application, str)): TypeError("'application' parameter expected as string")
+    if not (root_dir and isinstance(root_dir, str)): TypeError("'root_dir' parameter expected as string")
+    if not (repo_dir and isinstance(repo_dir, str)): TypeError("'repo_dir' parameter expected as string")
     if not isinstance(source, str): TypeError("'source' parameter expected as string")
     if not isinstance(gitignore_path, str): TypeError("'gitignore_path' parameter expected as string")
     if not (remote_alias and isinstance(remote_alias, str)): TypeError("'remote_alias' parameter expected as string")
 
     if source == "github":
-        remote_path = "https://github.com/{0}/{1}".format(organization, application)
+        remote_path = "https://github.com/{0}/{1}".format(organization, repo_dir)
         _log.debug("source repository (GitHub) remote: {0}".format(remote_path))
     elif source == "tfsgit":
-        remote_path = "https://dev.azure.com/{0}/{1}".format(organization, application)
+        remote_path = "https://dev.azure.com/{0}/{1}".format(organization, repo_dir)
         _log.debug("source repository (Azure) remote: {0}".format(remote_path))
         return False
     else:
@@ -552,14 +552,14 @@ def repository_strategy(organization, dotnet_dir, application, source="", gitign
     repo_descriptor = "remote, bare" if is_bare else "local, work"
     repo_changed = False
 
-    # Create application/repository directory
-    app_dir = sh.path_join(dotnet_dir, application)
-    _log.debug("checking for application directory ({0})...".format(app_dir))
+    # Create repository directory
+    app_dir = sh.path_join(root_dir, repo_dir)
+    _log.debug("checking for repository directory ({0})...".format(app_dir))
     app_dir_exists = sh.path_exists(app_dir, "d")
     if not app_dir_exists:
-        _log.warning("could not locate application directory, creating...")
+        _log.warning("could not locate repository directory, creating...")
         sh.directory_create(app_dir)
-        _log.info("successfully created application directory: {0}".format(app_dir))
+        _log.info("successfully created repository directory: {0}".format(app_dir))
 
     # Initialize Git repository directory
     repo_dir_exists = git.repo_exists(app_dir, is_bare)
@@ -731,9 +731,9 @@ def secret():
 
 def app_create():
     login()
-    application_strategy(args.tenant, args.dotnet_dir, args.application, args.project, args.strat, args.environment, args.framework, args.secret_key, args.secret_value)
+    application_strategy(args.tenant, args.dotnet_dir, args.solution, args.project, args.strat, args.environment, args.framework, args.secret_key, args.secret_value)
     gitignore_path = "/home/david/pc-setup/ansible_playbooks/roles/linux/apps/git/init/files/.gitignore"
-    repository_strategy(args.organization, args.dotnet_dir, args.application, args.source, gitignore_path, args.remote_alias)
+    repository_strategy(args.organization, args.dotnet_dir, args.solution, args.source, gitignore_path, args.remote_alias)
 
 
 def deploy():
@@ -808,7 +808,7 @@ if __name__ == "__main__":
         parser.add_argument("--arm", default="")
         # --- ASP.NET Core Application defaults ---
         parser.add_argument("--dotnet-dir", default="/mnt/d/Repos")
-        parser.add_argument("--application", "-a", default="") # solution
+        parser.add_argument("--solution", "-a", default="")
         parser.add_argument("--project", "p", default="")
         parser.add_argument("--framework", "f", default="net5.0") # "netcoreapp3.1"
         parser.add_argument("--strat", default="basic", const="basic", nargs="?", choices=["basic", "database", "identity", "api"])

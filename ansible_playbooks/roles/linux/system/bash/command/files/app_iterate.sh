@@ -16,23 +16,23 @@ ansible-playbook system_setup.yml --tags "py" --skip-tags "windows"
 # app secret --debug --resource-group="Main" --key-vault="main-keyvault" --secret-key="AutoTestKey" --secret-value="007"
 
 # --- Test creating an ASP.NET Core Application ---
-# app client --debug --application "Tutorials-net3-1-WebApps-RazorPages" --project "RazorPagesMovie" --source "github" --framework "netcoreapp3.1"
-# app client --debug --application "Tutorials-net3-1-DataAccess-RazorPages" --project "ContosoUniversity" --source "github" --framework "netcoreapp3.1" --strat "database"
-# app client --debug --application "Tutorials-net5-0-WebApps-RazorPages" --project "RazorPagesMovie" --source "github"
-# app client --debug --application "Tutorials-net5-0-DataAccess-RazorPages" --project "ContosoUniversity" --source "github" --strat "database"
-# app client --debug --application "Tutorials-net5-0-WebApiApps" --project "TodoApi" --source "github" --strat "api"
+# app client --debug --solution "Tutorials-net3-1-WebApps-RazorPages" --project "RazorPagesMovie" --source "github" --framework "netcoreapp3.1"
+# app client --debug --solution "Tutorials-net3-1-DataAccess-RazorPages" --project "ContosoUniversity" --source "github" --framework "netcoreapp3.1" --strat "database"
+# app client --debug --solution "Tutorials-net5-0-WebApps-RazorPages" --project "RazorPagesMovie" --source "github"
+# app client --debug --solution "Tutorials-net5-0-DataAccess-RazorPages" --project "ContosoUniversity" --source "github" --strat "database"
+# app client --debug --solution "Tutorials-net5-0-WebApiApps" --project "TodoApi" --source "github" --strat "api"
 
-# app client --debug --application "Templates-net5-0" --project "Templates-net5-0.WebApp.Base" --source "github"
-# app client --debug --application "Templates-net5-0" --project "Templates-net5-0.WebApp.SqlDb" --source "github" --strat "database"
-# app client --debug --application "Templates-net5-0" --project "Templates-net5-0.WebApp.Identity" --source "github" --strat "identity"
-# app client --debug --application "Templates-net5-0" --project "Templates-net5-0.WebApp.UnitTests" --source "github" --strat "test"
-# app client --debug --application "Templates-net5-0" --project "Templates-net5-0.WebApi.Base" --source "github" --strat "api"
+# app client --debug --solution "Templates-net5-0" --project "Templates-net5-0.WebApp.Base" --source "github"
+# app client --debug --solution "Templates-net5-0" --project "Templates-net5-0.WebApp.SqlDb" --source "github" --strat "database"
+# app client --debug --solution "Templates-net5-0" --project "Templates-net5-0.WebApp.Identity" --source "github" --strat "identity"
+# app client --debug --solution "Templates-net5-0" --project "Templates-net5-0.WebApp.UnitTests" --source "github" --strat "test"
+# app client --debug --solution "Templates-net5-0" --project "Templates-net5-0.WebApi.Base" --source "github" --strat "api"
 
-# app client --debug --application "DMR" --project "DMR.WebApp" --source "github" --strat "database"
-# app client --debug --application "DMR" --project "DMR.WebApp" --source "github" --strat "identity"
-# app client --debug --application "SexBound" --project "SexBound.WebApp" --strat "identity" --source=tfsgit
-# app client --debug --application "CorruptionOfChampions" --project "CorruptionOfChampions.Conversion" --strat "identity" --source=tfsgit
-# app client --debug --application "CorruptionOfChampions" --project "CorruptionOfChampions.WebApp" --strat "identity" --source=tfsgit
+# app client --debug --solution "DMR" --project "DMR.WebApp" --source "github" --strat "database"
+# app client --debug --solution "DMR" --project "DMR.WebApp" --source "github" --strat "identity"
+# app client --debug --solution "SexBound" --project "SexBound.WebApp" --strat "identity" --source "tfsgit"
+# app client --debug --solution "CorruptionOfChampions" --project "CorruptionOfChampions.Conversion" --strat "identity" --source "tfsgit"
+# app client --debug --solution "CorruptionOfChampions" --project "CorruptionOfChampions.WebApp" --strat "identity" --source "tfsgit"
 
 
 # --- Test deploying ARM template to 'Development' environment ---
