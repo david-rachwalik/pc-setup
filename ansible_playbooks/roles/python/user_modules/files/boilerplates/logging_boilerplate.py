@@ -2,8 +2,8 @@
 
 # Basename: logging_boilerplate
 # Description: Common logic for Python logging
-# Version: 1.5.0
-# VersionDate: 2 Mar 2021
+# Version: 2.0.0
+# VersionDate: 19 Oct 2021
 
 # --- Global Logging Commands ---
 # validation:           is_logger, is_handler
@@ -19,20 +19,12 @@
 
 import logging, datetime, pytz, sys
 import colorlog
-
-try:
-    # Python 2 has both 'str' (bytes) and 'unicode' text
-    basestring = basestring
-    unicode = unicode
-except NameError:
-    # Python 3 names the unicode data type 'str'
-    basestring = str
-    unicode = str
+from typing import List, Optional, Any
 
 # ------------------------ Classes ------------------------
 
-_timezone="US/Central"
-_time_format="%Y-%m-%d %H:%M:%S"
+_timezone = "US/Central"
+_time_format = "%Y-%m-%d %H:%M:%S"
 _message_format = "%(message)s"
 
 # Pass 'path' for file handler; must expand absolute paths ('~' treated relatively)
@@ -69,11 +61,11 @@ class LogArgs(object):
 
 # --- Validation Commands ---
 
-def is_logger(log):
+def is_logger(log) -> bool:
     return isinstance(log, logging.Logger)
 
 
-def is_handler(log):
+def is_handler(log) -> bool:
     return isinstance(log, logging.Handler)
 
 
@@ -81,7 +73,7 @@ def is_handler(log):
 
 # Initialize the logger with LogOptions or string (name); default is root logger without handlers
 # Providing LogOptions will automatically attach handlers (stream handler by default)
-def get_logger(log):
+def get_logger(log: Any) -> logging.Logger:
     logger = None
     if is_logger(log):
         return log
@@ -102,7 +94,7 @@ def get_logger(log):
     return logger
 
 
-def get_handler(options=LogHandlerOptions):
+def get_handler(options: Optional[LogHandlerOptions]=None):
     if not isinstance(options, LogHandlerOptions): raise TypeError("get_handler() expects parameter 'options' as instance of LogHandlerOptions")
     if options.path:
         # Setup a file handler for writing to log file
@@ -123,7 +115,7 @@ def get_handler(options=LogHandlerOptions):
 
 
 # Generate handler from LogHandlerOptions and attach to logger
-def add_handler(logger, options=None):
+def add_handler(logger: logging.Logger, options: Optional[LogHandlerOptions]=None):
     if not is_logger(logger): raise TypeError("add_handler() expects parameter 'logger' as instance of logging.Logger")
     if not isinstance(options, LogHandlerOptions): raise TypeError("add_handler() expects parameter 'options' as instance of LogHandlerOptions")
     handler = get_handler(options)
@@ -131,7 +123,7 @@ def add_handler(logger, options=None):
 
 
 # Apply batch of handlers to logger based on list of LogHandlerOptions
-def set_handlers(logger, handlers=None):
+def set_handlers(logger: logging.Logger, handlers: Optional[List[LogHandlerOptions]]=None):
     if isinstance(handlers, type(None)): handlers = []
     if not is_logger(logger): raise TypeError("parameter 'logger' expected as instance of logging.Logger")
     if not _valid_handlers(handlers): raise TypeError("parameter 'handlers' expected as list of LogHandlerOptions instances")
@@ -144,7 +136,7 @@ def set_handlers(logger, handlers=None):
 
 
 # Generate handlers with a standard configuration
-def gen_basic_handlers(debug=False, log_path=""):
+def gen_basic_handlers(debug: Optional[bool]=False, log_path: Optional[str]="") -> List[LogHandlerOptions]:
     # https://docs.python.org/3/library/logging.html#logrecord-attributes
     # _message_format = "%(asctime)s %(name)s\t[%(levelname)s]\t%(message)s"
     # _message_format = "%(asctime)s %(levelname)-7s %(message)s"
@@ -197,21 +189,21 @@ def _valid_handlers(handlers=None):
 # logging.addLevelName(logging.CRITICAL, "FATAL")
 
 # Initialize the logger
-basename = "logging_boilerplate"
-args = LogArgs() # for external modules
-log_options = LogOptions(basename)
-_log = get_logger(log_options)
+basename: str = "logging_boilerplate"
+args: LogArgs = LogArgs() # for external modules
+log_options: LogOptions = LogOptions(basename)
+_log: logging.Logger = get_logger(log_options)
 
 if __name__ == "__main__":
     # Configure the logger
-    log_level = 10 # logging.DEBUG
+    log_level: int = 10 # logging.DEBUG
     # Pass 'path' for file handler; must expand absolute paths ('~' treated relatively)
-    log_file = "/home/david/logs/{0}.log".format(basename)
+    log_file: str = "/home/david/logs/{0}.log".format(basename)
     # Set the log handler options
-    log_stream_options = LogHandlerOptions(log_level)
-    log_file_options = LogHandlerOptions(log_level, log_file)
+    log_stream_options: LogHandlerOptions = LogHandlerOptions(log_level)
+    log_file_options: LogHandlerOptions = LogHandlerOptions(log_level, log_file)
     # Refresh logger with the new handlers
-    log_handlers = [log_stream_options, log_file_options]
+    log_handlers: List[LogHandlerOptions] = [log_stream_options, log_file_options]
     set_handlers(_log, log_handlers)
 
     _log.debug("--- Log test successful! ---")
