@@ -2,8 +2,8 @@
 
 # Basename: dotnet_boilerplate
 # Description: Common business logic for ASP.NET Core
-# Version: 0.1.0
-# VersionDate: 12 Nov 2020
+# Version: 0.2.1
+# VersionDate: 19 Oct 2021
 # https://docs.microsoft.com/en-us/ef/core/miscellaneous/cli/dotnet
 
 # --- Global Methods ---
@@ -30,12 +30,12 @@ except NameError:
 # --- Solution Commands ---
 
 # https://docs.microsoft.com/en-us/dotnet/core/tools/dotnet-new
-def solution_new(dotnet_dir, application):
-    if not (dotnet_dir and isinstance(dotnet_dir, str)): TypeError("'dotnet_dir' parameter expected as string")
-    if not (application and isinstance(application, str)): TypeError("'application' parameter expected as string")
+def solution_new(solution_dir, solution):
+    if not (solution_dir and isinstance(solution_dir, str)): TypeError("'solution_dir' parameter expected as string")
+    if not (solution and isinstance(solution, str)): TypeError("'solution' parameter expected as string")
     template = "sln"
-    app_dir = sh.path_join(dotnet_dir, application)
-    command = ["dotnet", "new", template, "--output={0}".format(app_dir), "--name={0}".format(application)]
+
+    command = ["dotnet", "new", template, "--output={0}".format(solution_dir), "--name={0}".format(solution)]
     # command.append("--dry-run")
     sh.print_command(command)
     (stdout, stderr, rc) = sh.subprocess_run(command)
@@ -44,16 +44,11 @@ def solution_new(dotnet_dir, application):
 
 
 # https://docs.microsoft.com/en-us/dotnet/core/tools/dotnet-sln
-def solution_project_add(dotnet_dir, application, project):
-    if not (dotnet_dir and isinstance(dotnet_dir, str)): TypeError("'dotnet_dir' parameter expected as string")
-    if not (application and isinstance(application, str)): TypeError("'application' parameter expected as string")
-    if not (project and isinstance(project, str)): TypeError("'project' parameter expected as string")
-    # solution_dir = sh.path_join(dotnet_dir, application)
-    app_sln = sh.path_join(dotnet_dir, application, "{0}.sln".format(application))
-    # project_dir = sh.path_join(dotnet_dir, application, project)
-    app_csproj = sh.path_join(dotnet_dir, application, project, "{0}.csproj".format(project))
+def solution_project_add(solution_file, project_file):
+    if not (solution_file and isinstance(solution_file, str)): TypeError("'solution_file' parameter expected as string")
+    if not (project_file and isinstance(project_file, str)): TypeError("'project_file' parameter expected as string")
 
-    command = ["dotnet", "sln", app_sln, "add", app_csproj]
+    command = ["dotnet", "sln", solution_file, "add", project_file]
     sh.print_command(command)
     (stdout, stderr, rc) = sh.subprocess_run(command)
     # sh.subprocess_log(_log, stdout, stderr, rc, debug=args.debug)
@@ -65,20 +60,14 @@ def solution_project_add(dotnet_dir, application, project):
 
 # 'dotnet new' automatically calls build and restore
 # https://docs.microsoft.com/en-us/dotnet/core/tools/dotnet-new
-def project_new(tenant, dotnet_dir, application, project, strat, framework):
+def project_new(tenant, project_dir, strat, framework):
     if not (tenant and isinstance(tenant, str)): TypeError("'tenant' parameter expected as string")
-    if not (dotnet_dir and isinstance(dotnet_dir, str)): TypeError("'dotnet_dir' parameter expected as string")
-    if not (application and isinstance(application, str)): TypeError("'application' parameter expected as string")
-    if not (project and isinstance(project, str)): TypeError("'project' parameter expected as string")
+    if not (project_dir and isinstance(project_dir, str)): TypeError("'project_dir' parameter expected as string")
     if not (strat and isinstance(strat, str)): TypeError("'strat' parameter expected as string")
     if not (framework and isinstance(framework, str)): TypeError("'framework' parameter expected as string")
-    template = "webapp"
+    template = "webapi" if strat == "api" else "webapp"
     client_id = ""
-
-    if strat == "api":
-        template = "webapi"
     domain = "https://localhost:5001"
-    project_dir = sh.path_join(dotnet_dir, application, project)
 
     command = ["dotnet", "new", template]
     command.append("--framework={0}".format(framework))
@@ -105,12 +94,9 @@ def project_new(tenant, dotnet_dir, application, project, strat, framework):
 
 # Currently difficult to parse - will eventually have --json option: https://github.com/NuGet/Home/issues/7752
 # - TODO: skip attempting to add packages each run when this change occurs
-def project_package_list(dotnet_dir, application, project):
-    if not (dotnet_dir and isinstance(dotnet_dir, str)): TypeError("'dotnet_dir' parameter expected as string")
-    if not (application and isinstance(application, str)): TypeError("'application' parameter expected as string")
-    if not (project and isinstance(project, str)): TypeError("'project' parameter expected as string")
+def project_package_list(project_dir):
+    if not (project_dir and isinstance(project_dir, str)): TypeError("'project_dir' parameter expected as string")
     results = []
-    project_dir = sh.path_join(dotnet_dir, application, project)
     command = ["dotnet", "list", project_dir, "package"]
     sh.print_command(command)
     (stdout, stderr, rc) = sh.subprocess_run(command)
@@ -123,18 +109,15 @@ def project_package_list(dotnet_dir, application, project):
             if line_edit.startswith("> "):
                 line_edit_list = line_edit.split()
                 results.append(line_edit_list[1])
-    # _log.debug("results: {0}".format(results))
     results.sort()
+    # _log.debug("results: {0}".format(results))
     return results
 
 
 # https://docs.microsoft.com/en-us/dotnet/core/tools/dotnet-add
-def project_package_add(dotnet_dir, application, project, package):
-    if not (dotnet_dir and isinstance(dotnet_dir, str)): TypeError("'dotnet_dir' parameter expected as string")
-    if not (application and isinstance(application, str)): TypeError("'application' parameter expected as string")
-    if not (project and isinstance(project, str)): TypeError("'project' parameter expected as string")
+def project_package_add(project_dir, package):
+    if not (project_dir and isinstance(project_dir, str)): TypeError("'project_dir' parameter expected as string")
     if not (package and isinstance(package, str)): TypeError("'package' parameter expected as string")
-    project_dir = sh.path_join(dotnet_dir, application, project)
     command = ["dotnet", "add", project_dir, "package", package]
     sh.print_command(command)
     (stdout, stderr, rc) = sh.subprocess_run(command)
