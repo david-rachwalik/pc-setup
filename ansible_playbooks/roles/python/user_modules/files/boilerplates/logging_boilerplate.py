@@ -2,7 +2,7 @@
 
 # Basename: logging_boilerplate
 # Description: Common logic for Python logging
-# Version: 2.0.1
+# Version: 2.0.2
 # VersionDate: 19 Oct 2021
 
 # --- Global Logging Commands ---
@@ -19,10 +19,11 @@
 
 import logging, datetime, pytz, sys
 import colorlog
-from typing import List, Optional, Any
+from typing import List, Optional, Type
 
 # ------------------------ Classes ------------------------
 
+_logger_type: Type[logging.Logger] = logging.Logger
 _timezone: str = "US/Central"
 _time_format: str = "%Y-%m-%d %H:%M:%S"
 _message_format: str = "%(message)s"
@@ -173,7 +174,7 @@ def _valid_handlers(handlers=None):
 # Initialize the logger
 basename: str = "logging_boilerplate"
 args: LogArgs = LogArgs() # for external modules
-_log: logging.Logger = get_logger(basename)
+_log: _logger_type = get_logger(basename)
 
 if __name__ == "__main__":
     # Configure the logger
