@@ -2,7 +2,7 @@
 
 # Basename: logging_boilerplate
 # Description: Common logic for Python logging
-# Version: 2.0.0
+# Version: 2.0.1
 # VersionDate: 19 Oct 2021
 
 # --- Global Logging Commands ---
@@ -23,9 +23,9 @@ from typing import List, Optional, Any
 
 # ------------------------ Classes ------------------------
 
-_timezone = "US/Central"
-_time_format = "%Y-%m-%d %H:%M:%S"
-_message_format = "%(message)s"
+_timezone: str = "US/Central"
+_time_format: str = "%Y-%m-%d %H:%M:%S"
+_message_format: str = "%(message)s"
 
 # Pass 'path' for file handler; must expand absolute paths ('~' treated relatively)
 class LogHandlerOptions(object):
@@ -40,15 +40,6 @@ class LogHandlerOptions(object):
         self.message_format = str(message_format)
         self.time_format = str(time_format)
         self.timezone = str(timezone)
-
-
-_stream_handler = LogHandlerOptions()
-
-# Default handlers used when invalid list is provided
-class LogOptions(object):
-    def __init__(self, name="", handlers=[_stream_handler]):
-        self.name = str(name)
-        self.handlers = handlers if _valid_handlers(handlers) else [_stream_handler]
 
 
 # Default args for logging; argparse expected to override
@@ -71,26 +62,17 @@ def is_handler(log) -> bool:
 
 # --- Logger Commands ---
 
-# Initialize the logger with LogOptions or string (name); default is root logger without handlers
-# Providing LogOptions will automatically attach handlers (stream handler by default)
-def get_logger(log: Any) -> logging.Logger:
-    logger = None
-    if is_logger(log):
-        return log
-    elif isinstance(log, LogOptions):
-        logger = get_logger(log.name)
-        # Set logger to lowest level because handlers will control the true level
-        logger.setLevel(logging.DEBUG)
-        set_handlers(logger, log.handlers)
-    elif log and isinstance(log, str):
-        # Obtain instance of logging.Logger based on name (idempotent)
-        # logger = logging.getLogger(log)
-        logger = colorlog.getLogger(log)
-    else:
-        # Obtain root instance of logging.Logger
-        # logger = logging.getLogger(__name__)
-        # logger = logging.getLogger()
-        logger = colorlog.getLogger()
+_stream_handler: LogHandlerOptions = LogHandlerOptions()
+
+def get_logger(log_name: Optional[str]="root", handlers: Optional[List[LogHandlerOptions]]=None) -> logging.Logger:
+    # Automatically attach default handlers (stream handler)
+    if handlers == None: handlers = [_stream_handler]
+    # Obtain instance of logging.Logger based on name (idempotent)
+    # logger: logging.Logger = logging.getLogger(log_name)
+    logger: logging.Logger = colorlog.getLogger(log_name)
+    # Set logger to lowest level because handlers will control the true level
+    logger.setLevel(logging.DEBUG)
+    set_handlers(logger, handlers)
     return logger
 
 
@@ -191,8 +173,7 @@ def _valid_handlers(handlers=None):
 # Initialize the logger
 basename: str = "logging_boilerplate"
 args: LogArgs = LogArgs() # for external modules
-log_options: LogOptions = LogOptions(basename)
-_log: logging.Logger = get_logger(log_options)
+_log: logging.Logger = get_logger(basename)
 
 if __name__ == "__main__":
     # Configure the logger
