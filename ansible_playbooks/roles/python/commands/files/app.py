@@ -2,7 +2,7 @@
 
 # Basename: app
 # Description: A service to control application resources (Azure, ASP.NET Core)
-# Version: 0.3.1
+# Version: 1.0.2
 # VersionDate: 19 Oct 2021
 
 #       *** Resources ***
@@ -29,27 +29,19 @@
 # deploy:           Deploy an application to Azure (webapp, api, nuget package)
 # status:           View running state of deployed application
 
-from logging_boilerplate import *
+import logging_boilerplate as log
 import shell_boilerplate as sh
 import azure_boilerplate as az
 import azure_devops_boilerplate as az_devops
 import dotnet_boilerplate as net
 import git_boilerplate as git
-
-try:
-    # Python 2 has both 'str' (bytes) and 'unicode' text
-    basestring = basestring
-    unicode = unicode
-except NameError:
-    # Python 3 names the unicode data type 'str'
-    basestring = str
-    unicode = str
+from typing import List, Tuple, Optional
 
 # ------------------------ Global Azure Commands ------------------------
 
 # --- Strategies ---
 
-def resource_group_strategy(resource_group, location):
+def resource_group_strategy(resource_group: str, location: str) -> Tuple[az.ResourceGroup, bool]:
     if not _az.is_signed_in: return (az.ResourceGroup(), False)
     if not (resource_group and isinstance(resource_group, str)): TypeError("'resource_group' parameter expected as string")
     if not (location and isinstance(location, str)): TypeError("'location' parameter expected as string")
@@ -64,12 +56,12 @@ def resource_group_strategy(resource_group, location):
     return (resource_group_data, resource_group_changed)
 
 
-def key_vault_strategy(location, resource_group, key_vault):
+def key_vault_strategy(location: str, resource_group: str, key_vault: str):
     if not _az.is_signed_in: return (None, False)
     if not (location and isinstance(location, str)): TypeError("'location' parameter expected as string")
     if not (resource_group and isinstance(resource_group, str)): TypeError("'resource_group' parameter expected as string")
     if not (key_vault and isinstance(key_vault, str)): TypeError("'key_vault' parameter expected as string")
-    key_vault_changed = False
+    key_vault_changed: bool = False
 
     # Ensure resource group exists
     (resource_group_data, resource_group_changed) = resource_group_strategy(resource_group, location)
@@ -89,27 +81,27 @@ def key_vault_strategy(location, resource_group, key_vault):
     return (key_vault_data, key_vault_changed)
 
 
-def ad_group_strategy(ad_member_id, ad_group="main-ad-group"):
-    if not _az.is_signed_in: return (None, False)
+def ad_group_strategy(ad_member_id: str, ad_group: str="main-ad-group") -> Tuple[az.AdGroup, bool]:
+    if not _az.is_signed_in: return (az.AdGroup(), False)
     if not (ad_member_id and isinstance(ad_member_id, str)): TypeError("'ad_member_id' parameter expected as string")
     if not (ad_group and isinstance(ad_group, str)): TypeError("'ad_group' parameter expected as string")
 
     # Ensure active directory group exists
-    ad_group_data = az.ad_group_get(ad_group)
-    ad_group_changed = False
+    ad_group_data: az.AdGroup = az.ad_group_get(ad_group)
+    ad_group_changed: bool = False
     if not ad_group_data.is_valid:
         _log.warning("active directory group is missing, creating...")
         (ad_group_data, ad_group_changed) = az.ad_group_set(ad_group)
 
     # Ensure active directory group member exists
-    ad_group_member_exists = az.ad_group_member_get(ad_group, ad_member_id)
+    ad_group_member_exists: bool = az.ad_group_member_get(ad_group, ad_member_id)
     if not ad_group_member_exists:
         _log.warning("active directory group member is missing, adding...")
         ad_group_member_exists = az.ad_group_member_set(ad_group, ad_member_id)
 
     # Ensure role is assigned to active directory group
-    scope = "/subscriptions/{0}".format(_az.subscription_id)
-    role_assigned = az.role_assign_get(ad_group_data.id, scope)
+    scope: str = "/subscriptions/{0}".format(_az.subscription_id)
+    role_assigned: bool = az.role_assign_get(ad_group_data.id, scope)
     if not role_assigned:
         _log.warning("role is not assigned to active directory group, adding...")
         role_assigned = az.role_assign_set(ad_group_data.id, scope)
@@ -117,16 +109,16 @@ def ad_group_strategy(ad_member_id, ad_group="main-ad-group"):
     return (ad_group_data, ad_group_changed)
 
 
-def service_principal_strategy(tenant, service_principal, app_id):
-    if not _az.is_signed_in: return (None, False)
+def service_principal_strategy(tenant: str, service_principal: str, app_id: str) -> Tuple[az.ServicePrincipal, bool]:
+    if not _az.is_signed_in: return (az.ServicePrincipal(), False)
     if not (tenant and isinstance(tenant, str)): TypeError("'tenant' parameter expected as string")
     if not (service_principal and isinstance(service_principal, str)): TypeError("'service_principal' parameter expected as string")
     if not (app_id and isinstance(app_id, str)): TypeError("'app_id' parameter expected as string")
-    service_principal_changed = False
+    service_principal_changed: bool = False
     # Full filepath to service principal data
     service_principal = sh.format_resource(service_principal)
     # Ensure service principal exists
-    service_principal_data = az.service_principal_get(service_principal, tenant=tenant)
+    service_principal_data: az.ServicePrincipal = az.service_principal_get(service_principal, tenant=tenant)
     if not service_principal_data.appId:
         _log.debug("service principal credentials not found, creating...")
         service_principal_data = az.service_principal_set(service_principal, app_id)
@@ -134,18 +126,18 @@ def service_principal_strategy(tenant, service_principal, app_id):
     return (service_principal_data, service_principal_changed)
 
 
-def login_service_principal_strategy(location, resource_group, key_vault, service_principal, auth_dir):
+def login_service_principal_strategy(location: str, resource_group: str, key_vault: str, service_principal: str, auth_dir: str) -> Tuple[az.ServicePrincipal, bool]:
     if not (location and isinstance(location, str)): TypeError("'location' parameter expected as string")
     if not (resource_group and isinstance(resource_group, str)): TypeError("'resource_group' parameter expected as string")
     if not (key_vault and isinstance(key_vault, str)): TypeError("'key_vault' parameter expected as string")
     if not (service_principal and isinstance(service_principal, str)): TypeError("'service_principal' parameter expected as string")
     if not (auth_dir and isinstance(auth_dir, str)): TypeError("'auth_dir' parameter expected as string")
-    service_principal_changed = False
-    service_principal_data = None
+    service_principal_changed: bool = False
+    service_principal_data: az.ServicePrincipal = az.ServicePrincipal()
     key_vault_secret_value = ""
     # Full filepath to service principal data
     service_principal = sh.format_resource(service_principal)
-    service_principal_path = sh.path_join(sh.path_expand(auth_dir), "{0}.json".format(service_principal))
+    service_principal_path: str = sh.path_join(sh.path_expand(auth_dir), "{0}.json".format(service_principal))
 
     # Ensure service principal exists in Azure and local
     if sh.path_exists(service_principal_path, "f"):
@@ -154,7 +146,7 @@ def login_service_principal_strategy(location, resource_group, key_vault, servic
         service_principal_data = az.service_principal_get(service_principal, auth_dir)
     else:
         _log.debug("service principal file missing, checking Azure...")
-        if not _az.is_signed_in: return (False, False)
+        if not _az.is_signed_in: return (az.ServicePrincipal(), False)
 
         # Ensure service principal & key vault exists
         service_principal_data = az.service_principal_get(service_principal)
@@ -177,7 +169,7 @@ def login_service_principal_strategy(location, resource_group, key_vault, servic
             service_principal_data = az.service_principal_rbac_set(key_vault, service_principal)
 
         # Last chance to have service principal
-        if not service_principal_data: return (False, False)
+        if not service_principal_data: return (az.ServicePrincipal(), False)
 
         # Store password/credentials in JSON file
         az.service_principal_save(service_principal_path, service_principal_data)
@@ -271,17 +263,17 @@ def login_strategy(tenant, subscription, location, resource_group, key_vault, sp
     return _az
 
 
-def login_devops_pat_strategy(location, resource_group, key_vault, auth_dir):
+def login_devops_pat_strategy(location: str, resource_group: str, key_vault: str, auth_dir: str) -> Tuple[str, bool]:
     if not (location and isinstance(location, str)): TypeError("'location' parameter expected as string")
     if not (resource_group and isinstance(resource_group, str)): TypeError("'resource_group' parameter expected as string")
     if not (key_vault and isinstance(key_vault, str)): TypeError("'key_vault' parameter expected as string")
     if not (auth_dir and isinstance(auth_dir, str)): TypeError("'auth_dir' parameter expected as string")
-    secret_key = "main-devops-pat"
-    pat_changed = False
-    pat_data = None
+    secret_key: str = "main-devops-pat"
+    pat_changed: bool = False
+    pat_data: str = ""
     key_vault_secret_value = ""
     # Full filepath to PAT (personal access token)
-    pat_path = sh.path_join(sh.path_expand(auth_dir), "ado.pat")
+    pat_path: str = sh.path_join(sh.path_expand(auth_dir), "ado.pat")
 
     # Ensure user PAT exists in Azure and local
     if sh.path_exists(pat_path, "f"):
@@ -290,7 +282,7 @@ def login_devops_pat_strategy(location, resource_group, key_vault, auth_dir):
         pat_data = sh.file_read(pat_path, True)
         # _log.debug("pat_data: {0}".format(pat_data))
     else:
-        if not _az.is_signed_in: return (False, False)
+        if not _az.is_signed_in: return ("", False)
         _log.debug("PAT (personal access token) file missing, checking Azure...")
 
         # Ensure PAT exists in key vault as secret
@@ -303,7 +295,7 @@ def login_devops_pat_strategy(location, resource_group, key_vault, auth_dir):
         # TODO: - if invalid/expired: revoke the PAT and delete from local file
 
         # Last chance to have PAT
-        if not pat_data: return (False, False)
+        if not pat_data: return ("", False)
 
         # Store credentials in PAT file
         az_devops.user_save(pat_path, pat_data)
@@ -315,7 +307,7 @@ def login_devops_pat_strategy(location, resource_group, key_vault, auth_dir):
 
 # https://docs.microsoft.com/en-us/azure/devops/cli/log-in-via-pat
 # sign-in via 'az login' isn't supported, so a PAT token is required
-def login_devops_strategy(user, location, resource_group, key_vault, auth_dir, retry=True):
+def login_devops_strategy(user: str, location: str, resource_group: str, key_vault: str, auth_dir: str, retry: Optional[bool]=True) -> bool:
     global _az
     if not (user and isinstance(user, str)): TypeError("'user' parameter expected as string")
     if not (location and isinstance(location, str)): TypeError("'location' parameter expected as string")
@@ -335,19 +327,19 @@ def login_devops_strategy(user, location, resource_group, key_vault, auth_dir, r
     # Check if user is signed-in DevOps
     _log.info("checking if already signed-in Azure DevOps...")
     # First chance to be signed-in
-    user_signed_in = az_devops.user_get(_az.devops_pat, user)
+    user_is_signed_in: bool = az_devops.user_get(_az.devops_pat, user)
 
-    if not user_signed_in:
+    if not user_is_signed_in:
         if _az.devops_pat:
             # Attempt login with user PAT/credentials found, last chance to be signed-in
             _log.debug("attempting DevOps login with PAT (personal access token)...")
-            user_signed_in = az_devops.user_login(_az.devops_pat)
-            if not user_signed_in:
+            user_is_signed_in = az_devops.user_login(_az.devops_pat)
+            if not user_is_signed_in:
                 if retry:
                     # Will retry recursively only once
                     _log.warning("Azure DevOps login with PAT failed, saving backup and retrying...")
                     sh.file_backup(pat_path)
-                    user_signed_in = login_devops_strategy(user, location, resource_group, key_vault, auth_dir, False)
+                    user_is_signed_in = login_devops_strategy(user, location, resource_group, key_vault, auth_dir, False)
                 else:
                     _log.error("Azure DevOps login with PAT failed again, exiting...")
                     sh.process_fail()
@@ -361,15 +353,15 @@ def login_devops_strategy(user, location, resource_group, key_vault, auth_dir, r
     if pat_changed:
         # Confirm updated PAT login connects
         az_devops.user_logout()
-        user_signed_in = login_devops_strategy(user, location, resource_group, key_vault, auth_dir)
+        user_is_signed_in = login_devops_strategy(user, location, resource_group, key_vault, auth_dir)
         # No need to rename/backup SP credentials here if failed - it'll occur recursively
 
     _log.info("you are successfully signed-in Azure DevOps!")
-    return user_signed_in
+    return user_is_signed_in
 
 
 # ASP.NET Core NuGet Packages (https://www.nuget.org/packages/*)
-def _project_packages(strat, framework):
+def _project_packages(strat: str, framework: str) -> List[str]:
     if not (strat and isinstance(strat, str)): TypeError("'strat' parameter expected as string")
     if not (framework and isinstance(framework, str)): TypeError("'framework' parameter expected as string")
     # --- Development Packages ---
@@ -423,7 +415,8 @@ def _project_packages(strat, framework):
     return dotnet_packages
 
 
-def application_strategy(tenant, root_dir, solution, project, strat, environment, framework, secret_key, secret_value):
+def application_strategy(tenant: str, root_dir: str, solution: str, project: str, strat: str, environment: str,
+framework: str, secret_key: Optional[str]="", secret_value: Optional[str]="") -> Tuple[bool, bool]:
     if not _az.is_signed_in: return (False, False)
     if not (tenant and isinstance(tenant, str)): TypeError("'tenant' parameter expected as string")
     if not (root_dir and isinstance(root_dir, str)): TypeError("'root_dir' parameter expected as string")
@@ -473,30 +466,30 @@ def application_strategy(tenant, root_dir, solution, project, strat, environment
     _log.debug("Project Name: {0}".format(project))
 
     # Create project directory
-    project_dir = sh.path_join(app_dir, project) if use_solution_dir else app_dir
+    project_dir: str = sh.path_join(app_dir, project) if use_solution_dir else app_dir
     _log.debug("checking for project dir ({0})...".format(project_dir))
-    project_dir_exists = sh.path_exists(project_dir, "d")
+    project_dir_exists: bool = sh.path_exists(project_dir, "d")
     if not project_dir_exists:
         _log.warning("could not locate project directory, creating...")
         sh.directory_create(project_dir)
         _log.info("successfully created project directory: {0}".format(project_dir))
 
     # Create ASP.NET Core project
-    project_file = sh.path_join(project_dir, "{0}.csproj".format(project))
+    project_file: str = sh.path_join(project_dir, "{0}.csproj".format(project))
     _log.debug("checking for project ({0})...".format(project_file))
-    project_exists = sh.path_exists(project_file, "f")
+    project_exists: bool = sh.path_exists(project_file, "f")
     if not project_exists:
         _log.warning("could not locate project, creating...")
-        project_succeeded = net.project_new(tenant, project_dir, strat, framework)
+        project_succeeded: bool = net.project_new(tenant, project_dir, strat, framework)
         _log.info("successfully created project: {0}".format(project_succeeded))
         if not project_succeeded:
             _log.error("project failed to be created, exiting...")
             sh.process_fail()
 
     # Create ASP.NET Core solution
-    solution_file = sh.path_join(app_dir, "{0}.sln".format(solution)) if use_solution_dir else sh.path_join(app_dir, "{0}.sln".format(project))
+    solution_file: str = sh.path_join(app_dir, "{0}.sln".format(solution)) if use_solution_dir else sh.path_join(app_dir, "{0}.sln".format(project))
     _log.debug("checking for solution ({0})...".format(solution_file))
-    solution_exists = sh.path_exists(solution_file, "f")
+    solution_exists: bool = sh.path_exists(solution_file, "f")
     if not solution_exists:
         _log.warning("could not locate solution, creating...")
         sln_succeeded = net.solution_new(app_dir, solution) if use_solution_dir else net.solution_new(app_dir, project)
@@ -506,20 +499,20 @@ def application_strategy(tenant, root_dir, solution, project, strat, environment
             sh.process_fail()
 
     # Add ASP.NET Core project to solution
-    project_added = net.solution_project_add(solution_file, project_file)
+    project_added: bool = net.solution_project_add(solution_file, project_file)
     if not project_added:
         _log.error("failed to add project: {0}".format(project))
         sh.process_fail()
 
     # Add NuGet packages to ASP.NET Core project
-    packages_expected = _project_packages(strat, framework)
+    packages_expected: List[str] = _project_packages(strat, framework)
     # _log.debug("NuGet packages_expected: {0}".format(packages_expected))
-    packages_installed = net.project_package_list(project_dir)
+    packages_installed: List[str] = net.project_package_list(project_dir)
     # _log.debug("NuGet packages_installed: {0}".format(packages_installed))
-    packages_to_install = sh.list_differences(packages_expected, packages_installed)
+    packages_to_install: List[str] = sh.list_differences(packages_expected, packages_installed)
     _log.debug("NuGet packages_to_install: {0}".format(packages_to_install))
     for package in packages_to_install:
-        package_succeeded = net.project_package_add(project_dir, package)
+        package_succeeded: bool = net.project_package_add(project_dir, package)
         if not package_succeeded:
             _log.error("failed to add package: {0}".format(package))
             sh.process_fail()
@@ -531,7 +524,7 @@ def application_strategy(tenant, root_dir, solution, project, strat, environment
     return (True, app_changed)
 
 
-def repository_strategy(organization, root_dir, app_name, source="", gitignore_path="", remote_alias="origin"):
+def repository_strategy(organization: str, root_dir: str, app_name: str, source="", gitignore_path="", remote_alias="origin") -> bool:
     if not (organization and isinstance(organization, str)): TypeError("'organization' parameter expected as string")
     if not (root_dir and isinstance(root_dir, str)): TypeError("'root_dir' parameter expected as string")
     if not (app_name and isinstance(app_name, str)): TypeError("'app_name' parameter expected as string")
@@ -550,26 +543,26 @@ def repository_strategy(organization, root_dir, app_name, source="", gitignore_p
         _log.error("no source repository")
         return False
 
-    is_bare = not bool(remote_path)
-    repo_descriptor = "remote, bare" if is_bare else "local, work"
-    repo_changed = False
+    is_bare: bool = not bool(remote_path)
+    repo_descriptor: str = "remote, bare" if is_bare else "local, work"
+    repo_changed: bool = False
 
     # Create repository directory
-    app_dir = sh.path_join(root_dir, app_name)
+    app_dir: str = sh.path_join(root_dir, app_name)
     _log.debug("checking for repository directory ({0})...".format(app_dir))
-    app_dir_exists = sh.path_exists(app_dir, "d")
+    app_dir_exists: bool = sh.path_exists(app_dir, "d")
     if not app_dir_exists:
         _log.warning("could not locate repository directory, creating...")
         sh.directory_create(app_dir)
         _log.info("successfully created repository directory: {0}".format(app_dir))
 
     # Initialize Git repository directory
-    repo_dir_exists = git.repo_exists(app_dir, is_bare)
+    repo_dir_exists: bool = git.repo_exists(app_dir, is_bare)
     if repo_dir_exists:
         _log.debug("Successfully found {0} repository".format(repo_descriptor))
     else:
         _log.debug("Unable to locate {0} repository".format(repo_descriptor))
-        display_path = app_dir if (is_bare) else "{0}/.git".format(app_dir)
+        display_path: str = app_dir if (is_bare) else "{0}/.git".format(app_dir)
         _log.info("Repository not found ({0}), initializing...".format(display_path))
         # Initialize the repository
         (repo_exists, repo_changed) = git.repo_create(app_dir, is_bare)
@@ -765,11 +758,12 @@ def pipeline():
 # ------------------------ Main program ------------------------
 
 # Initialize the logger
-basename = "app"
-args = LogArgs() # for external modules
+basename: str = "app"
+# args = log.LogArgs() # for external modules
+import argparse
+args: argparse.Namespace = argparse.Namespace() # for external modules
 # log_file = "/var/log/{0}.log".format(basename)
-log_options = LogOptions(basename)
-_log = get_logger(log_options)
+_log: log._logger_type = log.get_logger(basename)
 
 if __name__ == "__main__":
     # When 'default' doesn't work, add nargs="?" and const=(same value as default)
@@ -828,24 +822,24 @@ if __name__ == "__main__":
     args = parse_arguments()
 
     #  Configure the main logger
-    log_handlers = gen_basic_handlers(args.debug, args.log_path)
-    set_handlers(_log, log_handlers)
+    log_handlers = log.gen_basic_handlers(args.debug, args.log_path)
+    log.set_handlers(_log, log_handlers)
     if args.debug:
         # Configure the shell_boilerplate logger
-        _sh_log = get_logger("shell_boilerplate")
-        set_handlers(_sh_log, log_handlers)
+        _sh_log = log.get_logger("shell_boilerplate")
+        log.set_handlers(_sh_log, log_handlers)
         sh.args.debug = args.debug
         # Configure the dotnet_boilerplate logger
-        _net_log = get_logger("dotnet_boilerplate")
-        set_handlers(_net_log, log_handlers)
+        _net_log = log.get_logger("dotnet_boilerplate")
+        log.set_handlers(_net_log, log_handlers)
         net.args.debug = args.debug
         # Configure the azure_boilerplate logger
-        _az_log = get_logger("azure_boilerplate")
-        set_handlers(_az_log, log_handlers)
+        _az_log = log.get_logger("azure_boilerplate")
+        log.set_handlers(_az_log, log_handlers)
         az.args.debug = args.debug
         # Configure the azure_devops_boilerplate logger
-        _az_devops_log = get_logger("azure_devops_boilerplate")
-        set_handlers(_az_devops_log, log_handlers)
+        _az_devops_log = log.get_logger("azure_devops_boilerplate")
+        log.set_handlers(_az_devops_log, log_handlers)
         az_devops.args.debug = args.debug
 
 

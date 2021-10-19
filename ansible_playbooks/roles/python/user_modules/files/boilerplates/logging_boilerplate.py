@@ -11,9 +11,8 @@
 # handler:              get_handler, add_handler, set_handlers
 
 # :: Usage Instructions ::
-# * Call get_logger() to receive a root logger without handlers
-# * Pass an instance of LogOptions into get_logger() to customize the logger name
-#   and handlers by using LogHandlerOptions
+# * Call get_logger() to receive a logger by name
+# * Pass handlers to logger as a list of LogHandlerOptions
 # * The logger types are stream (console/terminal) and file-based
 # * Providing 'path' to LogHandlerOptions toggles handler from stream to file
 
