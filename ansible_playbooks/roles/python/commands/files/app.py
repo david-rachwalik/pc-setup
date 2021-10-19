@@ -2,7 +2,7 @@
 
 # Basename: app
 # Description: A service to control application resources (Azure, ASP.NET Core)
-# Version: 1.0.2
+# Version: 1.0.3
 # VersionDate: 19 Oct 2021
 
 #       *** Resources ***
@@ -35,7 +35,7 @@ import azure_boilerplate as az
 import azure_devops_boilerplate as az_devops
 import dotnet_boilerplate as net
 import git_boilerplate as git
-from typing import List, Tuple, Optional
+from typing import List, Tuple, Dict, Any, Optional
 
 # ------------------------ Global Azure Commands ------------------------
 
@@ -612,10 +612,10 @@ def repository_strategy(organization: str, root_dir: str, app_name: str, source=
 
 
 # https://docs.microsoft.com/en-us/azure/azure-resource-manager/templates/deploy-cli#parameters
-def _json_to_parameters(parameters):
+def _json_to_parameters(parameters: Dict[str, Dict[str, Any]]) -> List[str]:
     # if not (parameters and isinstance(parameters, list)): TypeError("'parameters' parameter expected as a list")
-    if not isinstance(parameters, list): TypeError("'parameters' parameter expected as a list")
-    out_parameters = []
+    # if not isinstance(parameters, list): TypeError("'parameters' parameter expected as a list")
+    out_parameters: List[str] = []
     if not parameters: return out_parameters
     # Convert parameters JSON to CLI-ready parameters
     for item in parameters.items():
@@ -627,7 +627,7 @@ def _json_to_parameters(parameters):
     return out_parameters
 
 
-def deployment_group_strategy(tenant, sp_name, project, environment, location, arm):
+def deployment_group_strategy(tenant: str, sp_name: str, project: str, environment: str, location: str, arm: str) -> Tuple[bool, bool]:
     # if not _az.is_signed_in: return (az.ResourceGroup(), False)
     if not (tenant and isinstance(tenant, str)): TypeError("'tenant' parameter expected as string")
     if not (sp_name and isinstance(sp_name, str)): TypeError("'sp_name' parameter expected as string")
@@ -635,11 +635,9 @@ def deployment_group_strategy(tenant, sp_name, project, environment, location, a
     if not (environment and isinstance(environment, str)): TypeError("'environment' parameter expected as string")
     if not (location and isinstance(location, str)): TypeError("'location' parameter expected as string")
     if not (arm and isinstance(arm, str)): TypeError("'arm' parameter expected as string")
-    deployment_group = False
-    deployment_changed = False
-    sp_id = ""
-
-    rg_name = sh.format_resource("{0}-{1}".format(project, environment))
+    deployment_succeeded: bool = False
+    deployment_changed: bool = False
+    rg_name: str = sh.format_resource("{0}-{1}".format(project, environment))
     _log.debug("rg_name: {0}".format(rg_name))
 
     # Ensure resource group exists
@@ -649,18 +647,11 @@ def deployment_group_strategy(tenant, sp_name, project, environment, location, a
         sh.process_fail()
 
     # Azure Resource Manager steps
-    rm_root_path = "~/pc-setup/ansible_playbooks/roles/azure/resource_manager/deploy/templates"
-    template_path = sh.path_join(rm_root_path, arm, "azuredeploy.json")
-    parameters_path = sh.path_join(rm_root_path, arm, "azuredeploy.parameters.json")
-    parameters_file = sh.file_read(parameters_path)
-    parameters_json = az.ArmParameters(parameters_file).content
-    # _log.debug("parameters_json: {0}".format(parameters_json))
-    # parameter_index = parameters_json.__dict__.keys() # THIS METHOD DOES NOT WORK!
-    # _log.debug("parameter_index: {0}".format(parameter_index))
-    # for item in parameters_json.items():
-    #     _log.debug("parameters_json item: {0}".format(item))
-    #     _log.debug("parameters_json key: {0}".format(item[0]))
-    #     _log.debug("parameters_json value: {0}".format(item[1]["value"]))
+    rm_root_path: str = "~/pc-setup/ansible_playbooks/roles/azure/resource_manager/deploy/templates"
+    template_path: str = sh.path_join(rm_root_path, arm, "azuredeploy.json")
+    parameters_path: str = sh.path_join(rm_root_path, arm, "azuredeploy.parameters.json")
+    parameters_file: str = sh.file_read(parameters_path)
+    parameters_json: Dict[str, Dict[str, Any]] = az.ArmParameters(parameters_file).content
 
     # When 'objectId' is in parameters, replace its value with service principal's objectId
     if ("objectId" in parameters_json and "value" in parameters_json["objectId"]):
@@ -674,31 +665,22 @@ def deployment_group_strategy(tenant, sp_name, project, environment, location, a
 
     # Convert parameters JSON to CLI-ready parameters
     _log.debug("parameters_json: {0}".format(parameters_json))
-    parameters = _json_to_parameters(parameters_json)
+    parameters: List[str] = _json_to_parameters(parameters_json)
     _log.debug("parameters: {0}".format(parameters))
 
-
     # Ensure deployment group template is valid
-    deploy_valid = az.deployment_group_valid(resource_group.name, template_path, parameters)
-    # _log.debug("deployment is valid: {0}".format(deploy_valid))
+    deploy_valid: bool = az.deployment_group_valid(resource_group.name, template_path, parameters)
     if deploy_valid:
-        _log.warning("deployment validation has succeeded!")
-        # # Ensure deployment group exists
-        # deployment_group = az.deployment_group_get(resource_group.name, template_path, parameters)
-        # _log.debug("deployment_group: {0}".format(deployment_group))
-        # # if not deployment_group.is_valid:
-        # if not deployment_group:
-        #     _log.warning("deployment group is missing, creating...")
-        #     deployment_group = az.deployment_group_set(resource_group.name, template_path, parameters)
-        #     _log.debug("deployment_group: {0}".format(deployment_group))
-        #     deployment_changed = True
-
-        deployment_group = az.deployment_group_set(resource_group.name, template_path, parameters)
-        _log.debug("deployment_group result: {0}".format(deployment_group))
-        deployment_changed = True
+        _log.info("deployment validation has succeeded!")
+        deployment_succeeded = az.deployment_group_set(resource_group.name, template_path, parameters)
+        if deployment_succeeded:
+            _log.info("deployment to resource group has succeeded!")
+            deployment_changed = True
+        else:
+            _log.warning("deployment to resource group has failed")
     else:
         _log.warning("deployment validation has failed")
-    return (deployment_group, deployment_changed)
+    return (deployment_succeeded, deployment_changed)
 
 
 
@@ -706,13 +688,8 @@ def deployment_group_strategy(tenant, sp_name, project, environment, location, a
 
 # Login Azure Active Directory subscription
 def login():
-    # az.login_strategy(args.subscription, args.cert_path, args.tenant, args.key_vault)
-    # _log.debug("1st random password: {0}".format(sh.get_random_password()))
-    # _log.debug("2nd random password: {0}".format(sh.get_random_password()))
-    # _log.debug("3rd random password: {0}".format(sh.get_random_password()))
     login_strategy(args.tenant, args.subscription, args.location, args.login_resource_group, args.login_key_vault, args.login_service_principal, args.login_service_principal_dir)
-    # TODO: login Azure DevOps using PAT; automatically refresh upon expire
-    # login_devops_strategy(args.login_devops_user, args.login_key_vault, args.login_service_principal_dir)
+    # Sign into Azure DevOps using PAT; TODO: automatically refresh upon expire
     login_devops_strategy(args.login_devops_user, args.location, args.login_resource_group, args.login_key_vault, args.login_service_principal_dir)
 
 
