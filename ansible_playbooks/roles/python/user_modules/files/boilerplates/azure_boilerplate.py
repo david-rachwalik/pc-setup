@@ -2,7 +2,7 @@
 
 # Basename: azure_boilerplate
 # Description: Common business logic for Azure resources
-# Version: 1.0.2
+# Version: 1.0.3
 # VersionDate: 19 Oct 2021
 
 # --- Global Azure Classes ---
@@ -44,13 +44,13 @@ class AzureBase(object):
 
 class Account(AzureBase):
     def __init__(self, obj=""):
-        self.tenant_id = "" # active directory
-        self.account_user = "" # Microsoft account (*@outlook.com, *@hotmail.com)
-        self.subscription = ""
-        self.subscription_id = ""
-        self.subscription_is_default = False
-        self.is_signed_in = False
-        self.devops_pat = ""
+        self.is_signed_in: bool = False
+        self.tenant_id: str = "" # active directory
+        self.account_user: str = "" # Microsoft account (*@outlook.com, *@hotmail.com)
+        self.subscription: str = ""
+        self.subscription_id: str = ""
+        self.subscription_is_default: bool = False
+        self.devops_pat: str = ""
 
         # Business logic for parsing
         if obj and isinstance(obj, str): obj = sh.json_parse(obj)
@@ -68,8 +68,8 @@ class Account(AzureBase):
 
 class AdGroup(AzureBase):
     def __init__(self, obj=""):
-        self.is_valid = False
-        self.name = ""
+        self.is_valid: bool = False
+        self.name: str = ""
 
         # Business logic for parsing
         if obj and isinstance(obj, str): obj = sh.json_parse(obj)
@@ -84,10 +84,10 @@ class AdGroup(AzureBase):
 # NOTE: match attribute names to stdout for consistent JSON serialization
 class ServicePrincipal(AzureBase):
     def __init__(self, obj="", sp_name=""):
-        self.name = sp_name
-        self.appId = ""
-        self.objectId = ""
-        self.password = ""
+        self.name: str = sp_name
+        self.appId: str = ""
+        self.objectId: str = ""
+        self.password: str = ""
 
         # Business logic for parsing
         if obj and isinstance(obj, str): obj = sh.json_parse(obj)
@@ -107,9 +107,9 @@ class ServicePrincipal(AzureBase):
 
 class ResourceGroup(AzureBase):
     def __init__(self, obj=""):
-        self.location = ""
-        self.name = ""
-        self.is_valid = False
+        self.is_valid: bool = False
+        self.name: str = ""
+        self.location: str = ""
 
         # Business logic for parsing
         if obj and isinstance(obj, str): obj = sh.json_parse(obj)
@@ -121,8 +121,8 @@ class ResourceGroup(AzureBase):
 
 class ActiveDirectoryApplication(AzureBase):
     def __init__(self, obj=""):
-        self.appId = "" # client_id
-        self.name = ""
+        self.name: str = ""
+        self.appId: str = "" # client_id
 
         # Business logic for parsing
         if obj and isinstance(obj, str): obj = sh.json_parse(obj)
@@ -422,7 +422,7 @@ def service_principal_save(path: str, service_principal: ServicePrincipal):
     if not (path and isinstance(path, str)): TypeError("'path' parameter expected as string")
     if not isinstance(service_principal, ServicePrincipal): TypeError("'service_principal' parameter expected as ServicePrincipal")
     _log.info("storing service principal credentials...")
-    sh.json_save(path, service_principal.__dict__)
+    sh.json_save(path, str(service_principal.__dict__))
     _log.info("successfully saved service principal credentials!")
 
 
