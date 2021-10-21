@@ -3,6 +3,7 @@
     "git.enabled": true,
     // "python.pythonPath": "C:\\Python38\\python.exe",
     "python.pythonPath": "/usr/bin/python",
+    "python.analysis.typeCheckingMode": "basic",
     "update.channel": "none",
     "update.enableWindowsBackgroundUpdates": false,
     "workbench.editor.labelFormat": "short",
@@ -14,5 +15,7 @@
     "[python]": {
         "editor.formatOnSave": false
     },
-    "python.analysis.typeCheckingMode": "basic"
+    "[yaml]": {
+        "editor.formatOnSave": false
+    }
 }
