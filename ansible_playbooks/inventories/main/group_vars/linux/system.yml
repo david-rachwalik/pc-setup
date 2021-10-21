@@ -18,13 +18,13 @@ apt_packages:
 # https://docs.microsoft.com/en-us/cli/azure/install-azure-cli-apt
 - azure-cli
 # --- NPM ---
-# - nodejs
-# - npm
+- nodejs
+- npm
 
 
-# npm_packages:
-# - sass
-# - typescript
+npm_packages:
+- sass
+- typescript
 
 
 pip_packages:
