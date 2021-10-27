@@ -46,8 +46,9 @@ chocolatey_packages:
   - name: nodejs
   - name: vscode
   - name: postman
+  - name: nodejs-lts
   # - name: sqlitebrowser
-  - name: terraform
+  # - name: terraform
   
   # --- Media ---
   - name: geforce-experience
