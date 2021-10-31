@@ -17,5 +17,8 @@
     },
     "[yaml]": {
         "editor.formatOnSave": false
+    },
+    "files.associations": {
+        "*.json": "jsonc"
     }
 }
