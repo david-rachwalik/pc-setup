@@ -1,13 +1,14 @@
 ---
-# https://docs.ansible.com/ansible/latest/modules/pip_module.html
-# ansible localhost -m pip -a "name=pip state=latest"
-# setup --tags pip
+# setup --skip-tags windows,az,config,apt,npm
 
-- name: Update pip packages
+# https://docs.ansible.com/ansible/2.9/modules/pip_package_info_module.html
+# https://docs.ansible.com/ansible/latest/modules/pip_module.html
+- name: Upgrade pip package
   pip:
     name: "{{item}}"
     state: latest
   loop: "{{pip_packages}}"
-  register: out_pip_latest
+  register: pip_upgrade_facts
+  changed_when: "'Requirement already satisfied:' not in pip_upgrade_facts.stdout"
   tags: [pip]
 ...
