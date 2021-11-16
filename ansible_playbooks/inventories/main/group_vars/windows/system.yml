@@ -20,6 +20,7 @@ chocolatey_packages:
   - name: 7zip
   - name: nordvpn
   - name: GoogleChrome
+  # # https://chocolatey.org/packages/microsoft-office-deployment
   # - name: microsoft-office-deployment
   #   pseudo_name: Office365HomePremium
   #   package_params: >-
@@ -32,7 +33,12 @@ chocolatey_packages:
   # - name: defraggler
 
   # --- Development ---
+  # https://chocolatey.org/packages/visualstudio2019community
+  # https://docs.microsoft.com/en-us/visualstudio/install/use-command-line-parameters-to-install-visual-studio
+  # https://docs.microsoft.com/en-us/visualstudio/install/workload-component-id-vs-community
   - name: visualstudio2019community
+    # https://docs.microsoft.com/en-us/visualstudio/install/workload-component-id-vs-community
+    # https://stackoverflow.com/questions/3790454/how-do-i-break-a-string-over-multiple-lines
     package_params: >-
       --locale en-US
       --add Microsoft.VisualStudio.Workload.NetWeb;includeRecommended
@@ -62,8 +68,8 @@ chocolatey_packages:
   - name: eartrumpet
 
   # --- Video Editing ---
-  - name: mkvtoolnix # https://mkvtoolnix.download/doc/mkvmerge.html
-  - name: MakeMKV
+  - name: mkvtoolnix  # https://mkvtoolnix.download/doc/mkvmerge.html
+  - name: makemkv     # MakeMKV
   - name: handbrake
   - name: k-litecodecpackmega
   - name: 4k-video-downloader
@@ -92,6 +98,7 @@ chocolatey_packages:
   # - name: microsoftazurestorageexplorer
   - name: streamlabs-obs
   - name: twitch
+  - name: dotnetcore-3.1-sdk
 
 
 pip_packages:

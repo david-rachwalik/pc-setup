@@ -1,15 +1,16 @@
 ---
+# setup --skip-tags linux,az,config,pip,npm
+
 # ansible windows -m include_role -a "name=windows/system/chocolatey" -e "ansible_become=yes ansible_become_user=david ansible_become_method=runas"
 # ansible david -m include_role -a "name=windows/system/chocolatey"
-# setup --tags windows
 
 - include_role:
     name: windows/system/chocolatey
     tasks_from: facts
-  tags: [chocolatey, choco]
+  tags: [windows, chocolatey, choco]
 
 - include_role:
     name: windows/system/chocolatey
     tasks_from: packages
-  tags: [chocolatey, choco]
+  tags: [windows, chocolatey, choco]
 ...
