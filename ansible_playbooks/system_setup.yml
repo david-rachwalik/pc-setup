@@ -13,15 +13,19 @@
     tags: [pip]
 
   - include_role:
-      name: linux/system/setup
-    tags: [python, py, logrotate]
+      name: linux/system/npm
+    tags: [npm]
 
-  tags: [linux]
+  tags: [linux, install]
 
 
 - name: Configure Linux environment
   hosts: linux
   tasks:
+  - include_role:
+      name: linux/system/setup
+    tags: [setup, logrotate]
+
   - include_role:
       name: linux/system/bash/setup
     tags: [bash, sh, alias]
@@ -50,7 +54,7 @@
       name: azure/extension
     tags: [azure, az, extension]
 
-  tags: [linux]
+  tags: [linux, config]
 
 
 - name: Configure Azure environment
@@ -63,11 +67,10 @@
   tags: [azure, az]
 
 
-- name: Provision & configure Windows
+- name: Provision Windows system
   hosts: windows
   become: true
   tasks:
-  # --- Installation Steps ---
   # TODO: template Chocolatey .ps1 file and swap README example in place of group_vars yml
   - include_role:
       name: windows/system/chocolatey
@@ -77,10 +80,20 @@
       name: windows/system/pip
     tags: [pip]
 
-  # --- Configuration Steps ---
+  - include_role:
+      name: windows/system/npm
+    tags: [npm]
+
+  tags: [windows, install]
+
+
+- name: Configure Windows system
+  hosts: windows
+  become: true
+  tasks:
   - include_role:
       name: windows/system/setup
-    tags: [scheduled_task, sched, desktop]
+    tags: [setup, scheduled_task, sched, desktop]
 
   - include_role:
       name: python/user_modules
@@ -99,7 +112,7 @@
     tags: [vscode]
 
   # TODO: Install scanner software
-  tags: [windows]
+  tags: [windows, config]
 
 
 # TODO:

@@ -1,0 +1,17 @@
+---
+# setup --skip-tags windows,az,config,apt,pip
+
+# https://letscodepare.com/blog/npm-resolving-eacces-permissions-denied
+# sudo chown -R $(whoami) ~/.npm
+# sudo chown -R $(whoami) /usr/local/lib/node_modules/
+
+# https://docs.ansible.com/ansible/latest/modules/npm_module.html
+- name: Update npm packages
+  npm:
+    name: "{{item}}"
+    global: true
+    state: latest
+  loop: "{{npm_packages}}"
+  register: out_npm_latest
+  tags: [npm]
+...
