@@ -17,26 +17,26 @@
   - set_fact:
       dotnet_tools_installed: "{{out_tool_list.stdout | to_net_tools}}"
 
-  - set_fact:
-      dotnet_tools_to_install: "{{dotnet_tools_expected | difference(dotnet_tools_installed)}}"
+  # - set_fact:
+  #     dotnet_tools_to_install: "{{dotnet_tools_expected | difference(dotnet_tools_installed)}}"
 
   - name: Install .NET Core tool
     win_shell: >-
-      dotnet tool install {{item}} --global
-      --framework {{dotnet_default_framework}}
-    loop: "{{dotnet_tools_to_install}}"
+      dotnet tool install {{item.name}} --version {{item.version}} --global
+    # loop: "{{dotnet_tools_to_install}}"
+    loop: "{{dotnet_tools_expected}}"
     # when: app_use_database
     register: out_tool_install
     changed_when: "'was successfully installed' in out_tool_install.stdout"
+    failed_when: "'is already installed.' not in out_tool_install.stderr"
 
-  - name: Update .NET Core tools
-    win_shell: >-
-      dotnet tool update {{item}} --global
-      --framework {{dotnet_default_framework}}
-    loop: "{{dotnet_tools_installed}}"
-    # when: app_use_database
-    register: out_tool_update
-    changed_when: "'was successfully updated' in out_tool_update.stdout"
+  # - name: Update .NET Core tools
+  #   win_shell: >-
+  #     dotnet tool update {{item.name}} --version {{item.version}} --global
+  #   loop: "{{dotnet_tools_installed}}"
+  #   # when: app_use_database
+  #   register: out_tool_update
+  #   changed_when: "'was successfully updated' in out_tool_update.stdout"
 
   tags: [dotnet, tool]
 ...
