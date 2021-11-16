@@ -38,15 +38,15 @@ chocolatey_packages:
       --add Microsoft.VisualStudio.Workload.NetWeb;includeRecommended
       --add Microsoft.VisualStudio.Workload.Azure;includeRecommended
       --quiet
+  - name: vscode
   - name: git
   - name: github-desktop
   - name: python3
-  - name: dotnetcore-sdk
+  - name: nodejs-lts  # installs & activates NPM by default
+  # - name: dotnetcore-sdk    # 3.1 https://community.chocolatey.org/packages/dotnetcore-sdk
+  - name: dotnet-5.0-sdk    # 5.0 https://community.chocolatey.org/packages/dotnet-5.0-sdk
   - name: azure-cli
-  - name: nodejs
-  - name: vscode
   - name: postman
-  - name: nodejs-lts
   # - name: sqlitebrowser
   # - name: terraform
   
@@ -92,12 +92,6 @@ chocolatey_packages:
   # - name: microsoftazurestorageexplorer
   - name: streamlabs-obs
   - name: twitch
-
-
-pip_packages:
-- pip
-- pytz
-- colorlog
 
 
 vscode_extensions:
