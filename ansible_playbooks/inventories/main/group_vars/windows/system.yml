@@ -94,6 +94,12 @@ chocolatey_packages:
   - name: twitch
 
 
+pip_packages:
+- pip
+- pytz
+- colorlog        # https://pypi.org/project/colorlog
+
+
 vscode_extensions:
 - DavidAnson.vscode-markdownlint
 - donjayamanne.githistory
