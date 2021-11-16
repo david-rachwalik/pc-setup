@@ -1,17 +1,4 @@
 ---
-# --- Microsoft Visual Studio 2019 ---
-# https://chocolatey.org/packages/visualstudio2019community
-# https://docs.microsoft.com/en-us/visualstudio/install/use-command-line-parameters-to-install-visual-studio
-# https://docs.microsoft.com/en-us/visualstudio/install/workload-component-id-vs-community
-# TODO: https://marketplace.visualstudio.com/items?itemName=MadsKristensen.OpenCommandLine
-# --- Microsoft Office 365 ---
-# https://chocolatey.org/packages/microsoft-office-deployment
-
-
-powershell_uninstall_appx_packages:
-- CanonicalGroupLimited.Ubuntu18.04onWindows
-
-
 # https://chocolatey.org/packages/*
 chocolatey_packages:
   install:
@@ -102,9 +89,12 @@ chocolatey_packages:
 
 
 pip_packages:
-- pip
 - pytz
 - colorlog        # https://pypi.org/project/colorlog
+
+
+powershell_uninstall_appx_packages:
+- CanonicalGroupLimited.Ubuntu18.04onWindows
 
 
 vscode_extensions:
