@@ -7,4 +7,5 @@ bash_user_commands:
 - app_iterate.sh
 # - up.sh
 # - tester.sh
+bash_log_dir: ~/logs
 ...
