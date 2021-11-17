@@ -1,6 +1,0 @@
----
-npm_packages:
-- sass
-- typescript
-- '@angular/cli'
-...

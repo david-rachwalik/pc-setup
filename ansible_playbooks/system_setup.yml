@@ -12,10 +12,6 @@
       name: linux/system/pip
     tags: [pip]
 
-  - include_role:
-      name: linux/system/npm
-    tags: [npm]
-
   tags: [linux, install]
 
 
@@ -79,10 +75,6 @@
   - include_role:
       name: windows/system/pip
     tags: [pip]
-
-  - include_role:
-      name: windows/system/npm
-    tags: [npm]
 
   tags: [windows, install]
 

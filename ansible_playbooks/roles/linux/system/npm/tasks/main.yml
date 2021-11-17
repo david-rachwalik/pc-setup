@@ -1,6 +1,9 @@
 ---
 # setup --skip-tags windows,az,config,apt,pip
 
+# -- Maintaining file for historical purposes --
+# npm is part of each project's DevOps (not global setup)
+
 # https://letscodepare.com/blog/npm-resolving-eacces-permissions-denied
 # sudo chown -R $(whoami) ~/.npm
 # sudo chown -R $(whoami) /usr/local/lib/node_modules/
