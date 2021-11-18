@@ -1,5 +1,5 @@
 ---
-dotnet_default_framework: net5.0 # netcoreapp3.1
+dotnet_default_framework: net6.0 # netcoreapp3.1, net5.0, net6.0
 
 dotnet_tools_expected:
 # https://docs.microsoft.com/en-us/aspnet/core/data/ef-rp

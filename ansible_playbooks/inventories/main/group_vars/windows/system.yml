@@ -37,7 +37,8 @@ chocolatey_packages:
   - name: python3
   - name: nodejs-lts  # installs & activates NPM by default
   # - name: dotnetcore-sdk    # 3.1 https://community.chocolatey.org/packages/dotnetcore-sdk
-  - name: dotnet-5.0-sdk    # 5.0 https://community.chocolatey.org/packages/dotnet-5.0-sdk
+  # - name: dotnet-5.0-sdk    # 5.0 https://community.chocolatey.org/packages/dotnet-5.0-sdk
+  - name: dotnet-6.0-sdk    # 6.0 https://community.chocolatey.org/packages/dotnet-6.0-sdk
   - name: azure-cli
   - name: postman
   # - name: sqlitebrowser

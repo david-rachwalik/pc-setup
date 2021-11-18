@@ -13,8 +13,10 @@ apt_packages:
 - apt-transport-https
 # - dotnet-sdk-3.1
 # - aspnetcore-runtime-3.1
-- dotnet-sdk-5.0
-- aspnetcore-runtime-5.0
+# - dotnet-sdk-5.0
+# - aspnetcore-runtime-5.0
+- dotnet-runtime-6.0
+- aspnetcore-runtime-6.0
 # https://docs.microsoft.com/en-us/cli/azure/install-azure-cli-apt
 - azure-cli
 # --- NPM ---

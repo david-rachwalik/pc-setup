@@ -786,7 +786,7 @@ if __name__ == "__main__":
         parser.add_argument("--dotnet-dir", default="/mnt/e/Repos")
         parser.add_argument("--solution", "-a", default="")
         parser.add_argument("--project", "-p", default="")
-        parser.add_argument("--framework", "-f", default="net5.0") # "netcoreapp3.1"
+        parser.add_argument("--framework", "-f", default="net6.0") # "netcoreapp3.1", "net5.0", "net6.0"
         parser.add_argument("--strat", default="basic", const="basic", nargs="?", choices=["basic", "database", "identity", "api"])
         # parser.add_argument("--template", default="console", const="console", nargs="?", choices=, ["console", "webapp", "webapi", "xunit"])
         # parser.add_argument("--identity", default="None", const="None", nargs="?", choices=, ["None", "SingleOrg", "MultiOrg"])

@@ -1,8 +1,5 @@
 ---
-# setup --skip-tags windows,az,config,pip,npm
-
-# ansible-playbook system_setup.yml --tags "apt" --step
-# setup --tags apt
+# setup --skip-tags windows,az,config,pip
 
 # https://help.ubuntu.com/community/AptGet/Howto
 # https://stackoverflow.com/questions/41535838/how-to-run-apt-update-and-upgrade-via-ansible-shell
