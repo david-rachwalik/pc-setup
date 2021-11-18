@@ -1,21 +1,22 @@
 ---
+# setup --skip-tags linux,az,install,setup,py,vscode
+
+# TODO: optimize install/update logic by converting to Python script
+# - cannot do in custom ansible filter; why the 2 packages are currently repeated
+
 # https://docs.microsoft.com/en-us/aspnet/core/fundamentals/tools/dotnet-aspnet-codegenerator
 # https://docs.microsoft.com/en-us/aspnet/core/data/ef-rp
-# ansible windows -m include_role -a name=windows/apps/dotnet/setup
-# setup --tags dotnet
-
-
-# https://docs.microsoft.com/en-us/dotnet/core/tools/dotnet-tool-list
 - block:
+  # https://docs.microsoft.com/en-us/dotnet/core/tools/dotnet-tool-list
   - name: List .NET Core tools installed
     win_shell: "dotnet tool list --global"
     # when: app_use_database
-    register: out_tool_list
+    register: tool_list_facts
     changed_when: false # query only
     no_log: true
 
   - set_fact:
-      dotnet_tools_installed: "{{out_tool_list.stdout | to_net_tools}}"
+      dotnet_tools_installed: "{{tool_list_facts.stdout | to_net_tools}}"
 
   # - set_fact:
   #     dotnet_tools_to_install: "{{dotnet_tools_expected | difference(dotnet_tools_installed)}}"
@@ -26,17 +27,18 @@
     # loop: "{{dotnet_tools_to_install}}"
     loop: "{{dotnet_tools_expected}}"
     # when: app_use_database
-    register: out_tool_install
-    changed_when: "'was successfully installed' in out_tool_install.stdout"
-    failed_when: "'is already installed.' not in out_tool_install.stderr"
+    register: tool_install_facts
+    changed_when: "'was successfully installed' in tool_install_facts.stdout"
+    failed_when: "'is already installed.' not in tool_install_facts.stderr"
 
-  # - name: Update .NET Core tools
-  #   win_shell: >-
-  #     dotnet tool update {{item.name}} --version {{item.version}} --global
-  #   loop: "{{dotnet_tools_installed}}"
-  #   # when: app_use_database
-  #   register: out_tool_update
-  #   changed_when: "'was successfully updated' in out_tool_update.stdout"
+  - name: Update .NET Core tools
+    win_shell: >-
+      dotnet tool update {{item.name}} --version {{item.version}} --global
+    # loop: "{{dotnet_tools_installed}}"
+    loop: "{{dotnet_tools_expected}}"
+    # when: app_use_database
+    register: tool_update_facts
+    changed_when: "'was successfully updated' in tool_update_facts.stdout"
 
   tags: [dotnet, tool]
 ...

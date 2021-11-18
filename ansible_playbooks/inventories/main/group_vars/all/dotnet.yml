@@ -5,11 +5,13 @@ dotnet_tools_expected:
 # https://docs.microsoft.com/en-us/aspnet/core/data/ef-rp
 # https://www.nuget.org/packages/dotnet-ef
 - name: dotnet-ef                                 # Install Entity Framework Core
-  version: 5.0.12
+  # version: 5.0.12
+  version: 6.0.*
 # https://docs.microsoft.com/en-us/aspnet/core/security/authentication/scaffold-identity
 # https://www.nuget.org/packages/dotnet-aspnet-codegenerator
 - name: dotnet-aspnet-codegenerator               # Install Code Generator (Scaffold)
-  version: 5.0.2
+  # version: 5.0.2
+  version: 6.0.*
 
 
 # https://www.nuget.org/packages/*
