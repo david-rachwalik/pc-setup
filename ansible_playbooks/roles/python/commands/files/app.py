@@ -2,8 +2,8 @@
 
 # Basename: app
 # Description: A service to control application resources (Azure, ASP.NET Core)
-# Version: 1.0.3
-# VersionDate: 19 Oct 2021
+# Version: 1.0.4
+# VersionDate: 2021 Nov 20
 
 #       *** Resources ***
 # account:          Will only pair with 'login'; sign-in/config for 'az' & 'az devops'
@@ -364,53 +364,64 @@ def login_devops_strategy(user: str, location: str, resource_group: str, key_vau
 def _project_packages(strat: str, framework: str) -> List[str]:
     if not (strat and isinstance(strat, str)): TypeError("'strat' parameter expected as string")
     if not (framework and isinstance(framework, str)): TypeError("'framework' parameter expected as string")
-    # --- Development Packages ---
-    dotnet_packages = [
-        # "Microsoft.Extensions.Logging.Debug", # No longer required; included in 'Microsoft.AspNetCore.App'
-        "Microsoft.VisualStudio.Web.BrowserLink"
-    ]
-    if framework == "netcoreapp3.1":
+    dotnet_packages = []
+
+    # --- Common Development Packages ---
+    if framework == "net6.0":
         dotnet_packages.extend([
-            "Microsoft.CodeAnalysis.FxCopAnalyzers" # 3.x
+            "Microsoft.CodeAnalysis.NetAnalyzers"
         ])
-    else:
+    elif framework == "net5.0":
         dotnet_packages.extend([
             # https://github.com/dotnet/roslyn-analyzers
             # https://docs.microsoft.com/en-us/visualstudio/code-quality/migrate-from-fxcop-analyzers-to-net-analyzers
-            "Microsoft.CodeAnalysis.NetAnalyzers" # 5.x+
+            "Microsoft.CodeAnalysis.NetAnalyzers", # 5.x+
+            "Microsoft.VisualStudio.Web.BrowserLink"
         ])
+    elif framework == "netcoreapp3.1":
+        dotnet_packages.extend([
+            "Microsoft.CodeAnalysis.FxCopAnalyzers", # 3.x
+            # "Microsoft.Extensions.Logging.Debug", # No longer required; included in 'Microsoft.AspNetCore.App'
+            "Microsoft.VisualStudio.Web.BrowserLink"
+        ])
+    
     # --- Database Packages ---
     # Packages needed for scaffolding: [Microsoft.VisualStudio.Web.CodeGeneration.Design, Microsoft.EntityFrameworkCore.SqlServer]
     if strat == "database" or strat == "identity" or strat == "api":
-        dotnet_packages.extend([
-            "Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore",
-            "Microsoft.EntityFrameworkCore.Tools",
-            "Microsoft.EntityFrameworkCore.Design", # Install EF Core design package
-            "Microsoft.VisualStudio.Web.CodeGeneration.Design",
-            # Database provider automatically includes Microsoft.EntityFrameworkCore
-            "Microsoft.EntityFrameworkCore.SqlServer", # Install SQL Server database provider
-            "Microsoft.EntityFrameworkCore.Sqlite" # Install SQLite database provider
-        ])
+        if framework in ["netcoreapp3.1", "net5.0", "net6.0"]:
+            dotnet_packages.extend([
+                "Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore",
+                "Microsoft.EntityFrameworkCore.Tools",
+                "Microsoft.EntityFrameworkCore.Design",     # Install EF Core design package
+                "Microsoft.VisualStudio.Web.CodeGeneration.Design",
+                # Database provider automatically includes Microsoft.EntityFrameworkCore
+                "Microsoft.EntityFrameworkCore.SqlServer"   # Install SQL Server database provider
+                # "Microsoft.EntityFrameworkCore.Sqlite"      # Install SQLite database provider
+            ])
+    
     # --- Authentication Packages ---
     if strat == "identity":
         # "Microsoft.Owin.Security.OpenIdConnect",
         # "Microsoft.Owin.Security.Cookies",
         # "Microsoft.Owin.Host.SystemWeb"
-        if framework == "netcoreapp3.1":
-            dotnet_packages.extend([
-                "Microsoft.AspNetCore.Authentication.AzureAD.UI" # 3.x
-            ])
-        else:
+        if framework in ["net5.0", "net6.0"]:
             dotnet_packages.extend([
                 "Microsoft.AspNetCore.Identity.EntityFrameworkCore",
                 "Microsoft.AspNetCore.Identity.UI"
             ])
+        elif framework == "netcoreapp3.1":
+            dotnet_packages.extend([
+                "Microsoft.AspNetCore.Authentication.AzureAD.UI" # 3.x
+            ])
+    
     # --- API Packages ---
     if strat == "api":
-        dotnet_packages.extend([
-            # "NSwag.AspNetCore" # Swagger / OpenAPI
-            "Swashbuckle.AspNetCore"
-        ])
+        if framework in ["netcoreapp3.1", "net5.0", "net6.0"]:
+            dotnet_packages.extend([
+                # "NSwag.AspNetCore" # Swagger / OpenAPI
+                "Swashbuckle.AspNetCore"
+            ])
+    
     dotnet_packages.sort()
     return dotnet_packages
 
