@@ -17,4 +17,7 @@
   loop: "{{npm_packages}}"
   register: out_npm_latest
   tags: [npm]
+
+# https://docs.npmjs.com/try-the-latest-stable-version-of-npm
+# manual update command: npm install -g npm@latest
 ...
