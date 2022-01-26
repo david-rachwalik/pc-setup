@@ -39,6 +39,7 @@ chocolatey_packages:
     - name: git
     - name: github-desktop
     - name: python3
+    - name: powershell-core
     - name: dotnetcore-sdk
     - name: azure-cli
     - name: nodejs
