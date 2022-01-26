@@ -2,8 +2,8 @@
 
 # Basename: azure_boilerplate
 # Description: Common business logic for Azure resources
-# Version: 0.2.0
-# VersionDate: 5 Feb 2021
+# Version: 1.0.3
+# VersionDate: 19 Oct 2021
 
 # --- Global Azure Classes ---
 # Account:                      is_signed_in, tenant_id, account_user, subscription, subscription_id, subscription_is_default
@@ -27,19 +27,10 @@
 # pipelines:                    pipeline_set, pipeline_get
 # SQL database:                 sql_db_set, sql_db_get
 
-
-from logging_boilerplate import *
+import logging_boilerplate as log
 import shell_boilerplate as sh
 # import json, time, re
-
-try:
-    # Python 2 has both 'str' (bytes) and 'unicode' text
-    basestring = basestring
-    unicode = unicode
-except NameError:
-    # Python 3 names the unicode data type 'str'
-    basestring = str
-    unicode = str
+from typing import List, Tuple, Optional
 
 # ------------------------ Classes ------------------------
 
@@ -53,13 +44,13 @@ class AzureBase(object):
 
 class Account(AzureBase):
     def __init__(self, obj=""):
-        self.tenant_id = "" # active directory
-        self.account_user = "" # Microsoft account (*@outlook.com, *@hotmail.com)
-        self.subscription = ""
-        self.subscription_id = ""
-        self.subscription_is_default = False
-        self.is_signed_in = False
-        self.devops_pat = ""
+        self.is_signed_in: bool = False
+        self.tenant_id: str = "" # active directory
+        self.account_user: str = "" # Microsoft account (*@outlook.com, *@hotmail.com)
+        self.subscription: str = ""
+        self.subscription_id: str = ""
+        self.subscription_is_default: bool = False
+        self.devops_pat: str = ""
 
         # Business logic for parsing
         if obj and isinstance(obj, str): obj = sh.json_parse(obj)
@@ -77,8 +68,8 @@ class Account(AzureBase):
 
 class AdGroup(AzureBase):
     def __init__(self, obj=""):
-        self.is_valid = False
-        self.name = ""
+        self.is_valid: bool = False
+        self.name: str = ""
 
         # Business logic for parsing
         if obj and isinstance(obj, str): obj = sh.json_parse(obj)
@@ -93,10 +84,10 @@ class AdGroup(AzureBase):
 # NOTE: match attribute names to stdout for consistent JSON serialization
 class ServicePrincipal(AzureBase):
     def __init__(self, obj="", sp_name=""):
-        self.name = sp_name
-        self.appId = ""
-        self.objectId = ""
-        self.password = ""
+        self.name: str = sp_name
+        self.appId: str = ""
+        self.objectId: str = ""
+        self.password: str = ""
 
         # Business logic for parsing
         if obj and isinstance(obj, str): obj = sh.json_parse(obj)
@@ -116,9 +107,9 @@ class ServicePrincipal(AzureBase):
 
 class ResourceGroup(AzureBase):
     def __init__(self, obj=""):
-        self.location = ""
-        self.name = ""
-        self.is_valid = False
+        self.is_valid: bool = False
+        self.name: str = ""
+        self.location: str = ""
 
         # Business logic for parsing
         if obj and isinstance(obj, str): obj = sh.json_parse(obj)
@@ -130,8 +121,8 @@ class ResourceGroup(AzureBase):
 
 class ActiveDirectoryApplication(AzureBase):
     def __init__(self, obj=""):
-        self.appId = "" # client_id
-        self.name = ""
+        self.name: str = ""
+        self.appId: str = "" # client_id
 
         # Business logic for parsing
         if obj and isinstance(obj, str): obj = sh.json_parse(obj)
@@ -170,33 +161,33 @@ class ArmParameters(AzureBase):
 # --- Account/Subscription Commands ---
 # https://docs.microsoft.com/en-us/cli/azure/account
 
-def account_get(subscription):
+def account_get(subscription: str) -> Account:
     if not (subscription and isinstance(subscription, str)): TypeError("'subscription' parameter expected as string")
-    command = ["az", "account", "show", "--subscription={0}".format(subscription)]
+    command: List[str] = ["az", "account", "show", "--subscription={0}".format(subscription)]
     sh.print_command(command)
     (stdout, stderr, rc) = sh.subprocess_run(command)
     # sh.subprocess_log(_log, stdout, stderr, rc, debug=args.debug)
     if (rc != 0): return Account()
     # Return the parsed account data
-    results = Account(stdout)
+    results: Account = Account(stdout)
     # _log.debug("results: {0}".format(results))
     return results
 
 
-def account_list():
-    command = ["az", "account", "list", "--all"]
+def account_list() -> Account:
+    command: List[str] = ["az", "account", "list", "--all"]
     sh.print_command(command)
     (stdout, stderr, rc) = sh.subprocess_run(command)
     # sh.subprocess_log(_log, stdout, stderr, rc, debug=args.debug)
     if (rc != 0): return Account()
     # Return the parsed account data
-    results = Account(stdout)
+    results: Account = Account(stdout)
     # _log.debug("results: {0}".format(results))
     return results
 
 
-def account_logout():
-    command = ["az", "logout"]
+def account_logout() -> bool:
+    command: List[str] = ["az", "logout"]
     sh.print_command(command)
     (stdout, stderr, rc) = sh.subprocess_run(command)
     # sh.subprocess_log(_log, stdout, stderr, rc, debug=args.debug)
@@ -205,8 +196,8 @@ def account_logout():
 
 # https://docs.microsoft.com/en-us/cli/azure/reference-index#az_login
 # Login with username (service principal) and password (client secret/certificate)
-def account_login(tenant="", name="", password=""):
-    command = ["az", "login"]
+def account_login(tenant: Optional[str]="", name: Optional[str]="", password: Optional[str]="") -> Account:
+    command: List[str] = ["az", "login"]
     # az login --service-principal -u <app-url> -p <password-or-cert> --tenant <tenant>
     if tenant and name and password:
         command.append("--service-principal")
@@ -220,14 +211,14 @@ def account_login(tenant="", name="", password=""):
     # sh.subprocess_log(_log, stdout, stderr, rc, debug=args.debug)
     if (rc != 0): return Account()
     # Return the parsed account data
-    results = Account(stdout)
+    results: Account = Account(stdout)
     # _log.debug("results: {0}".format(results))
     return results
 
 
-def account_set(subscription):
+def account_set(subscription: str) -> bool:
     if not (subscription and isinstance(subscription, str)): TypeError("'subscription' parameter expected as string")
-    command = ["az", "account", "set", "--subscription={0}".format(subscription)]
+    command: List[str] = ["az", "account", "set", "--subscription={0}".format(subscription)]
     sh.print_command(command)
     (stdout, stderr, rc) = sh.subprocess_run(command)
     # sh.subprocess_log(_log, stdout, stderr, rc, debug=args.debug)
@@ -238,20 +229,20 @@ def account_set(subscription):
 # --- Active Directory (AD) Group Commands ---
 # https://docs.microsoft.com/en-us/cli/azure/ad/group
 
-def ad_group_get(name=""):
-    command = ["az", "ad", "group", "show", "--group={0}".format(name)]
+def ad_group_get(name: str) -> AdGroup:
+    command: List[str] = ["az", "ad", "group", "show", "--group={0}".format(name)]
     sh.print_command(command)
     (stdout, stderr, rc) = sh.subprocess_run(command)
     # sh.subprocess_log(_log, stdout, stderr, rc, debug=args.debug)
-    ad_group = AdGroup(stdout)
+    ad_group: AdGroup = AdGroup(stdout)
     _log.debug("ad_group: {0}".format(ad_group))
     return ad_group
 
 
-def ad_group_set(name=""):
-    ad_group = AdGroup()
-    group_changed = False
-    command = ["az", "ad", "group", "create", "--display-name={0}".format(name), "--mail-nickname={0}".format(name)]
+def ad_group_set(name: str) -> Tuple[AdGroup, bool]:
+    ad_group: AdGroup = AdGroup()
+    group_changed: bool = False
+    command: List[str] = ["az", "ad", "group", "create", "--display-name={0}".format(name), "--mail-nickname={0}".format(name)]
     sh.print_command(command)
     (stdout, stderr, rc) = sh.subprocess_run(command)
     # sh.subprocess_log(_log, stdout, stderr, rc, debug=args.debug)
@@ -266,20 +257,20 @@ def ad_group_set(name=""):
 # --- Active Directory (AD) Group Member Commands ---
 # https://docs.microsoft.com/en-us/cli/azure/ad/group/member
 
-def ad_group_member_get(name, member_id):
+def ad_group_member_get(name: str, member_id: str) -> bool:
     if not (name and isinstance(name, str)): TypeError("'name' parameter expected as string")
     if not (member_id and isinstance(member_id, str)): TypeError("'member_id' parameter expected as string")
-    command = ["az", "ad", "group", "member", "check", "--group={0}".format(name), "--member-id={0}".format(member_id), "--query=value"]
+    command: List[str] = ["az", "ad", "group", "member", "check", "--group={0}".format(name), "--member-id={0}".format(member_id), "--query=value"]
     sh.print_command(command, "--member-id=")
     (stdout, stderr, rc) = sh.subprocess_run(command)
     # sh.subprocess_log(_log, stdout, stderr, rc, debug=args.debug)
     return bool(rc == 0 and stdout == "true")
 
 
-def ad_group_member_set(name, member_id):
+def ad_group_member_set(name: str, member_id: str) -> bool:
     if not (name and isinstance(name, str)): TypeError("'name' parameter expected as string")
     if not (member_id and isinstance(member_id, str)): TypeError("'member_id' parameter expected as string")
-    command = ["az", "ad", "group", "member", "add", "--group={0}".format(name), "--member-id={0}".format(member_id)]
+    command: List[str] = ["az", "ad", "group", "member", "add", "--group={0}".format(name), "--member-id={0}".format(member_id)]
     sh.print_command(command, "--member-id=")
     (stdout, stderr, rc) = sh.subprocess_run(command)
     # sh.subprocess_log(_log, stdout, stderr, rc, debug=args.debug)
@@ -292,11 +283,11 @@ def ad_group_member_set(name, member_id):
 # https://docs.microsoft.com/en-us/azure/role-based-access-control/built-in-roles
 # https://docs.microsoft.com/en-us/azure/role-based-access-control/role-assignments-cli
 
-def role_assign_get(assignee_id, scope="", role="Contributor"):
+def role_assign_get(assignee_id: str, scope="", role="Contributor") -> bool:
     if not (assignee_id and isinstance(assignee_id, str)): TypeError("'assignee_id' parameter expected as string")
     if not (scope and isinstance(scope, str)): TypeError("'scope' parameter expected as string")
     # NOTE: do not wrap --role value in '', gets evaluated as part of string
-    command = ["az", "role", "assignment", "list",
+    command: List[str] = ["az", "role", "assignment", "list",
         "--assignee={0}".format(assignee_id),
         "--role={0}".format(role), "--scope={0}".format(scope),
         "--include-inherited", "--include-groups", "--query=[0]"
@@ -307,11 +298,11 @@ def role_assign_get(assignee_id, scope="", role="Contributor"):
     return bool(rc == 0)
 
 
-def role_assign_set(assignee_id, scope="", role="Contributor"):
+def role_assign_set(assignee_id: str, scope="", role="Contributor") -> bool:
     if not (assignee_id and isinstance(assignee_id, str)): TypeError("'assignee_id' parameter expected as string")
     if not (scope and isinstance(scope, str)): TypeError("'scope' parameter expected as string")
     # NOTE: do not wrap --role value in '', gets evaluated as part of string
-    command = ["az", "role", "assignment", "create",
+    command: List[str] = ["az", "role", "assignment", "create",
         "--assignee={0}".format(assignee_id),
         "--role={0}".format(role), "--scope={0}".format(scope)
     ]
@@ -326,7 +317,7 @@ def role_assign_set(assignee_id, scope="", role="Contributor"):
 # https://docs.microsoft.com/en-us/cli/azure/ad/sp
 
 # Always use service principal name (not id)
-def service_principal_get(sp_name, sp_dir="", tenant=""):
+def service_principal_get(sp_name: str, sp_dir: Optional[str]="", tenant: Optional[str]="") -> ServicePrincipal:
     if not (sp_name and isinstance(sp_name, str)): TypeError("'sp_name' parameter expected as string")
     # Full filepath to service principal data
     if not sh.valid_resource(sp_name):
@@ -347,18 +338,18 @@ def service_principal_get(sp_name, sp_dir="", tenant=""):
         sh.print_command(command)
         (stdout, stderr, rc) = sh.subprocess_run(command)
         # sh.subprocess_log(_log, stdout, stderr, rc, debug=args.debug)
-        if (rc != 0): return None
+        if (rc != 0): return ServicePrincipal()
     # Return the parsed service principal data
-    service_principal = ServicePrincipal(stdout, sp_name)
+    service_principal: ServicePrincipal = ServicePrincipal(stdout, sp_name)
     # _log.debug("service_principal: {0}".format(service_principal))
     return service_principal
 
 
-def service_principal_set(sp_name, obj_id):
+def service_principal_set(sp_name: str, obj_id: str) -> ServicePrincipal:
     if not (sp_name and isinstance(sp_name, str)): TypeError("'sp_name' parameter expected as string")
     if not (obj_id and isinstance(obj_id, str)): TypeError("'obj_id' parameter expected as string")
     # Using '--sdk-auth' produces better output but not available for reset
-    command = ["az", "ad", "sp", "create", "--id={0}".format(obj_id)]
+    command: List[str] = ["az", "ad", "sp", "create", "--id={0}".format(obj_id)]
     sh.print_command(command)
     (stdout, stderr, rc) = sh.subprocess_run(command)
     sh.subprocess_log(_log, stdout, stderr, rc, debug=args.debug)
@@ -366,17 +357,17 @@ def service_principal_set(sp_name, obj_id):
         service_principal = ServicePrincipal(stdout, sp_name)
         return service_principal
     else:
-        return None
+        return ServicePrincipal()
 
 
 # https://docs.microsoft.com/en-us/cli/azure/ad/sp#az_ad_sp_create_for_rbac
 # https://docs.microsoft.com/en-us/cli/azure/ad/sp/credential#az-ad-sp-credential-reset
 # az ad sp create-for-rbac --name {service-principal} --skip-assignment --sdk-auth > ~/.local/local-sp.json
-def service_principal_rbac_set(key_vault, sp_name, reset=False):
+def service_principal_rbac_set(key_vault: str, sp_name: str, reset: Optional[bool]=False) -> ServicePrincipal:
     if not (key_vault and isinstance(key_vault, str)): TypeError("'key_vault' parameter expected as string")
     if not (sp_name and isinstance(sp_name, str)): TypeError("'sp_name' parameter expected as string")
     # Using '--sdk-auth' produces better output but not available for reset
-    command = ["az", "ad", "sp"]
+    command: List[str] = ["az", "ad", "sp"]
     if not reset:
         command.append("create-for-rbac")
     else:
@@ -393,7 +384,7 @@ def service_principal_rbac_set(key_vault, sp_name, reset=False):
         service_principal = ServicePrincipal(stdout, sp_name)
         return service_principal
     else:
-        return None
+        return ServicePrincipal()
 
 
 # # https://docs.microsoft.com/en-us/cli/azure/ad/sp#az_ad_sp_create_for_rbac
@@ -427,11 +418,11 @@ def service_principal_rbac_set(key_vault, sp_name, reset=False):
 #     _log.info("successfully saved service principal credentials!")
 
 
-def service_principal_save(path, service_principal):
+def service_principal_save(path: str, service_principal: ServicePrincipal):
     if not (path and isinstance(path, str)): TypeError("'path' parameter expected as string")
     if not isinstance(service_principal, ServicePrincipal): TypeError("'service_principal' parameter expected as ServicePrincipal")
     _log.info("storing service principal credentials...")
-    sh.json_save(path, service_principal.__dict__)
+    sh.json_save(path, str(service_principal.__dict__))
     _log.info("successfully saved service principal credentials!")
 
 
@@ -440,8 +431,8 @@ def service_principal_save(path, service_principal):
 # https://docs.microsoft.com/en-us/cli/azure/group
 # * Identical output for [resource_group_get, resource_group_set]
 
-def resource_group_get(name=""):
-    command = ["az", "group", "show", "--name={0}".format(name)]
+def resource_group_get(name: str) -> ResourceGroup:
+    command: List[str] = ["az", "group", "show", "--name={0}".format(name)]
     sh.print_command(command)
     (stdout, stderr, rc) = sh.subprocess_run(command)
     # sh.subprocess_log(_log, stdout, stderr, rc, debug=args.debug)
@@ -450,8 +441,8 @@ def resource_group_get(name=""):
     return resource_group
 
 
-def resource_group_set(name="", location=""):
-    command = ["az", "group", "create", "--name={0}".format(name), "--location={0}".format(location)]
+def resource_group_set(name: str, location: str) -> ResourceGroup:
+    command: List[str] = ["az", "group", "create", "--name={0}".format(name), "--location={0}".format(location)]
     sh.print_command(command)
     (stdout, stderr, rc) = sh.subprocess_run(command)
     # sh.subprocess_log(_log, stdout, stderr, rc, debug=args.debug)
@@ -464,10 +455,10 @@ def resource_group_set(name="", location=""):
 # --- Key Vault Commands ---
 # https://docs.microsoft.com/en-us/cli/azure/keyvault
 
-def key_vault_get(resource_group, key_vault):
+def key_vault_get(resource_group: str, key_vault: str):
     if not (resource_group and isinstance(resource_group, str)): TypeError("'resource_group' parameter expected as string")
     if not (key_vault and isinstance(key_vault, str)): TypeError("'key_vault' parameter expected as string")
-    command = ["az", "keyvault", "show", "--name={0}".format(key_vault), "--resource-group={0}".format(resource_group)]
+    command: List[str] = ["az", "keyvault", "show", "--name={0}".format(key_vault), "--resource-group={0}".format(resource_group)]
     sh.print_command(command)
     (stdout, stderr, rc) = sh.subprocess_run(command)
     # sh.subprocess_log(_log, stdout, stderr, rc, debug=args.debug)
@@ -477,10 +468,10 @@ def key_vault_get(resource_group, key_vault):
 
 
 # Create a hardened container (vault) in Azure
-def key_vault_set(resource_group, key_vault):
+def key_vault_set(resource_group: str, key_vault: str):
     if not (resource_group and isinstance(resource_group, str)): TypeError("'resource_group' parameter expected as string")
     if not (key_vault and isinstance(key_vault, str)): TypeError("'key_vault' parameter expected as string")
-    command = ["az", "keyvault", "create", "--name={0}".format(key_vault), "--resource-group={0}".format(resource_group)]
+    command: List[str] = ["az", "keyvault", "create", "--name={0}".format(key_vault), "--resource-group={0}".format(resource_group)]
     sh.print_command(command)
     (stdout, stderr, rc) = sh.subprocess_run(command)
     # sh.subprocess_log(_log, stdout, stderr, rc, debug=args.debug)
@@ -493,20 +484,20 @@ def key_vault_set(resource_group, key_vault):
 # --- Key Vault Secret Commands ---
 # https://docs.microsoft.com/en-us/cli/azure/keyvault/secret
 
-def key_vault_secret_get(key_vault, secret_key):
-    command = ["az", "keyvault", "secret", "show", "--vault-name={0}".format(key_vault), "--name={0}".format(secret_key)]
+def key_vault_secret_get(key_vault: str, secret_key: str):
+    command: List[str] = ["az", "keyvault", "secret", "show", "--vault-name={0}".format(key_vault), "--name={0}".format(secret_key)]
     sh.print_command(command)
     (stdout, stderr, rc) = sh.subprocess_run(command)
     # sh.subprocess_log(_log, stdout, stderr, rc, debug=args.debug)
     if (rc != 0): return ""
     results = sh.json_parse(stdout)
     # _log.debug("results: {0}".format(results))
-    return results.value
+    return results
 
 
-def key_vault_secret_set(key_vault, secret_key, secret_value):
+def key_vault_secret_set(key_vault: str, secret_key: str, secret_value: str):
     _log.info("storing key vault secret...")
-    command = ["az", "keyvault", "secret", "set", "--vault-name={0}".format(key_vault), "--name={0}".format(secret_key), "--value={0}".format(secret_value)]
+    command: List[str] = ["az", "keyvault", "secret", "set", "--vault-name={0}".format(key_vault), "--name={0}".format(secret_key), "--value={0}".format(secret_value)]
     
     # command_str = str.join(" ", command)
     # command_str = command_str.split("--value=", 1)
@@ -527,15 +518,15 @@ def key_vault_secret_set(key_vault, secret_key, secret_value):
 # https://github.com/Azure/azure-cli/issues/7489
 # az keyvault secret download --file <mySecretCert.pem> --encoding base64 --name --vault-name
 # openssl pkcs12 -in <mySecretCert.pem> -out <mycert.pem> -nodes -passout
-def key_vault_secret_download(cert_path, key_vault, secret_key):
-    temp_cert_path = sh.path_join(sh.path_dir(cert_path), "temp-{0}".format(sh.path_basename(cert_path)))
-    backup_path = ""
+def key_vault_secret_download(cert_path: str, key_vault: str, secret_key: str) -> bool:
+    temp_cert_path: str = sh.path_join(sh.path_dir(cert_path), "temp-{0}".format(sh.path_basename(cert_path)))
+    backup_path: str = ""
     # Handle previous certification files if found
     if sh.path_exists(temp_cert_path, "f"): sh.file_delete(temp_cert_path)
     if sh.path_exists(cert_path, "f"): backup_path = sh.file_backup(cert_path)
     
     # Download secret from key vault
-    command = ["az", "keyvault", "secret", "download",
+    command: List[str] = ["az", "keyvault", "secret", "download",
         "--file={0}".format(temp_cert_path), "--encoding=base64",
         "--vault-name={0}".format(key_vault), "--name={0}".format(secret_key)]
     sh.print_command(command)
@@ -544,8 +535,8 @@ def key_vault_secret_download(cert_path, key_vault, secret_key):
     if (rc != 0): return False
     # Convert to proper format using OpenSSL
     # https://www.openssl.org/docs/man1.1.1/man1/openssl.html
-    # command = ["openssl", "pkcs12", "-in={0}".format(temp_cert_path), "-out={0}".format(cert_path), "-passout"]
-    command = ["openssl", "pkcs12", "-in={0}".format(temp_cert_path), "-out={0}".format(cert_path), "-nodes", "-password pass:''"]
+    # command: List[str] = ["openssl", "pkcs12", "-in={0}".format(temp_cert_path), "-out={0}".format(cert_path), "-passout"]
+    command: List[str] = ["openssl", "pkcs12", "-in={0}".format(temp_cert_path), "-out={0}".format(cert_path), "-nodes", "-password pass:''"]
     sh.print_command(command)
     (stdout, stderr, rc) = sh.subprocess_run(command)
     sh.subprocess_log(_log, stdout, stderr, rc, debug=args.debug)
@@ -562,8 +553,8 @@ def key_vault_secret_download(cert_path, key_vault, secret_key):
 # --- Active Directory Application Commands ---
 # https://docs.microsoft.com/en-us/cli/azure/ad/app
 
-def active_directory_application_get(app_name):
-    command = ["az", "ad", "app", "list", "--query=[?displayName=='{0}'] | [0]".format(app_name)]
+def active_directory_application_get(app_name: str) -> ActiveDirectoryApplication:
+    command: List[str] = ["az", "ad", "app", "list", "--query=[?displayName=='{0}'] | [0]".format(app_name)]
     sh.print_command(command)
     (stdout, stderr, rc) = sh.subprocess_run(command)
     # sh.subprocess_log(_log, stdout, stderr, rc, debug=args.debug)
@@ -572,14 +563,14 @@ def active_directory_application_get(app_name):
     return ad_app
 
 
-def active_directory_application_set(tenant, app_name, app_id=""):
+def active_directory_application_set(tenant: str, app_name: str, app_id: Optional[str]="") -> ActiveDirectoryApplication:
     if not (tenant and isinstance(tenant, str)): TypeError("'tenant' parameter expected as string")
     if not (app_name and isinstance(app_name, str)): TypeError("'app_name' parameter expected as string")
     if not (isinstance(app_id, str)): TypeError("'app_id' parameter expected as string")
-    az_ad_domain = "https://{0}.onmicrosoft.com".format(tenant)
-    az_ad_identifier_url = "{0}/{1}".format(az_ad_domain, app_name)
-    app_domain = "https://localhost:5001"
-    az_ad_reply_url = "{0}/signin-oidc".format(app_domain)
+    az_ad_domain: str = "https://{0}.onmicrosoft.com".format(tenant)
+    az_ad_identifier_url: str = "{0}/{1}".format(az_ad_domain, app_name)
+    app_domain: str = "https://localhost:5001"
+    az_ad_reply_url: str = "{0}/signin-oidc".format(app_domain)
 
     if app_id:
         _log.info("updating Azure AD application object registration...")
@@ -615,14 +606,14 @@ def active_directory_application_set(tenant, app_name, app_id=""):
 # --- Deployment Group Commands ---
 # https://docs.microsoft.com/en-us/cli/azure/deployment/group
 
-def deployment_group_valid(rg_name, template_path, parameters=None, deploy_name="Main"):
+def deployment_group_valid(rg_name: str, template_path: str, parameters: Optional[List[str]]=None, deploy_name: Optional[str]="Main") -> bool:
     if not (rg_name and isinstance(rg_name, str)): TypeError("'rg_name' parameter expected as string")
     if not (template_path and isinstance(template_path, str)): TypeError("'template_path' parameter expected as string")
     if isinstance(parameters, type(None)): parameters = []
     # if not (parameters and isinstance(parameters, str)): TypeError("'parameters' parameter expected as string")
     if not sh.is_list_of_strings(parameters): TypeError("'parameters' parameter expected as list of strings")
     if not (deploy_name and isinstance(deploy_name, str)): TypeError("'deploy_name' parameter expected as string")
-    command = ["az", "deployment", "group", "validate",
+    command: List[str] = ["az", "deployment", "group", "validate",
         "--name={0}".format(deploy_name),
         "--resource-group={0}".format(rg_name),
         "--template-file={0}".format(template_path),
@@ -637,14 +628,14 @@ def deployment_group_valid(rg_name, template_path, parameters=None, deploy_name=
     return (rc == 0)
 
 
-def deployment_group_get(rg_name, template_path, parameters=None, deploy_name="Main"):
+def deployment_group_get(rg_name: str, template_path: str, parameters: Optional[List[str]]=None, deploy_name: Optional[str]="Main") -> bool:
     if not (rg_name and isinstance(rg_name, str)): TypeError("'rg_name' parameter expected as string")
     if not (template_path and isinstance(template_path, str)): TypeError("'template_path' parameter expected as string")
     if isinstance(parameters, type(None)): parameters = []
     # if not (parameters and isinstance(parameters, str)): TypeError("'parameters' parameter expected as string")
     if not sh.is_list_of_strings(parameters): TypeError("'parameters' parameter expected as list of strings")
     if not (deploy_name and isinstance(deploy_name, str)): TypeError("'deploy_name' parameter expected as string")
-    command = ["az", "deployment", "group", "show",
+    command: List[str] = ["az", "deployment", "group", "show",
         "--name={0}".format(deploy_name),
         "--resource-group={0}".format(rg_name),
         "--template-file={0}".format(template_path),
@@ -659,14 +650,14 @@ def deployment_group_get(rg_name, template_path, parameters=None, deploy_name="M
     return (rc == 0)
 
 
-def deployment_group_set(rg_name, template_path, parameters=None, deploy_name="Main"):
+def deployment_group_set(rg_name: str, template_path: str, parameters: Optional[List[str]]=None, deploy_name: Optional[str]="Main") -> bool:
     if not (rg_name and isinstance(rg_name, str)): TypeError("'rg_name' parameter expected as string")
     if not (template_path and isinstance(template_path, str)): TypeError("'template_path' parameter expected as string")
     if isinstance(parameters, type(None)): parameters = []
     # if not isinstance(parameters, str): TypeError("'parameters' parameter expected as string")
     if not sh.is_list_of_strings(parameters): TypeError("'parameters' parameter expected as list of strings")
     if not (deploy_name and isinstance(deploy_name, str)): TypeError("'deploy_name' parameter expected as string")
-    command = ["az", "deployment", "group", "create",
+    command: List[str] = ["az", "deployment", "group", "create",
         "--name={0}".format(deploy_name),
         "--resource-group={0}".format(rg_name),
         "--template-file={0}".format(template_path)
@@ -776,10 +767,9 @@ def deployment_group_set(rg_name, template_path, parameters=None, deploy_name="M
 # ------------------------ Main Program ------------------------
 
 # Initialize the logger
-basename = "azure_boilerplate"
-args = LogArgs() # for external modules
-log_options = LogOptions(basename)
-_log = get_logger(log_options)
+basename: str = "azure_boilerplate"
+args = log.LogArgs() # for external modules
+_log: log._logger_type = log.get_logger(basename)
 
 if __name__ == "__main__":
     # Returns argparse.Namespace; to pass into function, use **vars(self.args)
@@ -792,12 +782,12 @@ if __name__ == "__main__":
     args = parse_arguments()
 
     #  Configure the main logger
-    log_handlers = gen_basic_handlers(args.debug, args.log_path)
-    set_handlers(_log, log_handlers)
+    log_handlers: List[log.LogHandlerOptions] = log.gen_basic_handlers(args.debug, args.log_path)
+    log.set_handlers(_log, log_handlers)
     if args.debug:
         # Configure the shell_boilerplate logger
-        _sh_log = get_logger("shell_boilerplate")
-        set_handlers(_sh_log, log_handlers)
+        _sh_log = log.get_logger("shell_boilerplate")
+        log.set_handlers(_sh_log, log_handlers)
         sh.args.debug = args.debug
 
     _log.debug("args: {0}".format(args))

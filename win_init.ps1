@@ -8,6 +8,9 @@
 
 # Install Chocolatey
 Set-ExecutionPolicy Bypass -Scope Process -Force; iwr https://chocolatey.org/install.ps1 -UseBasicParsing | iex
+# Configure Chocolatey:- remember params used for upgrades (to verify: choco feature list)
+# https://docs.chocolatey.org/en-us/guides/create/parse-packageparameters-argument
+choco feature enable -n=useRememberedArgumentsForUpgrades
 
 # https://docs.microsoft.com/en-us/windows/wsl/install-manual
 Enable-WindowsOptionalFeature -Online -FeatureName Microsoft-Windows-Subsystem-Linux

@@ -7,7 +7,7 @@
   - name: Gather facts from chocolatey
     win_chocolatey_facts:
     register: out_chocolatey_facts
-    # no_log: true
+    no_log: true
 
   # - name: Displays the Configuration
   #   debug:
@@ -25,5 +25,5 @@
   #   debug:
   #     var: out_chocolatey_facts.ansible_facts.ansible_chocolatey.packages
 
-  tags: [chocolatey, choco]
+  tags: [windows, chocolatey, choco]
 ...

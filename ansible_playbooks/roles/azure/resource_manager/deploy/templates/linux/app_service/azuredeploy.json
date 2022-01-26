@@ -2,13 +2,6 @@
     "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
     "contentVersion": "1.0.0.0",
     "parameters": {
-        "webAppName": {
-           "type": "string",
-           "defaultValue": "[concat('webApp-', uniqueString(resourceGroup().id))]",
-            "metadata": {
-                "description": "Name of web app service"
-            }
-        },
         "location": {
             "type": "string",
             "defaultValue": "[resourceGroup().location]",
@@ -16,8 +9,9 @@
                 "description": "Location for all resources"
             }
         },
-        "sku": {
+        "appSku": {
             "type": "string",
+            "defaultValue": "F1",
             "allowedValues": [
                 "F1",
                 "D1",
@@ -32,9 +26,8 @@
                 "P3",
                 "P4"
             ],
-            "defaultValue": "F1",
             "metadata": {
-                "description": "Pricing tier for the hosting plan"
+                "description": "Pricing tier and instance size for the hosting plan"
             }
         },
         "linuxFxVersion" : {
@@ -43,70 +36,67 @@
             "metadata": {
                 "description": "Runtime stack of web app"
             }
-        },
-        "repoUrl": {
-            "type": "string",
-            "defaultValue": " ",
-            "metadata": {
-                "description": "Optional Git Repo URL"
-            }
         }
     },
     "functions": [],
     "variables": {
-        "hostingPlanName": "[concat('hpn-', resourceGroup().name)]"
+        //"hostingPlanName": "[concat('plan-', resourceGroup().name)]",
+        // "appName": "[concat('app-', uniqueString(resourceGroup().id))]",
+        //"appName": "[concat('app-', resourceGroup().name)]",
+        "projectName": "[resourceGroup().name]",
+        // https://docs.microsoft.com/en-us/azure/azure-resource-manager/management/resource-name-rules
+        // https://docs.microsoft.com/en-us/azure/azure-resource-manager/templates/template-functions-string
+        "hostingPlanName": "[take(replace(variables('projectName'), '.', '-'), 40)]",
+        "appName": "[take(replace(variables('projectName'), '.', '-'), 60)]"
     },
     "resources": [
         {
+            // https://docs.microsoft.com/en-us/azure/templates/microsoft.web/serverfarms
             "type": "Microsoft.Web/serverfarms",
-            "apiVersion": "2018-02-01",
+            "apiVersion": "2021-02-01",
             "name": "[variables('hostingPlanName')]",
             "location": "[parameters('location')]",
             "kind": "linux",
             "sku": {
-                "name": "[parameters('sku')]"
+                "name": "[parameters('appSku')]"
             },
             "properties": {
-                "reserved": true
+                // https://stackoverflow.com/questions/59901840/what-is-the-reserved-argument-in-azure-app-service-plan-terraform-config
+                "reserved": true // Required for Linux app
             },
             "tags": {
                 "displayName": "[variables('hostingPlanName')]"
             }
         },
         {
+            // https://docs.microsoft.com/en-us/azure/templates/microsoft.web/sites
             "type": "Microsoft.Web/sites",
-            "apiVersion": "2018-11-01",
-            "name": "[parameters('webAppName')]",
+            "apiVersion": "2021-02-01",
+            "name": "[variables('appName')]",
             "location": "[parameters('location')]",
+            // https://stackoverflow.com/questions/62397476/arm-microsoft-web-sites-kind-possible-values
+            "kind": "app,linux",
+            "identity": {
+                "type": "SystemAssigned"
+            },
             "dependsOn": [
                 "[resourceId('Microsoft.Web/serverfarms', variables('hostingPlanName'))]"
             ],
             "properties": {
+                "enabled": true,
+                "httpsOnly": true,
+                "reserved": true,
                 "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', variables('hostingPlanName'))]",
                 "siteConfig": {
-                    "linuxFxVersion": "[parameters('linuxFxVersion')]"
+                    "linuxFxVersion": "[parameters('linuxFxVersion')]",
+                    "minTlsVersion": "1.2",
+                    "alwaysOn": "[if(equals(parameters('appSku'), 'F1'), 'false', 'true')]"
                 }
             },
             "tags": {
                 "[concat('hidden-related:', resourceGroup().id, '/providers/Microsoft.Web/serverfarms/', variables('hostingPlanName'))]": "Resource",
-                "displayName": "[parameters('webAppName')]"
-            },
-            "resources": [
-                {
-                    "type": "sourcecontrols",
-                    "apiVersion": "2018-11-01",
-                    "name": "web",
-                    "location": "[parameters('location')]",
-                    "condition": "[contains(parameters('repoUrl'), 'http')]",
-                    "dependsOn": [
-                        "[resourceId('Microsoft.Web/sites', parameters('webAppName'))]"
-                    ],
-                    "properties": {
-                        "repoUrl": "[parameters('repoUrl')]",
-                        "branch": "master"
-                    }
-                }
-            ]
+                "displayName": "[variables('appName')]"
+            }
         }
     ]
 }

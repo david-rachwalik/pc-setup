@@ -4,16 +4,18 @@
 - block:
   - name: List installed VSCode extensions
     win_shell: "code --list-extensions"
-    register: out_code_extensions
+    register: code_extension_facts
     changed_when: false
+    no_log: true
 
   - set_fact:
-      vscode_extensions_to_install: "{{vscode_extensions | difference(out_code_extensions.stdout_lines)}}"
+      vscode_extensions_installed: "{{code_extension_facts.stdout_lines}}"
+
+  - set_fact:
+      vscode_extensions_to_install: "{{vscode_extensions | difference(vscode_extensions_installed)}}"
 
   tags: ["vscode"]
 
-
-# - name: Get the difference between out_code_extensions and vscode_install_extensions
 
 # - name: Install VSCode Extensions
 #   win_command: "code --install-extension {{item}}"

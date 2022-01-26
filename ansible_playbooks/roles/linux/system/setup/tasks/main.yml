@@ -16,6 +16,15 @@
   tags: [python, py]
 
 
+# https://docs.ansible.com/ansible/latest/modules/file_module.html
+# Use case: Windows scheduled tasks (~/logs/ansible_win_backup.log)
+- name: Ensure log directory exists
+  file:
+    path: "{{bash_log_dir}}"
+    state: directory
+    mode: 0775
+
+
 # view /etc/logrotate.conf
 # https://linux.die.net/man/8/logrotate
 # https://www.digitalocean.com/community/tutorials/how-to-manage-logfiles-with-logrotate-on-ubuntu-16-04

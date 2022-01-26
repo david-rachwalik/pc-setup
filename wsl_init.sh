@@ -34,7 +34,7 @@ apt-get update && apt-get dist-upgrade -y
 apt-get install -y python3
 apt-get install -y python3-pip
 apt-get install -y python3-winrm
-pip3 install ansible
+pip3 install -U ansible=2.9.27
 
 # Register Microsoft to trusted keys and add package repository (for .NET SDK and Azure CLI)
 # https://docs.microsoft.com/en-us/dotnet/core/install/linux-ubuntu
@@ -47,7 +47,8 @@ fi
 
 # Install .NET SDK
 dotnet_install_path=https://raw.githubusercontent.com/dotnet/runtime/master/eng/common/dotnet-install.sh
-version="3.1" # default is 'Current'
+# version="3.1" # default is 'Current'
+version="5.0" # default is 'Current'
 curl -sSL $dotnet_install_path | bash /dev/stdin -c $version
 
 # Install Azure CLI

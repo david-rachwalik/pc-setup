@@ -3,11 +3,22 @@
     "git.enabled": true,
     // "python.pythonPath": "C:\\Python38\\python.exe",
     "python.pythonPath": "/usr/bin/python",
+    "python.analysis.typeCheckingMode": "basic",
     "update.channel": "none",
     "update.enableWindowsBackgroundUpdates": false,
     "workbench.editor.labelFormat": "short",
     // WSL1 workaround for renaming non-empty directories
     // https://devblogs.microsoft.com/commandline/tips-and-tricks-for-linux-development-with-wsl-and-visual-studio-code/
     "remote.WSL.fileWatcher.polling": true,
-    "remote.WSL.fileWatcher.pollingInterval": 5000 // default (every 5s)
+    "remote.WSL.fileWatcher.pollingInterval": 5000, // default (every 5s)
+    "editor.formatOnSave": true,
+    "[python]": {
+        "editor.formatOnSave": false
+    },
+    "[yaml]": {
+        "editor.formatOnSave": false
+    },
+    "files.associations": {
+        "*.json": "jsonc"
+    }
 }

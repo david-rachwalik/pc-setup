@@ -2,8 +2,8 @@
 
 # Basename: azure_devops_boilerplate
 # Description: Common business logic for Azure resources
-# Version: 0.2.0
-# VersionDate: 18 Feb 2021
+# Version: 1.0.0
+# VersionDate: 19 Oct 2021
 
 # --- Global Azure Methods ---
 # user:                         user_get, user_list, user_logout, user_login, user_set
@@ -16,17 +16,9 @@
 # pipelines:                    pipeline_set, pipeline_get
 # repos:                        repo_set, repo_get
 
-from logging_boilerplate import *
+import logging_boilerplate as log
 import shell_boilerplate as sh
-
-try:
-    # Python 2 has both 'str' (bytes) and 'unicode' text
-    basestring = basestring
-    unicode = unicode
-except NameError:
-    # Python 3 names the unicode data type 'str'
-    basestring = str
-    unicode = str
+from typing import List, Tuple, Optional
 
 # ------------------------ Global Methods ------------------------
 
@@ -34,10 +26,10 @@ except NameError:
 # https://docs.microsoft.com/en-us/cli/azure/ext/azure-devops/devops (login)
 # https://docs.microsoft.com/en-us/cli/azure/ext/azure-devops/devops/user
 
-def user_get(pat_data, user):
+def user_get(pat_data: str, user: str) -> bool:
     if not (pat_data and isinstance(pat_data, str)): TypeError("'pat_data' parameter expected as string")
     if not (user and isinstance(user, str)): TypeError("'user' parameter expected as string")
-    command = ["az", "devops", "user", "show", "--user={0}".format(user)]
+    command: List[str] = ["az", "devops", "user", "show", "--user={0}".format(user)]
     environment_vars = { 'AZURE_DEVOPS_EXT_PAT': pat_data }
     sh.print_command(command)
     # (stdout, stderr, rc) = sh.subprocess_run(command)
@@ -46,8 +38,8 @@ def user_get(pat_data, user):
     return (rc == 0)
 
 
-def user_logout():
-    command = ["az", "devops", "logout"]
+def user_logout() -> bool:
+    command: List[str] = ["az", "devops", "logout"]
     sh.print_command(command)
     (stdout, stderr, rc) = sh.subprocess_run(command)
     sh.subprocess_log(_log, stdout, stderr, rc, debug=args.debug)
@@ -74,9 +66,9 @@ def user_logout():
 
 
 # Login with credential (PAT)
-def user_login(pat_data):
+def user_login(pat_data: str) -> bool:
     if not (pat_data and isinstance(pat_data, str)): TypeError("'pat_data' parameter expected as string")
-    command = ["az", "devops", "login"]
+    command: List[str] = ["az", "devops", "login"]
     environment_vars = { 'AZURE_DEVOPS_EXT_PAT': pat_data }
     sh.print_command(command)
     (stdout, stderr, rc) = sh.subprocess_run(command, env=environment_vars)
@@ -92,7 +84,7 @@ def user_login(pat_data):
 #     _log.info("successfully saved service principal credentials!")
 
 
-def user_save(path, content):
+def user_save(path: str, content: str):
     if not (path and isinstance(path, str)): TypeError("'path' parameter expected as string")
     if not (content and isinstance(content, str)): TypeError("'content' parameter expected as string")
     # Handle previous credentials if found
@@ -106,8 +98,8 @@ def user_save(path, content):
 # --- DevOps Project Commands ---
 # https://docs.microsoft.com/en-us/cli/azure/ext/azure-devops/devops/project
 
-def devops_project_list():
-    command = ["az", "devops", "project", "--list"]
+def devops_project_list() -> Tuple[bool, bool]:
+    command: List[str] = ["az", "devops", "project", "--list"]
     sh.print_command(command)
     (stdout, stderr, rc) = sh.subprocess_run(command)
     sh.subprocess_log(_log, stdout, stderr, rc, debug=args.debug)
@@ -120,10 +112,9 @@ def devops_project_list():
 # ------------------------ Main Program ------------------------
 
 # Initialize the logger
-basename = "azure_devops_boilerplate"
-args = LogArgs() # for external modules
-log_options = LogOptions(basename)
-_log = get_logger(log_options)
+basename: str = "azure_devops_boilerplate"
+args = log.LogArgs() # for external modules
+_log: log._logger_type = log.get_logger(basename)
 
 if __name__ == "__main__":
     # Returns argparse.Namespace; to pass into function, use **vars(self.args)
@@ -136,12 +127,12 @@ if __name__ == "__main__":
     args = parse_arguments()
 
     #  Configure the main logger
-    log_handlers = gen_basic_handlers(args.debug, args.log_path)
-    set_handlers(_log, log_handlers)
+    log_handlers: List[log.LogHandlerOptions] = log.gen_basic_handlers(args.debug, args.log_path)
+    log.set_handlers(_log, log_handlers)
     if args.debug:
         # Configure the shell_boilerplate logger
-        _sh_log = get_logger("shell_boilerplate")
-        set_handlers(_sh_log, log_handlers)
+        _sh_log = log.get_logger("shell_boilerplate")
+        log.set_handlers(_sh_log, log_handlers)
         sh.args.debug = args.debug
 
     _log.debug("args: {0}".format(args))

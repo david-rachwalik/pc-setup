@@ -9,6 +9,35 @@
                 "description": "Location for all resources"
             }
         },
+        "sku": {
+            "type": "string",
+            "defaultValue": "F1",
+            "allowedValues": [
+                "F1",
+                "D1",
+                "B1",
+                "B2",
+                "B3",
+                "S1",
+                "S2",
+                "S3",
+                "P1",
+                "P2",
+                "P3",
+                "P4"
+            ],
+            "metadata": {
+                "description": "Pricing tier and instance size for the hosting plan"
+            }
+        },
+        "linuxFxVersion" : {
+            "type": "string",
+            // az webapp list-runtimes --linux
+            "defaultValue" : "DOTNET|5.0",
+            "metadata": {
+                "description": "Runtime stack of web app"
+            }
+        },
         // https://stackoverflow.com/questions/59924995/what-are-the-constraints-for-the-azure-sql-server-administrator-login-name
         "sqlAdministratorUsername": {
             "type": "string",
@@ -37,27 +66,33 @@
                 "description": "The collation (sorting rules) of the database."
             }
         }
-        // "sqlAdminAadGroupId": {
-        //     "type": "securestring",
-        //     "metadata": {
-        //         "description": "Object Id of your AAD user or whoever needs access to resources such as KeyVault."
-        //     }
-        // },
-        // "sqlAdminAadGroup": {
-        //     "type": "string",
-        //     "metadata": {
-        //         "description": "Name of your AAD user or whoever needs access to resources such as Azure SQL."
-        //     }
-        // }
     },
     "functions": [],
     "variables": {
-        // "sqlServerName": "[concat('sql-', uniqueString('server', resourceGroup().id))]",
+        "hostingPlanName": "[concat('plan-', resourceGroup().name)]",
+        // "appName": "[concat('app-', uniqueString(resourceGroup().id))]",
+        "appName": "[concat('app-', resourceGroup().name)]",
         "sqlServerName": "[concat('sql-', resourceGroup().name)]",
-        // "databaseName": "[concat('sqldb-', uniqueString('database', resourceGroup().id))]",
         "databaseName": "[concat('sqldb-', resourceGroup().name)]"
     },
     "resources": [
+        {
+            // https://docs.microsoft.com/en-us/azure/templates/microsoft.web/serverfarms
+            "type": "Microsoft.Web/serverfarms",
+            "apiVersion": "2021-02-01",
+            "name": "[variables('hostingPlanName')]",
+            "location": "[parameters('location')]",
+            "kind": "linux",
+            "sku": {
+                "name": "[parameters('sku')]"
+            },
+            "properties": {
+                "reserved": true
+            },
+            "tags": {
+                "displayName": "[variables('hostingPlanName')]"
+            }
+        },
         {
             // https://docs.microsoft.com/en-us/azure/templates/microsoft.sql/servers
             "type": "Microsoft.Sql/servers",
@@ -90,29 +125,12 @@
                         "startIpAddress": "0.0.0.0"
                     }
                 }
-                // {
-                //     // https://docs.microsoft.com/en-us/azure/templates/microsoft.sql/servers/administrators
-                //     "type": "administrators",
-                //     "apiVersion": "2021-02-01-preview",
-                //     "name": "activeDirectory",
-                //     "location": "[parameters('location')]",
-                //     "dependsOn": [
-                //         "[resourceId('Microsoft.Sql/servers', variables('sqlserverName'))]"
-                //     ],
-                //     "properties": {
-                //         "administratorType": "ActiveDirectory",
-                //         "login": "[parameters('sqlAdminAadGroup')]",
-                //         "sid": "[parameters('sqlAdminAadGroupId')]",
-                //         "tenantId": "[subscription().tenantId]"
-                //     }
-                // }
             ]
         },
         {
             // https://docs.microsoft.com/en-us/azure/templates/microsoft.sql/servers/databases
             "type": "Microsoft.Sql/servers/databases",
             "apiVersion": "2021-02-01-preview",
-            // "name": "[variables('databaseName')]",
             "name": "[concat(variables('sqlServerName'), '/', variables('databaseName'))]",
             "location": "[parameters('location')]",
             "dependsOn": [
@@ -134,28 +152,55 @@
                     "apiVersion": "2021-02-01-preview",
                     "name": "current",
                     "dependsOn": [
-                        // "[variables('databaseName')]"
                         "[resourceId('Microsoft.Sql/servers/databases', variables('sqlServerName'), variables('databaseName'))]"
                     ],
                     "properties": {
                         "state": "Enabled"
                     }
                 }
-                // {
-                //     // https://docs.microsoft.com/en-us/azure/templates/microsoft.sql/servers/databases/backupshorttermretentionpolicies
-                //     "type": "backupShortTermRetentionPolicies",
-                //     "apiVersion": "2021-02-01-preview",
-                //     "name": "default",
-                //     "dependsOn": [
-                //         // "[variables('databaseName')]"
-                //         "[resourceId('Microsoft.Sql/servers/databases', variables('sqlServerName'), variables('databaseName'))]"
-                //     ],
-                //     "properties": {
-                //         "diffBackupIntervalInHours": 24,
-                //         "retentionDays": 7
-                //     }
-                // }
             ]
+        },
+        {
+            // https://docs.microsoft.com/en-us/azure/templates/microsoft.web/sites
+            "type": "Microsoft.Web/sites",
+            "apiVersion": "2021-02-01",
+            "name": "[variables('appName')]",
+            "location": "[parameters('location')]",
+            "kind": "app,linux",
+            "identity": {
+                "type": "SystemAssigned"
+            },
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/serverfarms', variables('hostingPlanName'))]"
+            ],
+            "properties": {
+                "httpsOnly": true,
+                "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', variables('hostingPlanName'))]",
+                "siteConfig": {
+                    "linuxFxVersion": "[parameters('linuxFxVersion')]",
+                    "minTlsVersion": "1.2"
+                }
+            },
+            "tags": {
+                "[concat('hidden-related:', resourceGroup().id, '/providers/Microsoft.Web/serverfarms/', variables('hostingPlanName'))]": "Resource",
+                "displayName": "[variables('appName')]"
+            }
+        },
+        {
+            // https://docs.microsoft.com/en-us/azure/templates/microsoft.web/sites/config-connectionstrings
+            "type": "Microsoft.Web/sites/config",
+            "apiVersion": "2021-02-01",
+            "name": "[format('{0}/{1}', variables('appName'), 'connectionstrings')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Sql/servers', variables('sqlServerName'))]",
+                "[resourceId('Microsoft.Web/sites', variables('appName'))]"
+            ],
+            "properties": {
+                "DefaultConnection": {
+                    "value": "[format('Data Source=tcp:{0},1433;Initial Catalog={1};User Id={2}@{3};Password={4};', reference(resourceId('Microsoft.Sql/servers', variables('sqlServerName'))).fullyQualifiedDomainName, variables('databaseName'), parameters('sqlAdministratorUsername'), reference(resourceId('Microsoft.Sql/servers', variables('sqlServerName'))).fullyQualifiedDomainName, parameters('sqlAdministratorPassword'))]",
+                    "type": "SQLAzure"
+                }
+            }
         }
     ],
     "outputs": {

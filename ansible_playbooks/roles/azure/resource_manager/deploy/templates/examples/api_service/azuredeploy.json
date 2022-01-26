@@ -1,0 +1,73 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "location": {
+            "type": "string",
+            "defaultValue": "[resourceGroup().location]",
+            "metadata": {
+                "description": "Location for all resources"
+            }
+        },
+        "publisherEmail": {
+            "type": "string",
+            "minLength": 1,
+            "metadata": {
+                "description": "The email address of the owner of the service"
+            }
+        },
+        "publisherName": {
+            "type": "string",
+            "minLength": 1,
+            "metadata": {
+                "description": "The name of the owner of the service"
+            }
+        },
+        "apiSku": {
+            "type": "string",
+            "defaultValue": "Developer",
+            "allowedValues": [
+                "Consumption",  // 1 million calls free, 1+ million calls: $0.042 per 10,000 calls
+                "Developer",    // $48.04/month
+                "Basic",        // $147.17/month
+                "Standard",     // $686.72/month
+                "Premium"       // $2,795.17/month
+            ],
+            "metadata": {
+                "description": "The pricing tier of this API Management service"
+            }
+        },
+        "apiSkuCount": {
+            "type": "string",
+            "defaultValue": "1",
+            "allowedValues": [
+                "1",
+                "2"
+            ],
+            "metadata": {
+                "description": "The instance size of this API Management service."
+            }
+        }
+    },
+    "functions": [],
+    "variables": {
+        "apiManagementServiceName": "[concat('apiservice', uniqueString(resourceGroup().id))]"
+    },
+    "resources": [
+        {
+            // https://docs.microsoft.com/en-us/azure/templates/microsoft.apimanagement/service
+            "type": "Microsoft.ApiManagement/service",
+            "apiVersion": "2020-12-01",
+            "name": "[variables('apiManagementServiceName')]",
+            "location": "[parameters('location')]",
+            "sku": {
+                "name": "[parameters('apiSku')]",
+                "capacity": "[parameters('apiSkuCount')]"
+            },
+            "properties": {
+                "publisherEmail": "[parameters('publisherEmail')]",
+                "publisherName": "[parameters('publisherName')]"
+            }
+        }
+    ]
+}

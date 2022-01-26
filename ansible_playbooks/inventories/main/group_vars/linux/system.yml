@@ -13,24 +13,21 @@ apt_packages:
 - apt-transport-https
 # - dotnet-sdk-3.1
 # - aspnetcore-runtime-3.1
-- dotnet-sdk-5.0
-- aspnetcore-runtime-5.0
+# - dotnet-sdk-5.0
+# - aspnetcore-runtime-5.0
+- dotnet-runtime-6.0
+- aspnetcore-runtime-6.0
 # https://docs.microsoft.com/en-us/cli/azure/install-azure-cli-apt
 - azure-cli
 # --- NPM ---
-# - nodejs
-# - npm
-
-
-# npm_packages:
-# - sass
-# - typescript
+- nodejs
+- npm
 
 
 pip_packages:
 - pip
 # --- Ansible ---
-- ansible==2.9.15 # https://pypi.org/project/ansible/2.9.15
+- ansible==2.9.27 # https://pypi.org/project/ansible
 - jmespath        # for 'json_query' filter
 - pytz
 - colorlog        # https://pypi.org/project/colorlog
