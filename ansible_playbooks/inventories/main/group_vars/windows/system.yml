@@ -7,110 +7,106 @@
 # --- Microsoft Office 365 ---
 # https://chocolatey.org/packages/microsoft-office-deployment
 
-
 powershell_uninstall_appx_packages:
-- CanonicalGroupLimited.Ubuntu18.04onWindows
-
+  - CanonicalGroupLimited.Ubuntu18.04onWindows
 
 # https://chocolatey.org/packages/*
 chocolatey_packages:
   install:
-  # --- Productivity ---
-  - name: ccleaner
-  - name: 7zip
-  - name: nordvpn
-  - name: GoogleChrome
-  # - name: microsoft-office-deployment
-  #   pseudo_name: Office365HomePremium
-  #   package_params: >-
-  #     /64bit
-  #     /Product O365HomePremRetail
-  #     /Exclude Publisher,Lync,Groove
-  - name: qbittorrent
-  - name: speccy
-  # - name: recuva
-  # - name: defraggler
+    # --- Productivity ---
+    - name: ccleaner
+    - name: 7zip
+    - name: nordvpn
+    - name: GoogleChrome
+    # - name: microsoft-office-deployment
+    #   pseudo_name: Office365HomePremium
+    #   package_params: >-
+    #     /64bit
+    #     /Product O365HomePremRetail
+    #     /Exclude Publisher,Lync,Groove
+    - name: qbittorrent
+    - name: speccy
+    # - name: recuva
+    # - name: defraggler
 
-  # --- Development ---
-  - name: visualstudio2019community
-    package_params: >-
-      --locale en-US
-      --add Microsoft.VisualStudio.Workload.NetWeb;includeRecommended
-      --add Microsoft.VisualStudio.Workload.Azure;includeRecommended
-      --quiet
-  - name: git
-  - name: github-desktop
-  - name: python3
-  - name: dotnetcore-sdk
-  - name: azure-cli
-  - name: nodejs
-  - name: vscode
-  - name: postman
-  # - name: sqlitebrowser
-  - name: terraform
-  
-  # --- Media ---
-  - name: geforce-experience
-  - name: adobereader
-  - name: AdobeAIR
-  - name: adobeshockwaveplayer
-  - name: spotify
-  - name: comicrack
-  # - name: paint.net
-  # - name: blender
+    # --- Development ---
+    - name: visualstudio2019community
+      package_params: >-
+        --locale en-US
+        --add Microsoft.VisualStudio.Workload.NetWeb;includeRecommended
+        --add Microsoft.VisualStudio.Workload.Azure;includeRecommended
+        --quiet
+    - name: git
+    - name: github-desktop
+    - name: python3
+    - name: dotnetcore-sdk
+    - name: azure-cli
+    - name: nodejs
+    - name: vscode
+    - name: mongodb
+    - name: postman
+    # - name: sqlitebrowser
+    - name: terraform
 
-  # --- Video Editing ---
-  - name: mkvtoolnix # https://mkvtoolnix.download/doc/mkvmerge.html
-  - name: MakeMKV
-  - name: handbrake
-  - name: k-litecodecpackmega
-  - name: 4k-video-downloader
-  # - name: jubler
-  # - name: chatterino
+    # --- Media ---
+    - name: geforce-experience
+    - name: adobereader
+    - name: AdobeAIR
+    - name: adobeshockwaveplayer
+    - name: spotify
+    - name: comicrack
+    # - name: paint.net
+    # - name: blender
 
-  # --- Videogames ---
-  - name: directx
-  - name: steam
-  - name: discord
-  # - name: autohotkey
+    # --- Video Editing ---
+    - name: mkvtoolnix # https://mkvtoolnix.download/doc/mkvmerge.html
+    - name: MakeMKV
+    - name: handbrake
+    - name: k-litecodecpackmega
+    - name: 4k-video-downloader
+    # - name: jubler
+    # - name: chatterino
+
+    # --- Videogames ---
+    - name: directx
+    - name: steam
+    - name: discord
+    # - name: autohotkey
 
   uninstall:
-  - name: python2
-  - name: mitkerberos
-  # - name: docker-desktop
-  # - name: unity
-  # - name: obs-studio
-  # - name: gimp
-  - name: vlc
-  - name: passkey
-  - name: typescript
-  - name: sass
-  - name: dart-sdk # sass dependency
-  # - name: jekyll
-  # - name: microsoftazurestorageexplorer
-  - name: streamlabs-obs
-  - name: twitch
-
+    - name: python2
+    - name: mitkerberos
+    # - name: docker-desktop
+    # - name: unity
+    # - name: obs-studio
+    # - name: gimp
+    - name: vlc
+    - name: passkey
+    - name: typescript
+    - name: sass
+    - name: dart-sdk # sass dependency
+    # - name: jekyll
+    # - name: microsoftazurestorageexplorer
+    - name: streamlabs-obs
+    - name: twitch
 
 pip_packages:
-- pip
-- pytz
-- colorlog
-
+  - pip
+  - pytz
+  - colorlog
 
 vscode_extensions:
-- DavidAnson.vscode-markdownlint
-- donjayamanne.githistory
-- ms-azure-devops.azure-pipelines
-- ms-python.python
-- ms-vscode-remote.remote-ssh
-- ms-vscode-remote.remote-ssh-edit
-- ms-vscode-remote.remote-wsl
-- ms-vscode.azure-account
-- ms-vscode.csharp
-- ms-vscode.powershell
-- ms-vscode.vscode-typescript-tslint-plugin
-- rog2.luacheck
-- tangzx.emmylua
-- vscode-icons-team.vscode-icons
-...
+  - DavidAnson.vscode-markdownlint
+  - donjayamanne.githistory
+  - ms-azure-devops.azure-pipelines
+  - ms-python.python
+  - ms-vscode-remote.remote-ssh
+  - ms-vscode-remote.remote-ssh-edit
+  - ms-vscode-remote.remote-wsl
+  - ms-vscode.azure-account
+  - ms-vscode.csharp
+  - ms-vscode.powershell
+  - ms-vscode.vscode-typescript-tslint-plugin
+  - rog2.luacheck
+  - tangzx.emmylua
+  - vscode-icons-team.vscode-icons
