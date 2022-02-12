@@ -46,6 +46,7 @@ chocolatey_packages:
     - name: vscode
     - name: mongodb
     - name: mongodb-compass
+    - name: mongodb-shell
     - name: postman
     # - name: sqlitebrowser
     - name: terraform
