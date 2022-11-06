@@ -2,21 +2,31 @@
 
 ## Initialization
 
-1. Run Windows PowerShell (as Administrator) to install Linux on Windows
+1. Run Windows PowerShell (as _Administrator_) to install Linux on Windows
+
+   <sub><sup>Set security to TLS 1.2 (required by many sites; more secure than default TLS 1.0)</sup></sub>
 
    ```powershell
-   # Change security to TLS 1.2 (required by many sites; more secure than default TLS 1.0)
    [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
-   # Install WSL (*nix kernel) - restart system when prompted
+   ```
+
+   <sub><sup>Install WSL (\*nix kernel) - restart system when prompted</sup></sub>
+
+   ```powershell
    Enable-WindowsOptionalFeature -Online -FeatureName Microsoft-Windows-Subsystem-Linux
-   # Run script to install Chocolatey, Ubuntu, and RemoteRM
+   ```
+
+   <sub><sup>Run script to install Chocolatey, Ubuntu, and RemoteRM</sup></sub>
+
+   ```powershell
    iwr https://raw.githubusercontent.com/david-rachwalik/pc-setup/master/win_init.ps1 -UseBasicParsing | iex
    ```
 
 2. Run script to install Ansible on Linux and call provisioning playbooks
 
+   <sub><sup>Script installs might fail behind VPN</sup></sub>
+
    ```bash
-   # Script installs might fail behind VPN
    curl -s https://raw.githubusercontent.com/david-rachwalik/pc-setup/master/wsl_init.sh | sudo -H bash
    ```
 
@@ -52,10 +62,15 @@ view ~/log/ansible_scheduled_task.log
 
 1. Run PowerShell (as Administrator) to [install Chocolatey](https://chocolatey.org/install)
 
+   <sub><sup>Install Chocolatey</sup></sub>
+
    ```powershell
-   # Install Chocolatey
    Set-ExecutionPolicy Bypass -Scope Process -Force; iwr https://chocolatey.org/install.ps1 -UseBasicParsing | iex
-   # Set Chocolatey to skip confirmation prompts
+   ```
+
+   <sub><sup>Set Chocolatey to skip confirmation prompts</sup></sub>
+
+   ```powershell
    choco feature enable -n allowGlobalConfirmation
    ```
 
