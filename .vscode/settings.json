@@ -1,24 +1,25 @@
 {
-    // "git.path": "C:\\Git\\cmd\\git.exe",
-    "git.enabled": true,
-    // "python.pythonPath": "C:\\Python38\\python.exe",
-    "python.pythonPath": "/usr/bin/python",
-    "python.analysis.typeCheckingMode": "basic",
-    "update.channel": "none",
-    "update.enableWindowsBackgroundUpdates": false,
-    "workbench.editor.labelFormat": "short",
-    // WSL1 workaround for renaming non-empty directories
-    // https://devblogs.microsoft.com/commandline/tips-and-tricks-for-linux-development-with-wsl-and-visual-studio-code/
-    "remote.WSL.fileWatcher.polling": true,
-    "remote.WSL.fileWatcher.pollingInterval": 5000, // default (every 5s)
-    "editor.formatOnSave": true,
-    "[python]": {
-        "editor.formatOnSave": false
-    },
-    "[yaml]": {
-        "editor.formatOnSave": false
-    },
-    "files.associations": {
-        "*.json": "jsonc"
-    }
+  // "git.path": "C:\\Git\\cmd\\git.exe",
+  "git.enabled": true,
+  // https://github.com/microsoft/vscode-python/wiki/Setting-descriptions#pythondefaultinterpreterpath
+  // "python.defaultInterpreterPath": "/usr/bin/python",
+  "python.defaultInterpreterPath": "C:\\Python311\\python.exe",
+  "python.analysis.typeCheckingMode": "basic",
+  "update.channel": "none",
+  "update.enableWindowsBackgroundUpdates": false,
+  "workbench.editor.labelFormat": "short",
+  // WSL1 workaround for renaming non-empty directories
+  // https://devblogs.microsoft.com/commandline/tips-and-tricks-for-linux-development-with-wsl-and-visual-studio-code/
+  "remote.WSL.fileWatcher.polling": true,
+  "remote.WSL.fileWatcher.pollingInterval": 5000, // default (every 5s)
+  "editor.formatOnSave": true,
+  "[python]": {
+    "editor.formatOnSave": false
+  },
+  "[yaml]": {
+    "editor.formatOnSave": false
+  },
+  "files.associations": {
+    "*.json": "jsonc"
+  }
 }
