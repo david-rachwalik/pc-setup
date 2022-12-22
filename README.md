@@ -1,5 +1,7 @@
 # PC Setup
 
+These are the steps I would take to provision a new machine (PC or laptop) for Windows 10/11.
+
 ## Initialization
 
 1. Run Windows PowerShell (as _Administrator_) to install Linux on Windows
