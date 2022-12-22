@@ -7,8 +7,13 @@
 
 from logging_boilerplate import *
 import shell_boilerplate as sh
-import sys, os, time, atexit
-import signal, resource, errno
+import sys
+import os
+import time
+import atexit
+import signal
+import resource
+import errno
 
 try:
     # Python 2 has both 'str' (bytes) and 'unicode' text
@@ -23,9 +28,12 @@ except NameError:
 
 # Context for turning a program into daemon process instance
 # Usage: subclass DaemonContext() and override the run() method
+
+
 class DaemonContext(object):
     def __init__(self, basename, log_file=""):
-        if not isinstance(basename, str): raise TypeError("DaemonContext() expects 'basename' parameter as string.")
+        if not isinstance(basename, str):
+            raise TypeError("DaemonContext() expects 'basename' parameter as string.")
         logger.debug("(DaemonContext:__init__): Init")
         # Initial values
         self.basename = basename
@@ -34,28 +42,25 @@ class DaemonContext(object):
         self.lockfile = "/var/lock/subsys/{0}".format(self.basename)
         self._is_open = bool()
 
-
     # Entry point for 'with' context
+
     def __enter__(self):
         self.open()
         return self
 
-
     # Exit point for 'with' context
+
     def __exit__(self):
         self.close()
-
 
     @property
     def is_locked(self):
         result = sh.path_exists(self.lockfile, "f")
         return result
 
-
     @property
     def is_open(self):
         return self._is_open
-
 
     def open(self):
         logger.debug("(DaemonContext:open): Init")
@@ -84,7 +89,8 @@ class DaemonContext(object):
                 log_index = self.standard_fds.index(fd)
                 self.standard_streams.pop(log_index)
                 self.standard_fds.pop(log_index)
-                logger.debug("(DaemonContext:open): log using standard file descriptor; adjusted standard_fds: {0}".format(self.standard_fds))
+                logger.debug(
+                    "(DaemonContext:open): log using standard file descriptor; adjusted standard_fds: {0}".format(self.standard_fds))
         # -------------------------------------------------------------
 
         # Prevent this process from generating a core dump
@@ -106,7 +112,8 @@ class DaemonContext(object):
         # Redirect standard file decsriptors from /dev/pts/* to /dev/null
         for stream in self.standard_streams:
             self.redirect_stream(stream)
-        logger.debug("(DaemonContext:open): standard file descriptors redirected to null: {0}".format(self.standard_fds))
+        logger.debug(
+            "(DaemonContext:open): standard file descriptors redirected to null: {0}".format(self.standard_fds))
         # Attach exit event
         atexit.register(self.exit_handler)
         logger.debug("(DaemonContext:open): exit handler registered")
@@ -118,13 +125,13 @@ class DaemonContext(object):
         # Run tasks within the daemon context
         self.run()
 
-
     def close(self):
         logger.debug("(DaemonContext:close): Init")
         pid = self.read_pidfile()
         if not pid:
-            logger.debug("(DaemonContext:close): pidfile '{0}' does not exist. Daemon not running?".format(self.pidfile))
-            return # Not an error in a restart
+            logger.debug(
+                "(DaemonContext:close): pidfile '{0}' does not exist. Daemon not running?".format(self.pidfile))
+            return  # Not an error in a restart
         logger.debug("(DaemonContext:close): found '{0}' in pidfile".format(self.pidfile))
         # Try killing the daemon process
         try:
@@ -136,32 +143,31 @@ class DaemonContext(object):
                 if exc.errno == errno.ESRCH:
                     # Expected to land here for graceful exit when SIGTERM takes effect
                     logger.debug("(DaemonContext:close): daemon has stopped")
-                    pass # [Errno 3] no such process
+                    pass  # [Errno 3] no such process
                 else:
-                    logger.warning("(DaemonContext:close): error occurred attempting to terminate process ({0}): {exc}".format(pid, exc=exc))
+                    logger.warning(
+                        "(DaemonContext:close): error occurred attempting to terminate process ({0}): {exc}".format(pid, exc=exc))
                     raise
-        
-    
+
     # Write the latest PID to file
+
     def create_pidfile(self):
         logger.debug("(DaemonContext:create_pidfile): Init")
         sh.file_write(self.pidfile, str(sh.process_id()))
         logger.debug("(DaemonContext:create_pidfile): pid file created successfully")
 
-    
     # Obtain an exclusive lock before running actions
+
     def create_lock(self):
         logger.debug("(DaemonContext:create_lock): Init")
         sh.file_write(self.lockfile)
         logger.debug("(DaemonContext:create_lock): lockfile created successfully")
 
-    
     def read_pidfile(self):
         logger.debug("(DaemonContext:read_pidfile): Init")
         pid = sh.file_read(self.pidfile, True)
         return int(pid) if (pid) else pid
 
-    
     def prevent_core_dump(self):
         logger.debug("(DaemonContext:prevent_core_dump): Init")
         core_resource = resource.RLIMIT_CORE
@@ -169,33 +175,34 @@ class DaemonContext(object):
         try:
             resource.getrlimit(core_resource)
         except Exception as exc:
-            logger.error("(DaemonContext:prevent_core_dump): System does not support RLIMIT_CORE resource limit ({exc})".format(exc=exc))
+            logger.error(
+                "(DaemonContext:prevent_core_dump): System does not support RLIMIT_CORE resource limit ({exc})".format(exc=exc))
             raise
         # Set hard and soft limits to zero, i.e. no core dump at all
         core_limit = (0, 0)
         resource.setrlimit(core_resource, core_limit)
 
-
     def detach_process_context(self):
         logger.debug("(DaemonContext:detach_process_context): Init")
         self.become_child_process(error_message="Failed first fork")
         # logger.debug("(DaemonContext:detach_process_context): fork 1 pid: {0}".format(sh.process_id()))
-        os.setsid() # decouple from parent
+        os.setsid()  # decouple from parent
         # Do the UNIX double-fork to prevent daemon from acquiring TTY
         self.become_child_process(error_message="Failed second fork")
         # logger.debug("(DaemonContext:detach_process_context): fork 2 pid: {0}".format(sh.process_id()))
         self.pid = sh.process_id()
         logger.debug("(DaemonContext:detach_process_context): Daemon PID: {0}".format(self.pid))
 
-
     # Attempt to spawn a child process
+
     def become_child_process(self, error_message=""):
         logger.debug("(DaemonContext:become_child_process): Init")
         try:
             child_pid = os.fork()
         except OSError as exc:
             logger.debug("(DaemonContext:become_child_process): ERRNO {0}: {1}".format(e.errno, e.strerror))
-            logger.debug("(DaemonContext:become_child_process): {message}: [{exc.errno:d}] {exc.strerror}".format(message=error_message, exc=exc))
+            logger.debug("(DaemonContext:become_child_process): {message}: [{exc.errno:d}] {exc.strerror}".format(
+                message=error_message, exc=exc))
             raise
         # Positive PID is parent process needing to exit; child process waits for parent to complete
         if child_pid > 0:
@@ -204,9 +211,9 @@ class DaemonContext(object):
         elif child_pid == 0:
             # Wait until parent exits and child is inherited by init (PID=1) for ownership of files
             while sh.process_parent_id() != 1:
-                logger.debug("(DaemonContext:become_child_process): waiting until parent ({0}) exits".format(sh.process_parent_id()))
+                logger.debug("(DaemonContext:become_child_process): waiting until parent ({0}) exits".format(
+                    sh.process_parent_id()))
                 time.sleep(0.1)
-    
 
     def reset_signal_handlers(self):
         logger.debug("(DaemonContext:reset_signal_handlers): Init")
@@ -224,9 +231,9 @@ class DaemonContext(object):
         for (signal_number, handler) in signal_handler_map.items():
             signal.signal(signal_number, handler)
         logger.debug("(DaemonContext:reset_signal_handlers): all signal handlers are updated")
-    
 
     # Gather open file descriptors from system directory
+
     def list_open_file_descriptors(self):
         logger.debug("(DaemonContext:list_open_file_descriptors): Init")
         # NOTE: Always reflects file descriptors when process was started (even with /proc/{pid}/fd)
@@ -234,7 +241,6 @@ class DaemonContext(object):
         open_fds = list(int(result) for result in open_fd_strings)
         logger.debug("(DaemonContext:list_open_file_descriptors): file descriptors open: {0}".format(open_fds))
         return open_fds
-
 
     def redirect_stream(self, system_stream, target_stream=None):
         # logger.debug("(DaemonContext:redirect_stream): Init")
@@ -245,7 +251,8 @@ class DaemonContext(object):
         system_fd = system_stream.fileno()
         # Redirect a system stream to specified file
         if target_stream:
-            logger.debug("(DaemonContext:redirect_stream): redirecting file descriptor {0} to {1}".format(target_fd, system_fd))
+            logger.debug("(DaemonContext:redirect_stream): redirecting file descriptor {0} to {1}".format(
+                target_fd, system_fd))
         try:
             os.dup2(target_fd, system_fd)
         except Exception as exc:
@@ -254,7 +261,6 @@ class DaemonContext(object):
         # Cleanup '/dev/null' file when opened
         if target_stream is None:
             self.close_file_descriptor(target_fd)
-
 
     def get_file_descriptor_path(self, fd):
         # logger.debug("(DaemonContext:get_file_descriptor_path): Init")
@@ -265,10 +271,10 @@ class DaemonContext(object):
                 # [Errno 2] No such file or directory
                 fd_path = ""
             else:
-                logger.debug("(DaemonContext:get_file_descriptor_path): Failed to get file descriptor ({0}) path: {exc}".format(fd, exc=exc))
+                logger.debug(
+                    "(DaemonContext:get_file_descriptor_path): Failed to get file descriptor ({0}) path: {exc}".format(fd, exc=exc))
                 raise
         return fd_path
-
 
     def find_log_file_descriptors(self):
         logger.debug("(DaemonContext:find_log_file_descriptors): Init")
@@ -279,47 +285,51 @@ class DaemonContext(object):
                 log_fds.append(fd)
         return log_fds
 
-
     def list_default_file_descriptors(self):
         logger.debug("(DaemonContext:list_default_file_descriptors): Init")
         default_fds = []
         # Add all standard file descriptors
-        for fd in self.standard_fds: default_fds.append(fd)
+        for fd in self.standard_fds:
+            default_fds.append(fd)
         # Add logging file descriptor
-        for fd in self.log_fds: default_fds.append(fd)
+        for fd in self.log_fds:
+            default_fds.append(fd)
         logger.debug("(DaemonContext:list_default_file_descriptors): default_fds: {0}".format(default_fds))
         return default_fds
-        
 
     def close_file_descriptor(self, fd):
         logger.debug("(DaemonContext:close_file_descriptor): Init")
-        if not (fd and isinstance(fd, int)): raise TypeError("(DaemonContext:close_file_descriptor) expects 'fd' parameter as positive integer.")
+        if not (fd and isinstance(fd, int)):
+            raise TypeError("(DaemonContext:close_file_descriptor) expects 'fd' parameter as positive integer.")
         try:
             os.close(fd)
         except OSError as exc:
             if exc.errno == errno.EBADF:
-                pass # [Errno 9] Bad file descriptor
+                pass  # [Errno 9] Bad file descriptor
             else:
-                logger.debug("(DaemonContext:close_file_descriptor): error closing file descriptor ({0}): {exc}".format(fd, exc=exc))
+                logger.debug(
+                    "(DaemonContext:close_file_descriptor): error closing file descriptor ({0}): {exc}".format(fd, exc=exc))
                 raise
-    
 
     # Close all open file streams; primarily needs to close /dev/tty
+
     def close_all_open_files(self, exclude=set()):
         logger.debug("(DaemonContext:close_all_open_files): Init")
-        if not (isinstance(exclude, list) or isinstance(exclude, set)): raise TypeError("(DaemonContext:close_all_open_files) expects 'exclude' parameter as list/set.")
+        if not (isinstance(exclude, list) or isinstance(exclude, set)):
+            raise TypeError("(DaemonContext:close_all_open_files) expects 'exclude' parameter as list/set.")
         logger.debug("(DaemonContext:close_all_open_files): excluded file descriptors: {0}".format(exclude))
         # Determine candidate file descriptors to close
         fds_to_close = sh.list_differences(self.open_fds, exclude)
         # Close each file descriptor
         for fd in reversed(fds_to_close):
             fd_path = self.get_file_descriptor_path(fd)
-            logger.debug("(DaemonContext:close_all_open_files): closing file descriptor ({0}) for path '{1}'".format(fd, fd_path))
+            logger.debug(
+                "(DaemonContext:close_all_open_files): closing file descriptor ({0}) for path '{1}'".format(fd, fd_path))
             self.close_file_descriptor(fd)
         logger.debug("(DaemonContext:close_all_open_files): all file descriptors are closed")
 
-
     # Cleanup lockfile and PID file
+
     def exit_handler(self):
         logger.debug("(DaemonContext:exit_handler): Init")
         if sh.path_exists(self.lockfile, "f"):
@@ -329,10 +339,9 @@ class DaemonContext(object):
             logger.debug("(DaemonContext:exit_handler): removed PID file: {0}".format(self.pidfile))
             sh.file_delete(self.pidfile)
 
-
     def run(self):
-        logger.warning("(DaemonContext:run): Override this method when you subclass DaemonContext.  It will be called after the process has been daemonized.")
-
+        logger.warning(
+            "(DaemonContext:run): Override this method when you subclass DaemonContext.  It will be called after the process has been daemonized.")
 
     def terminate(self):
         logger.warning("(DaemonContext:terminate): Signal handler for end-process")
@@ -359,7 +368,8 @@ if __name__ == "__main__":
 
     # Configure the logger
     log_level = 20                  # logging.INFO
-    if args.debug: log_level = 10   # logging.DEBUG
+    if args.debug:
+        log_level = 10   # logging.DEBUG
     logger.setLevel(log_level)
     logger.debug("(__main__): args: {0}".format(args))
     logger.debug("(__main__): ------------------------------------------------")
@@ -393,7 +403,6 @@ if __name__ == "__main__":
         daemon.open()
     # Assume all is well if here
     sh.process_exit()
-
 
     # --- Usage Example ---
     # sudo python /root/.local/lib/python2.7/site-packages/daemon_boilerplate.py

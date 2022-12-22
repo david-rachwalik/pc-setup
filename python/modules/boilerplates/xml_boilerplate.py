@@ -25,11 +25,12 @@ except NameError:
 
 # ------------------------ Classes ------------------------
 
+
 class XmlManager(object):
     def __init__(self, xml):
         # Initial values or defaults
         self.elementTreeType = type(EL.ElementTree)
-        self.elementType = type(EL.Element(None)) # instance not directly exposed
+        self.elementType = type(EL.Element(None))  # instance not directly exposed
         self.entityType = type(XmlEntity)
         self.xml_path = str(xml)
 
@@ -37,7 +38,6 @@ class XmlManager(object):
         self.parsed = bool(self.elementTree)
 
         self.rootNamespace = self.Namespace() if (self.parsed) else ""
-
 
     def Parse(self, path):
         # logger.debug("(XmlManager:Parse): Init")
@@ -50,23 +50,26 @@ class XmlManager(object):
             logger.error("(XmlManager:Parse): error with parsing")
         return elementTree
 
-
     # Returns first element of ElementTree as root; any additional elements are considered comments
+
     def Root(self, item=None):
-        if not item: item = self.elementTree
+        if not item:
+            item = self.elementTree
         entity = self.ToEntity(item.getroot())
         return entity
 
-
     def ToEntity(self, item=None):
-        if not item: return self.Root()
-        if isinstance(item, self.elementTreeType): return self.Root(item)
-        if isinstance(item, self.elementType): return XmlEntity(item)
-        if isinstance(item, self.entityType): return item
+        if not item:
+            return self.Root()
+        if isinstance(item, self.elementTreeType):
+            return self.Root(item)
+        if isinstance(item, self.elementType):
+            return XmlEntity(item)
+        if isinstance(item, self.entityType):
+            return item
         logger.warning("(XmlManager:ToEntity): unanticipated entity: {0}".format(item))
         logger.warning("(XmlManager:ToEntity): unanticipated type(entity): {0}".format(type(item)))
         return item
-
 
     # # Cast to default element if provided a different type
     # def ToEntity(self, element=None):
@@ -77,13 +80,11 @@ class XmlManager(object):
     #     logger.warning("(XmlManager:ToEntity): unanticipated type(entity): {0}".format(type(element)))
     #     return element
 
-
     def Namespace(self, item=None):
         # logger.debug("(XmlManager:Namespace): Init")
         entity = self.ToEntity(item)
         result = re.match(r'\{.*\}', entity.element.tag)
         return result.group(0) if result else ""
-
 
     # # Get list of matching elements based on tag filter (XPath)
     # def Elements(self, tag, element=None):
@@ -95,7 +96,6 @@ class XmlManager(object):
     #         matches = []
     #     return matches
 
-
     # # Get first matching element based on tag filter (XPath)
     # def Element(self, tag, element=None):
     #     # logger.debug("(XmlManager:Elements): Init")
@@ -106,14 +106,12 @@ class XmlManager(object):
     #         match = []
     #     return match
 
-
     def ParentElement(self, element):
         logger.debug("(XmlManager:ParentElement): Init")
         if isinstance(element, self.entityType):
             return self.Element("..", element)
         else:
             return None
-
 
     def ChildElements(self, element):
         # logger.debug("(XmlManager:ChildElements): Init")
@@ -125,8 +123,8 @@ class XmlManager(object):
         else:
             return []
 
-
     # Get text content of element
+
     def ElementText(self, element):
         # logger.debug("(XmlManager:ElementText): Init")
         if isinstance(element, self.entityType):
@@ -134,8 +132,8 @@ class XmlManager(object):
         else:
             return ""
 
-
     # Get a specific element tag
+
     def ElementTag(self, element):
         # logger.debug("(XmlManager:ElementTag): Init")
         if isinstance(element, self.entityType):
@@ -143,8 +141,8 @@ class XmlManager(object):
         else:
             return ""
 
-
     # Collection of element attributes; use .keys() on results for attribute names
+
     def ElementAttributes(self, element=None):
         # logger.debug("(XmlManager:ElementAttributes): Init")
         if isinstance(element, self.entityType):
@@ -152,15 +150,14 @@ class XmlManager(object):
         else:
             return {}
 
-
     # Get the value of a specific element attribute
+
     def ElementAttribute(self, attributeName, element):
         # logger.debug("(XmlManager:ElementAttribute): Init")
         if isinstance(element, self.entityType):
             return element.get(attributeName)
         else:
             return None
-
 
     # TODO: create ElementsByAttribute and ElementByAttribute
 
@@ -187,9 +184,8 @@ class XmlManager(object):
     #             if element.get(attributeName) == attributeValue:
     #                 results.append(element)
     #         logger.debug("(XmlManager:Elements): results: {0}".format(results))
-        
-    #     return results
 
+    #     return results
 
     # def Element(self, tag, attributeName="", attributeValue="", element=None, recursive=False):
     #     logger.debug("(XmlManager:Element): Init")
@@ -218,9 +214,8 @@ class XmlManager(object):
     #                 result = element
     #                 break
     #         logger.debug("(XmlManager:Element): result: {0}".format(result))
-        
-    #     return result
 
+    #     return result
 
 
 # Extension methods can only be placed on classes, not built-ins (e.g. str)
@@ -231,33 +226,30 @@ class XmlManager(object):
 class XmlEntity(object):
     def __init__(self, element):
         # Initial values or defaults
-        self.type = type(EL.Element(None)) # instance not directly exposed
+        self.type = type(EL.Element(None))  # instance not directly exposed
         self.element = None
         self.exists = False
         # Verify type is correct or fail
         if isinstance(element, self.type)
-            self.element = element
-            self.exists = True
-
+        self.element = element
+        self.exists = True
 
     def __repr__(self):
         return str(self.element)
 
-
     def __str__(self):
         return self.Tag()
 
-
     def StripNamespace(self, text):
-        if not isinstance(text, str): return ""
+        if not isinstance(text, str):
+            return ""
         # Trim matching namespace from start of tag
         match = re.match(r'\{.*\}', text)
         if match is None:
-            return text # No namespace
+            return text  # No namespace
         namespace = match.group(0)
         tagName = re.sub(namespace, r'', text)
         return tagName
-
 
     def Children(self, tagName=""):
         children = self.element.getchildren()
@@ -273,48 +265,51 @@ class XmlEntity(object):
                 results.append(child)
         return results
 
-
     def Child(self, tagName):
         children = self.Children()
         for child in children:
             childTag = self.StripNamespace(child.Tag())
             # Return matching child entity
-            if childTag == tagName: return child
+            if childTag == tagName:
+                return child
         return None
 
-
     # Get the trimmed text content of an element
+
     def Text(self):
-        if not self.exists: return ""
+        if not self.exists:
+            return ""
         return str(self.element.text).strip()
 
-
     # Get a specific element tag name
+
     def Tag(self, withNamespace=False):
-        if not self.exists: return ""
+        if not self.exists:
+            return ""
         tagName = self.element.tag
-        if not withNamespace: tagName = self.StripNamespace(tagName)
+        if not withNamespace:
+            tagName = self.StripNamespace(tagName)
         return tagName
 
-
     # Collection of element attributes; use .keys() on result for attribute names
+
     def Attributes(self):
-        if not self.exists: return []
+        if not self.exists:
+            return []
         return self.element.attrib
 
-
     # Get the value of a specific element attribute
+
     def Attribute(self, attributeName):
-        if not self.exists: return ""
+        if not self.exists:
+            return ""
         return self.element.get(attributeName)
 
 
-
 # ------------------------ Main program ------------------------
-
 # Initialize the logger
-basename = "xml_boilerplate"
-log_options = LogOptions(basename)
+BASENAME = "xml_boilerplate"
+log_options = LogOptions(BASENAME)
 logger = get_logger(log_options)
 
 if __name__ == "__main__":
@@ -328,7 +323,8 @@ if __name__ == "__main__":
 
     # Configure the logger
     log_level = 20                  # logging.INFO
-    if args.debug: log_level = 10   # logging.DEBUG
+    if args.debug:
+        log_level = 10   # logging.DEBUG
     logger.setLevel(log_level)
     logger.debug("(__main__): args: {0}".format(args))
     logger.debug("(__main__): ------------------------------------------------")

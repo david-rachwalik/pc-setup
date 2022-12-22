@@ -11,9 +11,11 @@
 # --- ProcessPool Commands ---
 # .Close, .RunAsync, .await_results
 
-from logging_boilerplate import *
 import multiprocessing
-import time, random
+import random
+import time
+
+from logging_boilerplate import *
 
 try:
     # Python 2 has both 'str' (bytes) and 'unicode' text
@@ -26,13 +28,13 @@ except NameError:
 
 # ------------------------ Classes ------------------------
 
+
 class ProcessEvent(object):
     def __init__(self):
         logger.debug("(ProcessEvent:__init__): Init")
         # Initial values
         self.running = bool()
         self.event = multiprocessing.Event()
-    
 
     def Run(self):
         try:
@@ -40,7 +42,6 @@ class ProcessEvent(object):
         except Exception:
             return False
         return True
-
 
     def IsRunning(self):
         return self.event.is_set()
@@ -52,12 +53,10 @@ class ProcessPool(object):
         # Initial values
         self.running = bool()
         self.pool = multiprocessing.Pool()
-    
 
     def Close(self):
         self.pool.close()
         self.pool.join()
-    
 
     def RunAsync(self, func, args_list):
         if not callable(func):
@@ -70,7 +69,6 @@ class ProcessPool(object):
         except Exception:
             self.running = False
         return self.running
-
 
     def await_results(self):
         self.Close()
@@ -85,7 +83,8 @@ class ProcessPool(object):
 # Supports either a single function with list of args
 # OR takes a list of functions with a list of list of args (lengths must match)
 def ProcessPoolAwait(func, args_list, callback=None, log=None):
-    if not (callable(func) and isinstance(args_list, list)): return
+    if not (callable(func) and isinstance(args_list, list)):
+        return
     pool = ProcessPool(log=log)
     pool.RunAsync(func, args_list)
     results = pool.await_results()
@@ -95,7 +94,8 @@ def ProcessPoolAwait(func, args_list, callback=None, log=None):
 # Supports either a single function with list of args
 # OR takes a list of functions with a list of list of args (lengths must match)
 def ProcessPoolAsync(func, args_list, callback=None):
-    if not callable(func): return
+    if not callable(func):
+        return
     # Create pool and args enumerable
     pool = multiprocessing.Pool()
     # Run async processes, close pool, await (join), gather results
@@ -121,7 +121,7 @@ def rando(args):
         data[in_num] = num
     except Exception:
         print("rando nope!")
-    
+
     result = dict()
     result[in_num] = num
     return result
@@ -135,13 +135,14 @@ def rng_generate(in_num, tester):
         data[in_num] = num
     except Exception:
         print("rng_generate): Nope!")
-    
+
     result = dict()
     result[in_num] = num
     return result
 
 
 data = {}
+
 
 def end_print(start_time):
     end_time = time.time() - start_time
@@ -198,7 +199,6 @@ def my_service():
     print("{name}, exiting...")
 
 
-
 # ------------------------ Test Program ------------------------
 
 # socket_listener()
@@ -217,13 +217,13 @@ def MultiprocessSocketTester(hostName, hostPort, log=None):
     # Signal the main thread that we are up and listening
     logger.info("Socket listener started and listening on {0}:{1}".format(hostName, hostPort))
 
-
     logger.debug("(MultiprocessSocketTester): ACTION METHOD")
 
     # Create server socket to communicate with clients
     serverSocket = SocketContext(log=self.loggerOptions)
     connected = serverSocket.ConnectAsServer(self.hostName, self.config.hostPort)
-    if not connected: self.Fail()
+    if not connected:
+        self.Fail()
 
     # Signal the main thread that we are up and listening
     bindString = "{0}:{1}".format(self.hostName, self.config.hostPort)
@@ -243,7 +243,7 @@ def MultiprocessSocketTester(hostName, hostPort, log=None):
             newConn = True
         except socket.timeout:
             logger.debug("Socket timed out waiting for a client.")
-        
+
         if newConn:
             # Create args enumerable and run against process pool
             args_list = [(conn, addr)]
@@ -281,8 +281,8 @@ def MultiprocessSocketTester(hostName, hostPort, log=None):
 # ------------------------ Main Program ------------------------
 
 # Initialize the logger
-basename = "multiprocess_boilerplate"
-log_options = LogOptions(basename)
+BASENAME = "multiprocess_boilerplate"
+log_options = LogOptions(BASENAME)
 logger = get_logger(log_options)
 
 if __name__ == "__main__":
@@ -293,24 +293,24 @@ if __name__ == "__main__":
     start_time = time.time()
     # Create args enumerable and run against process pool
     args_list = []
-    for i in iterations: args_list.append((i, "test"))
+    for i in iterations:
+        args_list.append((i, "test"))
     results = ProcessPoolAsync(rando, args_list)
     # Print results
     print("results: {0}".format(results))
     end_print(start_time)
 
-
     # --- MAP ASYNC (class) ---
-    
+
     start_time = time.time()
     # Create args enumerable and run against process pool
     args_list = []
-    for i in iterations: args_list.append((i, "test"))
+    for i in iterations:
+        args_list.append((i, "test"))
     results = ProcessPoolAwait(rando, args_list)
     # Print results
     print("results: {0}".format(results))
     end_print(start_time)
-
 
     # --- Usage Example ---
     # sudo python /root/.local/lib/python2.7/site-packages/multiprocess_boilerplate.py

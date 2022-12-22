@@ -12,15 +12,17 @@
 # - branch:                     branch_validate, branch_exists, branch_create, branch_switch, branch_delete
 # - pull methods:               work_fetch, work_merge, work_rebase, work_reset
 
+from typing import List, Optional, Tuple
+
 import logging_boilerplate as log
 import shell_boilerplate as sh
-from typing import List, Tuple, Optional
 
 # ------------------------ Global Commands ------------------------
 
 # --- Repository (bare/work) Commands ---
 
-def repo_exists(path: str, bare: Optional[bool]=False) -> bool:
+
+def repo_exists(path: str, bare: Optional[bool] = False) -> bool:
     result: bool = False
     if bare:
         if sh.path_exists(path, "d"):
@@ -36,10 +38,10 @@ def repo_exists(path: str, bare: Optional[bool]=False) -> bool:
 
 
 # Initialize the repository
-def repo_create(path: str, bare: Optional[bool]=False) -> Tuple[bool, bool]:
+def repo_create(path: str, bare: Optional[bool] = False) -> Tuple[bool, bool]:
     command: List[str] = ["git", "init"]
     if bare:
-        sh.directory_create(path) # Directory must exist prior
+        sh.directory_create(path)  # Directory must exist prior
         command.append("--bare")
     sh.print_command(command)
     (stdout, stderr, rc) = sh.subprocess_run(command, path)
@@ -190,9 +192,10 @@ def ref_tags(path: str) -> List[str]:
 # --- Repository (work) Branch Commands ---
 
 # Validate version meets Git-allowed reference name rules
-def branch_validate(path: str, version: str="master") -> bool:
+def branch_validate(path: str, version: str = "master") -> bool:
     failed: bool = False
-    if version == "HEAD": return failed
+    if version == "HEAD":
+        return failed
     command: List[str] = ["git", "check-ref-format", "--branch", version]
     sh.print_command(command)
     (stdout, stderr, rc) = sh.subprocess_run(command, path)
@@ -284,7 +287,8 @@ def work_merge(path: str, version="master", remote_alias="", message="auto-merge
     remote_branch: str = "{0}/{1}".format(remote_alias, version)
     branch_use_name: str = remote_branch if remote_alias else version
     command: List[str] = ["git", "merge", branch_use_name]
-    if not fast_forward: command.append("--no-ff")
+    if not fast_forward:
+        command.append("--no-ff")
     command.extend(["--strategy=recursive", "--strategy-option={0}".format(pull_type), "-m '{0}'".format(message)])
     sh.print_command(command)
     (stdout, stderr, rc) = sh.subprocess_run(command, path)
@@ -324,7 +328,7 @@ def work_reset(path: str, version="master", remote_alias="") -> bool:
 
 # Initialize the logger
 basename: str = "git_boilerplate"
-args = log.LogArgs() # for external modules
+args = log.LogArgs()  # for external modules
 _log: log._logger_type = log.get_logger(basename)
 
 if __name__ == "__main__":
@@ -336,7 +340,7 @@ if __name__ == "__main__":
     args = parse_arguments()
 
     #  Configure the main logger
-    log_handlers: List[log.LogHandlerOptions] = log.gen_basic_handlers(args.debug, args.log_path)
+    log_handlers: List[log.LogHandlerOptions] = log.default_handlers(args.debug, args.log_path)
     log.set_handlers(_log, log_handlers)
     if args.debug:
         # Configure the shell_boilerplate logger
@@ -346,7 +350,6 @@ if __name__ == "__main__":
 
     _log.debug("args: {0}".format(args))
     _log.debug("------------------------------------------------")
-
 
     # --- Usage Example ---
     # python ~/.local/lib/python3.6/site-packages/git_boilerplate.py --debug --test=subprocess

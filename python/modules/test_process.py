@@ -8,11 +8,12 @@
 # sudo python3 /home/david/pc-setup/ansible_playbooks/roles/python/user_modules/files/test_process.py
 
 import multiprocessing
-import time
-import queue # imported for using queue.Empty exception
+import queue  # imported for using queue.Empty exception
 import random
+import time
 
 # ------------------------ Classes ------------------------
+
 
 def do_job(tasks_to_accomplish, tasks_that_are_done):
     while True:
@@ -67,7 +68,8 @@ def main():
 
 def rando(args):
     print("rando init")
-    if not isinstance(args, tuple): raise TypeError("rando() expected a tuple")
+    if not isinstance(args, tuple):
+        raise TypeError("rando() expected a tuple")
     (num, tester) = args
     proc_name = multiprocessing.current_process().name
     print("'{1}' num {0} for {2}".format(num, tester, proc_name))
@@ -80,7 +82,8 @@ def main_async():
     # Create pool and args enumerable
     pool = multiprocessing.Pool()
     args_list = []
-    for i in range(5): args_list.append((i, "test"))
+    for i in range(5):
+        args_list.append((i, "test"))
     # Run async processes, close pool, await (join), gather results
     processes = pool.map_async(rando, args_list)
     pool.close()
@@ -88,7 +91,6 @@ def main_async():
     results = processes.get()
     # Display results
     print("results: {0}".format(results))
-
 
 
 if __name__ == '__main__':

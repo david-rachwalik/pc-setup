@@ -13,17 +13,22 @@
 # deep:         Copy/move files in subdirectories       default=False
 # cut:          Move files instead of copy              default=False
 
+import argparse
+import os
+import shutil
+import sys
+
 from shell_boilerplate import ShellManager
-import argparse, os
-import sys, os, shutil
 
 # ------------------------ Primary classes/functions ------------------------
+
 
 class FileBackup(ShellManager):
     def __init__(self):
         self.args = self.ParseCommandLineArguments()
         logLevel = 20                       # logging.INFO
-        if self.args.debug: logLevel = 10   # logging.DEBUG
+        if self.args.debug:
+            logLevel = 10   # logging.DEBUG
         # Initialize the inherited class constructor
         ShellManager.__init__(self, logLevel)
         self.log.debug("(FileBackup:__init__) Init")
@@ -54,7 +59,6 @@ class FileBackup(ShellManager):
         # Perform backup copy of directory files
         self.DirectoryCopy(self.args.src, self.args.dest, self.args.deep, self.args.cut, self.args.extension)
 
-
     def ParseCommandLineArguments(self):
         parser = argparse.ArgumentParser()
         parser.add_argument("--src", default=os.getcwd())
@@ -65,7 +69,7 @@ class FileBackup(ShellManager):
         parser.add_argument("--deep", action="store_true")
         parser.add_argument("--cut", action="store_true")
         return parser.parse_args()
-    
+
 
 # ------------------------ Main Program ------------------------
 
