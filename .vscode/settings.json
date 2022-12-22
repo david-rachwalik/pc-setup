@@ -13,13 +13,14 @@
   "remote.WSL.fileWatcher.polling": true,
   "remote.WSL.fileWatcher.pollingInterval": 5000, // default (every 5s)
   "editor.formatOnSave": true,
-  "[python]": {
-    "editor.formatOnSave": false
-  },
+  // "[python]": {
+  //   "editor.formatOnSave": false
+  // },
   "[yaml]": {
     "editor.formatOnSave": false
   },
   "files.associations": {
     "*.json": "jsonc"
-  }
+  },
+  "python.analysis.extraPaths": ["./python/modules/boilerplates"]
 }
