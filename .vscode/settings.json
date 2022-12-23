@@ -21,6 +21,5 @@
   },
   "files.associations": {
     "*.json": "jsonc"
-  },
-  "python.analysis.extraPaths": ["./python/modules/boilerplates"]
+  }
 }
