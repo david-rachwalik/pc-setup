@@ -57,6 +57,7 @@ Write-Output "pip_packages_outdated: $pip_packages_outdated"
 
 # --- Install missing PIP packages ---
 
+# https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_foreach
 foreach ($package in $pip_packages_to_install)
 {
     Write-Output "Attempting to install PIP package '$package'.."
@@ -150,83 +151,98 @@ Write-Output "destination directory: $user_py_dir"
 # }
 
 
-# --- Deploy Python user modules ---
+# --- Method to validate files exist and are identical versions ---
+
+# https://learn.microsoft.com/en-us/powershell/scripting/learn/ps101/09-functions
+# https://learn.microsoft.com/en-us/powershell/scripting/developer/cmdlet/approved-verbs-for-windows-powershell-commands
+
+# Returns true if both files are found and the hashes match
+function Test-FileHashes
+{
+    param (
+        [Parameter(Mandatory)]
+        [string]$SourcePath,
+        [Parameter(Mandatory)]
+        [string]$DestinationPath
+    )
+
+    [bool]$result = 0
+
+    # --- Ensure that files exist before attempting to hash ---
+    # https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.management/test-path
+    if ((Test-Path -Path $SourcePath -PathType Leaf) -And (Test-Path -Path $DestinationPath -PathType Leaf))
+    {
+        $src = Get-FileHash $SourcePath
+        $dest = Get-FileHash $DestinationPath
+        # --- Compare the hashes ---
+        if ($src.Hash -eq $dest.Hash)
+        {
+            $result = 1
+        }
+    }
+
+    # https://stackoverflow.com/questions/10286164/function-return-value-in-powershell
+    return $result
+}
+
+
+# --- Deploy Python user modules & commands ---
 
 [System.Collections.ArrayList]$PythonFilesPassed = @()
 [System.Collections.ArrayList]$PythonFilesUpdated = @()
 
-# https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_foreach
+# Provision the latest Python modules
 foreach ($module in $python_user_modules)
 {
-    # Get the file hashes
-    # https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.management/join-path
     $src_path = Join-Path -Path $repo_py_module_dir -ChildPath $module
     $dest_path = Join-Path -Path $user_py_module_dir -ChildPath $module
-    $src = Get-FileHash $src_path
-    $dest = Get-FileHash $dest_path
-    # Compare the hashes
-    if ($src.Hash -ne $dest.Hash)
+    $match = Test-FileHashes $src_path $dest_path
+    if ($match)
     {
-        # Write-Output "Hash check failed, preparing to copy '$module'.."
+        $PythonFilesPassed.Add($module) | Out-Null
+    }
+    else
+    {
         # https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/robocopy
         # https://adamtheautomator.com/robocopy
         robocopy $repo_py_module_dir $user_py_module_dir $module /mt /z
-        # Write-Output "Successfully copied '$module'"
         $PythonFilesUpdated.Add($module) | Out-Null
     }
-    else
-    {
-        # Write-Output "Hash passed: $module"
-        $PythonFilesPassed.Add($module) | Out-Null
-    }
 }
-# Write-Output "* Completed provisioning of Python modules"
 
+# Provision the latest Python modules (boilerplate)
 foreach ($module in $python_user_boilerplate_modules)
 {
-    # Get the file hashes
     $src_path = Join-Path -Path $repo_py_boilerplate_dir -ChildPath $module
-    $dest_path = Join-Path -Path $user_py_boilerplate_dir -ChildPath $module
-    $src = Get-FileHash $src_path
-    $dest = Get-FileHash $dest_path
-    # Compare the hashes
-    if ($src.Hash -ne $dest.Hash)
+    $dest_path = Join-Path -Path $user_py_module_dir -ChildPath $module
+    $match = Test-FileHashes $src_path $dest_path
+    if ($match)
     {
-        # Write-Output "Hash check failed, preparing to copy '$module'.."
-        robocopy $repo_py_boilerplate_dir $user_py_boilerplate_dir $module /mt /z
-        # Write-Output "Successfully copied '$module'"
-        $PythonFilesUpdated.Add($module) | Out-Null
+        $PythonFilesPassed.Add($module) | Out-Null
     }
     else
     {
-        # Write-Output "Hash passed: $module"
-        $PythonFilesPassed.Add($module) | Out-Null
+        robocopy $repo_py_boilerplate_dir $user_py_module_dir $module /mt /z
+        $PythonFilesUpdated.Add($module) | Out-Null
     }
 }
-# Write-Output "* Completed provisioning of Python boilerplate modules"
 
+# Provision the latest Python commands
 foreach ($module in $python_user_commands)
 {
-    # Get the file hashes
     $src_path = Join-Path -Path $repo_py_command_dir -ChildPath $module
     $dest_path = Join-Path -Path $user_py_command_dir -ChildPath $module
-    $src = Get-FileHash $src_path
-    $dest = Get-FileHash $dest_path
-    # Compare the hashes
-    if ($src.Hash -ne $dest.Hash)
+    $match = Test-FileHashes $src_path $dest_path
+    if ($match)
     {
-        # Write-Output "Hash check failed, preparing to copy '$module'.."
-        robocopy $repo_py_command_dir $user_py_command_dir $module /mt /z
-        # Write-Output "Successfully copied '$module'"
-        $PythonFilesUpdated.Add($module) | Out-Null
+        $PythonFilesPassed.Add($module) | Out-Null
     }
     else
     {
-        # Write-Output "Hash passed: $module"
-        $PythonFilesPassed.Add($module) | Out-Null
+        robocopy $repo_py_command_dir $user_py_command_dir $module /mt /z
+        $PythonFilesUpdated.Add($module) | Out-Null
     }
 }
-# Write-Output "* Completed provisioning of Python commands"
 
 # Write-Output "Python files that passed the hash check: $PythonFilesPassed"
 Write-Output "Python files updated: $PythonFilesUpdated"
