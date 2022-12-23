@@ -229,9 +229,6 @@ foreach ($module in $python_user_commands)
 # Write-Output "* Completed provisioning of Python commands"
 
 # Write-Output "Python files that passed the hash check: $PythonFilesPassed"
-if ($PythonFilesUpdated)
-{
-    Write-Output "Python files updated: $PythonFilesUpdated"
-}
+Write-Output "Python files updated: $PythonFilesUpdated"
 
 Write-Output "--- Completed provisioning of Python ---"
