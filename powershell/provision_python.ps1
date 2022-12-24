@@ -1,13 +1,28 @@
-# -------- Provision all Python modules & commands --------
+# -------- Run as Administrator - Provision all Python modules & commands --------
 # based on E:\Repos\pc-setup\ansible_playbooks\inventories\main\group_vars\windows\python.yml
 
 $pip_packages = @(
     # 'pip'
+    'pytest'
     'autopep8'
     'pytz'
     'colorlog'
     'yt-dlp'
+    # https://learn.microsoft.com/en-us/azure/developer/python/configure-local-development-environment
+    # https://learn.microsoft.com/en-us/azure/developer/python/sdk/azure-sdk-overview#connect-to-and-use-azure-resources-with-client-libraries
+    'azure-identity'
+    'azure-mgmt-resource'
+    # https://learn.microsoft.com/en-us/python/api/overview/azure/cosmos-db
+    # https://learn.microsoft.com/en-us/azure/developer/python/sdk/examples/azure-sdk-example-database
+    'azure-cosmos'
+    'azure-mgmt-cosmosdb'
+    # https://github.com/Azure-Samples/azure-cosmos-db-mongodb-python-getting-started
+    # https://www.mongodb.com/docs/drivers/pymongo
+    'pymongo'
+    # https://pypi.org/project/python-dotenv
+    'python-dotenv'
 )
+# https://learn.microsoft.com/en-us/azure/cosmos-db/mongodb/quickstart-nodejs
 
 $python_user_modules = @(
     # --- Misc. ---
