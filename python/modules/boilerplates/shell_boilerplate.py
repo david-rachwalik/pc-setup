@@ -2,15 +2,15 @@
 """Common logic for shell interactions"""
 
 # --- Global Shell Commands ---
-# :-Helper-:        format_resource, valid_resource, get_random_password
-# JSON:             is_json_parse, is_json_str, json_parse, json_convert, json_save
-# Utility:          directory_shift, directory_change, is_list_of_strings, list_differences, print_command
-# Process:          process_exit, process_fail, process_id, process_parent_id
-# Path:             path_current, path_expand, path_join, path_exists, path_dir, path_basename, path_filename
-# Directory:        directory_list, directory_create, directory_delete, directory_copy, directory_sync
-# File:             file_read, file_write, file_delete, file_rename, file_copy, file_hash, file_match, file_backup
-# Signal:           signal_max, signal_handler, signal_send
-# SubProcess:       subprocess_run, subprocess_log
+# :-Helper-:        format_resource, is_valid_resource, random_password
+# JSON:             is_json_parse, is_json_str, parse_json, convert_json, save_json
+# Utility:          shift_directory, change_directory, is_list_of_strings, list_differences, print_command
+# Process:          exit_process, fail_process, process_id, process_parent_id
+# Path:             current_path, expand_path, join_path, path_exists, path_dir, path_basename, path_filename
+# Directory:        list_directory, create_directory, delete_directory, copy_directory, sync_directory
+# File:             read_file, write_file, delete_file, rename_file, copy_file, hash_file, file_match, backup_file
+# Signal:           max_signal, handle_signal, send_signal
+# SubProcess:       run_subprocess, log_subprocess
 
 # --- SubProcess Class Commands ---
 # await_results, is_done, format_output
@@ -73,15 +73,15 @@ def format_resource(raw_name: str, lowercase: Optional[bool] = True) -> str:
 
 
 # Must conform to the following pattern: '^[0-9a-zA-Z-]+$'
-def valid_resource(raw_name: str, lowercase: Optional[bool] = True) -> bool:
-    """Method that validates whether a resource exists"""
+def is_valid_resource(raw_name: str, lowercase: Optional[bool] = True) -> bool:
+    """Method that verifies whether a resource name is valid"""
     og_name = str(raw_name)
     formatted_name = format_resource(raw_name, lowercase)
     return bool(og_name == formatted_name)
 
 
 # https://pynative.com/python-generate-random-string
-def get_random_password(length: int = 16) -> str:
+def random_password(length: int = 16) -> str:
     """Method that returns a randomized password"""
     import random
     import string
@@ -107,19 +107,19 @@ def get_random_password(length: int = 16) -> str:
 
 # Changes directory during 'with' block and then switches back
 @contextmanager
-def directory_shift(path):
+def shift_directory(path):
     """Method that changes directory prior to next step"""
     if not isinstance(path, str):
         return
-    working_directory = path_current()
-    directory_change(path)
+    working_directory = current_path()
+    change_directory(path)
     try:
         yield
     finally:
-        directory_change(working_directory)
+        change_directory(working_directory)
 
 
-def directory_change(path):
+def change_directory(path):
     """Method that changes directory"""
     os.chdir(path)
 
@@ -158,12 +158,12 @@ def print_command(command: List[str], secure: Optional[str] = "") -> str:
 
 # --- Process (List State) Commands ---
 
-def process_exit():
+def exit_process():
     """Method that exits the process"""
     sys.exit(0)
 
 
-def process_fail():
+def fail_process():
     """Method that fails the process"""
     sys.exit(1)
 
@@ -180,13 +180,13 @@ def process_parent_id() -> int:
 
 # --- Path Commands ---
 
-def path_current() -> str:
+def current_path() -> str:
     """Method that returns the current directory path"""
     return os.getcwd()
 
 
 # Expands user directory and environmental variables
-def path_expand(path: str) -> str:
+def expand_path(path: str) -> str:
     """Method that returns the absolute path"""
     result: str = os.path.expanduser(path)
     result = os.path.expandvars(result)
@@ -194,7 +194,7 @@ def path_expand(path: str) -> str:
     return result
 
 
-def path_join(path: str, *paths) -> str:
+def join_path(path: str, *paths) -> str:
     """Method that returns the joined paths"""
     return os.path.join(path, *paths)
 
@@ -202,7 +202,7 @@ def path_join(path: str, *paths) -> str:
 # Pass either "f" (file) or 'd' (directory) to file_type
 def path_exists(path: str, file_type="") -> bool:
     """Method that validates whether the path exists"""
-    path = path_expand(path)
+    path = expand_path(path)
     if not (path and isinstance(path, str)):
         raise TypeError("path_exists() expects 'path' parameter as string")
     # Use more specific type of check if provided
@@ -237,22 +237,22 @@ def path_filename(name: str) -> str:
 
 # --- Directory Commands ---
 
-def directory_create(path: str, mode=0o775) -> List[str]:
+def create_directory(path: str, mode=0o775) -> List[str]:
     """Method that creates a directory"""
     directories_created: List[str] = distutils.dir_util.mkpath(path, mode)
     return directories_created
 
 
-# Use directory_sync() for similar functionality with file filters
-def directory_copy(src: str, dest: str) -> List[str]:
+# Use sync_directory() for similar functionality with file filters
+def copy_directory(src: str, dest: str) -> List[str]:
     """Method that copies a directory"""
     prefix = path_basename(src)
-    full_dest = path_join(dest, prefix) if path_basename(dest) != prefix else dest
+    full_dest = join_path(dest, prefix) if path_basename(dest) != prefix else dest
     destination_paths: List[str] = distutils.dir_util.copy_tree(src, full_dest, update=True)
     return destination_paths
 
 
-def directory_delete(path: str):
+def delete_directory(path: str):
     """Method that deletes a directory"""
     # result = None
     if path_exists(path, "d"):
@@ -262,8 +262,8 @@ def directory_delete(path: str):
     # return result
 
 
-def directory_list(path: str) -> List[str]:
-    """Method that list a directory's contents"""
+def list_directory(path: str) -> List[str]:
+    """Method that lists a directory's contents"""
     if not path_exists(path, "d"):
         return []
     paths: List[str] = os.listdir(path)
@@ -272,14 +272,14 @@ def directory_list(path: str) -> List[str]:
 
 
 # Uses rsync, a better alternative to 'shutil.copytree' with ignore
-def directory_sync(src: str, dest: str, recursive: Optional[bool] = True, purge: Optional[bool] = True, cut: Optional[bool] = False,
+def sync_directory(src: str, dest: str, recursive: Optional[bool] = True, purge: Optional[bool] = True, cut: Optional[bool] = False,
                    include=(), exclude=(), debug: Optional[bool] = False
                    ) -> Tuple[List[str], List[str]]:
     """Method that syncs a directory's contents"""
     if not isinstance(include, tuple):
-        raise TypeError("directory_sync() expects 'include' parameter as tuple")
+        raise TypeError("sync_directory() expects 'include' parameter as tuple")
     if not isinstance(exclude, tuple):
-        raise TypeError("directory_sync() expects 'exclude' parameter as tuple")
+        raise TypeError("sync_directory() expects 'exclude' parameter as tuple")
     _log.debug("Init")
     changed_files: List[str] = []
     changes_dirs: List[str] = []
@@ -324,8 +324,8 @@ def directory_sync(src: str, dest: str, recursive: Optional[bool] = True, purge:
     command.extend(command_options)
     command.extend([src, dest])
     _log.debug(f"command used: {command}")
-    (stdout, stderr, rc) = subprocess_run(command)
-    # subprocess_log(_log, stdout, stderr, rc)
+    (stdout, stderr, rc) = run_subprocess(command)
+    # log_subprocess(_log, stdout, stderr, rc)
 
     results: List[str] = str.splitlines(str(stdout))
     _log.debug(f"results: {results}")
@@ -335,9 +335,9 @@ def directory_sync(src: str, dest: str, recursive: Optional[bool] = True, purge:
         itemized_output = result[0]
         file_name = result[1]
         if itemized_output[1] == "f":
-            changed_files.append(path_join(dest, file_name))
+            changed_files.append(join_path(dest, file_name))
         elif itemized_output[1] == "d":
-            changes_dirs.append(path_join(dest, file_name))
+            changes_dirs.append(join_path(dest, file_name))
 
     _log.debug(f"changed_files: {changed_files}")
     return (changed_files, changes_dirs)
@@ -346,17 +346,17 @@ def directory_sync(src: str, dest: str, recursive: Optional[bool] = True, purge:
 # --- File Commands ---
 
 # Touch file and optionally fill with content
-def file_write(path: str, content=None, append=False):
+def write_file(path: str, content=None, append=False):
     """Method that creates a file"""
     # Ensure path is specified
     if not isinstance(path, str):
-        raise TypeError("file_write() expects 'path' parameter as string")
+        raise TypeError("write_file() expects 'path' parameter as string")
     strategy = "a" if (append) else "w"  # write mode
     # open() only accepts absolute paths, not relative
-    path = path_expand(path)
+    path = expand_path(path)
     # Ensure containing directory exists
     if not path_exists(path, "d"):
-        directory_create(path_dir(path))
+        create_directory(path_dir(path))
     # http://python-notes.curiousefficiency.org/en/latest/python3/text_file_processing.html
     f = open(path, strategy, encoding="latin-1")
     # Accept content as string or sequence of strings
@@ -370,69 +370,70 @@ def file_write(path: str, content=None, append=False):
     f.close()
 
 
-def file_read(path: str, oneline: Optional[bool] = False) -> str:
+def read_file(path: str, oneline: Optional[bool] = False) -> str:
     """Method that reads a file's content"""
     data: str = ""
     if not (path or path_exists(path, "f")):
         return data
     try:
-        path = path_expand(path)
+        path = expand_path(path)
         # Open with file() is deprecated
         # http://python-notes.curiousefficiency.org/en/latest/python3/text_file_processing.html
         f = open(path, "r", encoding="latin-1")  # default, read mode
         data = f.readline().rstrip() if (oneline) else f.read().strip()
         f.close()
-    except Exception:
+    except Exception as e:
+        _log.error(f"Exception: {e}")
         data = ""
     return data
 
 
-def file_delete(path: str):
+def delete_file(path: str):
     """Method that deletes a file"""
-    path = path_expand(path)
+    path = expand_path(path)
     if path_exists(path, "f"):
         os.unlink(path)
 
 
-def file_rename(src: str, dest: str):
+def rename_file(src: str, dest: str):
     """Method that renames a file"""
-    src = path_expand(src)
-    dest = path_expand(dest)
+    src = expand_path(src)
+    dest = expand_path(dest)
     if path_exists(src, "f"):
         os.rename(src, dest)
 
 
-def file_copy(src: str, dest: str) -> bool:
+def copy_file(src: str, dest: str) -> bool:
     """Method that copies a file"""
     if not path_exists(src, "f"):
         return False
     command = ["cp", "--force", src, dest]
-    (stdout, stderr, rc) = subprocess_run(command)
-    # subprocess_log(_log, stdout, stderr, rc, debug=ARGS.debug)
+    (stdout, stderr, rc) = run_subprocess(command)
+    # log_subprocess(_log, stdout, stderr, rc, debug=ARGS.debug)
     return bool(rc == 0)
 
 
-def file_hash(path: str) -> str:
+def hash_file(path: str) -> str:
     """Method that verifies a file hash"""
     if not path_exists(path, "f"):
         return ""
     # Using SHA-2 hash check (more secure than MD5|SHA-1)
     command: List[str] = ["sha256sum", path]
-    (stdout, stderr, rc) = subprocess_run(command)
-    # subprocess_log(_log, stdout, stderr, rc, debug=ARGS.debug)
+    (stdout, stderr, rc) = run_subprocess(command)
+    # log_subprocess(_log, stdout, stderr, rc, debug=ARGS.debug)
     results: List[str] = str(stdout).split()
     # _log.debug(f"results: {results}")
     return results[0]
 
 
 # Uses hash to validate file integrity
-def file_match(path1: str, path2: str) -> bool:
+def match_file(path1: str, path2: str) -> bool:
     """Method that verifies whether files match based on hash"""
     # _log.debug(f"path1: {path1}")
-    hash1 = file_hash(path1)
+    hash1 = hash_file(path1)
     # _log.debug(f"hash1: {hash1}")
     # _log.debug(f"path2: {path2}")
-    hash2 = file_hash(path2)
+    hash2 = hash_file(path2)
     # _log.debug(f"hash2: {hash2}")
     if len(hash1) > 0 and len(hash2) > 0:
         return bool(hash1 == hash2)
@@ -440,11 +441,11 @@ def file_match(path1: str, path2: str) -> bool:
         return False
 
 
-def file_backup(path: str, ext="bak", time_format="%Y%m%d-%H%M%S") -> str:
+def backup_file(path: str, ext="bak", time_format="%Y%m%d-%H%M%S") -> str:
     """Method that creates a file backup"""
     current_time = time.strftime(time_format)
     backup_path = f"{path}.{current_time}.{ext}"
-    file_rename(path, backup_path)
+    rename_file(path, backup_path)
     return backup_path
 
 
@@ -465,12 +466,12 @@ def is_json_str(json_str: str) -> bool:
     """Method that validates whether string is JSON"""
     if not (json_str and isinstance(json_str, str)):
         return False
-    results = json_parse(json_str)
+    results = parse_json(json_str)
     return bool(results)
 
 
 # Deserialize JSON string to Python dictionary: https://docs.python.org/2/library/json.html
-def json_parse(json_str: str):
+def parse_json(json_str: str):
     """Method that deserializes JSON string to Python dictionary"""
     results = None
     if not (json_str and isinstance(json_str, str)):
@@ -480,13 +481,14 @@ def json_parse(json_str: str):
     try:
         results = json.loads(json_str, object_hook=_decode_dict)  # convert to dict
     except ValueError as e:
+        _log.error(f"ValueError: {e}")
         results = ""
     # _log.debug(f"results: {results}")
     return results
 
 
 # Serialize Python dictionary into JSON string
-def json_convert(data: str, indent=4):
+def convert_json(data: str, indent=4):
     """Method that serializes Python dictionary into JSON string"""
     results = None
     if not (data and isinstance(data, dict)):
@@ -496,12 +498,13 @@ def json_convert(data: str, indent=4):
     try:
         results = json.dumps(data, indent=indent)  # convert to json
     except ValueError as e:
+        _log.error(f"ValueError: {e}")
         results = ""
     # _log.debug(f"results: {results}")
     return results
 
 
-def json_save(path: str, json_str: str, indent=4):
+def save_json(path: str, json_str: str, indent=4):
     """Method that saves JSON to a file"""
     if not (path and isinstance(path, str)):
         TypeError("'path' parameter expected as string")
@@ -511,12 +514,12 @@ def json_save(path: str, json_str: str, indent=4):
         TypeError("'indent' parameter expected as integer")
     # Handle previous service principal if found
     if path_exists(path, "f"):
-        backup_path = file_backup(path)
+        backup_path = backup_file(path)
     # https://stackoverflow.com/questions/39491420/python-jsonexpecting-property-name-enclosed-in-double-quotes
     # Valid JSON syntax uses quotation marks; single quotes are only valid in string
     # https://stackoverflow.com/questions/43509448/building-json-file-out-of-python-objects
-    file_ready = json_convert(json_str, indent)
-    file_write(path, file_ready)
+    file_ready = convert_json(json_str, indent)
+    write_file(path, file_ready)
 
 
 # --- Process Commands ---
@@ -557,45 +560,7 @@ def run_subprocess(
 # Log the subprocess output provided
 def log_subprocess(_log: log._logger_type, stdout=None, stderr=None, rc=None, debug=False):
     """Method that logs a command in a subprocess"""
-    # if not is_logger(_log): raise TypeError("subprocess_log() expects '_log' parameter as logging.Logger instance")
-    if isinstance(stdout, str) and len(stdout) > 0:
-        log_stdout = f"stdout: {stdout}" if debug else stdout
-        _log.info(log_stdout)
-    if isinstance(stderr, str) and len(stderr) > 0:
-        log_stderr = f"stderr: {stderr}" if debug else stderr
-        # _log.error(log_stderr)
-        _log.info(log_stderr)  # INFO so message is below WARN level (default on import)
-    if isinstance(rc, int) and debug:
-        log_rc = f"rc: {rc}" if debug else rc
-        _log.debug(log_rc)
-
-    # debug=False           debug=True
-    # [Info]  "{0}"         "stdout: {0}"
-    # [Info]  "{0}"         "stderr: {0}"
-    # [Debug]               "rc: {0}"
-
-
-# Creates asyncronous process and immediately awaits the tuple results
-# NOTE: Only accepting 'command' as list; argument options can have spaces
-def subprocess_run(command: List[str], path="", env=None, shell=False) -> Tuple[str, str, int]:
-    """Method that runs a command in a subprocess"""
-    if not is_list_of_strings(command):
-        raise TypeError("'command' parameter expected as list/sequence of strings")
-    if not isinstance(path, str):
-        raise TypeError("'path' parameter expected as string")
-    if not (env is None or isinstance(env, dict)):
-        raise TypeError("'env' parameter expected as dictionary")
-    if not isinstance(shell, bool):
-        raise TypeError("'shell' parameter expected as boolean")
-    process: SubProcess = SubProcess(command, path, env, shell)
-    (stdout, stderr, rc) = process.await_results()
-    return (stdout, stderr, rc)
-
-
-# Log the subprocess output provided
-def subprocess_log(_log: log._logger_type, stdout=None, stderr=None, rc=None, debug=False):
-    """Method that logs a command in a subprocess"""
-    # if not is_logger(_log): raise TypeError("subprocess_log() expects '_log' parameter as logging.Logger instance")
+    # if not is_logger(_log): raise TypeError("log_subprocess() expects '_log' parameter as logging.Logger instance")
     if isinstance(stdout, str) and len(stdout) > 0:
         log_stdout = f"stdout: {stdout}" if debug else stdout
         _log.info(log_stdout)
@@ -615,26 +580,26 @@ def subprocess_log(_log: log._logger_type, stdout=None, stderr=None, rc=None, de
 
 # --- Signal Commands ---
 
-# def signal_max():
+# def max_signal():
 #     return int(signal.NSIG) - 1
 
 
 # # Accepts 'task' of <function>, 0 (signal.SIG_DFL), or 1 (signal.SIG_IGN)
-# def signal_handler(signal_num, int):
+# def handle_signal(signal_num, int):
 #     # Validate parameter input
 #     if not isinstance(signal_num, int):
-#         raise TypeError("signal_handler() expects 'signal_num' parameter as integer")
+#         raise TypeError("handle_signal() expects 'signal_num' parameter as integer")
 #     task_whitelist = [signal.SIG_DFL, signal.SIG_IGN]
 #     valid_task = callable(task) or task in task_whitelist
 #     if not valid_task:
-#         raise TypeError("signal_handler() expects 'task' parameter as callable <function> or an integer of 0 or 1 (signal.SIG_DFL or signal.SIG_IGN)")
+#         raise TypeError("handle_signal() expects 'task' parameter as callable <function> or an integer of 0 or 1 (signal.SIG_DFL or signal.SIG_IGN)")
 #     # Update the signal handler (callback method)
 #     signal.signal(signal_num, task)
 
 
-# def signal_send(pid, signal_num=signal.SIGTERM):
-#     if not (pid and isinstance(pid, int)): raise TypeError("signal_send() expects 'pid' parameter as positive integer")
-#     if not isinstance(signal_num, int): raise TypeError("signal_send() expects 'signal_num' parameter as integer")
+# def send_signal(pid, signal_num=signal.SIGTERM):
+#     if not (pid and isinstance(pid, int)): raise TypeError("send_signal() expects 'pid' parameter as positive integer")
+#     if not isinstance(signal_num, int): raise TypeError("send_signal() expects 'signal_num' parameter as integer")
 #     os.kill(pid, signal_num)
 
 
@@ -656,7 +621,7 @@ class SubProcess(object):
             raise TypeError("'shell' property expected as boolean")
         # Initial values
         self.command: List[str] = command
-        self.cwd: str = path_current()
+        self.cwd: str = current_path()
         self.chdir: str = str(chdir)
         self.env = env
         self.rc: int = int()
@@ -697,7 +662,7 @@ class SubProcess(object):
         # Create an async process to await
         # https://docs.python.org/3.9/library/subprocess.html#subprocess.Popen
         process_dir: str = self.chdir if bool(self.chdir) else self.cwd
-        with directory_shift(process_dir):
+        with shift_directory(process_dir):
             self.process = subprocess.Popen(self.command, **command_args)
 
     # def __repr__(self):
@@ -769,10 +734,10 @@ if __name__ == "__main__":
         _log.debug(f"validation command => {validator_command}")
 
         # Validate configuration against the schema
-        (STDOUT, STDERR, RC) = subprocess_run(validator_command)
+        (STDOUT, STDERR, RC) = run_subprocess(validator_command)
         if RC != 0:
             _log.error(f"XML file ({xml_config}) failed to validate against schema ({xml_schema})")
-            subprocess_log(_log, STDOUT, STDERR, RC, debug=ARGS.debug)
+            log_subprocess(_log, STDOUT, STDERR, RC, debug=ARGS.debug)
         else:
             _log.debug(f"{xml_config} was successfully validated")
 
@@ -780,18 +745,18 @@ if __name__ == "__main__":
     elif ARGS.test == "subprocess":
         test_command: List[str] = ["ls", "-la", "/var"]
         _log.debug(f"test command => {test_command}")
-        (STDOUT, STDERR, RC) = subprocess_run(test_command)
-        subprocess_log(_log, STDOUT, STDERR, RC, debug=ARGS.debug)
+        (STDOUT, STDERR, RC) = run_subprocess(test_command)
+        log_subprocess(_log, STDOUT, STDERR, RC, debug=ARGS.debug)
 
         # Test writing to files
         test_file = "/tmp/ewertz"
         test_command = ["cat", test_file]
         inputs: List[str] = ["", "123", "12345", "1"]
         for I in inputs:
-            file_write(test_file, I)
-            (STDOUT, STDERR, RC) = subprocess_run(test_command)
-            subprocess_log(_log, STDOUT, STDERR, RC, debug=ARGS.debug)
-        file_delete(test_file)
+            write_file(test_file, I)
+            (STDOUT, STDERR, RC) = run_subprocess(test_command)
+            log_subprocess(_log, STDOUT, STDERR, RC, debug=ARGS.debug)
+        delete_file(test_file)
 
     # -------- SubProcess (simple) Test --------
     else:
@@ -799,9 +764,9 @@ if __name__ == "__main__":
         # test_command = ["ls"]
         test_command = ["pwd"]
         _log.debug(f"test command => {test_command}")
-        # (STDOUT, STDERR, RC) = subprocess_run(test_command)
+        # (STDOUT, STDERR, RC) = run_subprocess(test_command)
         (STDOUT, STDERR, RC) = run_subprocess(test_command)
-        subprocess_log(_log, STDOUT, STDERR, RC, debug=ARGS.debug)
+        log_subprocess(_log, STDOUT, STDERR, RC, debug=ARGS.debug)
 
     # --- Usage Example ---
     # sudo python /root/.local/lib/python2.7/site-packages/shell_boilerplate.py
