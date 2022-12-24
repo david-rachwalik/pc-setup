@@ -1,10 +1,5 @@
 #!/usr/bin/env python
-"""Common logic for Python shell interactions"""
-
-# Basename: shell_boilerplate
-# Description: Common business logic for *nix shell interactions
-# Version: 3.0.0
-# VersionDate: 19 Dec 2022
+"""Common logic for shell interactions"""
 
 # --- Global Shell Commands ---
 # :-Helper-:        format_resource, valid_resource, get_random_password
@@ -155,8 +150,7 @@ def print_command(command: List[str], secure: Optional[str] = "") -> str:
         # Print password-safe version of command
         for (i, line) in enumerate(_command):
             if line.startswith(secure):
-                _command[i] = f"{0}*".format(secure)
-    # display_command = "command => {0}".format(str.join(" ", _command))
+                _command[i] = f"{secure}*"
     display_command: str = " ".join(map(str, _command))  # using list comprehension
     _log.debug(display_command)
     return display_command
@@ -321,20 +315,20 @@ def directory_sync(src: str, dest: str, recursive: Optional[bool] = True, purge:
     # Add whitelist/blacklist filters
     for i in include:
         if i:
-            command_options.append(f"--include={0}".format(i))
+            command_options.append(f"--include={i}")
     for i in exclude:
         if i:
-            command_options.append(f"--exclude={0}".format(i))
+            command_options.append(f"--exclude={i}")
     # Build and run the command
     command = ["rsync"]
     command.extend(command_options)
     command.extend([src, dest])
-    _log.debug(f"command used: {0}".format(command))
+    _log.debug(f"command used: {command}")
     (stdout, stderr, rc) = subprocess_run(command)
     # subprocess_log(_log, stdout, stderr, rc)
 
     results: List[str] = str.splitlines(str(stdout))
-    _log.debug(f"results: {0}".format(results))
+    _log.debug(f"results: {results}")
 
     for r in results:
         result = r.split(" ", 1)
@@ -345,7 +339,7 @@ def directory_sync(src: str, dest: str, recursive: Optional[bool] = True, purge:
         elif itemized_output[1] == "d":
             changes_dirs.append(path_join(dest, file_name))
 
-    _log.debug(f"changed_files: {0}".format(changed_files))
+    _log.debug(f"changed_files: {changed_files}")
     return (changed_files, changes_dirs)
 
 
@@ -414,7 +408,7 @@ def file_copy(src: str, dest: str) -> bool:
         return False
     command = ["cp", "--force", src, dest]
     (stdout, stderr, rc) = subprocess_run(command)
-    # subprocess_log(_log, stdout, stderr, rc, debug=args.debug)
+    # subprocess_log(_log, stdout, stderr, rc, debug=ARGS.debug)
     return bool(rc == 0)
 
 
@@ -425,21 +419,21 @@ def file_hash(path: str) -> str:
     # Using SHA-2 hash check (more secure than MD5|SHA-1)
     command: List[str] = ["sha256sum", path]
     (stdout, stderr, rc) = subprocess_run(command)
-    # subprocess_log(_log, stdout, stderr, rc, debug=args.debug)
+    # subprocess_log(_log, stdout, stderr, rc, debug=ARGS.debug)
     results: List[str] = str(stdout).split()
-    # _log.debug("results: {0}".format(results))
+    # _log.debug(f"results: {results}")
     return results[0]
 
 
 # Uses hash to validate file integrity
 def file_match(path1: str, path2: str) -> bool:
     """Method that verifies whether files match based on hash"""
-    # _log.debug("path1: {0}".format(path1))
+    # _log.debug(f"path1: {path1}")
     hash1 = file_hash(path1)
-    # _log.debug("hash1: {0}".format(hash1))
-    # _log.debug("path2: {0}".format(path2))
+    # _log.debug(f"hash1: {hash1}")
+    # _log.debug(f"path2: {path2}")
     hash2 = file_hash(path2)
-    # _log.debug("hash2: {0}".format(hash2))
+    # _log.debug(f"hash2: {hash2}")
     if len(hash1) > 0 and len(hash2) > 0:
         return bool(hash1 == hash2)
     else:
@@ -449,7 +443,7 @@ def file_match(path1: str, path2: str) -> bool:
 def file_backup(path: str, ext="bak", time_format="%Y%m%d-%H%M%S") -> str:
     """Method that creates a file backup"""
     current_time = time.strftime(time_format)
-    backup_path = f"{0}.{1}.{2}".format(path, current_time, ext)
+    backup_path = f"{path}.{current_time}.{ext}"
     file_rename(path, backup_path)
     return backup_path
 
@@ -482,12 +476,12 @@ def json_parse(json_str: str):
     if not (json_str and isinstance(json_str, str)):
         return results
     # _log.debug("attempting json.loads")
-    # _log.debug("json_str: {0}".format(json_str))
+    # _log.debug(f"json_str: {json_str}")
     try:
         results = json.loads(json_str, object_hook=_decode_dict)  # convert to dict
     except ValueError as e:
         results = ""
-    # _log.debug("results: {0}".format(results))
+    # _log.debug(f"results: {results}")
     return results
 
 
@@ -498,12 +492,12 @@ def json_convert(data: str, indent=4):
     if not (data and isinstance(data, dict)):
         return results
     # _log.debug("attempting json.dumps")
-    # _log.debug("data: {0}".format(data))
+    # _log.debug(f"data: {data}")
     try:
         results = json.dumps(data, indent=indent)  # convert to json
     except ValueError as e:
         results = ""
-    # _log.debug("results: {0}".format(results))
+    # _log.debug(f"results: {results}")
     return results
 
 
@@ -529,6 +523,60 @@ def json_save(path: str, json_str: str, indent=4):
 
 # Creates asyncronous process and immediately awaits the tuple results
 # NOTE: Only accepting 'command' as list; argument options can have spaces
+def run_subprocess(
+    command: List[str],
+    cwd: Optional[str] = "",
+    env: Optional[Dict[str, str]] = None,
+) -> Tuple[str, str, int]:
+    """Method that runs a command in a subprocess"""
+    if not is_list_of_strings(command):
+        raise TypeError("'command' parameter expected as list/sequence of strings")
+    if not isinstance(cwd, str):
+        raise TypeError("'cwd' parameter expected as string")
+    if not (env is None or isinstance(env, dict)):
+        raise TypeError("'env' parameter expected as dictionary")
+
+    # process: SubProcess = SubProcess(command, cwd, env)
+    # (stdout, stderr, rc) = process.await_results()
+
+    # TODO: detect OS - use Powershell for Windows - use Bash for *nix
+    # run_command = ["pwsh", "-Command"] + command
+    run_command = ["powershell", "-Command"] + command
+    _log.debug(f"run_command: {run_command}")
+    # results = subprocess.run(command, universal_newlines=True, check=True, capture_output=True)
+    results = subprocess.run(run_command, universal_newlines=True, check=True, capture_output=True)
+    _log.debug(f"subprocess results: {results}")
+
+    stdout: str = results.stdout
+    stderr: str = results.stderr
+    rc: int = results.returncode
+
+    return (stdout, stderr, rc)
+
+
+# Log the subprocess output provided
+def log_subprocess(_log: log._logger_type, stdout=None, stderr=None, rc=None, debug=False):
+    """Method that logs a command in a subprocess"""
+    # if not is_logger(_log): raise TypeError("subprocess_log() expects '_log' parameter as logging.Logger instance")
+    if isinstance(stdout, str) and len(stdout) > 0:
+        log_stdout = f"stdout: {stdout}" if debug else stdout
+        _log.info(log_stdout)
+    if isinstance(stderr, str) and len(stderr) > 0:
+        log_stderr = f"stderr: {stderr}" if debug else stderr
+        # _log.error(log_stderr)
+        _log.info(log_stderr)  # INFO so message is below WARN level (default on import)
+    if isinstance(rc, int) and debug:
+        log_rc = f"rc: {rc}" if debug else rc
+        _log.debug(log_rc)
+
+    # debug=False           debug=True
+    # [Info]  "{0}"         "stdout: {0}"
+    # [Info]  "{0}"         "stderr: {0}"
+    # [Debug]               "rc: {0}"
+
+
+# Creates asyncronous process and immediately awaits the tuple results
+# NOTE: Only accepting 'command' as list; argument options can have spaces
 def subprocess_run(command: List[str], path="", env=None, shell=False) -> Tuple[str, str, int]:
     """Method that runs a command in a subprocess"""
     if not is_list_of_strings(command):
@@ -549,14 +597,14 @@ def subprocess_log(_log: log._logger_type, stdout=None, stderr=None, rc=None, de
     """Method that logs a command in a subprocess"""
     # if not is_logger(_log): raise TypeError("subprocess_log() expects '_log' parameter as logging.Logger instance")
     if isinstance(stdout, str) and len(stdout) > 0:
-        log_stdout = f"stdout: {0}".format(stdout) if debug else stdout
+        log_stdout = f"stdout: {stdout}" if debug else stdout
         _log.info(log_stdout)
     if isinstance(stderr, str) and len(stderr) > 0:
-        log_stderr = f"stderr: {0}".format(stderr) if debug else stderr
+        log_stderr = f"stderr: {stderr}" if debug else stderr
         # _log.error(log_stderr)
         _log.info(log_stderr)  # INFO so message is below WARN level (default on import)
     if isinstance(rc, int) and debug:
-        log_rc = f"rc: {0}".format(rc) if debug else rc
+        log_rc = f"rc: {rc}" if debug else rc
         _log.debug(log_rc)
 
     # debug=False           debug=True
@@ -632,12 +680,19 @@ class SubProcess(object):
             # https://stackoverflow.com/questions/2231227/python-subprocess-popen-with-a-modified-environment
             # Combine current environment variables with those provided
             current_env = os.environ.copy()
-            # _log.debug("current_env: {0}".format(current_env))
+            # _log.debug(f"current_env: {current_env}")
             current_env.update(env)  # update for dict, extend for list
-            # _log.debug("current_env: {0}".format(current_env))
+            # _log.debug(f"current_env: {current_env}")
             # command_args["shell"] = True
             command_args["env"] = current_env
             self.env = current_env
+
+        # if not hasattr(command_args, "shell") or command_args["shell"] is False:
+        #     # Get the windows system directory
+        #     win_dir_path = os.path.join(os.environ['WINDIR'], 'System32')
+        #     # Get the windows executable file ( notepad.exe ) path.
+        #     cmd_executeable_file_path = os.path.join(win_dir_path, 'notepad.exe')
+        #     self.command.insert(0, cmd_executeable_file_path)
 
         # Create an async process to await
         # https://docs.python.org/3.9/library/subprocess.html#subprocess.Popen
@@ -684,11 +739,10 @@ class SubProcess(object):
 # Initialize the logger
 BASENAME: str = "shell_boilerplate"
 ARGS = log.LogArgs()  # for external modules
-_log: log._logger_type = log.get_logger(BASENAME)
-# _log: log.Logger = log.get_logger(BASENAME)
+_log: log.Logger = log.get_logger(BASENAME)
 
 if __name__ == "__main__":
-    # Returns argparse.Namespace; to pass into function, use **vars(self.args)
+    # Returns argparse.Namespace; to pass into function, use **vars(self.ARGS)
     def parse_arguments():
         """Method that parses arguments provided"""
         import argparse
@@ -700,10 +754,10 @@ if __name__ == "__main__":
     ARGS = parse_arguments()
 
     #  Configure the main logger
-    log_handlers: List[log.LogHandlerOptions] = log.default_handlers(ARGS.debug, ARGS.log_path)
-    log.set_handlers(_log, log_handlers)
+    LOG_HANDLERS = log.default_handlers(ARGS.debug, ARGS.log_path)
+    log.set_handlers(_log, LOG_HANDLERS)
 
-    _log.debug(f"args: {0}".format(ARGS))
+    _log.debug(f"ARGS: {ARGS}")
     _log.debug("------------------------------------------------")
 
     # -------- XML Test --------
@@ -711,21 +765,21 @@ if __name__ == "__main__":
         # Build command to send
         xml_config: str = "$HOME/configuration.xml"
         xml_schema: str = "$HOME/configuration.xsd"
-        validator_command: List[str] = ["/usr/bin/xmllint", "--noout", f"--schema {0}".format(xml_schema), xml_config]
-        _log.debug(f"validation command => {0}".format(validator_command))
+        validator_command: List[str] = ["/usr/bin/xmllint", "--noout", f"--schema {xml_schema}", xml_config]
+        _log.debug(f"validation command => {validator_command}")
 
         # Validate configuration against the schema
         (STDOUT, STDERR, RC) = subprocess_run(validator_command)
         if RC != 0:
-            _log.error(f"XML file ({0}) failed to validate against schema ({1})".format(xml_config, xml_schema))
+            _log.error(f"XML file ({xml_config}) failed to validate against schema ({xml_schema})")
             subprocess_log(_log, STDOUT, STDERR, RC, debug=ARGS.debug)
         else:
-            _log.debug(f"{0} was successfully validated".format(xml_config))
+            _log.debug(f"{xml_config} was successfully validated")
 
     # -------- SubProcess Test --------
     elif ARGS.test == "subprocess":
         test_command: List[str] = ["ls", "-la", "/var"]
-        _log.debug(f"test command => {0}".format(test_command))
+        _log.debug(f"test command => {test_command}")
         (STDOUT, STDERR, RC) = subprocess_run(test_command)
         subprocess_log(_log, STDOUT, STDERR, RC, debug=ARGS.debug)
 
@@ -733,17 +787,20 @@ if __name__ == "__main__":
         test_file = "/tmp/ewertz"
         test_command = ["cat", test_file]
         inputs: List[str] = ["", "123", "12345", "1"]
-        for i in inputs:
-            file_write(test_file, i)
+        for I in inputs:
+            file_write(test_file, I)
             (STDOUT, STDERR, RC) = subprocess_run(test_command)
             subprocess_log(_log, STDOUT, STDERR, RC, debug=ARGS.debug)
         file_delete(test_file)
 
     # -------- SubProcess (simple) Test --------
     else:
-        test_command = ["ls", "-la", "/tmp"]
-        _log.debug(f"test command => {0}".format(test_command))
-        (STDOUT, STDERR, RC) = subprocess_run(test_command)
+        # test_command = ["ls", "-la", "/tmp"]
+        # test_command = ["ls"]
+        test_command = ["pwd"]
+        _log.debug(f"test command => {test_command}")
+        # (STDOUT, STDERR, RC) = subprocess_run(test_command)
+        (STDOUT, STDERR, RC) = run_subprocess(test_command)
         subprocess_log(_log, STDOUT, STDERR, RC, debug=ARGS.debug)
 
     # --- Usage Example ---
