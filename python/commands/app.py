@@ -878,7 +878,7 @@ basename: str = "app"
 
 args: argparse.Namespace = argparse.Namespace()  # for external modules
 # log_file = "/var/log/{0}.log".format(basename)
-_log: log._logger_type = log.get_logger(basename)
+_log: log.Logger = log.get_logger(basename)
 
 if __name__ == "__main__":
     # When 'default' doesn't work, add nargs="?" and const=(same value as default)

@@ -329,7 +329,7 @@ def work_reset(path: str, version="master", remote_alias="") -> bool:
 # Initialize the logger
 basename: str = "git_boilerplate"
 args = log.LogArgs()  # for external modules
-_log: log._logger_type = log.get_logger(basename)
+_log: log.Logger = log.get_logger(basename)
 
 if __name__ == "__main__":
     def parse_arguments():

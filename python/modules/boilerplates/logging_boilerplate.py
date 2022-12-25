@@ -30,7 +30,6 @@ import pytz
 
 # ------------------------ Classes ------------------------
 
-_logger_type: Type[logging.Logger] = logging.Logger
 Logger: Type[logging.Logger] = logging.Logger
 _timezone: str = "US/Central"
 _time_format: str = "%Y-%m-%d %H:%M:%S"
@@ -220,7 +219,7 @@ def _valid_handlers(handlers=None):
 # Initialize the logger
 BASENAME: str = "logging_boilerplate"
 ARGS = LogArgs()  # for external modules
-_log: _logger_type = get_logger(BASENAME)
+_log: Logger = get_logger(BASENAME)
 
 if __name__ == "__main__":
     def parse_arguments():

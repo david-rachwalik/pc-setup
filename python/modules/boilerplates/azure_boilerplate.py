@@ -870,7 +870,7 @@ def deployment_group_set(rg_name: str, template_path: str, parameters: Optional[
 # Initialize the logger
 basename: str = "azure_boilerplate"
 ARGS = log.LogArgs()  # for external modules
-_log: log._logger_type = log.get_logger(basename)
+_log: log.Logger = log.get_logger(basename)
 
 if __name__ == "__main__":
     # Returns argparse.Namespace; to pass into function, use **vars(self.args)

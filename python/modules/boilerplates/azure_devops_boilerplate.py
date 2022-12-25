@@ -125,7 +125,7 @@ def devops_project_list() -> Tuple[bool, bool]:
 # Initialize the logger
 BASENAME: str = "azure_devops_boilerplate"
 ARGS = log.LogArgs()  # for external modules
-_log: log._logger_type = log.get_logger(BASENAME)
+_log: log.Logger = log.get_logger(BASENAME)
 
 if __name__ == "__main__":
     # Returns argparse.Namespace; to pass into function, use **vars(self.ARGS)
