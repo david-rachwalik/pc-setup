@@ -4,7 +4,7 @@
 # --- Global Shell Commands ---
 # :-Helper-:        format_resource, is_valid_resource, random_password
 # JSON:             is_json_parse, is_json_str, from_json, to_json, save_json
-# Utility:          shift_directory, change_directory, is_list_of_strings, list_differences, print_command
+# Utility:          shift_directory, change_directory, list_differences, print_command
 # Process:          exit_process, fail_process, process_id, process_parent_id
 # Path:             current_path, expand_path, join_path, path_exists, path_dir, path_basename, path_filename
 # Directory:        list_directory, create_directory, delete_directory, copy_directory, sync_directory
@@ -41,17 +41,6 @@ def test_random_password():
 
 
 # --- Utility Commands ---
-
-def test_is_list_of_strings():
-    """Verify the output of 'is_list_of_strings' function"""
-    mock_list = ['a', 'b', 'c', 'd', 'e']
-    output = sh.is_list_of_strings(mock_list)
-    assert output is True
-
-    mock_list = [1, 2, 3, 4, 5]
-    output = sh.is_list_of_strings(mock_list)
-    assert output is False
-
 
 def test_list_differences():
     """Verify the output of 'list_differences' function"""
