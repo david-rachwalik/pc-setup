@@ -3,7 +3,7 @@
 
 # --- Global Shell Commands ---
 # :-Helper-:        format_resource, is_valid_resource, random_password
-# JSON:             is_json_parse, is_json_str, parse_json, convert_json, save_json
+# JSON:             from_json, to_json, save_json, is_json_parse, is_json_str
 # Utility:          shift_directory, change_directory, is_list_of_strings, list_differences, print_command
 # Process:          exit_process, fail_process, process_id, process_parent_id
 # Path:             current_path, expand_path, join_path, path_exists, path_dir, path_basename, path_filename
@@ -25,7 +25,7 @@ import sys
 import time
 # import signal
 from contextlib import contextmanager
-from typing import Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 
 import logging_boilerplate as log
 
@@ -40,12 +40,14 @@ import logging_boilerplate as log
 # Access dictionary items as object attributes
 
 
-class _dict2obj(dict):
+class DictObj(dict):
+    """Class that enables dictionary properties to be accessed as object attributes"""
+
     def __getattr__(self, name):
         if name in self:
             return self[name]
         else:
-            raise AttributeError("No such attribute: " + name)
+            raise AttributeError(f"No such attribute: {name}")
 
     def __setattr__(self, name, value):
         self[name] = value
@@ -54,7 +56,7 @@ class _dict2obj(dict):
         if name in self:
             del self[name]
         else:
-            raise AttributeError("No such attribute: " + name)
+            raise AttributeError(f"No such attribute: {name}")
 
 
 # ------------------------ Global Shell Commands ------------------------
@@ -452,59 +454,39 @@ def backup_file(path: str, ext="bak", time_format="%Y%m%d-%H%M%S") -> str:
 # --- JSON Commands ---
 
 # https://realpython.com/python-json
-def _decode_dict(dct) -> _dict2obj:
+def _decode_dict(dct) -> DictObj:
     """Method that casts dictionary items to be accessed as object attributes"""
-    return _dict2obj(dct)
+    return DictObj(dct)
 
 
-def is_json_parse(obj) -> bool:
-    """Method that validates whether object is a JSON parse"""
-    return isinstance(obj, _dict2obj)
-
-
-def is_json_str(json_str: str) -> bool:
-    """Method that validates whether string is JSON"""
-    if not (json_str and isinstance(json_str, str)):
-        return False
-    results = parse_json(json_str)
-    return bool(results)
-
-
-# Deserialize JSON string to Python dictionary: https://docs.python.org/2/library/json.html
-def parse_json(json_str: str):
+# Deserialize JSON string to Python dictionary: https://docs.python.org/3/library/json.html
+def from_json(json_str: str) -> dict | None:
     """Method that deserializes JSON string to Python dictionary"""
     results = None
     if not (json_str and isinstance(json_str, str)):
         return results
-    # _log.debug("attempting json.loads")
-    # _log.debug(f"json_str: {json_str}")
     try:
-        results = json.loads(json_str, object_hook=_decode_dict)  # convert to dict
+        # Decode/parse the json string
+        results = json.loads(json_str, object_hook=_decode_dict)
     except ValueError as e:
         _log.error(f"ValueError: {e}")
-        results = ""
     # _log.debug(f"results: {results}")
     return results
 
 
 # Serialize Python dictionary into JSON string
-def convert_json(data: str, indent=4):
+def to_json(data: Any, indent: Optional[int | None] = None) -> str:
     """Method that serializes Python dictionary into JSON string"""
-    results = None
-    if not (data and isinstance(data, dict)):
-        return results
-    # _log.debug("attempting json.dumps")
-    # _log.debug(f"data: {data}")
+    results = ""
     try:
         results = json.dumps(data, indent=indent)  # convert to json
     except ValueError as e:
         _log.error(f"ValueError: {e}")
-        results = ""
     # _log.debug(f"results: {results}")
     return results
 
 
-def save_json(path: str, json_str: str, indent=4):
+def save_json(path: str, json_str: str, indent=2):
     """Method that saves JSON to a file"""
     if not (path and isinstance(path, str)):
         TypeError("'path' parameter expected as string")
@@ -518,8 +500,21 @@ def save_json(path: str, json_str: str, indent=4):
     # https://stackoverflow.com/questions/39491420/python-jsonexpecting-property-name-enclosed-in-double-quotes
     # Valid JSON syntax uses quotation marks; single quotes are only valid in string
     # https://stackoverflow.com/questions/43509448/building-json-file-out-of-python-objects
-    file_ready = convert_json(json_str, indent)
+    file_ready = to_json(json_str, indent)
     write_file(path, file_ready)
+
+
+def is_json_parse(obj) -> bool:
+    """Method that validates whether object is a JSON parse"""
+    return isinstance(obj, DictObj)
+
+
+def is_json_str(json_str: str) -> bool:
+    """Method that validates whether string is JSON"""
+    if not (json_str and isinstance(json_str, str)):
+        return False
+    results = from_json(json_str)
+    return bool(results)
 
 
 # --- Process Commands ---
