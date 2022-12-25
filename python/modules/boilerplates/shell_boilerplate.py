@@ -4,10 +4,10 @@
 # --- Global Shell Commands ---
 # :-Helper-:        format_resource, is_valid_resource, random_password
 # JSON:             from_json, to_json, save_json, is_json_parse, is_json_str
-# Utility:          shift_directory, change_directory, is_list_of_strings, list_differences, print_command
+# Utility:          shift_directory, change_directory, list_differences, print_command
 # Process:          exit_process, fail_process, process_id, process_parent_id
 # Path:             current_path, expand_path, join_path, path_exists, path_dir, path_basename, path_filename
-# Directory:        list_directory, create_directory, delete_directory, copy_directory, sync_directory
+# Directory:        list_directory, create_directory, delete_directory, copy_directory, rsync_directory
 # File:             read_file, write_file, delete_file, rename_file, copy_file, hash_file, file_match, backup_file
 # Signal:           max_signal, handle_signal, send_signal
 # SubProcess:       run_subprocess, log_subprocess
@@ -66,8 +66,6 @@ class DictObj(dict):
 # Must conform to the following pattern: '^[0-9a-zA-Z-]+$'
 def format_resource(raw_name: str, lowercase: Optional[bool] = True) -> str:
     """Method that formats a string name into a resource name"""
-    if not (raw_name and isinstance(raw_name, str)):
-        TypeError("'raw_name' parameter expected as string")
     name = raw_name.lower() if lowercase else raw_name  # lowercase
     # name = re.sub('[^a-zA-Z0-9 \n\.]', '-', raw_name) # old, ignores '.'
     name = re.sub("[^a-zA-Z0-9-]", "-", name)  # replace
@@ -126,16 +124,6 @@ def change_directory(path):
     os.chdir(path)
 
 
-def is_list_of_strings(obj) -> bool:
-    """Method that validates whether object is a list of strings"""
-    if not isinstance(obj, list):
-        return False
-    # return bool(obj) and all(isinstance(elem, str) for elem in obj)
-    if not obj:
-        return True  # empty list
-    return all(isinstance(elem, str) for elem in obj)
-
-
 def list_differences(first, second):
     """Method that return items from the first list that aren't in the second list"""
     second = set(second)
@@ -145,8 +133,6 @@ def list_differences(first, second):
 # Provide beginning text of command option to 'secure' and remaining will be hidden
 def print_command(command: List[str], secure: Optional[str] = "") -> str:
     """Method that prints the main command text and hiding sensitive text"""
-    if not (command and is_list_of_strings(command)):
-        TypeError("'command' parameter expected as list of strings")
     _command: List[str] = command.copy()
     if secure:
         # Print password-safe version of command
@@ -205,8 +191,6 @@ def join_path(path: str, *paths) -> str:
 def path_exists(path: str, file_type="") -> bool:
     """Method that validates whether the path exists"""
     path = expand_path(path)
-    if not (path and isinstance(path, str)):
-        raise TypeError("path_exists() expects 'path' parameter as string")
     # Use more specific type of check if provided
     if file_type == "d":
         return os.path.isdir(path)
@@ -245,7 +229,7 @@ def create_directory(path: str, mode=0o775) -> List[str]:
     return directories_created
 
 
-# Use sync_directory() for similar functionality with file filters
+# Use rsync_directory() for similar functionality with file filters
 def copy_directory(src: str, dest: str) -> List[str]:
     """Method that copies a directory"""
     prefix = path_basename(src)
@@ -274,14 +258,10 @@ def list_directory(path: str) -> List[str]:
 
 
 # Uses rsync, a better alternative to 'shutil.copytree' with ignore
-def sync_directory(src: str, dest: str, recursive: Optional[bool] = True, purge: Optional[bool] = True, cut: Optional[bool] = False,
-                   include=(), exclude=(), debug: Optional[bool] = False
-                   ) -> Tuple[List[str], List[str]]:
+def rsync_directory(src: str, dest: str, recursive: Optional[bool] = True, purge: Optional[bool] = True, cut: Optional[bool] = False,
+                    include: Tuple = (), exclude: Tuple = (), debug: Optional[bool] = False
+                    ) -> Tuple[List[str], List[str]]:
     """Method that syncs a directory's contents"""
-    if not isinstance(include, tuple):
-        raise TypeError("sync_directory() expects 'include' parameter as tuple")
-    if not isinstance(exclude, tuple):
-        raise TypeError("sync_directory() expects 'exclude' parameter as tuple")
     _log.debug("Init")
     changed_files: List[str] = []
     changes_dirs: List[str] = []
@@ -348,11 +328,8 @@ def sync_directory(src: str, dest: str, recursive: Optional[bool] = True, purge:
 # --- File Commands ---
 
 # Touch file and optionally fill with content
-def write_file(path: str, content=None, append=False):
+def write_file(path: str, content: Optional[Any] = None, append: bool = False):
     """Method that creates a file"""
-    # Ensure path is specified
-    if not isinstance(path, str):
-        raise TypeError("write_file() expects 'path' parameter as string")
     strategy = "a" if (append) else "w"  # write mode
     # open() only accepts absolute paths, not relative
     path = expand_path(path)
@@ -365,7 +342,7 @@ def write_file(path: str, content=None, append=False):
     if content:
         if content is None:
             f.write("")
-        elif is_list_of_strings(content):
+        elif isinstance(content, list):
             f.writelines(content)
         else:
             f.write(str(content))
@@ -386,7 +363,6 @@ def read_file(path: str, oneline: Optional[bool] = False) -> str:
         f.close()
     except Exception as e:
         _log.error(f"Exception: {e}")
-        data = ""
     return data
 
 
@@ -475,7 +451,7 @@ def from_json(json_str: str) -> dict | None:
 
 
 # Serialize Python dictionary into JSON string
-def to_json(data: Any, indent: Optional[int | None] = None) -> str:
+def to_json(data: Any, indent: Optional[int] = None) -> str:
     """Method that serializes Python dictionary into JSON string"""
     results = ""
     try:
@@ -486,14 +462,8 @@ def to_json(data: Any, indent: Optional[int | None] = None) -> str:
     return results
 
 
-def save_json(path: str, json_str: str, indent=2):
+def save_json(path: str, json_str: str, indent: Optional[int] = 2):
     """Method that saves JSON to a file"""
-    if not (path and isinstance(path, str)):
-        TypeError("'path' parameter expected as string")
-    if not (json_str and isinstance(json_str, str)):
-        TypeError("'json_str' parameter expected as string")
-    if not (indent and isinstance(indent, int)):
-        TypeError("'indent' parameter expected as integer")
     # Handle previous service principal if found
     if path_exists(path, "f"):
         backup_path = backup_file(path)
@@ -527,19 +497,13 @@ def run_subprocess(
     env: Optional[Dict[str, str]] = None,
 ) -> Tuple[str, str, int]:
     """Method that runs a command in a subprocess"""
-    if not is_list_of_strings(command):
-        raise TypeError("'command' parameter expected as list/sequence of strings")
-    if not isinstance(cwd, str):
-        raise TypeError("'cwd' parameter expected as string")
-    if not (env is None or isinstance(env, dict)):
-        raise TypeError("'env' parameter expected as dictionary")
 
     # process: SubProcess = SubProcess(command, cwd, env)
     # (stdout, stderr, rc) = process.await_results()
 
     # TODO: detect OS - use Powershell for Windows - use Bash for *nix
-    # run_command = ["pwsh", "-Command"] + command
-    run_command = ["powershell", "-Command"] + command
+    # run_command = ["powershell", "-Command"] + command  # legacy Windows PowerShell, built on Windows-only .NET
+    run_command = ["pwsh", "-Command"] + command  # PowerShell [Core], built on cross-platform .NET Core
     _log.debug(f"run_command: {run_command}")
     # results = subprocess.run(command, universal_newlines=True, check=True, capture_output=True)
     results = subprocess.run(run_command, universal_newlines=True, check=True, capture_output=True)
@@ -553,9 +517,8 @@ def run_subprocess(
 
 
 # Log the subprocess output provided
-def log_subprocess(_log: log._logger_type, stdout=None, stderr=None, rc=None, debug=False):
+def log_subprocess(_log: log.Logger, stdout=None, stderr=None, rc=None, debug=False):
     """Method that logs a command in a subprocess"""
-    # if not is_logger(_log): raise TypeError("log_subprocess() expects '_log' parameter as logging.Logger instance")
     if isinstance(stdout, str) and len(stdout) > 0:
         log_stdout = f"stdout: {stdout}" if debug else stdout
         _log.info(log_stdout)
@@ -605,20 +568,13 @@ def log_subprocess(_log: log._logger_type, stdout=None, stderr=None, rc=None, de
 class SubProcess(object):
     """Class of subprocess methods"""
 
-    def __init__(self, command: List[str], chdir: Optional[str] = "", env: Optional[Dict[str, str]] = None, shell: Optional[bool] = False):
-        if not is_list_of_strings(command):
-            raise TypeError("'command' property expected as list/sequence of strings")
-        if not isinstance(chdir, str):
-            raise TypeError("'chdir' property expected as string")
-        if not (env is None or isinstance(env, dict)):
-            raise TypeError("'env' property expected as dictionary")
-        if not isinstance(shell, bool):
-            raise TypeError("'shell' property expected as boolean")
+    def __init__(self, command: List[str], chdir: str = "", env: Optional[Dict[str, str]] = None, shell: bool = False):
         # Initial values
         self.command: List[str] = command
         self.cwd: str = current_path()
         self.chdir: str = str(chdir)
         self.env = env
+        self.pid: int = int()
         self.rc: int = int()
         self.stdout: str = str()
         self.stderr: str = str()
@@ -666,21 +622,18 @@ class SubProcess(object):
     def __str__(self):
         return str(self.process)
 
-    # Waits for process to finish and returns output tuple (stdout, stderr, rc)
-
     def await_results(self) -> Tuple[str, str, int]:
-        """Method that returns process output (stdout, stderr, rc)"""
+        """Method that waits for the process to finish and return its output (stdout, stderr, rc)"""
         try:
             (stdout, stderr) = self.process.communicate()
-            self.rc = self.process.returncode
             self.pid = self.process.pid
+            self.rc = self.process.returncode
             self.stdout = self.format_output(stdout)
             self.stderr = self.format_output(stderr)
             return (self.stdout, self.stderr, self.rc)
-        except Exception:
+        except Exception as e:
+            _log.error(f"Exception: {e}")
             return ("", "", -1)
-
-    # ProcessOutputFormat
 
     def format_output(self, text: str) -> str:
         """Method that formats process output"""
