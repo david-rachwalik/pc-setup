@@ -2,7 +2,7 @@
 """Common logic for shell interactions"""
 
 # --- Global Shell Commands ---
-# :-Helper-:        format_resource, is_valid_resource, random_password
+# :-Helper-:        system_platform, environment_variable, format_resource, is_valid_resource, random_password
 # JSON:             from_json, to_json, save_json, is_json_parse, is_json_str
 # Utility:          shift_directory, change_directory, list_differences, print_command
 # Process:          exit_process, fail_process, process_id, process_parent_id
@@ -63,6 +63,22 @@ class DictObj(dict):
 # ------------------------ Global Shell Commands ------------------------
 
 # --- Helper Commands ---
+
+def system_platform() -> str:
+    """Method that fetches the system platform type"""
+    # https://docs.python.org/3.11/library/sys.html#sys.platform
+    if sys.platform.startswith('linux'):
+        return 'linux'
+    elif sys.platform.startswith('win'):
+        return 'windows'
+    return ''
+
+
+def environment_variable(key: str, default: Optional[str] = None) -> str | None:
+    """Method that fetches an environment variable, returns None if not found"""
+    # https://docs.python.org/3/library/os.html#os.environ
+    return os.getenv(key, default)
+
 
 # Must conform to the following pattern: '^[0-9a-zA-Z-]+$'
 def format_resource(raw_name: str, lowercase: bool = True) -> str:
@@ -307,10 +323,10 @@ def rsync_directory(src: str, dest: str, recursive: bool = True, purge: bool = T
     command.extend(command_options)
     command.extend([src, dest])
     LOG.debug(f"command used: {command}")
-    (stdout, stderr, rc) = run_subprocess(command)
-    # log_subprocess(LOG, stdout, stderr, rc)
+    process = run_subprocess(command)
+    # log_subprocess(LOG, process)
 
-    results: List[str] = str.splitlines(str(stdout))
+    results: List[str] = str.splitlines(str(process.stdout))
     LOG.debug(f"results: {results}")
 
     for r in results:
@@ -387,9 +403,9 @@ def copy_file(src: str, dest: str) -> bool:
     if not path_exists(src, "f"):
         return False
     command = ["cp", "--force", src, dest]
-    (stdout, stderr, rc) = run_subprocess(command)
-    # log_subprocess(LOG, stdout, stderr, rc, debug=ARGS.debug)
-    return rc == 0
+    process = run_subprocess(command)
+    # log_subprocess(LOG, process, debug=ARGS.debug)
+    return process.returncode == 0
 
 
 def hash_file(path: str) -> str:
@@ -398,9 +414,9 @@ def hash_file(path: str) -> str:
         return ""
     # Using SHA-2 hash check (more secure than MD5|SHA-1)
     command: List[str] = ["sha256sum", path]
-    (stdout, stderr, rc) = run_subprocess(command)
-    # log_subprocess(LOG, stdout, stderr, rc, debug=ARGS.debug)
-    results: List[str] = str(stdout).split()
+    process = run_subprocess(command)
+    # log_subprocess(LOG, process, debug=ARGS.debug)
+    results: List[str] = str(process.stdout).split()
     # LOG.debug(f"results: {results}")
     return results[0]
 
@@ -494,42 +510,57 @@ def is_json_str(json_str: str) -> bool:
 # NOTE: Only accepting 'command' as list; argument options can have spaces
 def run_subprocess(
     command: List[str],
-    cwd: str = "",
+    cwd: Optional[str] = None,
     env: Optional[Dict[str, str]] = None,
-) -> Tuple[str, str, int]:
+    # ) -> Tuple[str, str, int]:
+) -> subprocess.CompletedProcess:
     """Method that runs a command in a subprocess"""
+    run_command: List[str] = []
 
     # process: SubProcess = SubProcess(command, cwd, env)
     # (stdout, stderr, rc) = process.await_results()
 
-    # TODO: detect OS - use Powershell for Windows - use Bash for *nix
-    # run_command = ["powershell", "-Command"] + command  # legacy Windows PowerShell, built on Windows-only .NET
-    run_command = ["pwsh", "-Command"] + command  # PowerShell [Core], built on cross-platform .NET Core
+    # Detect shell to run command in based on system platform
+    platform = system_platform()
+    if platform == 'windows':
+        # run_command = ["powershell", "-Command"] + command  # legacy Windows PowerShell, built on Windows-only .NET
+        run_command = ["pwsh", "-Command"] + command  # PowerShell [Core], built on cross-platform .NET Core
+    elif platform == 'linux':
+        run_command = ["bash", "-c"] + command  # use Bash for *nix
     LOG.debug(f"run_command: {run_command}")
-    # results = subprocess.run(command, universal_newlines=True, check=True, capture_output=True)
-    results = subprocess.run(run_command, universal_newlines=True, check=True, capture_output=True)
-    LOG.debug(f"subprocess results: {results}")
 
-    stdout: str = results.stdout
-    stderr: str = results.stderr
-    rc: int = results.returncode
+    # Execute the command in a subprocess
+    result: subprocess.CompletedProcess = subprocess.run(
+        run_command,
+        capture_output=True,
+        cwd=cwd,
+        check=True,
+        env=env,
+        universal_newlines=True,
+    )
+    LOG.debug(f"subprocess result: {result}")
 
-    return (stdout, stderr, rc)
+    # stdout: str = result.stdout
+    # stderr: str = result.stderr
+    # rc: int = result.returncode
+
+    # return (stdout, stderr, rc)
+    return result
 
 
 # Log the subprocess output provided
-def log_subprocess(LOG: log.Logger, stdout=None, stderr=None, rc=None, debug=False):
+def log_subprocess(logger: log.Logger, process: subprocess.CompletedProcess, debug: bool = False):
     """Method that logs a command in a subprocess"""
-    if isinstance(stdout, str) and len(stdout) > 0:
-        log_stdout = f"stdout: {stdout}" if debug else stdout
-        LOG.info(log_stdout)
-    if isinstance(stderr, str) and len(stderr) > 0:
-        log_stderr = f"stderr: {stderr}" if debug else stderr
-        # LOG.error(log_stderr)
-        LOG.info(log_stderr)  # INFO so message is below WARN level (default on import)
-    if isinstance(rc, int) and debug:
-        log_rc = f"rc: {rc}" if debug else rc
-        LOG.debug(log_rc)
+    if isinstance(process.stdout, str) and len(process.stdout) > 0:
+        log_stdout = f"stdout: {process.stdout}" if debug else process.stdout
+        logger.info(log_stdout)
+    if isinstance(process.stderr, str) and len(process.stderr) > 0:
+        log_stderr = f"stderr: {process.stderr}" if debug else process.stderr
+        # logger.error(log_stderr)
+        logger.info(log_stderr)  # INFO so message is below WARN level (default on import)
+    if isinstance(process.returncode, int) and debug:
+        log_rc = f"rc: {process.returncode}" if debug else process.returncode
+        logger.debug(log_rc)
 
     # debug=False           debug=True
     # [Info]  "{0}"         "stdout: {0}"
@@ -680,10 +711,10 @@ if __name__ == "__main__":
         LOG.debug(f"validation command => {validator_command}")
 
         # Validate configuration against the schema
-        (STDOUT, STDERR, RC) = run_subprocess(validator_command)
-        if RC != 0:
+        PROCESS = run_subprocess(validator_command)
+        if PROCESS.returncode != 0:
             LOG.error(f"XML file ({xml_config}) failed to validate against schema ({xml_schema})")
-            log_subprocess(LOG, STDOUT, STDERR, RC, debug=ARGS.debug)
+            log_subprocess(LOG, PROCESS, debug=ARGS.debug)
         else:
             LOG.debug(f"{xml_config} was successfully validated")
 
@@ -691,8 +722,8 @@ if __name__ == "__main__":
     elif ARGS.test == "subprocess":
         test_command: List[str] = ["ls", "-la", "/var"]
         LOG.debug(f"test command => {test_command}")
-        (STDOUT, STDERR, RC) = run_subprocess(test_command)
-        log_subprocess(LOG, STDOUT, STDERR, RC, debug=ARGS.debug)
+        PROCESS = run_subprocess(test_command)
+        log_subprocess(LOG, PROCESS, debug=ARGS.debug)
 
         # Test writing to files
         test_file = "/tmp/ewertz"
@@ -700,8 +731,8 @@ if __name__ == "__main__":
         inputs: List[str] = ["", "123", "12345", "1"]
         for I in inputs:
             write_file(test_file, I)
-            (STDOUT, STDERR, RC) = run_subprocess(test_command)
-            log_subprocess(LOG, STDOUT, STDERR, RC, debug=ARGS.debug)
+            PROCESS = run_subprocess(test_command)
+            log_subprocess(LOG, PROCESS, debug=ARGS.debug)
         delete_file(test_file)
 
     # -------- SubProcess (simple) Test --------
@@ -710,9 +741,8 @@ if __name__ == "__main__":
         # test_command = ["ls"]
         test_command = ["pwd"]
         LOG.debug(f"test command => {test_command}")
-        # (STDOUT, STDERR, RC) = run_subprocess(test_command)
-        (STDOUT, STDERR, RC) = run_subprocess(test_command)
-        log_subprocess(LOG, STDOUT, STDERR, RC, debug=ARGS.debug)
+        PROCESS = run_subprocess(test_command)
+        log_subprocess(LOG, PROCESS, debug=ARGS.debug)
 
     # --- Usage Example ---
     # sudo python /root/.local/lib/python2.7/site-packages/shell_boilerplate.py

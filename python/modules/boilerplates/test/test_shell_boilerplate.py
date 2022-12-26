@@ -19,6 +19,13 @@ import shell_boilerplate as sh
 # --- Helper Commands ---
 
 
+def test_system_platform():
+    """Verify the output of 'system_platform' function"""
+    accepted_values = ['windows', 'linux']
+    output = sh.system_platform()
+    assert output in accepted_values
+
+
 def test_format_resource():
     """Verify the output of 'format_resource' function"""
     mock_name = "rg-001"
