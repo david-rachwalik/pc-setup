@@ -189,12 +189,12 @@ def account_get(subscription: str) -> Account:
     """Method that fetches Azure account"""
     command: List[str] = ["az", "account", "show", f"--subscription={subscription}"]
     sh.print_command(command)
-    (stdout, stderr, rc) = sh.run_subprocess(command)
-    # sh.log_subprocess(LOG, stdout, stderr, rc, debug=ARGS.debug)
-    if rc != 0:
+    process = sh.run_subprocess(command)
+    # sh.log_subprocess(LOG, process, debug=ARGS.debug)
+    if process.returncode != 0:
         return Account()
     # Return the parsed account data
-    results: Account = Account(stdout)
+    results: Account = Account(process.stdout)
     # LOG.debug("fresults: {results}")
     return results
 
@@ -203,12 +203,12 @@ def account_list() -> Account:
     """Method that lists Azure accounts"""
     command: List[str] = ["az", "account", "list", "--all"]
     sh.print_command(command)
-    (stdout, stderr, rc) = sh.run_subprocess(command)
-    # sh.log_subprocess(LOG, stdout, stderr, rc, debug=ARGS.debug)
-    if rc != 0:
+    process = sh.run_subprocess(command)
+    # sh.log_subprocess(LOG, process, debug=ARGS.debug)
+    if process.returncode != 0:
         return Account()
     # Return the parsed account data
-    results: Account = Account(stdout)
+    results: Account = Account(process.stdout)
     # LOG.debug("fresults: {results}")
     return results
 
@@ -217,9 +217,9 @@ def account_logout() -> bool:
     """Method that signs out of Azure account"""
     command: List[str] = ["az", "logout"]
     sh.print_command(command)
-    (stdout, stderr, rc) = sh.run_subprocess(command)
-    # sh.log_subprocess(LOG, stdout, stderr, rc, debug=ARGS.debug)
-    return rc == 0
+    process = sh.run_subprocess(command)
+    # sh.log_subprocess(LOG, process, debug=ARGS.debug)
+    return process.returncode == 0
 
 
 # https://docs.microsoft.com/en-us/cli/azure/reference-index#az_login
@@ -236,12 +236,12 @@ def account_login(tenant: str = "", name: str = "", password: str = "") -> Accou
         command.append("--allow-no-subscriptions")
     # Print password-safe version of command
     sh.print_command(command, "--password=")
-    (stdout, stderr, rc) = sh.run_subprocess(command)
-    # sh.log_subprocess(LOG, stdout, stderr, rc, debug=ARGS.debug)
-    if rc != 0:
+    process = sh.run_subprocess(command)
+    # sh.log_subprocess(LOG, process, debug=ARGS.debug)
+    if process.returncode != 0:
         return Account()
     # Return the parsed account data
-    results: Account = Account(stdout)
+    results: Account = Account(process.stdout)
     # LOG.debug("fresults: {results}")
     return results
 
@@ -250,9 +250,9 @@ def account_set(subscription: str) -> bool:
     """Method that sets the default Azure account"""
     command: List[str] = ["az", "account", "set", f"--subscription={subscription}"]
     sh.print_command(command)
-    (stdout, stderr, rc) = sh.run_subprocess(command)
-    # sh.log_subprocess(LOG, stdout, stderr, rc, debug=ARGS.debug)
-    return rc == 0
+    process = sh.run_subprocess(command)
+    # sh.log_subprocess(LOG, process, debug=ARGS.debug)
+    return process.returncode == 0
 
 
 # --- Active Directory (AD) Group Commands ---
@@ -262,9 +262,9 @@ def ad_group_get(name: str) -> AdGroup:
     """Method that fetches Azure Active Directory group"""
     command: List[str] = ["az", "ad", "group", "show", f"--group={name}"]
     sh.print_command(command)
-    (stdout, stderr, rc) = sh.run_subprocess(command)
-    # sh.log_subprocess(LOG, stdout, stderr, rc, debug=ARGS.debug)
-    ad_group: AdGroup = AdGroup(stdout)
+    process = sh.run_subprocess(command)
+    # sh.log_subprocess(LOG, process, debug=ARGS.debug)
+    ad_group: AdGroup = AdGroup(process.stdout)
     LOG.debug(f"ad_group: {ad_group}")
     return ad_group
 
@@ -276,10 +276,10 @@ def ad_group_set(name: str) -> Tuple[AdGroup, bool]:
     command: List[str] = ["az", "ad", "group", "create",
                           f"--display-name={name}", f"--mail-nickname={name}"]
     sh.print_command(command)
-    (stdout, stderr, rc) = sh.run_subprocess(command)
-    # sh.log_subprocess(LOG, stdout, stderr, rc, debug=ARGS.debug)
-    if rc == 0:
-        ad_group = AdGroup(stdout)
+    process = sh.run_subprocess(command)
+    # sh.log_subprocess(LOG, process, debug=ARGS.debug)
+    if process.returncode == 0:
+        ad_group = AdGroup(process.stdout)
         group_changed = True
     LOG.debug(f"ad_group: {ad_group}")
     return (ad_group, group_changed)
@@ -293,9 +293,9 @@ def ad_group_member_get(name: str, member_id: str) -> bool:
     command: List[str] = ["az", "ad", "group", "member", "check",
                           f"--group={name}", f"--member-id={member_id}", "--query=value"]
     sh.print_command(command, "--member-id=")
-    (stdout, stderr, rc) = sh.run_subprocess(command)
-    # sh.log_subprocess(LOG, stdout, stderr, rc, debug=ARGS.debug)
-    return rc == 0 and stdout == "true"
+    process = sh.run_subprocess(command)
+    # sh.log_subprocess(LOG, process, debug=ARGS.debug)
+    return process.returncode == 0 and process.stdout == "true"
 
 
 def ad_group_member_set(name: str, member_id: str) -> bool:
@@ -303,9 +303,9 @@ def ad_group_member_set(name: str, member_id: str) -> bool:
     command: List[str] = ["az", "ad", "group", "member", "add",
                           f"--group={name}", f"--member-id={member_id}"]
     sh.print_command(command, "--member-id=")
-    (stdout, stderr, rc) = sh.run_subprocess(command)
-    # sh.log_subprocess(LOG, stdout, stderr, rc, debug=ARGS.debug)
-    return rc == 0
+    process = sh.run_subprocess(command)
+    # sh.log_subprocess(LOG, process, debug=ARGS.debug)
+    return process.returncode == 0
 
 
 # --- Role Assignment Commands ---
@@ -322,9 +322,9 @@ def role_assign_get(assignee_id: str, scope: str = "", role: str = "Contributor"
                           "--include-inherited", "--include-groups", "--query=[0]"
                           ]
     sh.print_command(command, "--scope=")
-    (stdout, stderr, rc) = sh.run_subprocess(command)
-    # sh.log_subprocess(LOG, stdout, stderr, rc, debug=ARGS.debug)
-    return rc == 0
+    process = sh.run_subprocess(command)
+    # sh.log_subprocess(LOG, process, debug=ARGS.debug)
+    return process.returncode == 0
 
 
 def role_assign_set(assignee_id: str, scope: str = "", role: str = "Contributor") -> bool:
@@ -335,9 +335,9 @@ def role_assign_set(assignee_id: str, scope: str = "", role: str = "Contributor"
                           f"--role={role}", f"--scope={scope}"
                           ]
     sh.print_command(command, "--scope=")
-    (stdout, stderr, rc) = sh.run_subprocess(command)
-    sh.log_subprocess(LOG, stdout, stderr, rc, debug=ARGS.debug)
-    return rc == 0
+    process = sh.run_subprocess(command)
+    sh.log_subprocess(LOG, process, debug=ARGS.debug)
+    return process.returncode == 0
 
 
 # --- Service Principal Commands ---
@@ -346,6 +346,7 @@ def role_assign_set(assignee_id: str, scope: str = "", role: str = "Contributor"
 # Always use service principal name (not id)
 def service_principal_get(sp_name: str, sp_dir: str = "", tenant: str = "") -> ServicePrincipal:
     """Method that fetches Azure service principal"""
+    stdout: str = ""
     # Full filepath to service principal data
     if not sh.is_valid_resource(sp_name):
         LOG.error("'sp_name' parameter expected as valid resource name")
@@ -363,9 +364,10 @@ def service_principal_get(sp_name: str, sp_dir: str = "", tenant: str = "") -> S
         else:
             command = ["az", "ad", "sp", "show", f"--id=http://{sp_name}"]
         sh.print_command(command)
-        (stdout, stderr, rc) = sh.run_subprocess(command)
-        # sh.log_subprocess(LOG, stdout, stderr, rc, debug=ARGS.debug)
-        if rc != 0:
+        process = sh.run_subprocess(command)
+        stdout = process.stdout
+        # sh.log_subprocess(LOG, process, debug=ARGS.debug)
+        if process.returncode != 0:
             return ServicePrincipal()
     # Return the parsed service principal data
     service_principal: ServicePrincipal = ServicePrincipal(stdout, sp_name)
@@ -378,10 +380,10 @@ def service_principal_set(sp_name: str, obj_id: str) -> ServicePrincipal:
     # Using '--sdk-auth' produces better output but not available for reset
     command: List[str] = ["az", "ad", "sp", "create", f"--id={obj_id}"]
     sh.print_command(command)
-    (stdout, stderr, rc) = sh.run_subprocess(command)
-    sh.log_subprocess(LOG, stdout, stderr, rc, debug=ARGS.debug)
-    if rc == 0 and stdout:
-        service_principal = ServicePrincipal(stdout, sp_name)
+    process = sh.run_subprocess(command)
+    sh.log_subprocess(LOG, process, debug=ARGS.debug)
+    if process.returncode == 0 and process.stdout:
+        service_principal = ServicePrincipal(process.stdout, sp_name)
         return service_principal
     else:
         return ServicePrincipal()
@@ -403,12 +405,12 @@ def service_principal_rbac_set(key_vault: str, sp_name: str, reset: bool = False
     if not reset:
         command.append("--skip-assignment")
     sh.print_command(command)
-    (stdout, stderr, rc) = sh.run_subprocess(command)
-    sh.log_subprocess(LOG, stdout, stderr, rc, debug=ARGS.debug)
-    if rc == 0 and stdout:
+    process = sh.run_subprocess(command)
+    sh.log_subprocess(LOG, process, debug=ARGS.debug)
+    if process.returncode == 0 and process.stdout:
         sp_action = "reset" if reset else "created"
         LOG.info(f"successfully {sp_action} service principal credentials!")
-        service_principal = ServicePrincipal(stdout, sp_name)
+        service_principal = ServicePrincipal(process.stdout, sp_name)
         return service_principal
     else:
         return ServicePrincipal()
@@ -423,8 +425,8 @@ def service_principal_rbac_set(key_vault: str, sp_name: str, reset: bool = False
 #     command.append("--cert={cert}")
 #     command.append("--keyvault={key_vault}")
 #     sh.print_command(command)
-#     (stdout, stderr, rc) = sh.run_subprocess(command)
-#     # sh.log_subprocess(LOG, stdout, stderr, rc, debug=ARGS.debug)
+#     process = sh.run_subprocess(command)
+#     # sh.log_subprocess(LOG, process, debug=ARGS.debug)
 #     service_principal = sh.from_json(stdout)
 #     # LOG.debug("service_principal: {service_principal}")
 #     # Same output as key vault secret
@@ -458,9 +460,9 @@ def resource_group_get(name: str) -> ResourceGroup:
     """Method that fetches Azure resource group"""
     command: List[str] = ["az", "group", "show", f"--name={name}"]
     sh.print_command(command)
-    (stdout, stderr, rc) = sh.run_subprocess(command)
-    # sh.log_subprocess(LOG, stdout, stderr, rc, debug=ARGS.debug)
-    resource_group = ResourceGroup(stdout)
+    process = sh.run_subprocess(command)
+    # sh.log_subprocess(LOG, process, debug=ARGS.debug)
+    resource_group = ResourceGroup(process.stdout)
     # LOG.debug("resource_group: {resource_group}")
     return resource_group
 
@@ -469,9 +471,9 @@ def resource_group_set(name: str, location: str) -> ResourceGroup:
     """Method that sets Azure resource group"""
     command: List[str] = ["az", "group", "create", f"--name={name}", f"--location={location}"]
     sh.print_command(command)
-    (stdout, stderr, rc) = sh.run_subprocess(command)
-    # sh.log_subprocess(LOG, stdout, stderr, rc, debug=ARGS.debug)
-    resource_group = ResourceGroup(stdout)
+    process = sh.run_subprocess(command)
+    # sh.log_subprocess(LOG, process, debug=ARGS.debug)
+    resource_group = ResourceGroup(process.stdout)
     # LOG.debug("resource_group: {resource_group}")
     return resource_group
 
@@ -484,9 +486,9 @@ def key_vault_get(resource_group: str, key_vault: str):
     command: List[str] = ["az", "keyvault", "show",
                           f"--name={key_vault}", f"--resource-group={resource_group}"]
     sh.print_command(command)
-    (stdout, stderr, rc) = sh.run_subprocess(command)
-    # sh.log_subprocess(LOG, stdout, stderr, rc, debug=ARGS.debug)
-    results = sh.from_json(stdout)
+    process = sh.run_subprocess(command)
+    # sh.log_subprocess(LOG, process, debug=ARGS.debug)
+    results = sh.from_json(process.stdout)
     # LOG.debug("results: {results}")
     return results
 
@@ -497,9 +499,9 @@ def key_vault_set(resource_group: str, key_vault: str):
     command: List[str] = ["az", "keyvault", "create",
                           f"--name={key_vault}", f"--resource-group={resource_group}"]
     sh.print_command(command)
-    (stdout, stderr, rc) = sh.run_subprocess(command)
-    # sh.log_subprocess(LOG, stdout, stderr, rc, debug=ARGS.debug)
-    results = sh.from_json(stdout)
+    process = sh.run_subprocess(command)
+    # sh.log_subprocess(LOG, process, debug=ARGS.debug)
+    results = sh.from_json(process.stdout)
     # LOG.debug("results: {results}")
     return results
 
@@ -512,11 +514,11 @@ def key_vault_secret_get(key_vault: str, secret_key: str):
     command: List[str] = ["az", "keyvault", "secret", "show",
                           f"--vault-name={key_vault}", f"--name={secret_key}"]
     sh.print_command(command)
-    (stdout, stderr, rc) = sh.run_subprocess(command)
-    # sh.log_subprocess(LOG, stdout, stderr, rc, debug=ARGS.debug)
-    if rc != 0:
+    process = sh.run_subprocess(command)
+    # sh.log_subprocess(LOG, process, debug=ARGS.debug)
+    if process.returncode != 0:
         return ""
-    results = sh.from_json(stdout)
+    results = sh.from_json(process.stdout)
     # LOG.debug("results: {results}")
     return results
 
@@ -534,11 +536,11 @@ def key_vault_secret_set(key_vault: str, secret_key: str, secret_value: str):
 
     # Print password-safe version of command
     sh.print_command(command, "--value=")
-    (stdout, stderr, rc) = sh.run_subprocess(command)
-    # sh.log_subprocess(LOG, stdout, stderr, rc, debug=ARGS.debug)
-    if rc != 0:
+    process = sh.run_subprocess(command)
+    # sh.log_subprocess(LOG, process, debug=ARGS.debug)
+    if process.returncode != 0:
         return ""
-    results = sh.from_json(stdout)
+    results = sh.from_json(process.stdout)
     # LOG.debug("results: {results}")
     return results
 
@@ -563,9 +565,9 @@ def key_vault_secret_download(cert_path: str, key_vault: str, secret_key: str) -
                           f"--file={temp_cert_path}", "--encoding=base64",
                           f"--vault-name={key_vault}", f"--name={secret_key}"]
     sh.print_command(command)
-    (stdout, stderr, rc) = sh.run_subprocess(command)
-    sh.log_subprocess(LOG, stdout, stderr, rc, debug=ARGS.debug)
-    if rc != 0:
+    process = sh.run_subprocess(command)
+    sh.log_subprocess(LOG, process, debug=ARGS.debug)
+    if process.returncode != 0:
         return False
     # Convert to proper format using OpenSSL
     # https://www.openssl.org/docs/man1.1.1/man1/openssl.html
@@ -573,8 +575,8 @@ def key_vault_secret_download(cert_path: str, key_vault: str, secret_key: str) -
     command: List[str] = ["openssl", "pkcs12",
                           f"-in={temp_cert_path}", f"-out={cert_path}", "-nodes", "-password pass:''"]
     sh.print_command(command)
-    (stdout, stderr, rc) = sh.run_subprocess(command)
-    sh.log_subprocess(LOG, stdout, stderr, rc, debug=ARGS.debug)
+    process = sh.run_subprocess(command)
+    sh.log_subprocess(LOG, process, debug=ARGS.debug)
 
     # Remove recent backup if hash matches downloaded secret
     if backup_path:
@@ -582,7 +584,7 @@ def key_vault_secret_download(cert_path: str, key_vault: str, secret_key: str) -
         if match:
             sh.delete_file(backup_path)
 
-    return rc == 0
+    return process.returncode == 0
 
 
 # --- Active Directory Application Commands ---
@@ -592,9 +594,9 @@ def active_directory_application_get(app_name: str) -> ActiveDirectoryApplicatio
     """Method that fetches Azure Active Directory application"""
     command: List[str] = ["az", "ad", "app", "list", f"--query=[?displayName=='{app_name}'] | [0]"]
     sh.print_command(command)
-    (stdout, stderr, rc) = sh.run_subprocess(command)
-    # sh.log_subprocess(LOG, stdout, stderr, rc, debug=ARGS.debug)
-    ad_app = ActiveDirectoryApplication(stdout)
+    process = sh.run_subprocess(command)
+    # sh.log_subprocess(LOG, process, debug=ARGS.debug)
+    ad_app = ActiveDirectoryApplication(process.stdout)
     LOG.debug(f"ad_app: {ad_app}")
     return ad_app
 
@@ -629,9 +631,9 @@ def active_directory_application_set(tenant: str, app_name: str, app_id: str = "
         "--available-to-other-tenants=true"
     ])
     sh.print_command(command)
-    (stdout, stderr, rc) = sh.run_subprocess(command)
-    # sh.log_subprocess(LOG, stdout, stderr, rc, debug=ARGS.debug)
-    ad_app = ActiveDirectoryApplication(stdout)
+    process = sh.run_subprocess(command)
+    # sh.log_subprocess(LOG, process, debug=ARGS.debug)
+    ad_app = ActiveDirectoryApplication(process.stdout)
     LOG.debug(f"ad_app: {ad_app}")
     return ad_app
 
@@ -653,9 +655,9 @@ def deployment_group_valid(rg_name: str, template_path: str, parameters: Optiona
         command.append("--parameters")
         command.extend(parameters)
     sh.print_command(command)
-    (stdout, stderr, rc) = sh.run_subprocess(command)
-    # sh.log_subprocess(LOG, stdout, stderr, rc, debug=ARGS.debug)
-    return rc == 0
+    process = sh.run_subprocess(command)
+    # sh.log_subprocess(LOG, process, debug=ARGS.debug)
+    return process.returncode == 0
 
 
 def deployment_group_get(rg_name: str, template_path: str, parameters: Optional[List[str]] = None, deploy_name: str = "Main") -> bool:
@@ -672,9 +674,9 @@ def deployment_group_get(rg_name: str, template_path: str, parameters: Optional[
         command.append("--parameters")
         command.extend(parameters)
     sh.print_command(command)
-    (stdout, stderr, rc) = sh.run_subprocess(command)
-    sh.log_subprocess(LOG, stdout, stderr, rc, debug=ARGS.debug)
-    return rc == 0
+    process = sh.run_subprocess(command)
+    sh.log_subprocess(LOG, process, debug=ARGS.debug)
+    return process.returncode == 0
 
 
 def deployment_group_set(rg_name: str, template_path: str, parameters: Optional[List[str]] = None, deploy_name: str = "Main") -> bool:
@@ -691,9 +693,9 @@ def deployment_group_set(rg_name: str, template_path: str, parameters: Optional[
         command.append("--parameters")
         command.extend(parameters)
     sh.print_command(command)
-    (stdout, stderr, rc) = sh.run_subprocess(command)
-    # sh.log_subprocess(LOG, stdout, stderr, rc, debug=ARGS.debug)
-    return rc == 0
+    process = sh.run_subprocess(command)
+    # sh.log_subprocess(LOG, process, debug=ARGS.debug)
+    return process.returncode == 0
 
 
 # # Certificate method ended up more trouble with no gain compared to letting service principal make its own passphrase

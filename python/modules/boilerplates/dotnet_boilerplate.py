@@ -28,9 +28,9 @@ def solution_new(solution_dir: str, solution: str) -> bool:
     command: List[str] = ["dotnet", "new", template, f"--output={solution_dir}", f"--name={solution}"]
     # command.append("--dry-run")
     sh.print_command(command)
-    (stdout, stderr, rc) = sh.run_subprocess(command)
-    # sh.log_subprocess(LOG, stdout, stderr, rc, debug=ARGS.debug)
-    return rc == 0
+    process = sh.run_subprocess(command)
+    # sh.log_subprocess(LOG, process, debug=ARGS.debug)
+    return process.returncode == 0
 
 
 def solution_project_add(solution_file: str, project_file: str) -> bool:
@@ -38,9 +38,9 @@ def solution_project_add(solution_file: str, project_file: str) -> bool:
     # https://docs.microsoft.com/en-us/dotnet/core/tools/dotnet-sln
     command: List[str] = ["dotnet", "sln", solution_file, "add", project_file]
     sh.print_command(command)
-    (stdout, stderr, rc) = sh.run_subprocess(command)
-    # sh.log_subprocess(LOG, stdout, stderr, rc, debug=ARGS.debug)
-    return rc == 0
+    process = sh.run_subprocess(command)
+    # sh.log_subprocess(LOG, process, debug=ARGS.debug)
+    return process.returncode == 0
 
 
 # --- Project Commands ---
@@ -70,10 +70,10 @@ def project_new(tenant: str, project_dir: str, strat: str, framework: str) -> bo
     command.append("--org-read-access")
 
     sh.print_command(command)
-    (stdout, stderr, rc) = sh.run_subprocess(command)
-    # sh.log_subprocess(LOG, stdout, stderr, rc, debug=ARGS.debug)
+    process = sh.run_subprocess(command)
+    # sh.log_subprocess(LOG, process, debug=ARGS.debug)
     # LOG.debug("Successfully created ASP.NET Core project")
-    return rc == 0
+    return process.returncode == 0
 
 
 # Currently difficult to parse - will eventually have --json option: https://github.com/NuGet/Home/issues/7752
@@ -83,11 +83,11 @@ def project_package_list(project_dir: str) -> List[str]:
     results: List[str] = []
     command: List[str] = ["dotnet", "list", project_dir, "package"]
     sh.print_command(command)
-    (stdout, stderr, rc) = sh.run_subprocess(command)
-    # sh.log_subprocess(LOG, stdout, stderr, rc, debug=ARGS.debug)
+    process = sh.run_subprocess(command)
+    # sh.log_subprocess(LOG, process, debug=ARGS.debug)
     # Parse project package list
-    if (rc == 0 and stdout):
-        stdout_lines = stdout.splitlines()
+    if (process.returncode == 0 and process.stdout):
+        stdout_lines = process.stdout.splitlines()
         for line in stdout_lines:
             line_edit = line.lstrip()
             if line_edit.startswith("> "):
@@ -103,9 +103,9 @@ def project_package_add(project_dir: str, package: str) -> bool:
     """Method that adds a package to a project"""
     command: List[str] = ["dotnet", "add", project_dir, "package", package]
     sh.print_command(command)
-    (stdout, stderr, rc) = sh.run_subprocess(command)
-    # sh.log_subprocess(LOG, stdout, stderr, rc, debug=ARGS.debug)
-    return rc == 0
+    process = sh.run_subprocess(command)
+    # sh.log_subprocess(LOG, process, debug=ARGS.debug)
+    return process.returncode == 0
 
 
 # --- User-Secrets Commands ---
@@ -117,9 +117,9 @@ def secrets_init(dotnet_dir: str, application: str, project: str) -> bool:
     project_path: str = sh.join_path(app_dir, project)
     command: List[str] = ["dotnet", "user-secrets", "init", f"--project={project_path}"]
     sh.print_command(command)
-    (stdout, stderr, rc) = sh.run_subprocess(command)
-    sh.log_subprocess(LOG, stdout, stderr, rc, debug=ARGS.debug)
-    return rc == 0
+    process = sh.run_subprocess(command)
+    sh.log_subprocess(LOG, process, debug=ARGS.debug)
+    return process.returncode == 0
 
 
 def secrets_list(dotnet_dir: str, application: str, project: str) -> bool:
@@ -128,9 +128,9 @@ def secrets_list(dotnet_dir: str, application: str, project: str) -> bool:
     project_path: str = sh.join_path(app_dir, project)
     command: List[str] = ["dotnet", "user-secrets", "list", f"--project={project_path}"]
     sh.print_command(command)
-    (stdout, stderr, rc) = sh.run_subprocess(command)
-    sh.log_subprocess(LOG, stdout, stderr, rc, debug=ARGS.debug)
-    return rc == 0
+    process = sh.run_subprocess(command)
+    sh.log_subprocess(LOG, process, debug=ARGS.debug)
+    return process.returncode == 0
 
 
 def secrets_set(dotnet_dir: str, application: str, project: str, secret_key: str, secret_value: str) -> bool:
@@ -140,9 +140,9 @@ def secrets_set(dotnet_dir: str, application: str, project: str, secret_key: str
     command: List[str] = ["dotnet", "user-secrets", "set", secret_key,
                           secret_value, f"--project={project_path}"]
     sh.print_command(command)
-    (stdout, stderr, rc) = sh.run_subprocess(command)
-    sh.log_subprocess(LOG, stdout, stderr, rc, debug=ARGS.debug)
-    return rc == 0
+    process = sh.run_subprocess(command)
+    sh.log_subprocess(LOG, process, debug=ARGS.debug)
+    return process.returncode == 0
 
 
 # --- Scaffold Commands ---
@@ -154,9 +154,9 @@ def project_identity_scaffold(project_dir: str) -> bool:
                           f"--project={project_dir}"
                           ]
     sh.print_command(command)
-    (stdout, stderr, rc) = sh.run_subprocess(command)
-    sh.log_subprocess(LOG, stdout, stderr, rc, debug=ARGS.debug)
-    return rc == 0
+    process = sh.run_subprocess(command)
+    sh.log_subprocess(LOG, process, debug=ARGS.debug)
+    return process.returncode == 0
 
 
 # ------------------------ Main Program ------------------------

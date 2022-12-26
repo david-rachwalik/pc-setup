@@ -26,9 +26,9 @@ def repo_exists(path: str, bare: bool = False) -> bool:
         if sh.path_exists(path, "d"):
             command: List[str] = ["git", "rev-parse", "--is-bare-repository"]
             sh.print_command(command)
-            (stdout, stderr, rc) = sh.run_subprocess(command, path)
-            # sh.log_subprocess(LOG, stdout, stderr, rc, debug=ARGS.debug)
-            result = (rc == 0 and stdout == "true")
+            process = sh.run_subprocess(command, path)
+            # sh.log_subprocess(LOG, process, debug=ARGS.debug)
+            result = (process.returncode == 0 and process.stdout == "true")
     else:
         work_repo_dir = sh.join_path(path, ".git")
         result = sh.path_exists(work_repo_dir, "d")
@@ -43,10 +43,10 @@ def repo_create(path: str, bare: bool = False) -> Tuple[bool, bool]:
         sh.create_directory(path)  # Directory must exist prior
         command.append("--bare")
     sh.print_command(command)
-    (stdout, stderr, rc) = sh.run_subprocess(command, path)
-    sh.log_subprocess(LOG, stdout, stderr, rc, debug=ARGS.debug)
-    failed: bool = (rc != 0 and "Reinitialized existing Git repository" not in stdout)
-    changed: bool = (not failed and "skipped, since" not in stdout)
+    process = sh.run_subprocess(command, path)
+    sh.log_subprocess(LOG, process, debug=ARGS.debug)
+    failed: bool = (process.returncode != 0 and "Reinitialized existing Git repository" not in process.stdout)
+    changed: bool = (not failed and "skipped, since" not in process.stdout)
     return (not failed, changed)
 
 
@@ -58,25 +58,25 @@ def work_remote(path: str, remote_path: str, remote_alias: str = "origin") -> bo
     failed: bool = False
     # Check local repository for remote alias
     command: List[str] = ["git", "config", "--get", f"remote.{remote_alias}.url"]
-    (stdout, stderr, rc) = sh.run_subprocess(command, path)
-    if not stdout:
+    process = sh.run_subprocess(command, path)
+    if not process.stdout:
         # Repository is missing remote path, adding...
         LOG.warning(f"Remote ({remote_alias}) for local repository is missing, adding...")
         command = ["git", "remote", "add", remote_alias, remote_path]
 
         sh.print_command(command)
-        (stdout, stderr, rc) = sh.run_subprocess(command, path)
-        failed = (rc != 0 and f"remote {remote_alias} already exists" not in stderr)
+        process = sh.run_subprocess(command, path)
+        failed = (process.returncode != 0 and f"remote {remote_alias} already exists" not in process.stderr)
         LOG.info("Successfully added remote path for local repository!")
 
-    elif stdout != remote_path:
+    elif process.stdout != remote_path:
         # Repository has outdated remote path, updating...
         LOG.warning(f"Remote ({remote_alias}) for local repository is outdated, updating...")
         command = ["git", "remote", "set-url", remote_alias, remote_path]
 
         sh.print_command(command)
-        (stdout, stderr, rc) = sh.run_subprocess(command, path)
-        failed = (rc != 0 and f"remote {remote_alias} already exists" not in stderr)
+        process = sh.run_subprocess(command, path)
+        failed = (process.returncode != 0 and f"remote {remote_alias} already exists" not in process.stderr)
         LOG.info("Successfully updated remote path for local repository!")
 
     # don't be tempted to remove the copy-paste job above; they only occur in 2/3 conditionals, not the else condition
@@ -87,9 +87,9 @@ def work_status(path: str) -> bool:
     """Method that checks the working directory status of a repository"""
     command: List[str] = ["git", "status"]
     sh.print_command(command)
-    (stdout, stderr, rc) = sh.run_subprocess(command, path)
-    # sh.log_subprocess(LOG, stdout, stderr, rc, debug=ARGS.debug)
-    is_clean: bool = ("nothing to commit, working directory clean" in stdout)
+    process = sh.run_subprocess(command, path)
+    # sh.log_subprocess(LOG, process, debug=ARGS.debug)
+    is_clean: bool = ("nothing to commit, working directory clean" in process.stdout)
     return is_clean
 
 
@@ -100,16 +100,16 @@ def work_commit(path: str, message: str = "auto-commit", initial: bool = False) 
         # 'git add' detects all changes; 'git commit -a' only detects modified/deleted
         command = ["git", "add", "--all", "."]
         sh.print_command(command)
-        (stdout, stderr, rc) = sh.run_subprocess(command, path)
-        # sh.log_subprocess(LOG, stdout, stderr, rc, debug=ARGS.debug)
+        process = sh.run_subprocess(command, path)
+        # sh.log_subprocess(LOG, process, debug=ARGS.debug)
 
         # Commit the staged files
         command = ["git", "commit", f"-m '{message}'"]
         sh.print_command(command)
-        (stdout, stderr, rc) = sh.run_subprocess(command, path)
-        # sh.log_subprocess(LOG, stdout, stderr, rc, debug=ARGS.debug)
-        failed = (rc != 0 and "nothing to commit (working directory clean)" not in stdout)
-        changed = (not failed and "nothing to commit (working directory clean)" not in stdout)
+        process = sh.run_subprocess(command, path)
+        # sh.log_subprocess(LOG, process, debug=ARGS.debug)
+        failed = (process.returncode != 0 and "nothing to commit (working directory clean)" not in process.stdout)
+        changed = (not failed and "nothing to commit (working directory clean)" not in process.stdout)
         return (not failed, changed)    # (succeeded, changed)
     else:
         # Initial commit so 'master' branch exists; helps prevent dangling HEAD refs
@@ -117,7 +117,7 @@ def work_commit(path: str, message: str = "auto-commit", initial: bool = False) 
         # - however, there's no true 'master' branch until the first commit
         command = ["git", "commit", "--allow-empty", f"-m 'Initial {message}'"]
         sh.print_command(command)
-        (stdout, stderr, rc) = sh.run_subprocess(command, path)
+        process = sh.run_subprocess(command, path)
         return (True, True)             # (succeeded, changed)
 
 
@@ -126,10 +126,10 @@ def work_push(path: str, version: str = "master", remote_alias: str = "origin"):
     """Method that pushes the commits of a repository"""
     command: List[str] = ["git", "push", remote_alias, version]
     sh.print_command(command)
-    (stdout, stderr, rc) = sh.run_subprocess(command, path)
-    sh.log_subprocess(LOG, stdout, stderr, rc, debug=ARGS.debug)
-    failed = (rc != 0 and "Everything up-to-date" not in stderr)
-    changed = (not failed and "Everything up-to-date" not in stderr)
+    process = sh.run_subprocess(command, path)
+    sh.log_subprocess(LOG, process, debug=ARGS.debug)
+    failed = (process.returncode != 0 and "Everything up-to-date" not in process.stderr)
+    changed = (not failed and "Everything up-to-date" not in process.stderr)
     return (not failed, changed)
 
 
@@ -148,9 +148,9 @@ def ref_head(path: str) -> str:
     # command: List[str] = ["git", "show-ref", "--head"]
     command: List[str] = ["git", "rev-parse", "--abbrev-ref", "HEAD"]
     sh.print_command(command)
-    (stdout, stderr, rc) = sh.run_subprocess(command, path)
-    # sh.log_subprocess(LOG, stdout, stderr, rc, debug=ARGS.debug)
-    result: str = stdout if (rc == 0) else ""
+    process = sh.run_subprocess(command, path)
+    # sh.log_subprocess(LOG, process, debug=ARGS.debug)
+    result: str = process.stdout if (process.returncode == 0) else ""
     return result
 
 
@@ -160,9 +160,9 @@ def ref_heads(path: str) -> List[str]:
     """Method that lists the branch names of a repository"""
     command: List[str] = ["git", "for-each-ref", "--format='%(refname:short)'", "refs/heads"]
     sh.print_command(command)
-    (stdout, stderr, rc) = sh.run_subprocess(command, path)
-    # sh.log_subprocess(LOG, stdout, stderr, rc, debug=ARGS.debug)
-    stdout_lines: List[str] = stdout.splitlines()
+    process = sh.run_subprocess(command, path)
+    # sh.log_subprocess(LOG, process, debug=ARGS.debug)
+    stdout_lines: List[str] = process.stdout.splitlines()
     # LOG.debug(f"(ref_heads): stdout_lines: {stdout_lines}")
     results: List[str] = _ref_formatter(stdout_lines)
     return results
@@ -174,9 +174,9 @@ def ref_remotes(path: str) -> List[str]:
     """Method that lists the remote names of a repository"""
     command: List[str] = ["git", "for-each-ref", "--format='%(refname:short)'", "refs/remotes"]
     sh.print_command(command)
-    (stdout, stderr, rc) = sh.run_subprocess(command, path)
-    # sh.log_subprocess(LOG, stdout, stderr, rc, debug=ARGS.debug)
-    stdout_lines: List[str] = stdout.splitlines()
+    process = sh.run_subprocess(command, path)
+    # sh.log_subprocess(LOG, process, debug=ARGS.debug)
+    stdout_lines: List[str] = process.stdout.splitlines()
     # LOG.debug(f"(ref_remotes): stdout_lines: {stdout_lines}")
     results: List[str] = _ref_formatter(stdout_lines)
     return results
@@ -188,9 +188,9 @@ def ref_tags(path: str) -> List[str]:
     """Method that lists the tags of a repository"""
     command: List[str] = ["git", "for-each-ref", "--format='%(refname:short)'", "refs/tags"]
     sh.print_command(command)
-    (stdout, stderr, rc) = sh.run_subprocess(command, path)
-    # sh.log_subprocess(LOG, stdout, stderr, rc, debug=ARGS.debug)
-    stdout_lines: List[str] = stdout.splitlines()
+    process = sh.run_subprocess(command, path)
+    # sh.log_subprocess(LOG, process, debug=ARGS.debug)
+    stdout_lines: List[str] = process.stdout.splitlines()
     # LOG.debug(f"(ref_tags): stdout_lines: {stdout_lines}")
     results: List[str] = _ref_formatter(stdout_lines)
     return results
@@ -206,9 +206,9 @@ def branch_validate(path: str, version: str = "master") -> bool:
         return failed
     command: List[str] = ["git", "check-ref-format", "--branch", version]
     sh.print_command(command)
-    (stdout, stderr, rc) = sh.run_subprocess(command, path)
-    sh.log_subprocess(LOG, stdout, stderr, rc, debug=ARGS.debug)
-    failed = (rc != 0 and "not a valid branch name" not in stderr)
+    process = sh.run_subprocess(command, path)
+    sh.log_subprocess(LOG, process, debug=ARGS.debug)
+    failed = (process.returncode != 0 and "not a valid branch name" not in process.stderr)
     return not failed
 
 
@@ -246,10 +246,10 @@ def branch_create(path: str, version: str = "master") -> Tuple[bool, bool]:
     # 'git branch --force' resets the branch's HEAD (not wanted)
     command: List[str] = ["git", "branch", version]
     sh.print_command(command)
-    (stdout, stderr, rc) = sh.run_subprocess(command, path)
-    # sh.log_subprocess(LOG, stdout, stderr, rc, debug=ARGS.debug)
-    failed: bool = (rc != 0 and "already exists" not in stderr)
-    changed: bool = (not failed and "already exists" not in stderr)
+    process = sh.run_subprocess(command, path)
+    # sh.log_subprocess(LOG, process, debug=ARGS.debug)
+    failed: bool = (process.returncode != 0 and "already exists" not in process.stderr)
+    changed: bool = (not failed and "already exists" not in process.stderr)
     # LOG.debug(f"(branch_create): succeeded: {not failed}, changed: {changed}")
     return (not failed, changed)
 
@@ -261,10 +261,10 @@ def branch_switch(path: str, version: str = "master", remote_alias: str = "") ->
     branch_use_name: str = remote_branch if remote_alias else version
     command: List[str] = ["git", "checkout", branch_use_name]
     sh.print_command(command)
-    (stdout, stderr, rc) = sh.run_subprocess(command, path)
-    # sh.log_subprocess(LOG, stdout, stderr, rc, debug=ARGS.debug)
-    failed: bool = (rc != 0)
-    changed: bool = (not failed and "Already on" not in stderr)
+    process = sh.run_subprocess(command, path)
+    # sh.log_subprocess(LOG, process, debug=ARGS.debug)
+    failed: bool = (process.returncode != 0)
+    changed: bool = (not failed and "Already on" not in process.stderr)
     return (not failed, changed)
 
 
@@ -273,10 +273,10 @@ def branch_delete(path: str, version: str = "master") -> Tuple[bool, bool]:
     """Method that deletes a branch from the repository"""
     command: List[str] = ["git", "branch", "-D", version]
     sh.print_command(command)
-    (stdout, stderr, rc) = sh.run_subprocess(command, path)
-    sh.log_subprocess(LOG, stdout, stderr, rc, debug=ARGS.debug)
-    failed: bool = (rc != 0)
-    changed: bool = (not failed and "Deleted branch" in stdout)
+    process = sh.run_subprocess(command, path)
+    sh.log_subprocess(LOG, process, debug=ARGS.debug)
+    failed: bool = (process.returncode != 0)
+    changed: bool = (not failed and "Deleted branch" in process.stdout)
     LOG.debug(f"(branch_delete): succeeded: {not failed}, changed: {changed}")
     return (not failed, changed)
 
@@ -289,9 +289,9 @@ def work_fetch(path: str, remote_alias: str = "origin") -> Tuple[bool, bool]:
     """Method that fetches the contents of a remote repository"""
     command: List[str] = ["git", "fetch", "--prune", remote_alias]
     sh.print_command(command)
-    (stdout, stderr, rc) = sh.run_subprocess(command, path)
-    failed: bool = (rc != 0 and "find remote ref" not in stdout)
-    changed: bool = (not failed and "find remote ref" not in stdout and "Everything up-to-date" not in stderr)
+    process = sh.run_subprocess(command, path)
+    failed: bool = (process.returncode != 0 and "find remote ref" not in process.stdout)
+    changed: bool = (not failed and "find remote ref" not in process.stdout and "Everything up-to-date" not in process.stderr)
     return (not failed, changed)
 
 
@@ -306,10 +306,10 @@ def work_merge(path: str, version: str = "master", remote_alias: str = "", messa
         command.append("--no-ff")
     command.extend(["--strategy=recursive", f"--strategy-option={pull_type}", f"-m '{message}'"])
     sh.print_command(command)
-    (stdout, stderr, rc) = sh.run_subprocess(command, path)
-    # sh.log_subprocess(LOG, stdout, stderr, rc, debug=ARGS.debug)
-    failed: bool = (rc != 0)
-    changed: bool = (not failed and "Already uptodate" not in stdout and "Already up-to-date" not in stdout)
+    process = sh.run_subprocess(command, path)
+    # sh.log_subprocess(LOG, process, debug=ARGS.debug)
+    failed: bool = (process.returncode != 0)
+    changed: bool = (not failed and "Already uptodate" not in process.stdout and "Already up-to-date" not in process.stdout)
     return (not failed, changed)
 
 
@@ -322,10 +322,10 @@ def work_rebase(path: str, version: str = "master") -> Tuple[bool, bool]:
     # Merge pull branch (auto-resolve)
     command: List[str] = ["git", "rebase", version]
     sh.print_command(command)
-    (stdout, stderr, rc) = sh.run_subprocess(command, path)
-    # sh.log_subprocess(LOG, stdout, stderr, rc, debug=ARGS.debug)
-    failed: bool = (rc != 0)
-    changed: bool = (not failed and "is up to date" not in stdout)
+    process = sh.run_subprocess(command, path)
+    # sh.log_subprocess(LOG, process, debug=ARGS.debug)
+    failed: bool = (process.returncode != 0)
+    changed: bool = (not failed and "is up to date" not in process.stdout)
     return (not failed, changed)
 
 
@@ -336,9 +336,9 @@ def work_reset(path: str, version: str = "master", remote_alias: str = "") -> bo
     branch_use_name: str = remote_branch if remote_alias else version
     command: List[str] = ["git", "reset", "--hard", branch_use_name]
     sh.print_command(command)
-    (stdout, stderr, rc) = sh.run_subprocess(command, path)
-    # sh.log_subprocess(LOG, stdout, stderr, rc, debug=ARGS.debug)
-    return rc == 0
+    process = sh.run_subprocess(command, path)
+    # sh.log_subprocess(LOG, process, debug=ARGS.debug)
+    return process.returncode == 0
 
 
 # ------------------------ Main Program ------------------------

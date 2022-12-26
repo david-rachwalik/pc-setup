@@ -30,19 +30,19 @@ def user_get(pat_data: str, user: str) -> bool:
     command: List[str] = ["az", "devops", "user", "show", f"--user={user}"]
     environment_vars = {'AZURE_DEVOPS_EXT_PAT': pat_data}
     sh.print_command(command)
-    # (stdout, stderr, rc) = sh.run_subprocess(command)
-    (stdout, stderr, rc) = sh.run_subprocess(command, env=environment_vars)
-    # sh.log_subprocess(LOG, stdout, stderr, rc, debug=ARGS.debug)
-    return rc == 0
+    # process = sh.run_subprocess(command)
+    process = sh.run_subprocess(command, env=environment_vars)
+    # sh.log_subprocess(LOG, process, debug=ARGS.debug)
+    return process.returncode == 0
 
 
 def user_logout() -> bool:
     """Method that signs out Azure DevOps user profile"""
     command: List[str] = ["az", "devops", "logout"]
     sh.print_command(command)
-    (stdout, stderr, rc) = sh.run_subprocess(command)
-    sh.log_subprocess(LOG, stdout, stderr, rc, debug=ARGS.debug)
-    return rc == 0
+    process = sh.run_subprocess(command)
+    sh.log_subprocess(LOG, process, debug=ARGS.debug)
+    return process.returncode == 0
 
 
 # # Login with credential (PAT)
@@ -56,9 +56,9 @@ def user_logout() -> bool:
 #     environment_vars = {
 #         'AZURE_DEVOPS_EXT_PAT': pat_data
 #     }
-#     (stdout, stderr, rc) = sh.run_subprocess(command, shell=True)
-#     sh.log_subprocess(LOG, stdout, stderr, rc, debug=ARGS.debug)
-#     results = bool(rc == 0)
+#     process = sh.run_subprocess(command, shell=True)
+#     sh.log_subprocess(LOG, process, debug=ARGS.debug)
+#     results = bool(process.returncode == 0)
 #     LOG.debug(f"results: {results}")
 #     return results
 
@@ -69,9 +69,9 @@ def user_login(pat_data: str) -> bool:
     command: List[str] = ["az", "devops", "login"]
     environment_vars = {'AZURE_DEVOPS_EXT_PAT': pat_data}
     sh.print_command(command)
-    (stdout, stderr, rc) = sh.run_subprocess(command, env=environment_vars)
-    # sh.log_subprocess(LOG, stdout, stderr, rc, debug=ARGS.debug)
-    return rc == 0
+    process = sh.run_subprocess(command, env=environment_vars)
+    # sh.log_subprocess(LOG, process, debug=ARGS.debug)
+    return process.returncode == 0
 
 
 # def user_save(path: str, service_principal: ServicePrincipal):
@@ -97,10 +97,10 @@ def devops_project_list() -> Tuple[bool, bool]:
     """Method that lists Azure DevOps projects"""
     command: List[str] = ["az", "devops", "project", "--list"]
     sh.print_command(command)
-    (stdout, stderr, rc) = sh.run_subprocess(command)
-    sh.log_subprocess(LOG, stdout, stderr, rc, debug=ARGS.debug)
-    failed = (rc != 0)
-    changed = (not failed and "is not authorized to access this resource" not in stderr)
+    process = sh.run_subprocess(command)
+    sh.log_subprocess(LOG, process, debug=ARGS.debug)
+    failed = (process.returncode != 0)
+    changed = (not failed and "is not authorized to access this resource" not in process.stderr)
     return (not failed, changed)
 
 
