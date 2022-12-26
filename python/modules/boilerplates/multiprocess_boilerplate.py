@@ -1,9 +1,5 @@
 #!/usr/bin/env python
-
-# Basename: multiprocess_boilerplate
-# Description: Common business logic for processes
-# Version: 0.4
-# VersionDate: 4 Feb 2020
+"""Common business logic for multiple processes"""
 
 # --- ProcessEvent Commands ---
 # .Run, .IsRunning
@@ -11,27 +7,20 @@
 # --- ProcessPool Commands ---
 # .Close, .RunAsync, .await_results
 
+import argparse
 import multiprocessing
 import random
 import time
+from typing import Any, Callable, Optional, Tuple
 
-from logging_boilerplate import *
-
-try:
-    # Python 2 has both 'str' (bytes) and 'unicode' text
-    basestring = basestring
-    unicode = unicode
-except NameError:
-    # Python 3 names the unicode data type 'str'
-    basestring = str
-    unicode = str
+import logging_boilerplate as log
 
 # ------------------------ Classes ------------------------
 
 
 class ProcessEvent(object):
     def __init__(self):
-        logger.debug("(ProcessEvent:__init__): Init")
+        LOG.debug("(ProcessEvent:__init__): Init")
         # Initial values
         self.running = bool()
         self.event = multiprocessing.Event()
@@ -49,7 +38,7 @@ class ProcessEvent(object):
 
 class ProcessPool(object):
     def __init__(self):
-        logger.debug("(ProcessPool:__init__): Init")
+        LOG.debug("(ProcessPool:__init__): Init")
         # Initial values
         self.running = bool()
         self.pool = multiprocessing.Pool()
@@ -108,14 +97,10 @@ def ProcessPoolAsync(func, args_list, callback=None):
     return results
 
 
-def rando(args):
-    # print("rando init")
-    if isinstance(args, tuple):
-        (in_num, tester) = args
-    else:
-        raise TypeError("rando() requires tuple")
+def rando(args: Tuple):
+    (in_num, tester) = args
     num = random.random()
-    print("{0} '{1}' in with rando: {2}".format(in_num, tester, num))
+    print(f"{in_num} '{tester}' in with rando: {num}")
 
     try:
         data[in_num] = num
@@ -130,7 +115,7 @@ def rando(args):
 def rng_generate(in_num, tester):
     # print("rng_generate): Init")
     num = random.random()
-    print("{0} '{1}' in with rng_generate: {2}".format(in_num, tester, num))
+    print(f"{in_num} '{tester}' in with rng_generate: {num}")
     try:
         data[in_num] = num
     except Exception:
@@ -146,32 +131,28 @@ data = {}
 
 def end_print(start_time):
     end_time = time.time() - start_time
-    print("time taken: {0}".format(end_time))
+    print(f"time taken: {end_time}")
     print("")
 
 
 def data_callback(pack):
     # print("data_callback): Init")
     for (key, val) in pack.items():
-        # print("key: {0}".format(key))
-        # print("val: {0}".format(val))
+        # print(f"key: {key}")
+        # print(f"val: {val}")
         data[key] = val
 
 
 # def timer((func, *args, **kwargs)):
-def timer(args):
-    if not isinstance(args, tuple):
-        raise TypeError("timer() expects tuple parameter")
+def timer(args: Tuple[Callable, Any]):
     (func, val) = args
-    if not callable(func):
-        raise TypeError("timer() requires 1st arg to be a function")
 
     start_time = time.time()
     func(val)
     end_time = time.time() - start_time
 
-    print("val: {0}".format(num))
-    print("end time: {0}".format(end_time))
+    print(f"val: {val}")
+    print(f"end time: {end_time}")
     print("")
 
 
@@ -182,42 +163,46 @@ def random_num():
 
 def worker():
     # """worker function"""
-    # print("Worker pid: {0}".format(os.getpid()))
-    # print("Worker process name: {0}".format(multiprocessing.current_process().name))
+    # pid = os.getpid()
+    # print("Worker pid: {pid}")
+    # process_name = multiprocessing.current_process().name
+    # print("Worker process name: {process_name}")
     name = multiprocessing.current_process().name
-    print("{name}, starting...")
+    print(f"{name}, starting...")
     time.sleep(2)
-    print("{name}, exiting...")
+    print(f"{name}, exiting...")
 
 
 def my_service():
     name = multiprocessing.current_process().name
-    print("{name}, starting...")
-    # print("Worker pid: {0}".format(os.getpid()))
-    # print("Worker process name: {0}".format(multiprocessing.current_process().name))
+    print(f"{name}, starting...")
+    # pid = os.getpid()
+    # print("Worker pid: {pid}")
+    # process_name = multiprocessing.current_process().name
+    # print("Worker process name: {process_name}")
     time.sleep(3)
-    print("{name}, exiting...")
+    print(f"{name}, exiting...")
 
 
 # ------------------------ Test Program ------------------------
 
 # socket_listener()
-def MultiprocessSocketTester(hostName, hostPort, log=None):
+def MultiprocessSocketTester(hostName, hostPort, logger: Optional[log.Logger] = None):
     # Initialize the logger
-    logger = get_logger(log)
-    logger.debug("(MultiprocessSocketTester): Init")
+    LOG = log.get_logger(logger)
+    LOG.debug("(MultiprocessSocketTester): Init")
 
     # Create server socket to communicate with clients
     serverSocket = SocketContext(log=logger)
     connected = serverSocket.ConnectAsServer(hostName, hostPort)
     if not connected:
-        logger.debug("(MultiprocessSocketTester): not connected")
+        LOG.debug("(MultiprocessSocketTester): not connected")
         Fail()
 
     # Signal the main thread that we are up and listening
-    logger.info("Socket listener started and listening on {0}:{1}".format(hostName, hostPort))
+    LOG.info(f"Socket listener started and listening on {hostName}:{hostPort}")
 
-    logger.debug("(MultiprocessSocketTester): ACTION METHOD")
+    LOG.debug("(MultiprocessSocketTester): ACTION METHOD")
 
     # Create server socket to communicate with clients
     serverSocket = SocketContext(log=self.loggerOptions)
@@ -226,8 +211,8 @@ def MultiprocessSocketTester(hostName, hostPort, log=None):
         self.Fail()
 
     # Signal the main thread that we are up and listening
-    bindString = "{0}:{1}".format(self.hostName, self.config.hostPort)
-    logger.info("Socket listener started and listening on {0}".format(bindString))
+    bindString = f"{self.hostName}:{self.config.hostPort}"
+    LOG.info(f"Socket listener started and listening on {bindString}")
 
     # Create a holder for our client threads
     clients = {}
@@ -242,14 +227,14 @@ def MultiprocessSocketTester(hostName, hostPort, log=None):
             (conn, addr) = serverSocket.accept()
             newConn = True
         except socket.timeout:
-            logger.debug("Socket timed out waiting for a client.")
+            LOG.debug("Socket timed out waiting for a client.")
 
         if newConn:
             # Create args enumerable and run against process pool
             args_list = [(conn, addr)]
             results = ProcessPoolAsync(self.socket_client, args_list)
             # Print results
-            print("results: {0}".format(results))
+            print(f"results: {results}")
 
             # Launch a new thread to service the client
             clThread = threading.Thread(target=self.socket_client, args=(conn, addr))
@@ -259,7 +244,7 @@ def MultiprocessSocketTester(hostName, hostPort, log=None):
             newConn = False
         # If we are requested to die, break out of the while loop
         if self.killSocketEvent.is_set():
-            logger.warning("Socket listener (" + bindString + ") detected exit request, exiting.")
+            LOG.warning(f"Socket listener ("{bindString}") detected exit request, exiting.")
             break
         else:
             continue
@@ -268,22 +253,22 @@ def MultiprocessSocketTester(hostName, hostPort, log=None):
     while len(clients) > 0:
         for thrd in clients.keys():
             if thrd.is_alive():
-                logger.debug("Waiting for client to disconnect: " + clients[thrd])
+                LOG.debug("Waiting for client to disconnect: " + clients[thrd])
             else:
                 clients.pop(thrd)
         sleep(1)
 
     # When finished accepting connections clean up the socket
     serverSocket.Close()
-    logger.info("Socket listener shutdown (" + bindString + ")")
+    LOG.info("Socket listener shutdown (" + bindString + ")")
 
 
 # ------------------------ Main Program ------------------------
 
 # Initialize the logger
-BASENAME = "multiprocess_boilerplate"
-log_options = LogOptions(BASENAME)
-logger = get_logger(log_options)
+BASENAME = "shell_boilerplate"
+ARGS: argparse.Namespace = argparse.Namespace()  # for external modules
+LOG: log.Logger = log.get_logger(BASENAME)
 
 if __name__ == "__main__":
     iterations = range(10)
@@ -297,7 +282,7 @@ if __name__ == "__main__":
         args_list.append((i, "test"))
     results = ProcessPoolAsync(rando, args_list)
     # Print results
-    print("results: {0}".format(results))
+    print(f"results: {results}")
     end_print(start_time)
 
     # --- MAP ASYNC (class) ---
@@ -309,7 +294,7 @@ if __name__ == "__main__":
         args_list.append((i, "test"))
     results = ProcessPoolAwait(rando, args_list)
     # Print results
-    print("results: {0}".format(results))
+    print(f"results: {results}")
     end_print(start_time)
 
     # --- Usage Example ---

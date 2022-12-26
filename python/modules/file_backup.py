@@ -1,9 +1,5 @@
 #!/usr/bin/env python
-
-# Basename: file_backup
-# Description: Backup a directory of files
-# Version: 1.3
-# VersionDate: 13 Dec 2019
+"""Test backing up a directory of files"""
 
 #                   *** Options ***
 # src:          Path to source files                    default=(current directory)
@@ -47,8 +43,8 @@ class FileBackup(ShellManager):
             self.log.info(self.args.dest)
 
         # ---------------- Primary business logic area ----------------
-        self.log.debug("source: {0}".format(self.args.src))
-        self.log.debug("destination: {0}".format(self.args.dest))
+        self.log.debug(f"source: {self.args.src}")
+        self.log.debug(f"destination: {self.args.dest}")
 
         # Ensure source directory exists
         if not os.path.isdir(self.args.src):
@@ -76,3 +72,5 @@ class FileBackup(ShellManager):
 if __name__ == '__main__':
     backup = FileBackup()
     backup.Exit()
+
+# py $Env:AppData\Python\Python311\site-packages\boilerplates\file_backup.py --debug

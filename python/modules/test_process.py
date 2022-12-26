@@ -1,16 +1,11 @@
 #!/usr/bin/python
-
-# Basename: test_process
-# Version: 0.1
-# VersionDate: 26 Jan 2020
-# Description: Common business logic for testing multiprocessing
-
-# sudo python3 /home/david/pc-setup/ansible_playbooks/roles/python/user_modules/files/test_process.py
+"""Testing logic for multiprocessing"""
 
 import multiprocessing
 import queue  # imported for using queue.Empty exception
 import random
 import time
+from typing import Tuple
 
 # ------------------------ Classes ------------------------
 
@@ -66,13 +61,11 @@ def main():
     return True
 
 
-def rando(args):
+def rando(args: Tuple):
     print("rando init")
-    if not isinstance(args, tuple):
-        raise TypeError("rando() expected a tuple")
     (num, tester) = args
     proc_name = multiprocessing.current_process().name
-    print("'{1}' num {0} for {2}".format(num, tester, proc_name))
+    print(f"'{tester}' num {num} for {proc_name}")
     results = dict()
     results[num] = random.random()
     return results
@@ -90,17 +83,19 @@ def main_async():
     pool.join()
     results = processes.get()
     # Display results
-    print("results: {0}".format(results))
+    print(f"results: {results}")
 
 
 if __name__ == '__main__':
     # start_time = time.time()
     # main()
     # end_time = time.time() - start_time
-    # print("timer: {0}".format(end_time))
+    # print(f"timer: {end_time}")
     # print("")
 
     start_time = time.time()
     main_async()
     end_time = time.time() - start_time
-    print("Timer: {0}".format(end_time))
+    print(f"Timer: {end_time}")
+
+# sudo python3 /home/david/pc-setup/ansible_playbooks/roles/python/user_modules/files/test_process.py

@@ -15,15 +15,16 @@
 # --- SubProcess Class Commands ---
 # await_results, is_done, format_output
 
+import argparse
 import distutils.dir_util
 # import distutils.file_util
 import json
 import os
 import re
+# import signal
 import subprocess
 import sys
 import time
-# import signal
 from contextlib import contextmanager
 from typing import Any, Dict, List, Optional, Tuple
 
@@ -64,7 +65,7 @@ class DictObj(dict):
 # --- Helper Commands ---
 
 # Must conform to the following pattern: '^[0-9a-zA-Z-]+$'
-def format_resource(raw_name: str, lowercase: Optional[bool] = True) -> str:
+def format_resource(raw_name: str, lowercase: bool = True) -> str:
     """Method that formats a string name into a resource name"""
     name = raw_name.lower() if lowercase else raw_name  # lowercase
     # name = re.sub('[^a-zA-Z0-9 \n\.]', '-', raw_name) # old, ignores '.'
@@ -73,11 +74,11 @@ def format_resource(raw_name: str, lowercase: Optional[bool] = True) -> str:
 
 
 # Must conform to the following pattern: '^[0-9a-zA-Z-]+$'
-def is_valid_resource(raw_name: str, lowercase: Optional[bool] = True) -> bool:
+def is_valid_resource(raw_name: str, lowercase: bool = True) -> bool:
     """Method that verifies whether a resource name is valid"""
     og_name = str(raw_name)
     formatted_name = format_resource(raw_name, lowercase)
-    return bool(og_name == formatted_name)
+    return og_name == formatted_name
 
 
 # https://pynative.com/python-generate-random-string
@@ -131,7 +132,7 @@ def list_differences(first, second):
 
 
 # Provide beginning text of command option to 'secure' and remaining will be hidden
-def print_command(command: List[str], secure: Optional[str] = "") -> str:
+def print_command(command: List[str], secure: str = "") -> str:
     """Method that prints the main command text and hiding sensitive text"""
     _command: List[str] = command.copy()
     if secure:
@@ -140,7 +141,7 @@ def print_command(command: List[str], secure: Optional[str] = "") -> str:
             if line.startswith(secure):
                 _command[i] = f"{secure}*"
     display_command: str = " ".join(map(str, _command))  # using list comprehension
-    _log.debug(display_command)
+    LOG.debug(display_command)
     return display_command
 
 
@@ -258,11 +259,11 @@ def list_directory(path: str) -> List[str]:
 
 
 # Uses rsync, a better alternative to 'shutil.copytree' with ignore
-def rsync_directory(src: str, dest: str, recursive: Optional[bool] = True, purge: Optional[bool] = True, cut: Optional[bool] = False,
-                    include: Tuple = (), exclude: Tuple = (), debug: Optional[bool] = False
+def rsync_directory(src: str, dest: str, recursive: bool = True, purge: bool = True, cut: bool = False,
+                    include: Tuple = (), exclude: Tuple = (), debug: bool = False
                     ) -> Tuple[List[str], List[str]]:
     """Method that syncs a directory's contents"""
-    _log.debug("Init")
+    LOG.debug("Init")
     changed_files: List[str] = []
     changes_dirs: List[str] = []
     # Create sequence of command options
@@ -305,12 +306,12 @@ def rsync_directory(src: str, dest: str, recursive: Optional[bool] = True, purge
     command = ["rsync"]
     command.extend(command_options)
     command.extend([src, dest])
-    _log.debug(f"command used: {command}")
+    LOG.debug(f"command used: {command}")
     (stdout, stderr, rc) = run_subprocess(command)
-    # log_subprocess(_log, stdout, stderr, rc)
+    # log_subprocess(LOG, stdout, stderr, rc)
 
     results: List[str] = str.splitlines(str(stdout))
-    _log.debug(f"results: {results}")
+    LOG.debug(f"results: {results}")
 
     for r in results:
         result = r.split(" ", 1)
@@ -321,7 +322,7 @@ def rsync_directory(src: str, dest: str, recursive: Optional[bool] = True, purge
         elif itemized_output[1] == "d":
             changes_dirs.append(join_path(dest, file_name))
 
-    _log.debug(f"changed_files: {changed_files}")
+    LOG.debug(f"changed_files: {changed_files}")
     return (changed_files, changes_dirs)
 
 
@@ -349,7 +350,7 @@ def write_file(path: str, content: Optional[Any] = None, append: bool = False):
     f.close()
 
 
-def read_file(path: str, oneline: Optional[bool] = False) -> str:
+def read_file(path: str, oneline: bool = False) -> str:
     """Method that reads a file's content"""
     data: str = ""
     if not (path or path_exists(path, "f")):
@@ -362,7 +363,7 @@ def read_file(path: str, oneline: Optional[bool] = False) -> str:
         data = f.readline().rstrip() if (oneline) else f.read().strip()
         f.close()
     except Exception as e:
-        _log.error(f"Exception: {e}")
+        LOG.error(f"Exception: {e}")
     return data
 
 
@@ -387,8 +388,8 @@ def copy_file(src: str, dest: str) -> bool:
         return False
     command = ["cp", "--force", src, dest]
     (stdout, stderr, rc) = run_subprocess(command)
-    # log_subprocess(_log, stdout, stderr, rc, debug=ARGS.debug)
-    return bool(rc == 0)
+    # log_subprocess(LOG, stdout, stderr, rc, debug=ARGS.debug)
+    return rc == 0
 
 
 def hash_file(path: str) -> str:
@@ -398,23 +399,23 @@ def hash_file(path: str) -> str:
     # Using SHA-2 hash check (more secure than MD5|SHA-1)
     command: List[str] = ["sha256sum", path]
     (stdout, stderr, rc) = run_subprocess(command)
-    # log_subprocess(_log, stdout, stderr, rc, debug=ARGS.debug)
+    # log_subprocess(LOG, stdout, stderr, rc, debug=ARGS.debug)
     results: List[str] = str(stdout).split()
-    # _log.debug(f"results: {results}")
+    # LOG.debug(f"results: {results}")
     return results[0]
 
 
 # Uses hash to validate file integrity
 def match_file(path1: str, path2: str) -> bool:
     """Method that verifies whether files match based on hash"""
-    # _log.debug(f"path1: {path1}")
+    # LOG.debug(f"path1: {path1}")
     hash1 = hash_file(path1)
-    # _log.debug(f"hash1: {hash1}")
-    # _log.debug(f"path2: {path2}")
+    # LOG.debug(f"hash1: {hash1}")
+    # LOG.debug(f"path2: {path2}")
     hash2 = hash_file(path2)
-    # _log.debug(f"hash2: {hash2}")
+    # LOG.debug(f"hash2: {hash2}")
     if len(hash1) > 0 and len(hash2) > 0:
-        return bool(hash1 == hash2)
+        return hash1 == hash2
     else:
         return False
 
@@ -445,8 +446,8 @@ def from_json(json_str: str) -> dict | None:
         # Decode/parse the json string
         results = json.loads(json_str, object_hook=_decode_dict)
     except ValueError as e:
-        _log.error(f"ValueError: {e}")
-    # _log.debug(f"results: {results}")
+        LOG.error(f"ValueError: {e}")
+    # LOG.debug(f"results: {results}")
     return results
 
 
@@ -457,8 +458,8 @@ def to_json(data: Any, indent: Optional[int] = None) -> str:
     try:
         results = json.dumps(data, indent=indent)  # convert to json
     except ValueError as e:
-        _log.error(f"ValueError: {e}")
-    # _log.debug(f"results: {results}")
+        LOG.error(f"ValueError: {e}")
+    # LOG.debug(f"results: {results}")
     return results
 
 
@@ -493,7 +494,7 @@ def is_json_str(json_str: str) -> bool:
 # NOTE: Only accepting 'command' as list; argument options can have spaces
 def run_subprocess(
     command: List[str],
-    cwd: Optional[str] = "",
+    cwd: str = "",
     env: Optional[Dict[str, str]] = None,
 ) -> Tuple[str, str, int]:
     """Method that runs a command in a subprocess"""
@@ -504,10 +505,10 @@ def run_subprocess(
     # TODO: detect OS - use Powershell for Windows - use Bash for *nix
     # run_command = ["powershell", "-Command"] + command  # legacy Windows PowerShell, built on Windows-only .NET
     run_command = ["pwsh", "-Command"] + command  # PowerShell [Core], built on cross-platform .NET Core
-    _log.debug(f"run_command: {run_command}")
+    LOG.debug(f"run_command: {run_command}")
     # results = subprocess.run(command, universal_newlines=True, check=True, capture_output=True)
     results = subprocess.run(run_command, universal_newlines=True, check=True, capture_output=True)
-    _log.debug(f"subprocess results: {results}")
+    LOG.debug(f"subprocess results: {results}")
 
     stdout: str = results.stdout
     stderr: str = results.stderr
@@ -517,18 +518,18 @@ def run_subprocess(
 
 
 # Log the subprocess output provided
-def log_subprocess(_log: log.Logger, stdout=None, stderr=None, rc=None, debug=False):
+def log_subprocess(LOG: log.Logger, stdout=None, stderr=None, rc=None, debug=False):
     """Method that logs a command in a subprocess"""
     if isinstance(stdout, str) and len(stdout) > 0:
         log_stdout = f"stdout: {stdout}" if debug else stdout
-        _log.info(log_stdout)
+        LOG.info(log_stdout)
     if isinstance(stderr, str) and len(stderr) > 0:
         log_stderr = f"stderr: {stderr}" if debug else stderr
-        # _log.error(log_stderr)
-        _log.info(log_stderr)  # INFO so message is below WARN level (default on import)
+        # LOG.error(log_stderr)
+        LOG.info(log_stderr)  # INFO so message is below WARN level (default on import)
     if isinstance(rc, int) and debug:
         log_rc = f"rc: {rc}" if debug else rc
-        _log.debug(log_rc)
+        LOG.debug(log_rc)
 
     # debug=False           debug=True
     # [Info]  "{0}"         "stdout: {0}"
@@ -538,26 +539,24 @@ def log_subprocess(_log: log.Logger, stdout=None, stderr=None, rc=None, debug=Fa
 
 # --- Signal Commands ---
 
-# def max_signal():
+# def max_signal() -> int:
 #     return int(signal.NSIG) - 1
 
 
 # # Accepts 'task' of <function>, 0 (signal.SIG_DFL), or 1 (signal.SIG_IGN)
-# def handle_signal(signal_num, int):
-#     # Validate parameter input
-#     if not isinstance(signal_num, int):
-#         raise TypeError("handle_signal() expects 'signal_num' parameter as integer")
+# def handle_signal(signal_num: int, task: Callable | int):
 #     task_whitelist = [signal.SIG_DFL, signal.SIG_IGN]
 #     valid_task = callable(task) or task in task_whitelist
 #     if not valid_task:
-#         raise TypeError("handle_signal() expects 'task' parameter as callable <function> or an integer of 0 or 1 (signal.SIG_DFL or signal.SIG_IGN)")
+#         raise ValueError(
+#             "handle_signal() expects 'task' parameter as callable <function> or an integer of 0 or 1 (signal.SIG_DFL or signal.SIG_IGN)")
 #     # Update the signal handler (callback method)
 #     signal.signal(signal_num, task)
 
 
-# def send_signal(pid, signal_num=signal.SIGTERM):
-#     if not (pid and isinstance(pid, int)): raise TypeError("send_signal() expects 'pid' parameter as positive integer")
-#     if not isinstance(signal_num, int): raise TypeError("send_signal() expects 'signal_num' parameter as integer")
+# def send_signal(pid: int, signal_num: int = signal.SIGTERM):
+#     if not pid:
+#         raise ValueError("send_signal() expects 'pid' parameter as a positive integer")
 #     os.kill(pid, signal_num)
 
 
@@ -588,17 +587,17 @@ class SubProcess(object):
         }
 
         if env or shell:
-            # _log.debug("evaluating subprocess as shell")
+            # LOG.debug("evaluating subprocess as shell")
             command_args["shell"] = True
 
         if env:
-            # _log.debug("implementing environment variables")
+            # LOG.debug("implementing environment variables")
             # https://stackoverflow.com/questions/2231227/python-subprocess-popen-with-a-modified-environment
             # Combine current environment variables with those provided
             current_env = os.environ.copy()
-            # _log.debug(f"current_env: {current_env}")
+            # LOG.debug(f"current_env: {current_env}")
             current_env.update(env)  # update for dict, extend for list
-            # _log.debug(f"current_env: {current_env}")
+            # LOG.debug(f"current_env: {current_env}")
             # command_args["shell"] = True
             command_args["env"] = current_env
             self.env = current_env
@@ -632,7 +631,7 @@ class SubProcess(object):
             self.stderr = self.format_output(stderr)
             return (self.stdout, self.stderr, self.rc)
         except Exception as e:
-            _log.error(f"Exception: {e}")
+            LOG.error(f"Exception: {e}")
             return ("", "", -1)
 
     def format_output(self, text: str) -> str:
@@ -650,15 +649,14 @@ class SubProcess(object):
 # ------------------------ Main program ------------------------
 
 # Initialize the logger
-BASENAME: str = "shell_boilerplate"
-ARGS = log.LogArgs()  # for external modules
-_log: log.Logger = log.get_logger(BASENAME)
+BASENAME = "shell_boilerplate"
+ARGS: argparse.Namespace = argparse.Namespace()  # for external modules
+LOG: log.Logger = log.get_logger(BASENAME)
 
 if __name__ == "__main__":
     # Returns argparse.Namespace; to pass into function, use **vars(self.ARGS)
     def parse_arguments():
         """Method that parses arguments provided"""
-        import argparse
         parser = argparse.ArgumentParser()
         parser.add_argument("--debug", action="store_true")
         parser.add_argument("--log-path", default="")
@@ -668,10 +666,10 @@ if __name__ == "__main__":
 
     #  Configure the main logger
     LOG_HANDLERS = log.default_handlers(ARGS.debug, ARGS.log_path)
-    log.set_handlers(_log, LOG_HANDLERS)
+    log.set_handlers(LOG, LOG_HANDLERS)
 
-    _log.debug(f"ARGS: {ARGS}")
-    _log.debug("------------------------------------------------")
+    LOG.debug(f"ARGS: {ARGS}")
+    LOG.debug("------------------------------------------------")
 
     # -------- XML Test --------
     if ARGS.test == "xml":
@@ -679,22 +677,22 @@ if __name__ == "__main__":
         xml_config: str = "$HOME/configuration.xml"
         xml_schema: str = "$HOME/configuration.xsd"
         validator_command: List[str] = ["/usr/bin/xmllint", "--noout", f"--schema {xml_schema}", xml_config]
-        _log.debug(f"validation command => {validator_command}")
+        LOG.debug(f"validation command => {validator_command}")
 
         # Validate configuration against the schema
         (STDOUT, STDERR, RC) = run_subprocess(validator_command)
         if RC != 0:
-            _log.error(f"XML file ({xml_config}) failed to validate against schema ({xml_schema})")
-            log_subprocess(_log, STDOUT, STDERR, RC, debug=ARGS.debug)
+            LOG.error(f"XML file ({xml_config}) failed to validate against schema ({xml_schema})")
+            log_subprocess(LOG, STDOUT, STDERR, RC, debug=ARGS.debug)
         else:
-            _log.debug(f"{xml_config} was successfully validated")
+            LOG.debug(f"{xml_config} was successfully validated")
 
     # -------- SubProcess Test --------
     elif ARGS.test == "subprocess":
         test_command: List[str] = ["ls", "-la", "/var"]
-        _log.debug(f"test command => {test_command}")
+        LOG.debug(f"test command => {test_command}")
         (STDOUT, STDERR, RC) = run_subprocess(test_command)
-        log_subprocess(_log, STDOUT, STDERR, RC, debug=ARGS.debug)
+        log_subprocess(LOG, STDOUT, STDERR, RC, debug=ARGS.debug)
 
         # Test writing to files
         test_file = "/tmp/ewertz"
@@ -703,7 +701,7 @@ if __name__ == "__main__":
         for I in inputs:
             write_file(test_file, I)
             (STDOUT, STDERR, RC) = run_subprocess(test_command)
-            log_subprocess(_log, STDOUT, STDERR, RC, debug=ARGS.debug)
+            log_subprocess(LOG, STDOUT, STDERR, RC, debug=ARGS.debug)
         delete_file(test_file)
 
     # -------- SubProcess (simple) Test --------
@@ -711,10 +709,10 @@ if __name__ == "__main__":
         # test_command = ["ls", "-la", "/tmp"]
         # test_command = ["ls"]
         test_command = ["pwd"]
-        _log.debug(f"test command => {test_command}")
+        LOG.debug(f"test command => {test_command}")
         # (STDOUT, STDERR, RC) = run_subprocess(test_command)
         (STDOUT, STDERR, RC) = run_subprocess(test_command)
-        log_subprocess(_log, STDOUT, STDERR, RC, debug=ARGS.debug)
+        log_subprocess(LOG, STDOUT, STDERR, RC, debug=ARGS.debug)
 
     # --- Usage Example ---
     # sudo python /root/.local/lib/python2.7/site-packages/shell_boilerplate.py

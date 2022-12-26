@@ -1,27 +1,15 @@
 #!/usr/bin/env python
-
-# Basename: xml_boilerplate
-# Description: Common business logic for Python XML commands
-# Version: 1.3
-# VersionDate: 29 Jan 2020
+"""Common business logic for Python XML commands"""
 
 # --- XML Commands ---
 # Utility:          Parse, Root, Namespace, ToElement
 # Element:          Elements, Element, ChildElements
 # Value:            ElementText, ElementTag, ElementAttributes, ElementAttribute
 
-from logging_boilerplate import *
+import argparse
+import logging_boilerplate as log
 import xml.etree.ElementTree as EL
 import re
-
-try:
-    # Python 2 has both 'str' (bytes) and 'unicode' text
-    basestring = basestring
-    unicode = unicode
-except NameError:
-    # Python 3 names the unicode data type 'str'
-    basestring = str
-    unicode = str
 
 # ------------------------ Classes ------------------------
 
@@ -30,7 +18,7 @@ class XmlManager(object):
     def __init__(self, xml):
         # Initial values or defaults
         self.elementTreeType = type(EL.ElementTree)
-        self.elementType = type(EL.Element(None))  # instance not directly exposed
+        self.elementType = type(EL.Element)  # instance not directly exposed
         self.entityType = type(XmlEntity)
         self.xml_path = str(xml)
 
@@ -40,14 +28,14 @@ class XmlManager(object):
         self.rootNamespace = self.Namespace() if (self.parsed) else ""
 
     def Parse(self, path):
-        # logger.debug("(XmlManager:Parse): Init")
+        # LOG.debug("Init")
         # Read the XML configuration file
-        logger.debug("(XmlManager:Parse): parsing {0}...".format(path))
+        LOG.debug(f"parsing {path}...")
         try:
             elementTree = EL.parse(path)
         except Exception:
             elementTree = None
-            logger.error("(XmlManager:Parse): error with parsing")
+            LOG.error("error with parsing")
         return elementTree
 
     # Returns first element of ElementTree as root; any additional elements are considered comments
@@ -67,8 +55,8 @@ class XmlManager(object):
             return XmlEntity(item)
         if isinstance(item, self.entityType):
             return item
-        logger.warning("(XmlManager:ToEntity): unanticipated entity: {0}".format(item))
-        logger.warning("(XmlManager:ToEntity): unanticipated type(entity): {0}".format(type(item)))
+        LOG.warning(f"unanticipated entity: {item}")
+        LOG.warning(f"unanticipated type(entity): {type(item)}")
         return item
 
     # # Cast to default element if provided a different type
@@ -76,19 +64,19 @@ class XmlManager(object):
     #     if not element: return self.Root()
     #     if isinstance(element, self.elementTreeType): return self.Root(element)
     #     if isinstance(element, self.entityType): return element
-    #     logger.warning("(XmlManager:ToEntity): unanticipated entity: {0}".format(element))
-    #     logger.warning("(XmlManager:ToEntity): unanticipated type(entity): {0}".format(type(element)))
+    #     LOG.warning(f"unanticipated entity: {element}")
+    #     LOG.warning(f"unanticipated type(entity): {type(element)}")
     #     return element
 
     def Namespace(self, item=None):
-        # logger.debug("(XmlManager:Namespace): Init")
+        # LOG.debug("Init")
         entity = self.ToEntity(item)
         result = re.match(r'\{.*\}', entity.element.tag)
         return result.group(0) if result else ""
 
     # # Get list of matching elements based on tag filter (XPath)
     # def Elements(self, tag, element=None):
-    #     # logger.debug("(XmlManager:Elements): Init")
+    #     # LOG.debug("Init")
     #     element = self.ToElement(element)
     #     try:
     #         matches = element.findall(tag)
@@ -98,7 +86,7 @@ class XmlManager(object):
 
     # # Get first matching element based on tag filter (XPath)
     # def Element(self, tag, element=None):
-    #     # logger.debug("(XmlManager:Elements): Init")
+    #     # LOG.debug("Init")
     #     element = self.ToElement(element)
     #     try:
     #         match = element.find(tag)
@@ -107,14 +95,14 @@ class XmlManager(object):
     #     return match
 
     def ParentElement(self, element):
-        logger.debug("(XmlManager:ParentElement): Init")
+        LOG.debug("Init")
         if isinstance(element, self.entityType):
             return self.Element("..", element)
         else:
             return None
 
     def ChildElements(self, element):
-        # logger.debug("(XmlManager:ChildElements): Init")
+        # LOG.debug("Init")
         # element = self.ToElement(element)
         # return element.getchildren()
         if isinstance(element, self.entityType):
@@ -126,7 +114,6 @@ class XmlManager(object):
     # Get text content of element
 
     def ElementText(self, element):
-        # logger.debug("(XmlManager:ElementText): Init")
         if isinstance(element, self.entityType):
             return element.text
         else:
@@ -135,7 +122,6 @@ class XmlManager(object):
     # Get a specific element tag
 
     def ElementTag(self, element):
-        # logger.debug("(XmlManager:ElementTag): Init")
         if isinstance(element, self.entityType):
             return element.tag
         else:
@@ -144,7 +130,6 @@ class XmlManager(object):
     # Collection of element attributes; use .keys() on results for attribute names
 
     def ElementAttributes(self, element=None):
-        # logger.debug("(XmlManager:ElementAttributes): Init")
         if isinstance(element, self.entityType):
             return element.attrib
         else:
@@ -153,7 +138,6 @@ class XmlManager(object):
     # Get the value of a specific element attribute
 
     def ElementAttribute(self, attributeName, element):
-        # logger.debug("(XmlManager:ElementAttribute): Init")
         if isinstance(element, self.entityType):
             return element.get(attributeName)
         else:
@@ -162,58 +146,58 @@ class XmlManager(object):
     # TODO: create ElementsByAttribute and ElementByAttribute
 
     # def Elements(self, tag, attributeName="", attributeValue="", element=None, recursive=False):
-    #     logger.debug("(XmlManager:Elements): Init")
+    #     LOG.debug("Init")
     #     if not element: element = self.elementTree
-    #     logger.debug("(XmlManager:Elements): tag name: {0}".format(tag))
-    #     logger.debug("(XmlManager:Elements): attributeName: {0}".format(attributeName))
-    #     logger.debug("(XmlManager:Elements): attributeValue: {0}".format(attributeValue))
+    #     LOG.debug(f"tag name: {tag}")
+    #     LOG.debug(f"attributeName: {attributeName}")
+    #     LOG.debug(f"attributeValue: {attributeValue}")
 
-    #     elementFilter = ".//{0}{1}".format(self.rootNamespace, tag)
+    #     elementFilter = f".//{self.rootNamespace}{tag}"
 
     #     if recursive:
     #         matches = element.iterfind(elementFilter)
     #     else:
     #         matches = element.findall(elementFilter)
-    #     logger.debug("(XmlManager:Elements): matches: {0}".format(matches))
+    #     LOG.debug(f"matches: {matches}")
 
     #     # Filter matches
     #     results = []
     #     if attributeName != "" and attributeValue != "":
-    #         logger.debug("(XmlManager:Elements): filtering element results...")
+    #         LOG.debug("filtering element results...")
     #         for element in matches:
     #             if element.get(attributeName) == attributeValue:
     #                 results.append(element)
-    #         logger.debug("(XmlManager:Elements): results: {0}".format(results))
+    #         LOG.debug(f"results: {results}")
 
     #     return results
 
     # def Element(self, tag, attributeName="", attributeValue="", element=None, recursive=False):
-    #     logger.debug("(XmlManager:Element): Init")
+    #     LOG.debug("Init")
     #     # if not element: element = self.elementTree
     #     if not element: element = self.Root()
-    #     logger.debug("(XmlManager:Element): tag name: {0}".format(tag))
-    #     logger.debug("(XmlManager:Element): attributeName: {0}".format(attributeName))
-    #     logger.debug("(XmlManager:Element): attributeValue: {0}".format(attributeValue))
+    #     LOG.debug(f"tag name: {tag}")
+    #     LOG.debug(f"attributeName: {attributeName}")
+    #     LOG.debug(f"attributeValue: {attributeValue}")
 
-    #     # elementFilter = ".//{0}".format(tag)
-    #     elementFilter = ".//{0}{1}".format(self.rootNamespace, tag)
-    #     logger.debug("(XmlManager:Element): elementFilter: {0}".format(elementFilter))
+    #     # elementFilter = f".//{tag}"
+    #     elementFilter = f".//{self.rootNamespace}{tag}"
+    #     LOG.debug(f"elementFilter: {elementFilter}")
 
     #     if recursive:
     #         matches = element.iterfind(elementFilter)
     #     else:
     #         matches = element.findall(elementFilter)
-    #     logger.debug("(XmlManager:Element): matches: {0}".format(matches))
+    #     LOG.debug(f"matches: {matches}")
 
     #     # Filter matches
     #     result = None
     #     if attributeName != "" and attributeValue != "":
-    #         logger.debug("(XmlManager:Element): filtering element result...")
+    #         LOG.debug("filtering element result...")
     #         for element in matches:
     #             if element.get(attributeName) == attributeValue:
     #                 result = element
     #                 break
-    #         logger.debug("(XmlManager:Element): result: {0}".format(result))
+    #         LOG.debug(f"result: {result}")
 
     #     return result
 
@@ -226,7 +210,7 @@ class XmlManager(object):
 class XmlEntity(object):
     def __init__(self, element):
         # Initial values or defaults
-        self.type = type(EL.Element(None))  # instance not directly exposed
+        self.type = type(EL.Element)  # instance not directly exposed
         self.element = None
         self.exists = False
         # Verify type is correct or fail
@@ -307,27 +291,28 @@ class XmlEntity(object):
 
 
 # ------------------------ Main program ------------------------
+
 # Initialize the logger
 BASENAME = "xml_boilerplate"
-log_options = LogOptions(BASENAME)
-logger = get_logger(log_options)
+ARGS: argparse.Namespace = argparse.Namespace()  # for external modules
+LOG: log.Logger = log.get_logger(BASENAME)
 
 if __name__ == "__main__":
-    # Returns argparse.Namespace; to pass into function, use **vars(self.args)
+    # Returns argparse.Namespace; to pass into function, use **vars(self.ARGS)
     def parse_arguments():
-        import argparse
+        """Method that parses arguments provided"""
         parser = argparse.ArgumentParser()
         parser.add_argument("--debug", action="store_true")
         return parser.parse_args()
-    args = parse_arguments
+    ARGS = parse_arguments()
 
     # Configure the logger
     log_level = 20                  # logging.INFO
-    if args.debug:
+    if ARGS.debug:
         log_level = 10   # logging.DEBUG
-    logger.setLevel(log_level)
-    logger.debug("(__main__): args: {0}".format(args))
-    logger.debug("(__main__): ------------------------------------------------")
+    LOG.setLevel(log_level)
+    LOG.debug(f"ARGS: {ARGS}")
+    LOG.debug("------------------------------------------------")
 
     # -------- XML Test --------
     boilerplate = XmlManager()
