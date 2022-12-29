@@ -7,8 +7,8 @@
 # Utility:          shift_directory, change_directory, list_differences, print_command
 # Process:          exit_process, fail_process, process_id, process_parent_id
 # Path:             current_path, expand_path, join_path, path_exists, path_dir, path_basename, path_filename
-# Directory:        list_directory, create_directory, delete_directory, copy_directory, rsync_directory
-# File:             read_file, write_file, delete_file, rename_file, copy_file, hash_file, file_match, backup_file
+# Directory:        list_directory, create_directory, delete_directory, copy_directory, sync_directory
+# File:             read_file, write_file, delete_file, rename_file, copy_file, hash_file, match_file, backup_file
 # Signal:           max_signal, handle_signal, send_signal
 # SubProcess:       run_subprocess, log_subprocess
 
@@ -16,11 +16,12 @@
 # await_results, is_done, format_output
 
 import argparse
-import distutils.dir_util
+# import distutils.dir_util
 # import distutils.file_util
 import json
 import os
 import re
+import shutil
 # import signal
 import subprocess
 import sys
@@ -28,6 +29,7 @@ import time
 from contextlib import contextmanager
 from typing import Any, Dict, List, Optional, Tuple
 
+import dirsync
 import logging_boilerplate as log
 
 # --- Module Key ---
@@ -74,10 +76,15 @@ def system_platform() -> str:
     return ''
 
 
-def environment_variable(key: str, default: Optional[str] = None) -> str | None:
-    """Method that fetches an environment variable, returns None if not found"""
-    # https://docs.python.org/3/library/os.html#os.environ
-    return os.getenv(key, default)
+# def environment_variable(key: str, default: Optional[str] = None) -> str | None:
+#     """Method that fetches an environment variable, returns None if not found"""
+#     # https://docs.python.org/3/library/os.html#os.environ
+#     return os.getenv(key, default)
+
+
+def environment_variable(key: str, default: str = '') -> str:
+    """Method that fetches an environment variable"""
+    return os.environ.get(key, default) or ''
 
 
 # Must conform to the following pattern: '^[0-9a-zA-Z-]+$'
@@ -204,14 +211,14 @@ def join_path(path: str, *paths) -> str:
     return os.path.join(path, *paths)
 
 
-# Pass either "f" (file) or 'd' (directory) to file_type
-def path_exists(path: str, file_type="") -> bool:
+# Pass either 'f' (file) or 'd' (directory) to file_type
+def path_exists(path: str, file_type: str = '') -> bool:
     """Method that validates whether the path exists"""
     path = expand_path(path)
     # Use more specific type of check if provided
-    if file_type == "d":
+    if file_type == 'd':
         return os.path.isdir(path)
-    elif file_type == "f":
+    elif file_type == 'f':
         return os.path.isfile(path)
     else:
         return os.path.exists(path)
@@ -223,7 +230,7 @@ def path_dir(name: str) -> str:
     return os.path.dirname(name)
 
 
-# Returns 'item' from /foo/bar/item
+# Returns 'item.bat' from /foo/bar/item.bat
 def path_basename(name: str) -> str:
     """Method that returns the last segment of a path"""
     return os.path.basename(name)
@@ -240,38 +247,48 @@ def path_filename(name: str) -> str:
 
 # --- Directory Commands ---
 
-def create_directory(path: str, mode=0o775) -> List[str]:
-    """Method that creates a directory"""
-    directories_created: List[str] = distutils.dir_util.mkpath(path, mode)
-    return directories_created
-
-
-# Use rsync_directory() for similar functionality with file filters
-def copy_directory(src: str, dest: str) -> List[str]:
-    """Method that copies a directory"""
-    prefix = path_basename(src)
-    full_dest = join_path(dest, prefix) if path_basename(dest) != prefix else dest
-    destination_paths: List[str] = distutils.dir_util.copy_tree(src, full_dest, update=True)
-    return destination_paths
-
-
-def delete_directory(path: str):
-    """Method that deletes a directory"""
-    # result = None
-    if path_exists(path, "d"):
-        # Better alternative to shutil.rmtree(path)
-        # result = distutils.dir_util.remove_tree(path)
-        distutils.dir_util.remove_tree(path)
-    # return result
-
-
 def list_directory(path: str) -> List[str]:
     """Method that lists a directory's contents"""
-    if not path_exists(path, "d"):
+    if not path_exists(path, 'd'):
         return []
     paths: List[str] = os.listdir(path)
     paths.sort()
     return paths
+
+
+def create_directory(path: str, mode=0o777) -> bool:
+    """Method that creates a directory"""
+    if path_exists(path, 'd'):
+        return False
+    # directories_created: List[str] = distutils.dir_util.mkpath(path, mode)
+    # No longer using 'mode' here - prefer to change permissions (os.chmod) when needed
+    # https://stackoverflow.com/questions/1627198/python-mkdir-giving-me-wrong-permissions
+    # https://docs.python.org/3/library/os.html#os.makedirs
+    os.makedirs(path, mode)
+    return True
+
+
+def delete_directory(path: str):
+    """Method that deletes a directory"""
+    if not path_exists(path, 'd'):
+        return False
+    try:
+        # distutils.dir_util.remove_tree(path)
+        shutil.rmtree(path)
+        return True
+    except Exception as e:
+        LOG.error(f'Exception: {e}')
+        return False
+
+
+def copy_directory(src: str, dest: str) -> bool:
+    """Method that copies a directory"""
+    try:
+        shutil.copytree(src, dest)
+        return True
+    except shutil.Error as e:
+        LOG.error(f'shutil.Error: {e}')
+        return False
 
 
 # Uses rsync, a better alternative to 'shutil.copytree' with ignore
@@ -342,6 +359,54 @@ def rsync_directory(src: str, dest: str, recursive: bool = True, purge: bool = T
     return (changed_files, changes_dirs)
 
 
+def sync_directory(sourcedir: str, targetdir: str, action: str = 'sync', options: Optional[Dict[str, Any]] = None) -> bool:
+    """Method that copies a directory
+
+    Args:
+        src (str): Source directory location
+        dest (str): Destination directory location
+        action (str): Action strategy for behavior.  Defaults to 'sync'.
+        options (dict): Provide additional options, such as: only, exclude, include
+
+    Returns:
+        bool: Whether directories are in sync
+    """
+    action_choices: List[str] = ['diff', 'sync', 'update']
+    if action not in action_choices:
+        return False
+
+    # https://github.com/tkhyn/dirsync/#additional-options
+    # https://github.com/tkhyn/dirsync/#custom-logger
+    default_options: Dict[str, Any] = {
+        'logger': LOG,  # custom logger to send output somewhere other than stdout
+        'verbose': True,
+        'create': True,  # create target directory if it does not exist
+        'ctime': True,  # takes into account the creation time or last metadata change
+        'content': True,  # synchronize only different files (e.g. hash check)
+        # use raw string notation for regex (https://docs.python.org/3/howto/regex.html)
+        'ignore': [
+            r'.*\.bak$',  # ignore files with '.bak' extension
+        ],  # regex patterns to ignore (https://regexr.com)
+    }
+    if options:
+        LOG.debug(f'options provided: {options}')
+        full_options: Dict[str, Any] = {
+            **default_options,
+            **options,
+        }
+    else:
+        full_options: Dict[str, Any] = default_options
+    # LOG.debug(f'options used: {full_options}')
+
+    try:
+        # https://github.com/tkhyn/dirsync
+        dirsync.sync(sourcedir, targetdir, action, **full_options)
+        return True
+    except Exception as e:
+        LOG.error(f'Exception: {e}')
+        return False
+
+
 # --- File Commands ---
 
 # Touch file and optionally fill with content
@@ -400,12 +465,17 @@ def rename_file(src: str, dest: str):
 
 def copy_file(src: str, dest: str) -> bool:
     """Method that copies a file"""
-    if not path_exists(src, "f"):
+    if not path_exists(src, 'f'):
         return False
-    command = ["cp", "--force", src, dest]
-    process = run_subprocess(command)
-    # log_subprocess(LOG, process, debug=ARGS.debug)
-    return process.returncode == 0
+    # Ensure containing directory exists
+    dest_dir = path_dir(dest)  # grab directory path from file path
+    create_directory(dest_dir)
+    try:
+        shutil.copy2(src, dest)
+        return True
+    except Exception as e:
+        LOG.error(f'Exception: {e}')
+        return False
 
 
 def hash_file(path: str) -> str:
