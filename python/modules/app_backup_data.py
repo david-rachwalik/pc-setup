@@ -10,11 +10,11 @@ import shell_boilerplate as sh
 # https://realpython.com/python-data-classes
 @dataclass
 class AppBackup:
-    """Class that tracks application backup details"""
-    id: str  # arbitrary 'app_id' given for ad hoc commands
+    """Class model of application backup details"""
+    id: str  # arbitrary 'app_id' given for ad hoc commands (filter_id)
     root: str  # install directory path without app title
-    name: str  # directory for the app title (mirrored by backup)
-    setting_opts: Optional[List[str]] = field(default=None)
+    name: str  # directory for the app title (mirrored by backup target)
+    # setting_opts: Optional[List[str]] = field(default=None)
     options: Optional[Dict[str, Any]] = field(default=None)  # provide additional options [only, exclude, include]
 
 
@@ -25,7 +25,7 @@ app_backups: List[AppBackup] = [
         id='handbrake',
         root=app_root_dir,
         name='HandBrake',
-        setting_opts=['--include=presets.json', '--include=settings.json', '--exclude=*'],
+        # setting_opts=['--include=presets.json', '--include=settings.json', '--exclude=*'],
         options={
             'only': ['presets.json', 'settings.json'],
         },
@@ -35,8 +35,8 @@ app_backups: List[AppBackup] = [
         root=app_root_dir,
         name='obs-studio',
         # Test Command: rsync -a --dry-run --verbose --exclude=*.bak --include=global.ini --include=basic/ --include=basic/**/ --include=basic/**/* --exclude=* /mnt/c/Users/david/AppData/Roaming/obs-studio/ /mnt/d/OneDrive/Backups/Apps/obs-studio
-        setting_opts=['--exclude=*.bak', '--include=global.ini', '--include=basic/',
-                      '--include=basic/**/', '--include=basic/**/*', '--exclude=*'],
+        # setting_opts=['--exclude=*.bak', '--include=global.ini', '--include=basic/',
+        #               '--include=basic/**/', '--include=basic/**/*', '--exclude=*'],
         options={
             'only': ['global.ini', 'basic/*'],
         },
@@ -45,7 +45,7 @@ app_backups: List[AppBackup] = [
         id='vscode',
         root=app_root_dir,
         name=sh.join_path('Code', 'User'),
-        setting_opts=['--include=settings.json', '--include=snippets/', '--exclude=*'],
+        # setting_opts=['--include=settings.json', '--include=snippets/', '--exclude=*'],
         options={
             # 'only': ['settings.json', 'snippets/*'],
             'only': ['settings.json'],
