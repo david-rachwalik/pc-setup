@@ -1,6 +1,12 @@
 #!/usr/bin/env python
 """Common logic for Python Azure interactions"""
 
+# https://learn.microsoft.com/en-us/azure/developer/python/configure-local-development-environment
+# https://learn.microsoft.com/en-us/azure/developer/python/sdk/azure-sdk-overview
+# https://learn.microsoft.com/en-us/azure/developer/python/sdk/examples/azure-sdk-example-resource-group
+# https://learn.microsoft.com/en-us/azure/developer/python/sdk/examples/azure-sdk-example-list-resource-groups
+# https://learn.microsoft.com/en-us/azure/developer/python/sdk/examples/azure-sdk-example-database
+
 # --- Global Azure Classes ---
 # Account:                      is_signed_in, tenant_id, account_user, subscription, subscription_id, subscription_is_default
 # ServicePrincipal:             name, appId, password
