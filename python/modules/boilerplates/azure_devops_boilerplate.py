@@ -27,7 +27,7 @@ import shell_boilerplate as sh
 
 def user_get(pat_data: str, user: str) -> bool:
     """Method that fetches Azure DevOps user profile"""
-    command: List[str] = ["az", "devops", "user", "show", f"--user={user}"]
+    command: List[str] = ['az', 'devops', 'user', 'show', f'--user={user}']
     environment_vars = {'AZURE_DEVOPS_EXT_PAT': pat_data}
     sh.print_command(command)
     # process = sh.run_subprocess(command)
@@ -38,7 +38,7 @@ def user_get(pat_data: str, user: str) -> bool:
 
 def user_logout() -> bool:
     """Method that signs out Azure DevOps user profile"""
-    command: List[str] = ["az", "devops", "logout"]
+    command: List[str] = ['az', 'devops', 'logout']
     sh.print_command(command)
     process = sh.run_subprocess(command)
     sh.log_subprocess(LOG, process, debug=ARGS.debug)
@@ -66,7 +66,7 @@ def user_logout() -> bool:
 # Login with credential (PAT)
 def user_login(pat_data: str) -> bool:
     """Method that signs into Azure DevOps user profile"""
-    command: List[str] = ["az", "devops", "login"]
+    command: List[str] = ['az', 'devops', 'login']
     environment_vars = {'AZURE_DEVOPS_EXT_PAT': pat_data}
     sh.print_command(command)
     process = sh.run_subprocess(command, env=environment_vars)
@@ -83,11 +83,11 @@ def user_login(pat_data: str) -> bool:
 def user_save(path: str, content: str):
     """Method that saves Azure DevOps user profile to a file"""
     # Handle previous credentials if found
-    if sh.path_exists(path, "f"):
+    if sh.path_exists(path, 'f'):
         backup_path = sh.backup_file(path)
-    LOG.debug("storing user PAT/credentials...")
+    LOG.debug('storing user PAT/credentials...')
     sh.write_file(path, content)
-    LOG.debug("successfully saved user PAT/credentials!")
+    LOG.debug('successfully saved user PAT/credentials!')
 
 
 # --- DevOps Project Commands ---
@@ -95,28 +95,28 @@ def user_save(path: str, content: str):
 
 def devops_project_list() -> Tuple[bool, bool]:
     """Method that lists Azure DevOps projects"""
-    command: List[str] = ["az", "devops", "project", "--list"]
+    command: List[str] = ['az', 'devops', 'project', '--list']
     sh.print_command(command)
     process = sh.run_subprocess(command)
     sh.log_subprocess(LOG, process, debug=ARGS.debug)
     failed = (process.returncode != 0)
-    changed = (not failed and "is not authorized to access this resource" not in process.stderr)
+    changed = (not failed and 'is not authorized to access this resource' not in process.stderr)
     return (not failed, changed)
 
 
 # ------------------------ Main Program ------------------------
 # Initialize the logger
-BASENAME = "azure_devops_boilerplate"
+BASENAME = 'azure_devops_boilerplate'
 ARGS: argparse.Namespace = argparse.Namespace()  # for external modules
 LOG: log.Logger = log.get_logger(BASENAME)
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     # Returns argparse.Namespace; to pass into function, use **vars(self.ARGS)
     def parse_arguments():
         """Method that parses arguments provided"""
         parser = argparse.ArgumentParser()
-        parser.add_argument("--debug", action="store_true")
-        parser.add_argument("--log-path", default="")
+        parser.add_argument('--debug', action='store_true')
+        parser.add_argument('--log-path', default='')
         return parser.parse_args()
     ARGS = parse_arguments()
 
@@ -125,12 +125,12 @@ if __name__ == "__main__":
     log.set_handlers(LOG, LOG_HANDLERS)
     if ARGS.debug:
         # Configure the shell_boilerplate logger
-        _sh_log = log.get_logger("shell_boilerplate")
+        _sh_log = log.get_logger('shell_boilerplate')
         log.set_handlers(_sh_log, LOG_HANDLERS)
         sh.ARGS.debug = ARGS.debug
 
-    LOG.debug(f"ARGS: {ARGS}")
-    LOG.debug("------------------------------------------------")
+    LOG.debug(f'ARGS: {ARGS}')
+    LOG.debug('------------------------------------------------')
 
     # --- Usage Example ---
     # python ~/.local/lib/python2.7/site-packages/azure_devops_boilerplate.py --debug

@@ -26,9 +26,9 @@ import pytz
 # ------------------------ Classes ------------------------
 
 Logger: Type[logging.Logger] = logging.Logger
-_timezone: str = "US/Central"
-_time_format: str = "%Y-%m-%d %H:%M:%S"
-_message_format: str = "%(message)s"
+_timezone: str = 'US/Central'
+_time_format: str = '%Y-%m-%d %H:%M:%S'
+_message_format: str = '%(message)s'
 
 # Pass 'path' for file handler; must expand absolute paths ('~' treated relatively)
 
@@ -36,7 +36,7 @@ _message_format: str = "%(message)s"
 class LogHandlerOptions(object):
     """Options object for log handling"""
 
-    def __init__(self, level=logging.WARNING, path="",
+    def __init__(self, level=logging.WARNING, path='',
                  message_format=_message_format, time_format=_time_format, timezone=_timezone
                  ):
         # levels: 10-DEBUG, 20-INFO, 30-WARNING, 40-ERROR, 50-CRITICAL
@@ -59,7 +59,7 @@ _stream_handler: LogHandlerOptions = LogHandlerOptions()
 
 
 def get_logger(
-    log_name: str = "root",
+    log_name: str = 'root',
     handlers: Optional[List[LogHandlerOptions]] = None
 ) -> logging.Logger:
     """Method to fetch the logging Logger"""
@@ -119,7 +119,7 @@ def set_handlers(logger: logging.Logger, handlers: Optional[List[LogHandlerOptio
 # Generate handlers with a standard configuration
 def default_handlers(
     debug: bool = False,
-    log_path: str = ""
+    log_path: str = ''
 ) -> List[LogHandlerOptions]:
     """Method to generate default logging Handlers"""
     # https://docs.python.org/3/library/logging.html#logrecord-attributes
@@ -128,14 +128,14 @@ def default_handlers(
     # _message_format = "%(asctime)s [%(levelname)s] %(message)s"
     if debug:
         log_level = 10  # logging.DEBUG
-        # log_format = "%(asctime)s [%(levelname).1s] (%(module)s:%(funcName)s): %(message)s"
-        log_format = "%(log_color)s%(asctime)s [%(levelname).1s] (%(module)s:%(funcName)s): %(message)s"
+        # log_format = '%(asctime)s [%(levelname).1s] (%(module)s:%(funcName)s): %(message)s'
+        log_format = '%(log_color)s%(asctime)s [%(levelname).1s] (%(module)s:%(funcName)s): %(message)s'
     else:
         log_level = 20  # logging.INFO
-        # log_format = "%(message)s"
-        log_format = "%(log_color)s%(asctime)s: %(message)s"
+        # log_format = '%(message)s'
+        log_format = '%(log_color)s%(asctime)s: %(message)s'
     # Create stream handler (console/terminal)
-    log_stream_options = LogHandlerOptions(log_level, "", log_format)
+    log_stream_options = LogHandlerOptions(log_level, '', log_format)
     log_handlers = [log_stream_options]
     # Create file handler when path is provided
     if log_path:
@@ -147,7 +147,7 @@ def default_handlers(
 # --- Private Commands ---
 
 # Convert to timezone for log output
-def _get_timezone_converter(timezone="UTC"):
+def _get_timezone_converter(timezone='UTC'):
     def format_timezone(*args):
         utc_date = pytz.utc.localize(datetime.datetime.utcnow())
         tz = pytz.timezone(timezone)
@@ -163,16 +163,16 @@ def _get_timezone_converter(timezone="UTC"):
 # logging.addLevelName(logging.CRITICAL, "FATAL")
 
 # Initialize the logger
-BASENAME = "logging_boilerplate"
+BASENAME = 'logging_boilerplate'
 ARGS: argparse.Namespace = argparse.Namespace()  # for external modules
 LOG: Logger = get_logger(BASENAME)
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     def parse_arguments():
         """Method that parses arguments provided"""
         parser = argparse.ArgumentParser()
-        parser.add_argument("--debug", action="store_true")
-        parser.add_argument("--log-path", default="")
+        parser.add_argument('--debug', action='store_true')
+        parser.add_argument('--log-path', default='')
         return parser.parse_args()
     ARGS = parse_arguments()
 
@@ -193,15 +193,15 @@ if __name__ == "__main__":
         ARGS.debug, ARGS.log_path)
     set_handlers(LOG, LOG_HANDLERS)
 
-    LOG.debug("--- Log test successful! ---")
-    LOG.info("--- Log test successful! ---")
-    LOG.warning("--- Log test successful! ---")
-    LOG.error("--- Log test successful! ---")
-    LOG.critical("--- Log test successful! ---")
+    LOG.debug('--- Log test successful! ---')
+    LOG.info('--- Log test successful! ---')
+    LOG.warning('--- Log test successful! ---')
+    LOG.error('--- Log test successful! ---')
+    LOG.critical('--- Log test successful! ---')
 
     HANDLER_LENGTH = len(LOG.handlers)
-    LOG.warning(f"log handler count: {HANDLER_LENGTH}")
-    LOG.warning(f"log handlers: {LOG.handlers}")
+    LOG.warning(f'log handler count: {HANDLER_LENGTH}')
+    LOG.warning(f'log handlers: {LOG.handlers}')
 
     # --- Usage Example ---
     # python $HOME/.local/lib/python3.6/site-packages/logging_boilerplate.py
