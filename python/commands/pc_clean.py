@@ -101,13 +101,13 @@ def main():
             DEST = sh.join_path(backup_root, 'Apps_test', APP.name)  # TODO: change after testing
             LOG.info(f'SRC path: {SRC}')
             LOG.info(f'DEST path: {DEST}')
-            # RESULT = sh.sync_directory(SRC, DEST, 'diff', options=APP.options)
-            RESULT = sh.sync_directory(SRC, DEST, options=APP.options)
+            if ARGS.test_run:
+                RESULT = sh.sync_directory(SRC, DEST, 'diff', options=APP.options)
+            else:
+                RESULT = sh.sync_directory(SRC, DEST, options=APP.options)
+                DIR_REMOVED = remove_empty_directories(DEST)
+                LOG.debug(f'empty directories removed: {DIR_REMOVED}')
             # LOG.debug(f'sync_directory RESULT: {RESULT}')
-
-            # NOTE: if sync_directory() action is 'diff', comment out line below
-            DIR_REMOVED = remove_empty_directories(DEST)
-            LOG.debug(f'empty directories removed: {DIR_REMOVED}')
 
     # --- Backup important game files (screenshots, settings, addons) ---
     if 'games' in tasks:
@@ -123,13 +123,13 @@ def main():
             DEST = sh.join_path(backup_root, 'Games_test', GAME.name)  # TODO: change after testing
             LOG.info(f'SRC path: {SRC}')
             LOG.info(f'DEST path: {DEST}')
-            # RESULT = sh.sync_directory(SRC, DEST, 'diff', options=GAME.options)
-            RESULT = sh.sync_directory(SRC, DEST, options=GAME.options)
+            if ARGS.test_run:
+                RESULT = sh.sync_directory(SRC, DEST, 'diff', options=GAME.options)
+            else:
+                RESULT = sh.sync_directory(SRC, DEST, options=GAME.options)
+                DIR_REMOVED = remove_empty_directories(DEST)
+                LOG.debug(f'empty directories removed: {DIR_REMOVED}')
             # LOG.debug(f'sync_directory RESULT: {RESULT}')
-
-            # NOTE: if sync_directory() action is 'diff', comment out line below
-            DIR_REMOVED = remove_empty_directories(DEST)
-            LOG.debug(f'empty directories removed: {DIR_REMOVED}')
 
             # Clear source screenshot directory
             if GAME.screenshot:
@@ -137,11 +137,9 @@ def main():
                 sh.delete_directory(ss_path)
 
     # --- Clean the system platform / health check ---
-    if 'clean' in tasks:
+    if 'clean' in tasks and not ARGS.test_run:
         LOG.info('--- Cleaning system platform ---')
         run_ccleaner()
-
-    # TODO: work on script to restore settings and addons
 
 
 # Initialize the logger
@@ -156,6 +154,7 @@ if __name__ == '__main__':
         parser.add_argument('--debug', action='store_true')
         parser.add_argument('--log-path', default='')
         parser.add_argument('--id-filter', action='append', choices=ALL_IDS)  # most reliable list approach
+        parser.add_argument('--test-run', action='store_true')
         parser.add_argument('--only-apps', action='store_true')
         parser.add_argument('--only-games', action='store_true')
         parser.add_argument('--only-clean', action='store_true')
