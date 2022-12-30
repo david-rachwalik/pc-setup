@@ -27,6 +27,7 @@ $choco_packages_to_install = @(
     'mongodb-shell'
     'postman'
     'terraform'
+    'upx' # Ultimate Packer for eXecutables (for PyInstaller)
 
     # --- Media ---
     'geforce-experience'

@@ -7,7 +7,10 @@ $pip_packages = @(
     'autopep8'
     'pytz'
     'colorlog'
+    'pylint-quotes'
+    'pyinstaller'  # https://pyinstaller.org/en/stable
     'yt-dlp'
+    'dirsync'  # https://github.com/tkhyn/dirsync
     # https://learn.microsoft.com/en-us/azure/developer/python/configure-local-development-environment
     # https://learn.microsoft.com/en-us/azure/developer/python/sdk/azure-sdk-overview#connect-to-and-use-azure-resources-with-client-libraries
     'azure-identity'
@@ -26,26 +29,30 @@ $pip_packages = @(
 
 $python_user_modules = @(
     # --- Misc. ---
-    'file_backup.py'
-    # 'mytest.py'
+    'file_backup'
+    # 'mytest'
+    'app_backup_data'
+    'game_backup_data'
 )
 
 $python_user_boilerplate_modules = @(
-    'logging_boilerplate.py'
-    'shell_boilerplate.py'
-    'azure_boilerplate.py'
-    'azure_devops_boilerplate.py'
-    'dotnet_boilerplate.py'
-    'git_boilerplate.py'
-    # 'xml_boilerplate.py'
-    # 'multiprocess_boilerplate.py'
-    # 'daemon_boilerplate.py'
-    # 'socket_boilerplate.py'
+    'logging_boilerplate'
+    'shell_boilerplate'
+    'azure_boilerplate'
+    'azure_devops_boilerplate'
+    'dotnet_boilerplate'
+    'git_boilerplate'
+    # 'xml_boilerplate'
+    # 'multiprocess_boilerplate'
+    # 'daemon_boilerplate'
+    # 'socket_boilerplate'
 )
 
 $python_user_commands = @(
-    'app.py'
-    'mygit.py'
+    'app'
+    'mygit'
+    'provision_vscode'
+    'pc_clean'
 )
 
 
@@ -209,53 +216,68 @@ function Test-FileHashes
 # Provision the latest Python modules
 foreach ($module in $python_user_modules)
 {
-    $src_path = Join-Path -Path $repo_py_module_dir -ChildPath $module
-    $dest_path = Join-Path -Path $user_py_module_dir -ChildPath $module
+    $filename = "$($module).py"
+    $src_path = Join-Path -Path $repo_py_module_dir -ChildPath $filename
+    $dest_path = Join-Path -Path $user_py_module_dir -ChildPath $filename
     $match = Test-FileHashes $src_path $dest_path
     if ($match)
     {
-        $PythonFilesPassed.Add($module) | Out-Null
+        $PythonFilesPassed.Add($filename) | Out-Null
     }
     else
     {
+        $PythonFilesUpdated.Add($filename) | Out-Null
         # https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/robocopy
         # https://adamtheautomator.com/robocopy
-        robocopy $repo_py_module_dir $user_py_module_dir $module /mt /z
-        $PythonFilesUpdated.Add($module) | Out-Null
+        robocopy $repo_py_module_dir $user_py_module_dir $filename /mt /z
     }
 }
 
 # Provision the latest Python modules (boilerplate)
 foreach ($module in $python_user_boilerplate_modules)
 {
-    $src_path = Join-Path -Path $repo_py_boilerplate_dir -ChildPath $module
-    $dest_path = Join-Path -Path $user_py_module_dir -ChildPath $module
+    $filename = "$($module).py"
+    $src_path = Join-Path -Path $repo_py_boilerplate_dir -ChildPath $filename
+    $dest_path = Join-Path -Path $user_py_module_dir -ChildPath $filename
     $match = Test-FileHashes $src_path $dest_path
     if ($match)
     {
-        $PythonFilesPassed.Add($module) | Out-Null
+        $PythonFilesPassed.Add($filename) | Out-Null
     }
     else
     {
-        robocopy $repo_py_boilerplate_dir $user_py_module_dir $module /mt /z
-        $PythonFilesUpdated.Add($module) | Out-Null
+        $PythonFilesUpdated.Add($filename) | Out-Null
+        robocopy $repo_py_boilerplate_dir $user_py_module_dir $filename /mt /z
     }
 }
 
 # Provision the latest Python commands
 foreach ($module in $python_user_commands)
 {
-    $src_path = Join-Path -Path $repo_py_command_dir -ChildPath $module
-    $dest_path = Join-Path -Path $user_py_command_dir -ChildPath $module
+    $filename = "$($module).py"
+    $src_path = Join-Path -Path $repo_py_command_dir -ChildPath $filename
+    $dest_path = Join-Path -Path $user_py_command_dir -ChildPath $filename
     $match = Test-FileHashes $src_path $dest_path
     if ($match)
     {
-        $PythonFilesPassed.Add($module) | Out-Null
+        $PythonFilesPassed.Add($filename) | Out-Null
     }
     else
     {
-        robocopy $repo_py_command_dir $user_py_command_dir $module /mt /z
-        $PythonFilesUpdated.Add($module) | Out-Null
+        $PythonFilesUpdated.Add($filename) | Out-Null
+        robocopy $repo_py_command_dir $user_py_command_dir $filename /mt /z
+        
+        # --- Make the command executable from CLI ---
+        $dest_bat_content = "py %AppData%\Python\bin\$($filename) %*"
+        $dest_bat = "C:\Python311\Scripts\$($module).bat"
+        Set-Content -Path $dest_bat -Value $dest_bat_content -Encoding Ascii
+
+        # --- Make a distributeable application (for external users) ---
+        # https://pyinstaller.org/en/stable/usage.html
+        # https://realpython.com/pyinstaller-python
+        # $dest_build_path = Join-Path -Path $user_py_command_dir -ChildPath 'build'
+        # $dest_dist_path = Join-Path -Path $user_py_command_dir -ChildPath 'dist'
+        # pyinstaller --onefile --specpath=$dest_build_path --workpath=$dest_build_path --distpath='C:\Python311\Scripts' $dest_path
     }
 }
 
