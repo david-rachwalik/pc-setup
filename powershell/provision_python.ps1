@@ -71,7 +71,8 @@ function Join-RepoPath
         [string]$RootPath,
         [Parameter(Mandatory)]
         [string]$ChildPath,
-        [bool]$IsRemote = 0
+        [Parameter(Mandatory)]
+        [bool]$IsRemote
     )
 
     [string]$Path = ""
@@ -254,10 +255,10 @@ else
     $repo_dir = "https://raw.githubusercontent.com/david-rachwalik/pc-setup/master"
 }
 
-$repo_py_dir = Join-RepoPath $repo_dir "python"
-$repo_py_module_dir = Join-RepoPath $repo_py_dir "modules"
-$repo_py_boilerplate_dir = Join-RepoPath $repo_py_module_dir "boilerplates"
-$repo_py_command_dir = Join-RepoPath $repo_py_dir "commands"
+$repo_py_dir = Join-RepoPath $repo_dir "python" $script_is_remote
+$repo_py_module_dir = Join-RepoPath $repo_py_dir "modules" $script_is_remote
+$repo_py_boilerplate_dir = Join-RepoPath $repo_py_module_dir "boilerplates" $script_is_remote
+$repo_py_command_dir = Join-RepoPath $repo_py_dir "commands" $script_is_remote
 
 Write-Host "source directory: $repo_py_dir"
 
@@ -319,7 +320,7 @@ Write-Host "destination directory: $user_py_dir"
 foreach ($module in $python_user_modules)
 {
     $filename = "$($module).py"
-    $src_path = Join-RepoPath $repo_py_module_dir $filename
+    $src_path = Join-RepoPath $repo_py_module_dir $filename $script_is_remote
     $dest_path = Join-Path -Path $user_py_module_dir -ChildPath $filename
     $match = Test-FileHashes $src_path $dest_path $script_is_remote
     if ($match)
@@ -338,7 +339,7 @@ foreach ($module in $python_user_modules)
 foreach ($module in $python_user_boilerplate_modules)
 {
     $filename = "$($module).py"
-    $src_path = Join-RepoPath $repo_py_boilerplate_dir $filename
+    $src_path = Join-RepoPath $repo_py_boilerplate_dir $filename $script_is_remote
     $dest_path = Join-Path -Path $user_py_module_dir -ChildPath $filename
     $match = Test-FileHashes $src_path $dest_path $script_is_remote
     if ($match)
@@ -357,7 +358,7 @@ foreach ($module in $python_user_boilerplate_modules)
 foreach ($module in $python_user_commands)
 {
     $filename = "$($module).py"
-    $src_path = Join-RepoPath $repo_py_command_dir $filename
+    $src_path = Join-RepoPath $repo_py_command_dir $filename $script_is_remote
     $dest_path = Join-Path -Path $user_py_command_dir -ChildPath $filename
     $match = Test-FileHashes $src_path $dest_path $script_is_remote
     if ($match)
