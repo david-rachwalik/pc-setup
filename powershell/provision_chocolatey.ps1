@@ -1,7 +1,7 @@
-# Run with PowerShell (as Administrator)
+# -------- Run with PowerShell (as Administrator) --------
 
 # https://chocolatey.org/packages/*
-$choco_packages_to_install = @(
+$choco_packages = @(
     # --- Productivity ---
     'GoogleChrome'
     '7zip'
@@ -66,7 +66,7 @@ $choco_packages_to_install = @(
 $choco_version = choco -v
 if (-not($choco_version))
 {
-    Write-Output "Chocolatey is missing, installing..."
+    Write-Host "Chocolatey is missing, installing..." -ForegroundColor Yellow
     # Set-ExecutionPolicy Bypass -Scope Process -Force; ie ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))
     # Set-ExecutionPolicy Bypass -Scope Process -Force; iwr https://chocolatey.org/install.ps1 -UseBasicParsing | iex
     Set-ExecutionPolicy Bypass -Scope Process -Force; Invoke-WebRequest https://chocolatey.org/install.ps1 -UseBasicParsing | Invoke-Expression
@@ -79,47 +79,61 @@ if (-not($choco_version))
 }
 else
 {
-    Write-Output "Chocolatey install found, version $choco_version"
+    Write-Host "Chocolatey install found, version $choco_version"
 }
+
+
+# --- Enable Chocolatey to output as PowerShell objects ---
+# TODO: verify whether still necessary
+# $powershell_module_chocolatey = Get-InstalledModule -Name chocolatey
+# if (-not($powershell_module_chocolatey))
+# {
+#     Write-Host "PowerShellGet is missing 'chocolatey' Module, preparing to install..." -ForegroundColor Yellow
+#     # https://learn.microsoft.com/en-us/powershell/module/powershellget/install-module
+#     # https://www.powershellgallery.com/packages/chocolatey/0.0.79
+#     Install-Module -Name chocolatey -RequiredVersion 0.0.79 -Force
+#     Write-Host "PowerShellGet successfully installed 'chocolatey' Module"
+# }
 
 
 # --- Verify Chocolatey packages ---
 # https://docs.chocolatey.org/en-us/choco/commands/list
-$choco_packages = choco search --local-only --id-only # requires admin
-# $choco_packages_type = $choco_packages.GetType()
-# $choco_packages_length = $choco_packages.Length
+$choco_packages_installed = choco search --local-only --id-only # requires admin
+# $choco_packages_type = $choco_packages_installed.GetType()
+# $choco_packages_length = $choco_packages_installed.Length
 # https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.utility/get-member
-# $choco_packages_members = $choco_packages | Get-Member
-# $choco_packages_properties = $choco_packages | Get-Member -MemberType Property
-# $choco_packages_methods = $choco_packages | Get-Member -MemberType Method
+# $choco_packages_members = $choco_packages_installed | Get-Member
+# $choco_packages_properties = $choco_packages_installed | Get-Member -MemberType Property
+# $choco_packages_methods = $choco_packages_installed | Get-Member -MemberType Method
 
-# if ($choco_packages)
+# if ($choco_packages_installed)
 # {
-#     Write-Output "results of choco search (truthy)"
-#     Write-Output "---"
-#     Write-Output "choco_packages:"
-#     Write-Output ($choco_packages | Out-String).Trim()
-#     Write-Output "---"
+#     Write-Host "results of choco search (truthy)" -ForegroundColor Green
+#     Write-Host "---"
+#     Write-Host "choco_packages:"
+#     Write-Host ($choco_packages_installed | Out-String).Trim()
+#     Write-Host "---"
 
-#     Write-Output "choco_packages_type: $choco_packages_type"
-#     Write-Output "choco_packages_length: $choco_packages_length"
-#     Write-Output "choco_packages_properties: $choco_packages_properties"
+#     Write-Host "choco_packages_type: $choco_packages_type"
+#     Write-Host "choco_packages_length: $choco_packages_length"
+#     Write-Host "choco_packages_properties: $choco_packages_properties"
 
 #     $chrome = "GoogleChrome"
-#     $chrome_found = $choco_packages -contains $chrome
-#     Write-Output "Found $chrome : $chrome_found"
+#     $chrome_found = $choco_packages_installed -contains $chrome
+#     Write-Host "Found $chrome : $chrome_found"
 # }
 # else
 # {
-#     Write-Output "results of choco search (falsy)"
+#     Write-Host "results of choco search (falsy)" -ForegroundColor Red
 # }
 
 
-if ($choco_packages)
+# --- Install/Upgrade Chocolatey packages as needed ---
+if ($choco_packages_installed)
 {
-    foreach ($package in $choco_packages_to_install | Sort-Object)
+    foreach ($package in $choco_packages | Sort-Object)
     {
-        if (-not ($choco_packages -contains $package))
+        if (-not ($choco_packages_installed -contains $package))
         {
             # Install missing Chocolatey package
             choco install $package -y
@@ -134,4 +148,4 @@ if ($choco_packages)
 }
 
 
-Write-Output "--- Successfully completed Chocolatey provisioning! ---"
+Write-Host "--- Successfully completed Chocolatey provisioning! ---" -ForegroundColor Green
