@@ -47,7 +47,7 @@ Write-Host "Completed 'provision_chocolatey.ps1' process"
 
 # -------- STAGE 3: Provision Python --------
 
-Write-Host "Calling 'provision_chocolatey.ps1' from remote..."
+Write-Host "Calling 'provision_python.ps1' from remote..."
 $provision_python_url = "https://raw.githubusercontent.com/david-rachwalik/pc-setup/master/powershell/provision_python.ps1"
 $provision_python_script = Invoke-WebRequest $provision_python_url
 Invoke-Expression $provision_python_script.Content
