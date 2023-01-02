@@ -42,6 +42,14 @@ app_backups: List[AppBackup] = [
         },
     ),
     AppBackup(
+        id='voicemeeter',
+        root=sh.join_path(sh.environment_variable('Home'), 'Documents'),
+        name='Voicemeeter',
+        options={
+            'only': ['VoicemeeterProfile.xml'],
+        },
+    ),
+    AppBackup(
         id='vscode',
         root=app_root_dir,
         name=sh.join_path('Code', 'User'),
