@@ -148,4 +148,4 @@ if ($choco_packages_installed)
 }
 
 
-Write-Host "--- Successfully completed Chocolatey provisioning! ---" -ForegroundColor Green
+Write-Host "--- Completed provisioning of Chocolatey ---" -ForegroundColor Green
