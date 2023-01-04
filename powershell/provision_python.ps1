@@ -203,7 +203,8 @@ $pip_packages_installed = (pip list --format=json | ConvertFrom-Json).name
 Write-Host "pip_packages_installed: $pip_packages_installed"
 $pip_packages_to_install = $pip_packages | Where-Object { $pip_packages_installed -notcontains $_ }
 Write-Host "pip_packages_to_install: $pip_packages_to_install"
-$pip_packages_outdated = ((pip list --outdated --format=json | ConvertFrom-Json).name | Out-String).replace("`r`n", " ")
+# $pip_packages_outdated = ((pip list --outdated --format=json | ConvertFrom-Json).name | Out-String).replace("`r`n", " ").Trim().Split()
+$pip_packages_outdated = (pip list --outdated --format=json | ConvertFrom-Json).name
 Write-Host "pip_packages_outdated: $pip_packages_outdated"
 
 
@@ -217,10 +218,10 @@ foreach ($package in $pip_packages_to_install)
 
 
 # --- Upgrade all PIP packages ---
-if ($pip_packages_outdated)
+foreach ($package in $pip_packages_outdated)
 {
     Write-Host "Attempting to upgrade PIP package '$package'.."
-    pip install --upgrade $pip_packages_outdated
+    pip install --upgrade $package
 }
 
 Write-Host "--- Completed provisioning of PIP (package manager) ---" -ForegroundColor Green
