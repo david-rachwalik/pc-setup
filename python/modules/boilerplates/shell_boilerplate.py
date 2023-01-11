@@ -7,7 +7,7 @@
 # Utility:          shift_directory, change_directory, list_differences, print_command
 # Process:          exit_process, fail_process, process_id, process_parent_id
 # Path:             current_path, expand_path, join_path, path_exists, path_dir, path_basename, path_filename
-# Directory:        list_directory, create_directory, delete_directory, copy_directory, sync_directory
+# Directory:        list_directory, create_directory, delete_directory, copy_directory, sync_directory, remove_empty_directories
 # File:             read_file, write_file, delete_file, rename_file, copy_file, hash_file, match_file, backup_file
 # Signal:           max_signal, handle_signal, send_signal
 # SubProcess:       run_subprocess, log_subprocess
@@ -359,7 +359,10 @@ def rsync_directory(src: str, dest: str, recursive: bool = True, purge: bool = T
     return (changed_files, changes_dirs)
 
 
-def sync_directory(sourcedir: str, targetdir: str, action: str = 'sync', options: Optional[Dict[str, Any]] = None) -> bool:
+def sync_directory(sourcedir: str, targetdir: str, action: str = 'sync',
+                   options: Optional[Dict[str, Any]] = None,
+                   ignore: Optional[List[str]] = None,
+                   ) -> bool:
     """Method that copies a directory
 
     Args:
@@ -375,6 +378,9 @@ def sync_directory(sourcedir: str, targetdir: str, action: str = 'sync', options
     if action not in action_choices:
         return False
 
+    if not ignore:
+        ignore = []
+
     # https://github.com/tkhyn/dirsync/#additional-options
     # https://github.com/tkhyn/dirsync/#custom-logger
     default_options: Dict[str, Any] = {
@@ -386,6 +392,7 @@ def sync_directory(sourcedir: str, targetdir: str, action: str = 'sync', options
         # use raw string notation for regex (https://docs.python.org/3/howto/regex.html)
         'ignore': [
             r'.*\.bak$',  # ignore files with '.bak' extension
+            *ignore,
         ],  # regex patterns to ignore (https://regexr.com)
     }
     if options:
@@ -396,7 +403,7 @@ def sync_directory(sourcedir: str, targetdir: str, action: str = 'sync', options
         }
     else:
         full_options: Dict[str, Any] = default_options
-    # LOG.debug(f'options used: {full_options}')
+    LOG.debug(f'options used: {full_options}')
 
     try:
         # https://github.com/tkhyn/dirsync
@@ -405,6 +412,31 @@ def sync_directory(sourcedir: str, targetdir: str, action: str = 'sync', options
     except Exception as e:
         LOG.error(f'Exception: {e}')
         return False
+
+
+# https://stackoverflow.com/questions/47093561/remove-empty-folders-python
+def remove_empty_directories(root) -> List[str]:
+    """Method that recursively removes empty subdirectories"""
+    removed_dirs: List[str] = []
+
+    for (current_dir, subdirs, files) in os.walk(root, topdown=False):
+        if files:
+            continue  # skip directory with files
+        # LOG.debug(f'current_dir: {current_dir}')
+
+        still_has_subdirs = False
+        for subdir in subdirs:
+            # LOG.debug(f'subdir: {subdir}')
+            if os.path.join(current_dir, subdir) not in removed_dirs:
+                still_has_subdirs = True
+            # LOG.debug(f'still_has_subdirs: {still_has_subdirs}')
+
+        if not still_has_subdirs:
+            os.rmdir(current_dir)
+            removed_dirs.append(current_dir)
+
+    # LOG.debug(f'empty directories removed: {removed_dirs}')
+    return removed_dirs
 
 
 # --- File Commands ---

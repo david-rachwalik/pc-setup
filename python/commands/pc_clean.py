@@ -2,7 +2,6 @@
 """Command to backup & clean the system platform"""
 
 import argparse
-import os
 from typing import List
 
 import logging_boilerplate as log
@@ -34,31 +33,6 @@ def keep_dir_name(path1: str, path2: str) -> str:
     if keep_dir_name and sh.path_basename(path2) != basename:
         return sh.join_path(path2, basename)
     return path2
-
-
-# https://stackoverflow.com/questions/47093561/remove-empty-folders-python
-def remove_empty_directories(root) -> List[str]:
-    """Method that recursively walks backward through subdirectories to remove empty directories"""
-    removed_dirs: List[str] = []
-
-    for (current_dir, subdirs, files) in os.walk(root, topdown=False):
-        if files:
-            continue  # skip directory with files
-        # LOG.debug(f'current_dir: {current_dir}')
-
-        still_has_subdirs = False
-        for subdir in subdirs:
-            # LOG.debug(f'subdir: {subdir}')
-            if os.path.join(current_dir, subdir) not in removed_dirs:
-                still_has_subdirs = True
-            # LOG.debug(f'still_has_subdirs: {still_has_subdirs}')
-
-        if not still_has_subdirs:
-            os.rmdir(current_dir)
-            removed_dirs.append(current_dir)
-
-    # LOG.debug(f'empty directories removed: {removed_dirs}')
-    return removed_dirs
 
 
 def run_ccleaner():
@@ -105,7 +79,7 @@ def main():
                 RESULT = sh.sync_directory(SRC, DEST, 'diff', options=APP.options)
             else:
                 RESULT = sh.sync_directory(SRC, DEST, options=APP.options)
-                DIR_REMOVED = remove_empty_directories(DEST)
+                DIR_REMOVED = sh.remove_empty_directories(DEST)
                 LOG.debug(f'empty directories removed: {DIR_REMOVED}')
             # LOG.debug(f'sync_directory RESULT: {RESULT}')
 
@@ -127,7 +101,7 @@ def main():
                 RESULT = sh.sync_directory(SRC, DEST, 'diff', options=GAME.options)
             else:
                 RESULT = sh.sync_directory(SRC, DEST, options=GAME.options)
-                DIR_REMOVED = remove_empty_directories(DEST)
+                DIR_REMOVED = sh.remove_empty_directories(DEST)
                 LOG.debug(f'empty directories removed: {DIR_REMOVED}')
             # LOG.debug(f'sync_directory RESULT: {RESULT}')
 
