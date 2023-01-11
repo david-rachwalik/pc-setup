@@ -53,6 +53,7 @@ $python_user_commands = @(
     # 'mygit'
     # 'provision_vscode'
     'pc_clean'
+    'pc_restore'
 )
 
 
