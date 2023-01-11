@@ -72,7 +72,7 @@ def main():
             LOG.info(f'--- Backing up app: {APP.name} ---')
 
             SRC = sh.join_path(APP.root, APP.name)
-            DEST = sh.join_path(backup_root, 'Apps_test', APP.name)  # TODO: change after testing
+            DEST = sh.join_path(backup_root, 'Apps', APP.name)
             LOG.info(f'SRC path: {SRC}')
             LOG.info(f'DEST path: {DEST}')
             if ARGS.test_run:
@@ -94,7 +94,7 @@ def main():
             LOG.info(f'--- Backing up game: {GAME.name} ---')
 
             SRC = sh.join_path(GAME.root, GAME.name)
-            DEST = sh.join_path(backup_root, 'Games_test', GAME.name)  # TODO: change after testing
+            DEST = sh.join_path(backup_root, 'Games', GAME.name)
             LOG.info(f'SRC path: {SRC}')
             LOG.info(f'DEST path: {DEST}')
             if ARGS.test_run:
