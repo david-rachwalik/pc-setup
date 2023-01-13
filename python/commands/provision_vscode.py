@@ -12,17 +12,16 @@ import shell_boilerplate as sh
 vscode_extensions: List[str] = [
     # --- Baseline ---
     'bierner.markdown-preview-github-styles',
-    'bowlerhatllc.vscode-as3mxml',  # ActionScript
     'christian-kohler.path-intellisense',
     'DavidAnson.vscode-markdownlint',
     'esbenp.prettier-vscode',
+    'felipecaputo.git-project-manager',
     'mikestead.dotenv',
-    'mongodb.mongodb-vscode',
     'natqe.reload',
-    'redhat.vscode-yaml',
-    # 'rog2.luacheck',
-    # 'tangzx.emmylua',
+    # 'TabNine.tabnine-vscode',  # code suggestions
     'theumletteam.umlet',  # UML Diagrams
+    'VisualStudioExptTeam.intellicode-api-usage-examples',
+    'VisualStudioExptTeam.vscodeintellicode',
     'vscode-icons-team.vscode-icons',
     'wayou.vscode-todo-highlight',
 
@@ -31,12 +30,11 @@ vscode_extensions: List[str] = [
     'hashicorp.terraform',
     'ms-vscode.azure-account',
     'ms-azure-devops.azure-pipelines',
-    'ms-vscode-remote.vscode-remote-extensionpack',
+    'ms-vscode-remote.vscode-remote-extensionpack',  # installs others
     'ms-vscode.powershell',
     'msazurermtools.azurerm-vscode-tools',
 
     # --- HTML, CSS/SASS, JavaScript/TypeScript ---
-    'ms-vscode.vscode-typescript-tslint-plugin',
     'dbaeumer.vscode-eslint',
     # 'DigitalBrainstem.javascript-ejs-support',
     'formulahendry.auto-close-tag',
@@ -49,28 +47,53 @@ vscode_extensions: List[str] = [
     'WooodHead.disable-eslint-rule',
     # 'xabikos.JavaScriptSnippets',
 
-    # --- Angular ---
-    'Angular.ng-template',
+    # --- Python ---
+    'Cameron.vscode-pytest',
+    # 'donjayamanne.python-environment-manager',
+    'ms-python.isort',
+    'ms-python.pylint',
+    'ms-python.python',
+    'ms-python.vscode-pylance',
+    'njpwerner.autodocstring',
 
-    # --- Vue ---
-    'MisterJ.vue-volar-extention-pack',
-    # 'Vue.volar',
-    'Wscats.vue',
+    # --- Other Languages ---
+    'bowlerhatllc.vscode-as3mxml',  # ActionScript
+    'redhat.vscode-yaml',
+    # 'rog2.luacheck',
+    # 'tangzx.emmylua',
 
-    # --- C# .NET ---
-    'ms-vscode.csharp',
-    'ms-dotnettools.csharp',
-    'ms-dotnettools.vscode-dotnet-runtime',
+    # --- Databases ---
+    'mongodb.mongodb-vscode',
+    'ms-azuretools.vscode-cosmosdb',
 
-    # --- Node.js ---
+    # --- Server - Node.js ---
     '42Crunch.vscode-openapi',
     'christian-kohler.npm-intellisense',
     'howardzuo.vscode-npm-dependency',
 
-    # --- Python ---
-    'ms-python.pylint',
-    'ms-python.python',
-    'ms-python.vscode-pylance',
+    # --- Server - Azure ---
+    'ms-vscode.vscode-node-azure-pack',  # install others
+    # 'ms-azuretools.azure-dev',
+    # 'ms-azuretools.vscode-azureappservice',
+    # 'ms-azuretools.vscode-azurefunctions',
+    # 'ms-azuretools.vscode-azureresourcegroups',
+    # 'ms-azuretools.vscode-azurestaticwebapps',
+    # 'ms-azuretools.vscode-azurestorage',
+    # 'ms-azuretools.vscode-azureterraform',
+    # 'ms-azuretools.vscode-azurevirtualmachines',
+
+    # --- Angular ---
+    'Angular.ng-template',
+
+    # --- Vue ---
+    # 'MisterJ.vue-volar-extention-pack',  # installs others
+    # 'Vue.volar',
+    # 'Vue.vscode-typescript-vue-plugin',
+    # 'Wscats.vue',
+
+    # --- C# .NET ---
+    'ms-dotnettools.csharp',
+    'ms-dotnettools.vscode-dotnet-runtime',
 ]
 
 
@@ -92,6 +115,7 @@ def list_extensions_installed() -> List[str]:
     process = sh.run_subprocess(command)
     # sh.log_subprocess(LOG, process, debug=ARGS.debug)
     vscode_extensions_installed = str(process.stdout).splitlines()
+    vscode_extensions_installed.sort()
     return vscode_extensions_installed
 
 
@@ -100,6 +124,7 @@ def list_extensions_to_install(installed: List[str]) -> List[str]:
     if not installed:
         return []
     vscode_extensions_to_install = list(set(vscode_extensions).difference(installed))
+    vscode_extensions_to_install.sort()
     return vscode_extensions_to_install
 
 
@@ -108,11 +133,20 @@ def list_extensions_unexpected(installed: List[str]) -> List[str]:
     if not installed:
         return []
     vscode_extensions_unexpected = list(set(installed).difference(vscode_extensions))
+    vscode_extensions_unexpected.sort()
     return vscode_extensions_unexpected
 
 
-# ------------------------ Main program ------------------------
+# https://code.visualstudio.com/docs/editor/extension-marketplace#_command-line-extension-management
+def install_extension(extension_id: str) -> bool:
+    """Method that installs a VS Code extension"""
+    command: List[str] = ['code', '--install-extension', extension_id]
+    process = sh.run_subprocess(command)
+    sh.log_subprocess(LOG, process, debug=ARGS.debug)
+    return process.returncode == 0
 
+
+# ------------------------ Main program ------------------------
 # Initialize the logger
 BASENAME = 'provision_vscode'
 ARGS: argparse.Namespace = argparse.Namespace()  # for external modules
@@ -136,13 +170,19 @@ if __name__ == '__main__':
 
     # --- Gather extension information ---
     extensions_installed = list_extensions_installed()
-    LOG.info(f'vscode_extensions_installed: {extensions_installed}')
+    LOG.info(f'extensions installed: {extensions_installed}')
     extensions_to_install = list_extensions_to_install(extensions_installed)
-    LOG.info(f'vscode_extensions_to_install: {extensions_to_install}')
+    LOG.info(f'extensions to install: {extensions_to_install}')
     extensions_unexpected = list_extensions_unexpected(extensions_installed)
-    LOG.info(f'vscode_extensions_unexpected: {extensions_unexpected}')
+    LOG.info(f'extensions unexpected: {extensions_unexpected}')
 
-    # If we get to this point, assume all went well
+    # --- Install missing extensions as needed ---
+    for extension in extensions_to_install:
+        LOG.debug(f'preparing to install "{extension}" extension...')
+        install_extension(extension)
+
+    # Upgrade to extensions not necessary - VS Code handles automatically
+
     LOG.debug('--------------------------------------------------------')
     LOG.debug('--- end point reached :3 ---')
     sh.exit_process()

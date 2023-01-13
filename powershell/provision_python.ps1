@@ -51,9 +51,9 @@ $python_user_boilerplate_modules = @(
 $python_user_commands = @(
     # 'app'
     # 'mygit'
-    # 'provision_vscode'
     'pc_clean'
     'pc_restore'
+    'provision_vscode'
 )
 
 
