@@ -43,6 +43,10 @@ $prov_python_script = Join-Path -Path $repo_powershell_dir -ChildPath "provision
 # --- Provision Visual Studio Code ---
 & "provision_vscode"
 
+# --- Provision .NET Framework ---
+# & "provision_dotnet"
+# based on /ansible_playbooks/roles/windows/apps/dotnet/setup/tasks/main.yml
+
 # --- Provision Azure CLI ---
 # & "provision_azure"
 
