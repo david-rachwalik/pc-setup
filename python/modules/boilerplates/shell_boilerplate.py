@@ -617,6 +617,7 @@ def run_subprocess(
     # ) -> Tuple[str, str, int]:
 ) -> subprocess.CompletedProcess:
     """Method that runs a command in a subprocess"""
+    LOG.debug(f'command: {command}')
     run_command: List[str] = []
 
     # process: SubProcess = SubProcess(command, cwd, env)
@@ -629,7 +630,7 @@ def run_subprocess(
         run_command = ['pwsh', '-Command'] + command  # PowerShell [Core], built on cross-platform .NET Core
     elif platform == 'linux':
         run_command = ['bash', '-c'] + command  # use Bash for *nix
-    LOG.debug(f'run_command: {run_command}')
+    # LOG.debug(f'run_command: {run_command}')
 
     # Execute the command in a subprocess
     result: subprocess.CompletedProcess = subprocess.run(
@@ -640,7 +641,7 @@ def run_subprocess(
         env=env,
         universal_newlines=True,
     )
-    LOG.debug(f'subprocess result: {result}')
+    # LOG.debug(f'subprocess result: {result}')
 
     # stdout: str = result.stdout
     # stderr: str = result.stderr
