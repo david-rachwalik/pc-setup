@@ -617,7 +617,6 @@ def run_subprocess(
     # ) -> Tuple[str, str, int]:
 ) -> subprocess.CompletedProcess:
     """Method that runs a command in a subprocess"""
-    LOG.debug(f'command: {command}')
     run_command: List[str] = []
 
     # process: SubProcess = SubProcess(command, cwd, env)
