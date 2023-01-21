@@ -2,7 +2,7 @@
 """Common logic for shell interactions"""
 
 # --- Global Shell Commands ---
-# :-Helper-:        system_platform, environment_variable, format_resource, is_valid_resource, random_password
+# :-Helper-:        system_platform, environment_get, environment_set, random_password
 # JSON:             from_json, to_json, save_json, is_json_parse, is_json_str
 # Utility:          shift_directory, change_directory, list_differences, print_command
 # Process:          exit_process, fail_process, process_id, process_parent_id
@@ -20,14 +20,13 @@ import argparse
 # import distutils.file_util
 import json
 import os
-import re
 import shutil
 # import signal
 import subprocess
 import sys
 import time
 from contextlib import contextmanager
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Callable, Dict, List, Optional, Tuple
 
 import dirsync
 import logging_boilerplate as log
@@ -47,10 +46,9 @@ class DictObj(dict):
     """Class that enables dictionary properties to be accessed as object attributes"""
 
     def __getattr__(self, name):
-        if name in self:
-            return self[name]
-        else:
+        if name not in self:
             raise AttributeError(f'No such attribute: {name}')
+        return self[name]
 
     def __setattr__(self, name, value):
         self[name] = value
@@ -74,34 +72,19 @@ def system_platform() -> str:
     elif sys.platform.startswith('win'):
         return 'windows'
     return ''
+    # alternatively, could use os.name (posix=linux, nt=windows)
 
 
-# def environment_variable(key: str, default: Optional[str] = None) -> str | None:
-#     """Method that fetches an environment variable, returns None if not found"""
+def environment_get(key: str, default: str = '') -> str:
+    """Method that fetches an environment variable"""
 #     # https://docs.python.org/3/library/os.html#os.environ
 #     return os.getenv(key, default)
-
-
-def environment_variable(key: str, default: str = '') -> str:
-    """Method that fetches an environment variable"""
     return os.environ.get(key, default) or ''
 
 
-# Must conform to the following pattern: '^[0-9a-zA-Z-]+$'
-def format_resource(raw_name: str, lowercase: bool = True) -> str:
-    """Method that formats a string name into a resource name"""
-    name = raw_name.lower() if lowercase else raw_name  # lowercase
-    # name = re.sub('[^a-zA-Z0-9 \n\.]', '-', raw_name) # old, ignores '.'
-    name = re.sub('[^a-zA-Z0-9-]', '-', name)  # replace
-    return name
-
-
-# Must conform to the following pattern: '^[0-9a-zA-Z-]+$'
-def is_valid_resource(raw_name: str, lowercase: bool = True) -> bool:
-    """Method that verifies whether a resource name is valid"""
-    og_name = str(raw_name)
-    formatted_name = format_resource(raw_name, lowercase)
-    return og_name == formatted_name
+def environment_set(key: str, value: str):
+    """Method that updates an environment variable"""
+    os.environ[key] = value
 
 
 # https://pynative.com/python-generate-random-string
@@ -451,31 +434,28 @@ def write_file(path: str, content: Optional[Any] = None, append: bool = False):
     if not path_exists(path, 'd'):
         create_directory(path_dir(path))
     # http://python-notes.curiousefficiency.org/en/latest/python3/text_file_processing.html
-    f = open(path, strategy, encoding='latin-1')
-    # Accept content as string or sequence of strings
-    if content:
-        if content is None:
-            f.write('')
-        elif isinstance(content, list):
+    with open(path, strategy, encoding='latin-1') as f:
+        # Accept content as string or sequence of strings
+        if isinstance(content, list):
             f.writelines(content)
+        elif content is None:
+            f.write('')
         else:
             f.write(str(content))
-    f.close()
 
 
 def read_file(path: str, oneline: bool = False) -> str:
     """Method that reads a file's content"""
     data: str = ''
+    path = expand_path(path)
     if not (path or path_exists(path, 'f')):
         return data
     try:
-        path = expand_path(path)
-        # Open with file() is deprecated
         # http://python-notes.curiousefficiency.org/en/latest/python3/text_file_processing.html
-        f = open(path, 'r', encoding='latin-1')  # default, read mode
-        data = f.readline().rstrip() if (oneline) else f.read().strip()
-        f.close()
-    except Exception as e:
+        with open(path, 'r', encoding='latin-1') as f:
+            data = f.readline().rstrip() if (oneline) else f.read().strip()
+    except IOError as e:
+        # File does not exist or some other IOError
         LOG.error(f'Exception: {e}')
     return data
 
@@ -555,14 +535,16 @@ def _decode_dict(dct) -> DictObj:
 
 
 # Deserialize JSON string to Python dictionary: https://docs.python.org/3/library/json.html
-def from_json(json_str: str) -> dict | None:
+def from_json(jsonstr: str, object_hook: Optional[Callable] = None) -> Dict[str, Any] | None:
     """Method that deserializes JSON string to Python dictionary"""
     results = None
-    if not (json_str and isinstance(json_str, str)):
+    if not (jsonstr and isinstance(jsonstr, str)):
         return results
     try:
         # Decode/parse the json string
-        results = json.loads(json_str, object_hook=_decode_dict)
+        # https://stackoverflow.com/questions/43286178/object-hook-in-json-module-doesnt-seem-to-work-as-id-expect
+        # results = json.loads(json_str, object_hook=_decode_dict)
+        results = json.loads(jsonstr, object_hook=object_hook)
     except ValueError as e:
         LOG.error(f'ValueError: {e}')
     # LOG.debug(f"results: {results}")
@@ -575,13 +557,16 @@ def to_json(data: Any, indent: Optional[int] = None) -> str:
     results = ''
     try:
         results = json.dumps(data, indent=indent)  # convert to json
+        # https://www.bruceeckel.com/2018/09/16/json-encoding-python-dataclasses
+        # can pass a json.JSONEncoder to json.dumps 'cls' param for custom objects
     except ValueError as e:
         LOG.error(f'ValueError: {e}')
-    # LOG.debug(f"results: {results}")
+    # LOG.debug(f'results: {results}')
     return results
 
 
-def save_json(path: str, json_str: str, indent: Optional[int] = 2):
+# TODO: only backup if content has changed
+def save_json(path: str, data: Any, indent: Optional[int] = 2) -> bool:
     """Method that saves JSON to a file"""
     # Handle previous service principal if found
     if path_exists(path, 'f'):
@@ -589,8 +574,11 @@ def save_json(path: str, json_str: str, indent: Optional[int] = 2):
     # https://stackoverflow.com/questions/39491420/python-jsonexpecting-property-name-enclosed-in-double-quotes
     # Valid JSON syntax uses quotation marks; single quotes are only valid in string
     # https://stackoverflow.com/questions/43509448/building-json-file-out-of-python-objects
-    file_ready = to_json(json_str, indent)
+    # LOG.debug(f'data: {data}')
+    file_ready = to_json(data, indent)
+    # LOG.debug(f'file_ready: {file_ready}')
     write_file(path, file_ready)
+    return path_exists(path, 'f')
 
 
 def is_json_parse(obj) -> bool:
@@ -636,7 +624,7 @@ def run_subprocess(
         run_command,
         capture_output=True,
         cwd=cwd,
-        check=True,
+        check=False,  # False avoids need to try/except (only CompletedProcess, no CalledProcessError)
         env=env,
         universal_newlines=True,
     )
@@ -658,8 +646,9 @@ def log_subprocess(logger: log.Logger, process: subprocess.CompletedProcess, deb
         logger.info(log_stdout)
     if isinstance(process.stderr, str) and len(process.stderr) > 0:
         log_stderr = f'stderr: {process.stderr}' if debug else process.stderr
-        # logger.error(log_stderr)
-        logger.info(log_stderr)  # INFO so message is below WARN level (default on import)
+        # Level at least INFO (above DEBUG) so exceptions are shown
+        # https://docs.python.org/3/library/logging.html#levels
+        logger.error(log_stderr)
     if isinstance(process.returncode, int) and debug:
         log_rc = f'rc: {process.returncode}' if debug else process.returncode
         logger.debug(log_rc)
