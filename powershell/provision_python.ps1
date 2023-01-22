@@ -15,6 +15,8 @@ $pip_packages = @(
     # https://learn.microsoft.com/en-us/azure/developer/python/sdk/azure-sdk-overview#connect-to-and-use-azure-resources-with-client-libraries
     'azure-identity'
     'azure-mgmt-resource'
+    # https://pypi.org/project/azure-keyvault-secrets
+    'azure-keyvault-secrets'
     # https://learn.microsoft.com/en-us/python/api/overview/azure/cosmos-db
     # https://learn.microsoft.com/en-us/azure/developer/python/sdk/examples/azure-sdk-example-database
     'azure-cosmos'
@@ -54,6 +56,7 @@ $python_user_commands = @(
     'pc_clean'
     'pc_restore'
     'provision_vscode'
+    'provision_azure'
 )
 
 
