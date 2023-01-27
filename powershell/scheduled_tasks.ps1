@@ -23,23 +23,30 @@ function Write-ColorOutput($ForegroundColor)
 
 # -------- Scheduled Tasks (Daily) --------
 
+# https://stackoverflow.com/questions/54061724/run-a-script-as-hidden-scheduled-task-with-powershell
+# https://learn.microsoft.com/en-us/powershell/module/scheduledtasks/new-scheduledtaskprincipal
+$principal = New-ScheduledTaskPrincipal -UserId "$env:USERDOMAIN\$env:USERNAME" -LogonType "S4U" -RunLevel "Highest"
+# https://learn.microsoft.com/en-us/powershell/module/scheduledtasks/new-scheduledtasksettingsset
+$settings = New-ScheduledTaskSettingsSet -Hidden
+
+
 # --- Provision System ---
 $taskName = "CRON PC Setup"
-$action = New-ScheduledTaskAction -Execute "pwsh" -Argument "E:\Repos\pc-setup\powershell\pc_setup.ps1"
-$trigger = New-ScheduledTaskTrigger -Daily -At "3am"
+$action = New-ScheduledTaskAction -Execute "pwsh" -Argument "-NonInteractive -File E:\Repos\pc-setup\powershell\pc_setup.ps1"
+$trigger = New-ScheduledTaskTrigger -Daily -At "03:00am"
 # $taskExists = Get-ScheduledTask | Where-Object { $_.TaskName -like $taskName }
 $taskExists = Get-ScheduledTask -TaskName $taskName -ErrorAction SilentlyContinue
 if (!$taskExists)
 {
     Write-Output "Scheduled task '$taskName' does not exist, creating..."
     # https://learn.microsoft.com/en-us/powershell/module/scheduledtasks/register-scheduledtask
-    Register-ScheduledTask -TaskName $taskName -RunLevel "Highest" -Action $action -Trigger $trigger
+    Register-ScheduledTask -TaskName $taskName -Action $action -Trigger $trigger -Principal $principal -Settings $settings -Force
 }
 else
 {
     Write-Output "Scheduled task '$taskName' was found, updating..."
     # https://learn.microsoft.com/en-us/powershell/module/scheduledtasks/set-scheduledtask
-    Set-ScheduledTask -TaskName $taskName -Action $action -Trigger $trigger
+    Set-ScheduledTask -TaskName $taskName -Action $action -Trigger $trigger -Principal $principal -Settings $settings
 }
 
 
@@ -48,17 +55,17 @@ $taskName = "CRON PC Clean"
 $py_exe = "C:\Python311\python.exe"
 $py_script = "$Env:AppData\Python\bin\pc_clean.py"
 $action = New-ScheduledTaskAction -Execute $py_exe -Argument $py_script
-$trigger = New-ScheduledTaskTrigger -Daily -At "4am"
+$trigger = New-ScheduledTaskTrigger -Daily -At "04:00am"
 $taskExists = Get-ScheduledTask -TaskName $taskName -ErrorAction SilentlyContinue
 if (!$taskExists)
 {
     Write-Output "Scheduled task '$taskName' does not exist, creating..."
-    Register-ScheduledTask -TaskName $taskName -RunLevel "Highest" -Action $action -Trigger $trigger
+    Register-ScheduledTask -TaskName $taskName -Action $action -Trigger $trigger -Principal $principal -Settings $settings -Force
 }
 else
 {
     Write-Output "Scheduled task '$taskName' was found, updating..."
-    Set-ScheduledTask -TaskName $taskName -Action $action -Trigger $trigger
+    Set-ScheduledTask -TaskName $taskName -Action $action -Trigger $trigger -Principal $principal -Settings $settings
 }
 
 
