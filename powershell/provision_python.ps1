@@ -9,6 +9,7 @@ $pip_packages = @(
     'colorlog'
     'pylint-quotes'
     'pyinstaller'  # https://pyinstaller.org/en/stable
+    'requests'  # https://requests.readthedocs.io
     'yt-dlp'
     'dirsync'  # https://github.com/tkhyn/dirsync
     # https://learn.microsoft.com/en-us/azure/developer/python/configure-local-development-environment
@@ -40,6 +41,7 @@ $python_user_modules = @(
 $python_user_boilerplate_modules = @(
     'logging_boilerplate'
     'shell_boilerplate'
+    'http_boilerplate'
     'azure_boilerplate'
     'azure_devops_boilerplate'
     'dotnet_boilerplate'
