@@ -37,7 +37,7 @@ import logging_boilerplate as log
 import shell_boilerplate as sh
 
 # https://docs.python.org/3/library/typing.html#typing.TypeAlias
-Credential: TypeAlias = azid.DefaultAzureCredential | azid.AzureCliCredential
+Credential: TypeAlias = azid.DefaultAzureCredential | azid.AzureCliCredential | azid.EnvironmentCredential | azid.ClientSecretCredential
 
 # ------------------------ Data Classes ------------------------
 
@@ -275,24 +275,30 @@ def subscription_details(credential: Credential, name: str) -> Optional[Subscrip
     return None
 
 
-def credential_environment(account: Account):
+def environment_credential(account: Account):
     """Method that sets environment variables based on Azure account"""
     # --- Environment Variables, service principal with secret (based on subscription) ---
     # https://pypi.org/project/azure-identity
     # ID of the application's Azure AD tenant
     sh.environment_set('AZURE_TENANT_ID', account.tenantId)
     if account.login_sp:
-        # # ID of an Azure AD application
+        # ID of an Azure AD application
         sh.environment_set('AZURE_CLIENT_ID', account.login_sp.appId)
-        # # one of the application's client secrets
+        # one of the application's client secrets
         sh.environment_set('AZURE_CLIENT_SECRET', account.login_sp.password)
 
 
-def credential_get(scope: str = 'default') -> Credential:
+def credential_get(scope: str = 'default', tenant_id: str = '', client_id: str = '', client_secret: str = '') -> Credential:
     """Method that fetches Azure authentication credential"""
     # https://pypi.org/project/azure-identity
     if scope == 'cli':
         credential = azid.AzureCliCredential()
+    if scope == 'env':
+        # https://learn.microsoft.com/en-us/python/api/azure-identity/azure.identity.environmentcredential
+        credential = azid.EnvironmentCredential()
+    if scope == 'secret':
+        # https://learn.microsoft.com/en-us/python/api/azure-identity/azure.identity.clientsecretcredential
+        credential = azid.ClientSecretCredential(tenant_id, client_id, client_secret)
     else:
         # https://learn.microsoft.com/en-us/python/api/azure-identity/azure.identity.defaultazurecredential
         # credential = azid.DefaultAzureCredential(logging_enable=True)

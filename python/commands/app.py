@@ -143,15 +143,15 @@ def login_service_principal_strategy(account: az.Account) -> az.ServicePrincipal
     if not account.isSignedIn:
         return service_principal
 
-    # Ensure service principal exists
-    service_principal = az.service_principal_get(sp_name)
-    # LOG.debug(f'service principal data: {service_principal}')
-
     # Ensure key vault exists
     key_vault = key_vault_strategy(account, ARGS.location, ARGS.login_resource_group, ARGS.login_key_vault)
     if not key_vault.isValid:
         LOG.error('failed to retrieve valid key vault details')
         return service_principal
+
+    # Ensure service principal exists
+    service_principal = az.service_principal_get(sp_name)
+    # LOG.debug(f'service principal data: {service_principal}')
 
     if service_principal.isValid:
         # Check for passphrase as key vault secret (to cloud share across systems)
@@ -164,7 +164,7 @@ def login_service_principal_strategy(account: az.Account) -> az.ServicePrincipal
             # Service principal in Azure but not local file, must reset pass to regain access
             LOG.info('service principal found in Azure but not local, resetting credentials...')
             service_principal_reset = az.service_principal_rbac_set(sp_name, True)
-            LOG.debug(f'service principal reset: {service_principal}')
+            # LOG.debug(f'service principal reset: {service_principal_reset}')
             # Grab service principal credential/password
             service_principal.password = service_principal_reset.password
             service_principal.changed = True
@@ -184,15 +184,15 @@ def login_service_principal_strategy(account: az.Account) -> az.ServicePrincipal
             LOG.info('successfully created service principal!')
             # Grab service principal object id
             service_principal_new = az.service_principal_get(sp_name)
-            LOG.debug(f'service principal new: {service_principal}')
+            # LOG.debug(f'service principal new: {service_principal_new}')
             service_principal.id = service_principal_new.id
 
     LOG.debug(f'service principal data: {service_principal}')
 
     # Store service principal details in JSON file
     LOG.info('saving service principal credentials to local JSON...')
-    sp_save_result = az.service_principal_save(service_principal_path, service_principal)
-    if sp_save_result:
+    is_sp_saved = az.service_principal_save(service_principal_path, service_principal)
+    if is_sp_saved:
         LOG.info('successfully saved service principal credentials to local JSON!')
     else:
         LOG.error('failed to save service principal credentials to local JSON')
@@ -303,98 +303,154 @@ def login_strategy(account: Optional[az.Account] = None, retry: bool = True) -> 
     return account
 
 
-def login_devops_pat_strategy(account: az.Account, pat_path: str) -> Tuple[str, bool]:
+# This is dependent upon an active PAT in DevOps saved to key vault secret
+# Cannot create DevOps PAT by CLI, navigate site manually, go to user settings and select "Personal access tokens"
+# https://docs.microsoft.com/en-us/azure/devops/organizations/accounts/use-personal-access-tokens-to-authenticate
+def login_devops_pat_strategy(account: az.Account) -> str:
     """Method to sign-in an Azure DevOps with PAT"""
-    key_vault: str = ARGS.login_key_vault
+    key_vault_name: str = ARGS.login_key_vault
     secret_key: str = 'main-devops-pat'
     pat_data: str = ''
-    pat_changed: bool = False
 
-    # Ensure user PAT exists in Azure and local
-    if sh.path_exists(pat_path, 'f'):
-        # Gather login info from PAT file
-        LOG.debug('DevOps PAT (personal access token) exists, checking file...')
-        pat_data = sh.read_file(pat_path, True)
-        LOG.debug(f'PAT data: {pat_data}')
-        return (pat_data, pat_changed)
-
-    LOG.debug('DevOps PAT (personal access token) missing, checking Azure...')
     if not account.isSignedIn:
-        return (pat_data, pat_changed)
+        return pat_data
 
-    # Ensure PAT exists in key vault as secret
-    key_vault_secret = az.key_vault_secret_get(key_vault, secret_key)
+    # Ensure key vault exists
+    key_vault = key_vault_strategy(account, ARGS.location, ARGS.login_resource_group, key_vault_name)
+    if not key_vault.isValid:
+        LOG.error('failed to retrieve valid key vault details')
+        return pat_data
+
+    # Ensure personal access token (PAT) exists in key vault as secret
+    key_vault_secret = az.key_vault_secret_get(key_vault_name, secret_key)
     # key_vault_secret = az.key_vault_secret_get(account.auth, key_vault, secret_key)
-    if key_vault_secret:
-        LOG.debug('PAT successfully found in key vault')
-        pat_data = key_vault_secret
+    if not key_vault_secret:
+        LOG.error('failed to retrieve PAT from key vault')
+        return pat_data
 
-    # TODO: be able to create/reset credentials similar to login_service_principal_strategy()
-    # TODO: - if missing: create PAT and save to local file
-    # TODO: - if invalid/expired: revoke the PAT and delete from local file
-
-    # Last chance to have PAT
-    if not pat_data:
-        return (pat_data, pat_changed)
-
-    # Store credentials in PAT file
-    az_devops.user_save(pat_path, pat_data)
-
-    pat_changed = True
-
-    return (pat_data, pat_changed)
+    LOG.debug('successfully retrieved PAT from key vault!')
+    pat_data = key_vault_secret
+    return pat_data
 
 
 # https://docs.microsoft.com/en-us/azure/devops/cli/log-in-via-pat
-# sign-in via 'az login' isn't supported, so a PAT token is required
-def login_devops_strategy(account: az.Account, retry: bool = True) -> bool:
+# Does not use 'az devops login' because environment variable will suffice
+def login_devops_strategy(account: az.Account):
     """Method to sign-in Azure DevOps account"""
-    user: str = ARGS.login_devops_user
     key_vault: str = ARGS.login_key_vault
     secret_key = 'main-devops-pat'
-    # Full filepath to PAT (personal access token)
-    auth_dir: str = ARGS.login_service_principal_dir
-    pat_path: str = sh.join_path(sh.expand_path(auth_dir), 'ado.pat')
 
     # Ensure user PAT/credentials exist
-    (pat_data, pat_changed) = login_devops_pat_strategy(account, pat_path)
-    account.devops_pat = pat_data
-    LOG.debug(f'DevOps PAT data: {pat_data}')
+    account.devops_pat = login_devops_pat_strategy(account)
+    LOG.debug(f'PAT data: {account.devops_pat}')
 
-    # Check if user is signed-in DevOps
-    LOG.info('checking if already signed-in Azure DevOps...')
-    # First chance to be signed-in
-    user_is_signed_in: bool = az_devops.user_get(account.devops_pat, user)
+    if not account.devops_pat:
+        # This can occur when PAT is neither in local file nor key vault
+        LOG.error('failed to retrieve valid PAT, navigate the following site to manually create a PAT, go to user settings and select "Personal access tokens"')
+        LOG.error('https://docs.microsoft.com/en-us/azure/devops/organizations/accounts/use-personal-access-tokens-to-authenticate')
+        LOG.error(
+            f'this PAT must be stored in "{key_vault}" as secret "{secret_key}" before repeating your previous command')
+        sh.fail_process()
 
-    if not user_is_signed_in:
-        if account.devops_pat:
-            # Attempt login with user PAT/credentials found, last chance to be signed-in
-            LOG.debug('attempting DevOps login with PAT (personal access token)...')
-            user_is_signed_in = az_devops.user_login(account.devops_pat)
-            if not user_is_signed_in:
-                if retry:
-                    # Will retry recursively only once
-                    LOG.warning('Azure DevOps login with PAT failed, saving backup and retrying...')
-                    sh.backup_file(pat_path)
-                    user_is_signed_in = login_devops_strategy(account, False)
-                else:
-                    LOG.error('Azure DevOps login with PAT failed again, exiting...')
-                    sh.fail_process()
-        else:
-            # - this can occur when signed-in with PAT and needing to change own credentials
-            LOG.error('not signed-in DevOps, navigate the following site to manually create a PAT, go to user settings and select "Personal access tokens"')
-            LOG.error('https://docs.microsoft.com/en-us/azure/devops/organizations/accounts/use-personal-access-tokens-to-authenticate')
-            LOG.error(f'this PAT must be in "{key_vault}" as "{secret_key}" before repeating your previous command')
-            sh.fail_process()
+    LOG.debug('assigning DevOps PAT (personal access token) to environment...')
+    az_devops.environment_pat(account.devops_pat)
 
-    if pat_changed:
-        # Confirm updated PAT login connects
-        az_devops.user_logout()
-        user_is_signed_in = login_devops_strategy(account)
-        # No need to rename/backup SP credentials here if failed - it'll occur recursively
 
-    LOG.info('you are successfully signed-in Azure DevOps!')
-    return user_is_signed_in
+# # This is dependent upon an active PAT in DevOps saved to key vault secret
+# # Cannot create DevOps PAT by CLI, navigate site manually, go to user settings and select "Personal access tokens"
+# # https://docs.microsoft.com/en-us/azure/devops/organizations/accounts/use-personal-access-tokens-to-authenticate
+# def login_devops_pat_strategy(account: az.Account, pat_path: str) -> str:
+#     """Method to sign-in an Azure DevOps with PAT"""
+#     key_vault_name: str = ARGS.login_key_vault
+#     secret_key: str = 'main-devops-pat'
+#     pat_data: str = ''
+
+#     # Ensure user PAT exists in Azure and local
+#     if sh.path_exists(pat_path, 'f'):
+#         # Gather login info from PAT file
+#         LOG.debug('DevOps PAT (personal access token) exists, checking file...')
+#         pat_data = sh.read_file(pat_path, True)
+#         return pat_data
+
+#     LOG.debug('DevOps PAT (personal access token) missing, checking Azure...')
+#     if not account.isSignedIn:
+#         return pat_data
+
+#     # Ensure key vault exists
+#     key_vault = key_vault_strategy(account, ARGS.location, ARGS.login_resource_group, key_vault_name)
+#     if not key_vault.isValid:
+#         LOG.error('failed to retrieve valid key vault details')
+#         return pat_data
+
+#     # Ensure personal access token (PAT) exists in key vault as secret
+#     key_vault_secret = az.key_vault_secret_get(key_vault_name, secret_key)
+#     # key_vault_secret = az.key_vault_secret_get(account.auth, key_vault, secret_key)
+#     if not key_vault_secret:
+#         LOG.error('failed to retrieve PAT from key vault')
+#         return pat_data
+
+#     LOG.debug('successfully retrieved PAT from key vault!')
+#     pat_data = key_vault_secret
+#     # Store credentials in PAT file
+#     az_devops.save_pat(pat_path, pat_data)
+#     return pat_data
+
+
+# Below works, but the login doesn't return False for a bad pat :(
+# # https://docs.microsoft.com/en-us/azure/devops/cli/log-in-via-pat
+# def login_devops_strategy(account: az.Account, retry: bool = True) -> bool:
+#     """Method to sign-in Azure DevOps account"""
+#     is_devops_signed_in: bool = False
+#     user: str = ARGS.login_devops_user
+#     key_vault: str = ARGS.login_key_vault
+#     secret_key = 'main-devops-pat'
+#     # Full filepath to PAT (personal access token)
+#     auth_dir: str = ARGS.login_service_principal_dir
+#     pat_path: str = sh.join_path(sh.expand_path(auth_dir), 'ado.pat')
+
+#     # Ensure user PAT/credentials exist
+#     account.devops_pat = login_devops_pat_strategy(account, pat_path)
+#     LOG.debug(f'PAT data: {account.devops_pat}')
+
+#     # # Check if user is signed-in DevOps (first chance to be signed-in)
+#     # LOG.info('checking if already signed-in Azure DevOps...')
+#     # # user_is_signed_in: bool = az_devops.user_get(account.devops_pat, user)
+#     # is_devops_signed_in: bool = az_devops.login(account.devops_pat)
+
+#     if not account.devops_pat:
+#         # This can occur when PAT is neither in local file nor key vault
+#         LOG.error('not signed-in Azure DevOps, navigate the following site to manually create a PAT, go to user settings and select "Personal access tokens"')
+#         LOG.error('https://docs.microsoft.com/en-us/azure/devops/organizations/accounts/use-personal-access-tokens-to-authenticate')
+#         LOG.error(
+#             f'this PAT must be stored in "{key_vault}" as secret "{secret_key}" before repeating your previous command')
+#         sh.fail_process()
+
+#     # --- elif used to limit recursive activity ---
+
+#     if account.isSignedIn and not account.devops_pat:
+#         # Possibly due to a bad PAT file or insufficient privileges on account
+#         LOG.error('failed to retrieve valid PAT, signing out...')
+#         az_devops.logout()
+#         is_devops_signed_in = login_devops_strategy(account)
+
+#     elif not is_devops_signed_in:
+#         # Attempt login with PAT found (last chance to be signed-in)
+#         LOG.debug('attempting DevOps login with PAT (personal access token)...')
+#         is_devops_signed_in = az_devops.login(account.devops_pat)
+#         if not is_devops_signed_in:
+#             if retry:
+#                 # Will retry recursively only once
+#                 LOG.warning('Azure DevOps login with PAT failed, saving backup and retrying...')
+#                 sh.backup_file(pat_path)
+#                 is_devops_signed_in = login_devops_strategy(account, False)
+#             else:
+#                 LOG.error('Azure DevOps login with PAT failed again, exiting...')
+#                 sh.fail_process()
+
+#     elif account.isSignedIn and is_devops_signed_in:
+#         LOG.info('you are successfully signed-in Azure DevOps!')
+
+#     return is_devops_signed_in
 
 
 # ASP.NET Core NuGet Packages (https://www.nuget.org/packages/*)
@@ -731,14 +787,11 @@ def authenticate() -> az.Account:
     """Method that authenticates user to Azure"""
     # Sign-in Azure subscription using service principal
     account = login_strategy()
-
-    # Generate credential from account details
-    az.credential_environment(account)
+    # Generate credential (for Python SDK) from account details
+    az.environment_credential(account)
     account.auth = az.credential_get()
-
-    # Sign-in Azure DevOps using PAT; TODO: automatically refresh upon expire
+    # Sign-in Azure DevOps using PAT
     login_devops_strategy(account)
-
     return account
 
 
