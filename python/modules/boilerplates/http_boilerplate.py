@@ -2,15 +2,33 @@
 """Common logic for Python HTTP request interactions"""
 
 import argparse
-from typing import Any, List
+from typing import Any, List, Optional, TypeAlias
 
 import logging_boilerplate as log
 import requests as req
 import shell_boilerplate as sh
+from requests.auth import HTTPBasicAuth
 
 # ------------------------ Global Methods ------------------------
 # https://requests.readthedocs.io
 # https://realpython.com/python-requests
+
+
+# --- Authentication ---
+# https://requests.readthedocs.io/en/latest/user/authentication
+
+AUTH_TYPE: TypeAlias = HTTPBasicAuth
+
+
+def authentication_web(user: str, password: str) -> HTTPBasicAuth:
+    """Method that creates HTTP 'Basic Auth' for web services that require authentication"""
+    basic = HTTPBasicAuth(user, password)
+    # LOG.debug(f'basic auth: {basic}')
+    return basic
+
+
+# https://requests-oauthlib.readthedocs.io/en/latest/oauth2_workflow.html
+# def authentication_oauth2():
 
 
 # --- CRUD Operations ---
@@ -19,30 +37,30 @@ DEFAULT_TIMEOUT = 100  # seconds before exception is raised if server has not re
 Response = req.Response
 
 
-def create(url: str, data: Any = None) -> req.Response:
+def create(url: str, data: Any = None, auth: Optional[AUTH_TYPE] = None) -> req.Response:
     """Method that creates - performs an HTTP 'POST' request"""
-    response = req.post(url, data=data, timeout=DEFAULT_TIMEOUT)
+    response = req.post(url, data=data, timeout=DEFAULT_TIMEOUT, auth=auth)
     # LOG.debug(f'response: {response}')
     return response
 
 
-def get(url: str) -> req.Response:
+def get(url: str, auth: Optional[AUTH_TYPE] = None) -> req.Response:
     """Method that reads/fetches - performs an HTTP 'GET' request"""
-    response = req.get(url, timeout=DEFAULT_TIMEOUT)
+    response = req.get(url, timeout=DEFAULT_TIMEOUT, auth=auth)
     # LOG.debug(f'response: {response}')
     return response
 
 
-def update(url: str, data: Any = None) -> req.Response:
+def update(url: str, data: Any = None, auth: Optional[AUTH_TYPE] = None) -> req.Response:
     """Method that updates - performs an HTTP 'PUT' request"""
-    response = req.put(url, data=data, timeout=DEFAULT_TIMEOUT)
+    response = req.put(url, data=data, timeout=DEFAULT_TIMEOUT, auth=auth)
     # LOG.debug(f'response: {response}')
     return response
 
 
-def delete(url: str) -> req.Response:
+def delete(url: str, auth: Optional[AUTH_TYPE] = None) -> req.Response:
     """Method that deletes - performs an HTTP 'DELETE' request"""
-    response = req.delete(url, timeout=DEFAULT_TIMEOUT)
+    response = req.delete(url, timeout=DEFAULT_TIMEOUT, auth=auth)
     # LOG.debug(f'response: {response}')
     return response
 
