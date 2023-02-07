@@ -4,6 +4,8 @@
 $choco_packages = @(
     # --- Productivity ---
     'GoogleChrome'
+    'procexp'
+    'tcpview'
     '7zip'
     'ccleaner'
     'nordvpn'
@@ -146,6 +148,12 @@ if ($choco_packages_installed)
     # Update all Chocolatey packages
     choco upgrade all
 }
+
+
+# Remove shortcuts from desktop
+Remove-Item "$Env:HomeDrive\Users\*\Desktop\*.lnk" -Force  # C drive
+$DesktopPath = [Environment]::GetFolderPath("Desktop")
+Remove-Item "$DesktopPath\*.lnk" -Force  # OneDrive
 
 
 Write-Host "--- Completed provisioning of Chocolatey ---" -ForegroundColor Green
