@@ -1,17 +1,27 @@
 # -------- Run with PowerShell (as Administrator) --------
 # based on /ansible_playbooks/inventories/main/group_vars/windows/python.yml
 
+# --- Third-Party Modules ---
+
 $pip_packages = @(
     # 'pip'
+    # --- Entertainment ---
+    'yt-dlp' # YouTube video downloader
+    'bpy' # Blender (https://pypi.org/project/bpy)
+
+    # --- Development ---
     'pytest'
     'autopep8'
     'pytz'
     'colorlog'
     'pylint-quotes'
-    'pyinstaller'  # https://pyinstaller.org/en/stable
-    'requests'  # https://requests.readthedocs.io
-    'yt-dlp'
-    'dirsync'  # https://github.com/tkhyn/dirsync
+    # https://pypi.org/project/python-dotenv
+    'python-dotenv'
+    'dirsync' # https://github.com/tkhyn/dirsync
+    'pyinstaller' # https://pyinstaller.org/en/stable
+    'requests' # https://requests.readthedocs.io
+
+    # --- Projects ---
     # https://learn.microsoft.com/en-us/azure/developer/python/configure-local-development-environment
     # https://learn.microsoft.com/en-us/azure/developer/python/sdk/azure-sdk-overview#connect-to-and-use-azure-resources-with-client-libraries
     'azure-identity'
@@ -25,10 +35,10 @@ $pip_packages = @(
     # https://github.com/Azure-Samples/azure-cosmos-db-mongodb-python-getting-started
     # https://www.mongodb.com/docs/drivers/pymongo
     'pymongo'
-    # https://pypi.org/project/python-dotenv
-    'python-dotenv'
 )
 # https://learn.microsoft.com/en-us/azure/cosmos-db/mongodb/quickstart-nodejs
+
+# --- Custom Modules ---
 
 $python_user_modules = @(
     # --- Misc. ---
