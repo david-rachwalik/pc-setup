@@ -30,6 +30,7 @@ $choco_packages = @(
     'postman'
     'terraform'
     'upx' # Ultimate Packer for eXecutables (for PyInstaller)
+    'ruby' # mainly for Jekyll (gem install jekyll bundler)
 
     # --- Media ---
     'geforce-experience'
@@ -56,6 +57,14 @@ $choco_packages = @(
     'directx'
     'steam'
     'discord'
+)
+
+# Additional packages only for desktop systems
+$choco_packages_extra = @(
+    # --- Productivity ---
+    'vmware-player' # free version of VMWare virtualization software
+    'vmware-tools' # utilities to enhance virtual machine performance
+    # 'vmware-workstation-player' # paid version of VMWare Player with additional features
 )
 
 
