@@ -18,7 +18,7 @@ class AppBackup:
     options: Optional[Dict[str, Any]] = field(default=None)  # provide additional options [only, exclude, include]
 
 
-app_root_dir = sh.environment_variable('AppData')  # %UserProfile%/AppData/Roaming
+app_root_dir = sh.environment_get('AppData')  # %UserProfile%/AppData/Roaming
 
 app_backups: List[AppBackup] = [
     AppBackup(
@@ -43,7 +43,7 @@ app_backups: List[AppBackup] = [
     ),
     AppBackup(
         id='voicemeeter',
-        root=sh.join_path(sh.environment_variable('Home'), 'Documents'),
+        root=sh.join_path(sh.environment_get('Home'), 'Documents'),
         name='Voicemeeter',
         options={
             'only': ['VoicemeeterProfile.xml'],

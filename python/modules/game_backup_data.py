@@ -26,7 +26,7 @@ class GameBackup:
     # setting_opts: Optional[Dict[str, Any]] = field(default=None)  # provide additional options [only, exclude, include]
 
 
-game_root_dir = sh.environment_variable('AppData')  # %UserProfile%/AppData/Roaming
+game_root_dir = sh.environment_get('AppData')  # %UserProfile%/AppData/Roaming
 game_e_root_dir = sh.join_path('E:\\', 'GameFiles')
 
 game_backups: List[GameBackup] = [
@@ -39,7 +39,7 @@ game_backups: List[GameBackup] = [
     GameBackup(
         id='diablo_iii',
         # root='/mnt/c/Users/david/Documents',
-        root=sh.join_path(sh.environment_variable('Home'), 'Documents'),  # similar to UserProfile
+        root=sh.join_path(sh.environment_get('Home'), 'Documents'),  # similar to UserProfile
         name='Diablo III',
         screenshot='Screenshots',
         # screenshot_opts=['--backup', "--backup-dir=backup_{{ lookup('pipe','date +%Y-%m-%d') }}"],
@@ -55,7 +55,7 @@ game_backups: List[GameBackup] = [
     GameBackup(
         id='elder_scrolls_online',
         # root='/mnt/c/Users/david/Documents',
-        root=sh.join_path(sh.environment_variable('Home'), 'Documents'),
+        root=sh.join_path(sh.environment_get('Home'), 'Documents'),
         name=sh.join_path('Elder Scrolls Online', 'live'),
         # addon='AddOns',
         screenshot='Screenshots',
@@ -74,7 +74,7 @@ game_backups: List[GameBackup] = [
     GameBackup(
         id='elite_dangerous',
         # root='/mnt/c/Users/david/AppData/Local',
-        root=sh.environment_variable('LocalAppData'),
+        root=sh.environment_get('LocalAppData'),
         name=sh.join_path('Frontier Developments', 'Elite Dangerous'),
         screenshot='Screenshots',
         # setting=sh.join_path('Options', 'Bindings'),
@@ -101,7 +101,7 @@ game_backups: List[GameBackup] = [
     GameBackup(
         id='final_fantasy_xiv',
         # root='/mnt/c/Users/david/Documents/My Games',
-        root=sh.join_path(sh.environment_variable('Home'), 'Documents', 'My Games'),
+        root=sh.join_path(sh.environment_get('Home'), 'Documents', 'My Games'),
         name='FINAL FANTASY XIV - A Realm Reborn',
         screenshot='screenshots',
         # setting=' ',
@@ -129,7 +129,7 @@ game_backups: List[GameBackup] = [
     GameBackup(
         id='hotline_miami',
         # root='/mnt/c/Users/david/Documents/My Games',
-        root=sh.join_path(sh.environment_variable('Home'), 'Documents', 'My Games'),
+        root=sh.join_path(sh.environment_get('Home'), 'Documents', 'My Games'),
         name='HotlineMiami',
         # setting=' ',
         # setting_opts=['--include=*.cfg', '--exclude=*'],
@@ -143,7 +143,7 @@ game_backups: List[GameBackup] = [
     GameBackup(
         id='killing_floor_2',
         # root='/mnt/c/Users/david/Documents/My Games',
-        root=sh.join_path(sh.environment_variable('Home'), 'Documents', 'My Games'),
+        root=sh.join_path(sh.environment_get('Home'), 'Documents', 'My Games'),
         name='KillingFloor2',
         # setting='KFGame/Config',
         options={
@@ -155,7 +155,7 @@ game_backups: List[GameBackup] = [
     GameBackup(
         id='rocket_league',
         # root='/mnt/c/Users/david/Documents/My Games',
-        root=sh.join_path(sh.environment_variable('Home'), 'Documents', 'My Games'),
+        root=sh.join_path(sh.environment_get('Home'), 'Documents', 'My Games'),
         name='Rocket League',
         # setting='TAGame/Config',
         options={
@@ -171,7 +171,7 @@ game_backups: List[GameBackup] = [
     GameBackup(
         id='skyrim_se',
         # root='/mnt/c/Users/david/Documents/My Games',
-        root=sh.join_path(sh.environment_variable('Home'), 'Documents', 'My Games'),
+        root=sh.join_path(sh.environment_get('Home'), 'Documents', 'My Games'),
         name='Skyrim Special Edition',
         # setting=' ',
         # setting_opts=['--include=Saves/', '--include=Saves/*', '--exclude=*/', '--include=*.ini', '--exclude=*'],
@@ -185,7 +185,7 @@ game_backups: List[GameBackup] = [
     GameBackup(
         id='skyrim_vr',
         # root='/mnt/c/Users/david/Documents/My Games',
-        root=sh.join_path(sh.environment_variable('Home'), 'Documents', 'My Games'),
+        root=sh.join_path(sh.environment_get('Home'), 'Documents', 'My Games'),
         name='Skyrim VR',
         # setting=' ',
         # setting_opts=['--include=Saves/', '--include=Saves/*', '--exclude=*/', '--include=*.ini', '--exclude=*'],
