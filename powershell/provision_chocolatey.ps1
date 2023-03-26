@@ -4,13 +4,15 @@
 $choco_packages = @(
     # --- Productivity ---
     'GoogleChrome'
+    'speccy'
     'procexp'
     'tcpview'
     '7zip'
     'ccleaner'
     'nordvpn'
+    '4k-video-downloader'
     'qbittorrent'
-    'speccy'
+    'chatgpt'
 
     # --- Development ---
     'powershell-core'
@@ -48,15 +50,20 @@ $choco_packages = @(
     'MakeMKV'
     'handbrake'
     'mkvtoolnix' # https://mkvtoolnix.download/doc/mkvmerge.html
-    '4k-video-downloader'
-    'obs-studio'
     # 'jubler'
+    
+    # --- Streaming ---
+    'obs-studio'
     # 'chatterino'
+    'chatterino7'
 
     # --- Videogames ---
     'directx'
     'steam'
     'discord'
+    'reshade'
+    # Example of using params
+    # 'reshade --params "/Desktop /NoStartMenu"'
 )
 
 # Additional packages only for desktop systems
