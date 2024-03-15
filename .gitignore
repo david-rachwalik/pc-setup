@@ -260,10 +260,12 @@ paket-files/
 __pycache__/
 *.pyc
 
+# --- Custom Omissions ---
 
-# Custom additions
 **/.azure/credentials
 *vault.yml
+wwwroot/
+dist/
 
 # Terraform
 .terraform.lock.*
