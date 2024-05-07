@@ -31,6 +31,7 @@ $settings = New-ScheduledTaskSettingsSet -Hidden
 
 
 # --- Provision System ---
+
 $taskName = "CRON PC Setup"
 $action = New-ScheduledTaskAction -Execute "pwsh" -Argument "-NonInteractive -File E:\Repos\pc-setup\powershell\pc_setup.ps1"
 $trigger = New-ScheduledTaskTrigger -Daily -At "03:00am"
@@ -51,8 +52,15 @@ else
 
 
 # --- Backup System ---
+
+# Get the Python install directory from the executable path
+$pythonExecutablePath = python -c "import sys; print(sys.executable)"
+$pythonInstallLocation = Split-Path -Path $pythonExecutablePath -Parent
+Write-Output "Python install location: $pythonInstallLocation"
+
 $taskName = "CRON PC Clean"
-$py_exe = "C:\Python311\python.exe"
+# $py_exe = "C:\Python312\python.exe"
+$py_exe = "${pythonInstallLocation}\python.exe"
 $py_script = "$Env:AppData\Python\bin\pc_clean.py"
 $action = New-ScheduledTaskAction -Execute $py_exe -Argument $py_script
 $trigger = New-ScheduledTaskTrigger -Daily -At "04:00am"

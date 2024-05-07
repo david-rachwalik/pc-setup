@@ -25,6 +25,7 @@ $pip_packages = @(
     # https://learn.microsoft.com/en-us/azure/developer/python/configure-local-development-environment
     # https://learn.microsoft.com/en-us/azure/developer/python/sdk/azure-sdk-overview#connect-to-and-use-azure-resources-with-client-libraries
     'azure-identity'
+    'azure.mgmt.subscription'
     'azure-mgmt-resource'
     # https://pypi.org/project/azure-keyvault-secrets
     'azure-keyvault-secrets'
@@ -63,7 +64,7 @@ $python_user_boilerplate_modules = @(
 )
 
 $python_user_commands = @(
-    # 'app'
+    'app'
     # 'mygit'
     'pc_clean'
     'pc_restore'
@@ -96,7 +97,7 @@ function Join-RepoPath
     if ($IsRemote)
     {
         # Use remote repository when called indirectly (another script)
-        $Path = "$($RootPath)/$($ChildPath)"
+        $Path = "${RootPath}/${ChildPath}"
     }
     else
     {
@@ -184,12 +185,12 @@ function Copy-SourceFile
         try
         {
             # Copy file from remote repository into Temp directory, then robocopy from there
-            Invoke-WebRequest "$($SourcePath)/$($FileName)" -OutFile "$($Env:Temp)\$($FileName)"
+            Invoke-WebRequest "${SourcePath}/${FileName}" -OutFile "${Env:Temp}\${FileName}"
             robocopy $Env:Temp $DestinationPath $FileName /mt /z /mov  # /mov (cut instead of copy)
         }
         catch [System.Net.WebException], [System.IO.IOException]
         {
-            Write-Host "Unable to download '$($SourcePath)/$($FileName)'." -ForegroundColor Red
+            Write-Host "Unable to download '${SourcePath}/${FileName}'." -ForegroundColor Red
         }
     }
     else
@@ -336,7 +337,7 @@ Write-Host "destination directory: $user_py_dir"
 # Provision the latest Python modules
 foreach ($module in $python_user_modules)
 {
-    $filename = "$($module).py"
+    $filename = "${module}.py"
     $src_path = Join-RepoPath $repo_py_module_dir $filename $script_is_remote
     $dest_path = Join-Path -Path $user_py_module_dir -ChildPath $filename
     $match = Test-FileHashes $src_path $dest_path $script_is_remote
@@ -355,7 +356,7 @@ foreach ($module in $python_user_modules)
 # Provision the latest Python modules (boilerplate)
 foreach ($module in $python_user_boilerplate_modules)
 {
-    $filename = "$($module).py"
+    $filename = "${module}.py"
     $src_path = Join-RepoPath $repo_py_boilerplate_dir $filename $script_is_remote
     $dest_path = Join-Path -Path $user_py_module_dir -ChildPath $filename
     $match = Test-FileHashes $src_path $dest_path $script_is_remote
@@ -371,10 +372,22 @@ foreach ($module in $python_user_boilerplate_modules)
     }
 }
 
+# # Run `py --version` command and capture the output
+# $pythonVersionOutput = py --version
+# # Extract the version number (major and minor) from the output
+# $pythonVersion = $pythonVersionOutput -replace 'Python (\d+\.\d+).*', '$1'
+# Write-Output "Python version: $pythonVersion"
+# $pythonVersionWithoutDot = $pythonVersion -replace '\.'
+
+# Get the Python install directory from the executable path
+$pythonExecutablePath = python -c "import sys; print(sys.executable)"
+$pythonInstallLocation = Split-Path -Path $pythonExecutablePath -Parent
+Write-Output "Python install location: $pythonInstallLocation"
+
 # Provision the latest Python commands
 foreach ($module in $python_user_commands)
 {
-    $filename = "$($module).py"
+    $filename = "${module}.py"
     $src_path = Join-RepoPath $repo_py_command_dir $filename $script_is_remote
     $dest_path = Join-Path -Path $user_py_command_dir -ChildPath $filename
     $match = Test-FileHashes $src_path $dest_path $script_is_remote
@@ -389,8 +402,10 @@ foreach ($module in $python_user_commands)
         Copy-SourceFile $repo_py_command_dir $user_py_command_dir $filename $script_is_remote
         
         # --- Make the command executable from CLI ---
-        $dest_bat_content = "py %AppData%\Python\bin\$($filename) %*"
-        $dest_bat = "C:\Python311\Scripts\$($module).bat"
+        $dest_bat_content = "py %AppData%\Python\bin\${filename} %*"
+        # $dest_bat = "C:\Python311\Scripts\${module}.bat"
+        # $dest_bat = "C:\Python${pythonVersionWithoutDot}\Scripts\${module}.bat"
+        $dest_bat = "${pythonInstallLocation}\Scripts\${module}.bat"
         Set-Content -Path $dest_bat -Value $dest_bat_content -Encoding Ascii
 
         # --- Make a distributeable application (for external users) ---

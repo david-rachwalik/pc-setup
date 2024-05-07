@@ -25,8 +25,16 @@
 # deploy:           Deploy an application to Azure (webapp, api, nuget package)
 # status:           View running state of deployed application
 
+
+# :: Usage Example ::
+# setup --tags "py" --skip-tags "windows"
+# app --debug login
+# app --debug --secret-key="AutoTestKey" --secret-value="007" secret
+# app --debug --project="test" --arm="test-deploy" deploy
+
+
 import argparse
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Tuple
 
 import azure_boilerplate as az
 import azure_devops_boilerplate as az_devops
@@ -39,10 +47,9 @@ import shell_boilerplate as sh
 
 # --- Strategies ---
 
-
-def resource_group_strategy(account: az.Account, resource_group_name: str, location: str) -> az.ResourceGroup:
+def resource_group_strategy(resource_group_name: str, location: str) -> az.ResourceGroup:
     """Method to setup an Azure resource group"""
-    if not account.isSignedIn:
+    if not ACCOUNT.isSignedIn:
         return az.ResourceGroup()
     # Ensure resource group exists
     resource_group = az.resource_group_get(resource_group_name)
@@ -53,13 +60,13 @@ def resource_group_strategy(account: az.Account, resource_group_name: str, locat
     return resource_group
 
 
-def key_vault_strategy(account: az.Account, location: str, resource_group_name: str, key_vault_name: str) -> az.KeyVault:
+def key_vault_strategy(location: str, resource_group_name: str, key_vault_name: str) -> az.KeyVault:
     """Method to setup an Azure key vault"""
-    if not account.isSignedIn:
+    if not ACCOUNT.isSignedIn:
         return az.KeyVault()
 
     # Ensure resource group exists
-    resource_group = resource_group_strategy(account, resource_group_name, location)
+    resource_group = resource_group_strategy(resource_group_name, location)
     if not resource_group.isValid:
         LOG.error('failed to create resource group')
         sh.fail_process()
@@ -74,10 +81,10 @@ def key_vault_strategy(account: az.Account, location: str, resource_group_name: 
     return key_vault
 
 
-def ad_group_strategy(account: az.Account, ad_member_id: str, ad_group_name: str = 'main-ad-group') -> az.AdGroup:
+def ad_group_strategy(ad_member_id: str, ad_group_name: str = 'main-ad-group') -> az.AdGroup:
     """Method to setup an Azure Active Directory group"""
     ad_group = az.AdGroup()
-    if not account.isSignedIn:
+    if not ACCOUNT.isSignedIn:
         return ad_group
 
     # Ensure active directory group exists
@@ -95,7 +102,7 @@ def ad_group_strategy(account: az.Account, ad_member_id: str, ad_group_name: str
         is_ad_group_member = az.ad_group_member_set(ad_group_name, ad_member_id)
 
     # Ensure access role is assigned to active directory group
-    scope: str = f'/subscriptions/{account.subscriptionId}'
+    scope: str = f'/subscriptions/{ACCOUNT.subscriptionId}'
     role_assigned: bool = az.role_assign_get(ad_group.id, scope)
     if not role_assigned:
         LOG.warning(
@@ -107,9 +114,9 @@ def ad_group_strategy(account: az.Account, ad_member_id: str, ad_group_name: str
 
 
 # TODO: figure out whether still needed
-def service_principal_strategy(account: az.Account, tenant: str, service_principal_name: str, app_id: str) -> az.ServicePrincipal:
+def service_principal_strategy(tenant: str, service_principal_name: str, app_id: str) -> az.ServicePrincipal:
     """Method to setup an Azure service principal"""
-    if not account.isSignedIn:
+    if not ACCOUNT.isSignedIn:
         return az.ServicePrincipal()
     # Full filepath to service principal data
     service_principal_name = az.format_resource_name(service_principal_name)
@@ -122,7 +129,8 @@ def service_principal_strategy(account: az.Account, tenant: str, service_princip
     return service_principal
 
 
-def login_service_principal_strategy(account: az.Account) -> az.ServicePrincipal:
+# https://learn.microsoft.com/en-us/azure/developer/python/sdk/authentication-local-development-service-principal
+def login_service_principal_strategy() -> az.ServicePrincipal:
     """Method to sign-in an Azure service principal"""
     service_principal = az.ServicePrincipal()
     # Full filepath to service principal data
@@ -140,11 +148,11 @@ def login_service_principal_strategy(account: az.Account) -> az.ServicePrincipal
         return service_principal
 
     LOG.debug('service principal file missing, checking Azure...')
-    if not account.isSignedIn:
+    if not ACCOUNT.isSignedIn:
         return service_principal
 
     # Ensure key vault exists
-    key_vault = key_vault_strategy(account, ARGS.location, ARGS.login_resource_group, ARGS.login_key_vault)
+    key_vault = key_vault_strategy(ARGS.location, ARGS.login_resource_group, ARGS.login_key_vault)
     if not key_vault.isValid:
         LOG.error('failed to retrieve valid key vault details')
         return service_principal
@@ -215,7 +223,7 @@ def login_service_principal_strategy(account: az.Account) -> az.ServicePrincipal
 
     # Ensure active directory groups/roles exist
     if service_principal.changed:
-        ad_group = ad_group_strategy(account, service_principal.id)
+        ad_group = ad_group_strategy(service_principal.id)
         LOG.debug(f'AD group data: {ad_group}')
 
     # TODO: manage service principal security access to Key Vault:
@@ -226,7 +234,7 @@ def login_service_principal_strategy(account: az.Account) -> az.ServicePrincipal
     return service_principal
 
 
-def login_strategy(account: Optional[az.Account] = None, retry: bool = True) -> az.Account:
+def login_strategy(retry: bool = True) -> az.Account:
     """Method to sign-in an Azure account"""
     # Full filepath to service principal data
     sp_dir = ARGS.login_service_principal_dir
@@ -240,8 +248,9 @@ def login_strategy(account: Optional[az.Account] = None, retry: bool = True) -> 
     # LOG.debug(f'account: {account}')
 
     # Ensure service principal credentials exist
-    service_principal = login_service_principal_strategy(account)
+    service_principal = login_service_principal_strategy()
     # LOG.debug(f'service principal data: {service_principal}')
+    account.login_sp = service_principal
 
     # --- elif used to limit recursive activity ---
 
@@ -249,18 +258,14 @@ def login_strategy(account: Optional[az.Account] = None, retry: bool = True) -> 
         # Confirm updated service principal login connects
         LOG.info('detected service principal change, preparing to use new credentials...')
         az.account_logout()
-        # account.isSignedIn = False
         # Do not backup/rename SP credentials here if failed (it'll occur recursively)
-        # account = login_strategy(account)
         account = login_strategy()
 
     elif account.isSignedIn and not service_principal.isValid:
         # Possibly due to a bad service principal file or insufficient privileges on account
         LOG.error('failed to retrieve valid service principal, signing out...')
         az.account_logout()
-        # account.isSignedIn = False
         # Prompt manual 'az login' indirectly
-        # account = login_strategy(account)
         account = login_strategy()
 
     elif not account.isSignedIn:
@@ -274,8 +279,7 @@ def login_strategy(account: Optional[az.Account] = None, retry: bool = True) -> 
                     # Will retry recursively only once
                     LOG.warning('Azure login with service principal failed, saving backup and retrying...')
                     sh.backup_file(service_principal_path)
-                    # account = login_strategy(account, False)
-                    account = login_strategy(None, False)
+                    account = login_strategy(False)
                 else:
                     # This should never occur (theoretically)
                     LOG.error('Azure login with service principal failed again, exiting...')
@@ -306,17 +310,17 @@ def login_strategy(account: Optional[az.Account] = None, retry: bool = True) -> 
 # This is dependent upon an active PAT in DevOps saved to key vault secret
 # Cannot create DevOps PAT by CLI, navigate site manually, go to user settings and select "Personal access tokens"
 # https://docs.microsoft.com/en-us/azure/devops/organizations/accounts/use-personal-access-tokens-to-authenticate
-def login_devops_pat_strategy(account: az.Account) -> str:
+def login_devops_pat_strategy() -> str:
     """Method to sign-in an Azure DevOps with PAT"""
     key_vault_name: str = ARGS.login_key_vault
     secret_key: str = 'main-devops-pat'
     pat_data: str = ''
 
-    if not account.isSignedIn:
+    if not ACCOUNT.isSignedIn:
         return pat_data
 
     # Ensure key vault exists
-    key_vault = key_vault_strategy(account, ARGS.location, ARGS.login_resource_group, key_vault_name)
+    key_vault = key_vault_strategy(ARGS.location, ARGS.login_resource_group, key_vault_name)
     if not key_vault.isValid:
         LOG.error('failed to retrieve valid key vault details')
         return pat_data
@@ -335,16 +339,16 @@ def login_devops_pat_strategy(account: az.Account) -> str:
 
 # https://docs.microsoft.com/en-us/azure/devops/cli/log-in-via-pat
 # Does not use 'az devops login' because environment variable will suffice
-def login_devops_strategy(account: az.Account):
+def login_devops_strategy():
     """Method to sign-in Azure DevOps account"""
     key_vault: str = ARGS.login_key_vault
     secret_key = 'main-devops-pat'
 
     # Ensure user PAT/credentials exist
-    account.devops_pat = login_devops_pat_strategy(account)
-    LOG.debug(f'PAT data: {account.devops_pat}')
+    ACCOUNT.devops_pat = login_devops_pat_strategy()
+    LOG.debug(f'PAT data: {ACCOUNT.devops_pat}')
 
-    if not account.devops_pat:
+    if not ACCOUNT.devops_pat:
         # This can occur when PAT is neither in local file nor key vault
         LOG.error('failed to retrieve valid PAT, navigate the following site to manually create a PAT, go to user settings and select "Personal access tokens"')
         LOG.error('https://docs.microsoft.com/en-us/azure/devops/organizations/accounts/use-personal-access-tokens-to-authenticate')
@@ -353,13 +357,13 @@ def login_devops_strategy(account: az.Account):
         sh.fail_process()
 
     LOG.debug('assigning DevOps PAT (personal access token) to environment...')
-    az_devops.environment_pat(account.devops_pat)
+    az_devops.environment_pat(ACCOUNT.devops_pat)
 
 
 # # This is dependent upon an active PAT in DevOps saved to key vault secret
 # # Cannot create DevOps PAT by CLI, navigate site manually, go to user settings and select "Personal access tokens"
 # # https://docs.microsoft.com/en-us/azure/devops/organizations/accounts/use-personal-access-tokens-to-authenticate
-# def login_devops_pat_strategy(account: az.Account, pat_path: str) -> str:
+# def login_devops_pat_strategy(pat_path: str) -> str:
 #     """Method to sign-in an Azure DevOps with PAT"""
 #     key_vault_name: str = ARGS.login_key_vault
 #     secret_key: str = 'main-devops-pat'
@@ -373,18 +377,18 @@ def login_devops_strategy(account: az.Account):
 #         return pat_data
 
 #     LOG.debug('DevOps PAT (personal access token) missing, checking Azure...')
-#     if not account.isSignedIn:
+#     if not ACCOUNT.isSignedIn:
 #         return pat_data
 
 #     # Ensure key vault exists
-#     key_vault = key_vault_strategy(account, ARGS.location, ARGS.login_resource_group, key_vault_name)
+#     key_vault = key_vault_strategy(ARGS.location, ARGS.login_resource_group, key_vault_name)
 #     if not key_vault.isValid:
 #         LOG.error('failed to retrieve valid key vault details')
 #         return pat_data
 
 #     # Ensure personal access token (PAT) exists in key vault as secret
 #     key_vault_secret = az.key_vault_secret_get(key_vault_name, secret_key)
-#     # key_vault_secret = az.key_vault_secret_get(account.auth, key_vault, secret_key)
+#     # key_vault_secret = az.key_vault_secret_get(ACCOUNT.auth, key_vault, secret_key)
 #     if not key_vault_secret:
 #         LOG.error('failed to retrieve PAT from key vault')
 #         return pat_data
@@ -398,7 +402,7 @@ def login_devops_strategy(account: az.Account):
 
 # Below works, but the login doesn't return False for a bad pat :(
 # # https://docs.microsoft.com/en-us/azure/devops/cli/log-in-via-pat
-# def login_devops_strategy(account: az.Account, retry: bool = True) -> bool:
+# def login_devops_strategy(retry: bool = True) -> bool:
 #     """Method to sign-in Azure DevOps account"""
 #     is_devops_signed_in: bool = False
 #     user: str = ARGS.login_devops_user
@@ -409,15 +413,15 @@ def login_devops_strategy(account: az.Account):
 #     pat_path: str = sh.join_path(sh.expand_path(auth_dir), 'ado.pat')
 
 #     # Ensure user PAT/credentials exist
-#     account.devops_pat = login_devops_pat_strategy(account, pat_path)
-#     LOG.debug(f'PAT data: {account.devops_pat}')
+#     ACCOUNT.devops_pat = login_devops_pat_strategy(pat_path)
+#     LOG.debug(f'PAT data: {ACCOUNT.devops_pat}')
 
 #     # # Check if user is signed-in DevOps (first chance to be signed-in)
 #     # LOG.info('checking if already signed-in Azure DevOps...')
-#     # # user_is_signed_in: bool = az_devops.user_get(account.devops_pat, user)
-#     # is_devops_signed_in: bool = az_devops.login(account.devops_pat)
+#     # # user_is_signed_in: bool = az_devops.user_get(ACCOUNT.devops_pat, user)
+#     # is_devops_signed_in: bool = az_devops.login(ACCOUNT.devops_pat)
 
-#     if not account.devops_pat:
+#     if not ACCOUNT.devops_pat:
 #         # This can occur when PAT is neither in local file nor key vault
 #         LOG.error('not signed-in Azure DevOps, navigate the following site to manually create a PAT, go to user settings and select "Personal access tokens"')
 #         LOG.error('https://docs.microsoft.com/en-us/azure/devops/organizations/accounts/use-personal-access-tokens-to-authenticate')
@@ -427,27 +431,27 @@ def login_devops_strategy(account: az.Account):
 
 #     # --- elif used to limit recursive activity ---
 
-#     if account.isSignedIn and not account.devops_pat:
+#     if ACCOUNT.isSignedIn and not ACCOUNT.devops_pat:
 #         # Possibly due to a bad PAT file or insufficient privileges on account
 #         LOG.error('failed to retrieve valid PAT, signing out...')
 #         az_devops.logout()
-#         is_devops_signed_in = login_devops_strategy(account)
+#         is_devops_signed_in = login_devops_strategy()
 
 #     elif not is_devops_signed_in:
 #         # Attempt login with PAT found (last chance to be signed-in)
 #         LOG.debug('attempting DevOps login with PAT (personal access token)...')
-#         is_devops_signed_in = az_devops.login(account.devops_pat)
+#         is_devops_signed_in = az_devops.login(ACCOUNT.devops_pat)
 #         if not is_devops_signed_in:
 #             if retry:
 #                 # Will retry recursively only once
 #                 LOG.warning('Azure DevOps login with PAT failed, saving backup and retrying...')
 #                 sh.backup_file(pat_path)
-#                 is_devops_signed_in = login_devops_strategy(account, False)
+#                 is_devops_signed_in = login_devops_strategy(False)
 #             else:
 #                 LOG.error('Azure DevOps login with PAT failed again, exiting...')
 #                 sh.fail_process()
 
-#     elif account.isSignedIn and is_devops_signed_in:
+#     elif ACCOUNT.isSignedIn and is_devops_signed_in:
 #         LOG.info('you are successfully signed-in Azure DevOps!')
 
 #     return is_devops_signed_in
@@ -518,10 +522,12 @@ def _project_packages(strat: str, framework: str) -> List[str]:
     return dotnet_packages
 
 
-def application_strategy(tenant: str, root_dir: str, solution: str, project: str, strat: str, environment: str,
-                         framework: str, secret_key: str = '', secret_value: str = '') -> Tuple[bool, bool]:
+# def application_strategy(tenant: str, root_dir: str, solution: str, project: str, strat: str, environment: str,
+#                          framework: str, secret_key: str = '', secret_value: str = '') -> Tuple[bool, bool]:
+def application_strategy(root_dir: str, solution: str, project: str, strat: str, environment: str,
+                         framework: str) -> Tuple[bool, bool]:
     """Method to setup an Azure application"""
-    if not account.is_signed_in:
+    if not ACCOUNT.isSignedIn:
         return (False, False)
     app_changed = False
     # Determine solution scenario (if a solution directory should exist)
@@ -543,13 +549,13 @@ def application_strategy(tenant: str, root_dir: str, solution: str, project: str
         # Register Azure Active Directory application for project
         ad_app = az.active_directory_application_get(app_name)
         if not ad_app.appId:
-            ad_app = az.active_directory_application_set(tenant, app_name)
+            ad_app = az.active_directory_application_set(ACCOUNT.tenantId, app_name)
             if not ad_app.appId:
                 LOG.error('failed to register active directory application')
                 sh.fail_process()
 
         # Ensure service principal credentials exist for AD application object registration
-        service_principal = service_principal_strategy(account, app_name, ad_app.appId)
+        service_principal = service_principal_strategy(ACCOUNT.tenantId, app_name, ad_app.appId)
         # LOG.debug(f'service_principal: {service_principal}')
         # TODO: might need additional test iterations linking AD app to SP with CLI instead of portal
 
@@ -580,8 +586,7 @@ def application_strategy(tenant: str, root_dir: str, solution: str, project: str
     project_exists: bool = sh.path_exists(project_file, 'f')
     if not project_exists:
         LOG.warning('could not locate project, creating...')
-        project_succeeded: bool = net.project_new(
-            tenant, project_dir, strat, framework)
+        project_succeeded: bool = net.project_new(ACCOUNT.tenantId, project_dir, strat, framework)
         LOG.info(f'successfully created project: {project_succeeded}')
         if not project_succeeded:
             LOG.error('project failed to be created, exiting...')
@@ -727,7 +732,8 @@ def _json_to_parameters(parameters: Dict[str, Dict[str, Any]]) -> List[str]:
     return out_parameters
 
 
-def deployment_group_strategy(tenant: str, sp_name: str, project: str, environment: str, location: str, arm: str) -> Tuple[bool, bool]:
+# deployment_group_strategy(account, ARGS.login_service_principal, ARGS.project, ARGS.environment, ARGS.location, ARGS.arm)
+def deployment_group_strategy(sp_name: str, project: str, environment: str, location: str, arm: str) -> Tuple[bool, bool]:
     """Method to setup an Azure deployment group"""
     # if not account.isSignedIn: return (az.ResourceGroup(), False)
     deployment_succeeded: bool = False
@@ -736,7 +742,7 @@ def deployment_group_strategy(tenant: str, sp_name: str, project: str, environme
     LOG.debug(f'rg_name: {rg_name}')
 
     # Ensure resource group exists
-    resource_group = resource_group_strategy(account, rg_name, location)
+    resource_group = resource_group_strategy(rg_name, location)
     if not resource_group.isValid:
         LOG.error('failed to create resource group')
         sh.fail_process()
@@ -744,8 +750,7 @@ def deployment_group_strategy(tenant: str, sp_name: str, project: str, environme
     # Azure Resource Manager steps
     rm_root_path: str = '~/pc-setup/ansible_playbooks/roles/azure/resource_manager/deploy/templates'
     template_path: str = sh.join_path(rm_root_path, arm, 'azuredeploy.json')
-    parameters_path: str = sh.join_path(
-        rm_root_path, arm, 'azuredeploy.parameters.json')
+    parameters_path: str = sh.join_path(rm_root_path, arm, 'azuredeploy.parameters.json')
     parameters_file: str = sh.read_file(parameters_path)
     parameters_json: Dict[str, Dict[str, Any]] = az.ArmParameters(parameters_file).content
 
@@ -788,27 +793,28 @@ def authenticate() -> az.Account:
     # Sign-in Azure subscription using service principal
     account = login_strategy()
     # Generate credential (for Python SDK) from account details
+    # account.auth = az.credential_get('secret', account.tenantId, account.login_sp.appId, account.login_sp.password)
     az.environment_credential(account)
     account.auth = az.credential_get()
     # Sign-in Azure DevOps using PAT
-    login_devops_strategy(account)
+    login_devops_strategy()
     return account
 
 
 def secret():
-    """Method to perform actions to create an Azure key vault secret"""
-    account = authenticate()
-    key_vault_strategy(account, ARGS.location, ARGS.resource_group, ARGS.key_vault)
+    """Method to perform actions for creating an Azure key vault secret"""
+    key_vault_strategy(ARGS.location, ARGS.resource_group, ARGS.key_vault)
     # Add a [key, secret, certificate] to vault (certificates have annual renewal costs)
     # az.key_vault_secret_set(ARGS.key_vault, ARGS.secret_key, ARGS.secret_value)
     # Set key vault advanced access policies
 
 
 def app_create():
-    """Method to perform actions to create an Azure application"""
-    account = authenticate()
-    application_strategy(ARGS.tenant, ARGS.dotnet_dir, ARGS.solution, ARGS.project,
-                         ARGS.strat, ARGS.environment, ARGS.framework, ARGS.secret_key, ARGS.secret_value)
+    """Method to perform actions for creating an Azure application"""
+    # application_strategy(ARGS.tenant, ARGS.dotnet_dir, ARGS.solution, ARGS.project,
+    #                      ARGS.strat, ARGS.environment, ARGS.framework, ARGS.secret_key, ARGS.secret_value)
+    application_strategy(ARGS.dotnet_dir, ARGS.solution, ARGS.project,
+                         ARGS.strat, ARGS.environment, ARGS.framework)
     gitignore_path = '/home/david/pc-setup/ansible_playbooks/roles/linux/apps/git/init/files/.gitignore'
     # Determine scenario (if repo is inside solution or project directory)
     use_solution_dir = bool(ARGS.solution and isinstance(ARGS.solution, str))
@@ -818,19 +824,25 @@ def app_create():
 
 
 def deploy():
-    """Method to perform actions to deploy an application to Azure"""
-    account = authenticate()
+    """Method to perform actions for deploying an application to Azure"""
     # Deploy ARM templates to resource group
-    deployment_group_strategy(ARGS.tenant, ARGS.login_service_principal,
-                              ARGS.project, ARGS.environment, ARGS.location, ARGS.arm)
+    # deployment_group_strategy(ARGS.login_service_principal,
+    #                           ARGS.project, ARGS.environment, ARGS.location, ARGS.arm)
+
+    project = ARGS.project
+    environment = ARGS.environment
+    rg_name: str = az.format_resource_name(f'{project}-{environment}')
+    LOG.debug(f'rg_name: {rg_name}')
+
+    LOG.debug(f'script path: {__file__}')
+
     # Example deployment resource scenarios:
     # - resource group, app service plan, web app service
     # - resource group, app service plan, web app service, sql server, sql database, connection
 
 
 def pipeline():
-    """Method to perform actions to create an Azure pipeline"""
-    account = authenticate()
+    """Method to perform actions for creating an Azure pipeline"""
     LOG.debug('<mock "pipeline" action> -- to be added later if az command gains more pipelines methods')
     # Project pipeline example scenarios:
     # - build csproj, deploy Python (pip) packages
@@ -854,8 +866,8 @@ if __name__ == '__main__':
     # else:
     #     # ~/.local/az_service_principals/{service-principal}.json
     #     service_principal_dir = '~/.local/az_service_principals'
-    HOME_DIR = sh.environment_get('HOME')
-    service_principal_dir = sh.join_path(HOME_DIR, '.az_service_principals')
+    home_dir = sh.environment_get('HOME')
+    service_principal_dir = sh.join_path(home_dir, '.az_service_principals')
 
     # When 'default' doesn't work, add nargs="?" and const=(same value as default)
     def parse_arguments():
@@ -955,32 +967,40 @@ if __name__ == '__main__':
 
     # --- Run Actions ---
 
-    if ARGS.group == 'login':
-        ACCOUNT = authenticate()
-    elif ARGS.group == 'secret':
-        secret()
-    elif ARGS.group == 'client':
-        app_create()
-    elif ARGS.group == 'deploy':
-        deploy()
-    elif ARGS.group == 'pipeline':
-        pipeline()
+    ACCOUNT = authenticate()
 
-    if ACCOUNT.auth is None:
+    # if ARGS.group == 'secret':
+    #     secret()
+    # elif ARGS.group == 'client':
+    #     app_create()
+    # elif ARGS.group == 'deploy':
+    #     deploy()
+    # elif ARGS.group == 'pipeline':
+    #     pipeline()
+    
+    match ARGS.group:
+        case 'secret':
+            secret()
+        case 'client':
+            app_create()
+        case 'deploy':
+            deploy()
+        case 'pipeline':
+            pipeline()
+        # case _:
+        #     secret()
+
+    main_vault_name = 'main-keyvault'
+    main_secret_key = 'main-devops-pat'
+    if ACCOUNT.auth:
+        secret_value = az.key_vault_secret_get_new(ACCOUNT.auth, main_vault_name, main_secret_key)
+        LOG.debug(f'secret_value: {secret_value}')
+    else:
         LOG.debug('Cannot continue without valid credentials, exiting...')
         sh.fail_process()
 
-    VAULT_NAME = 'main-keyvault'
-    SECRET_KEY = 'main-devops-pat'
-    SECRET_VALUE = az.key_vault_secret_get_new(ACCOUNT.auth, VAULT_NAME, SECRET_KEY)
-    LOG.debug(f'SECRET_VALUE: {SECRET_VALUE}')
 
     # If we get to this point, assume all went well
     LOG.debug('--------------------------------------------------------')
     LOG.debug('--- end point reached :3 ---')
     sh.exit_process()
-
-    # :: Usage Example ::
-    # setup --tags "py" --skip-tags "windows"
-    # app --debug login
-    # app --debug --secret-key="AutoTestKey" --secret-value="007" secret
