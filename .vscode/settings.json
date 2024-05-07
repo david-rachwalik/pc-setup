@@ -3,10 +3,8 @@
   "git.enabled": true,
   // https://github.com/microsoft/vscode-python/wiki/Setting-descriptions#pythondefaultinterpreterpath
   // "python.defaultInterpreterPath": "/usr/bin/python",
-  "python.defaultInterpreterPath": "C:\\Python311\\python.exe",
+  "python.defaultInterpreterPath": "C:\\Python312\\python.exe",
   "python.analysis.typeCheckingMode": "basic",
-  "update.channel": "none",
-  "update.enableWindowsBackgroundUpdates": false,
   "workbench.editor.labelFormat": "short",
   // WSL1 workaround for renaming non-empty directories
   // https://devblogs.microsoft.com/commandline/tips-and-tricks-for-linux-development-with-wsl-and-visual-studio-code/
