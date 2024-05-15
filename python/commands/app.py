@@ -63,6 +63,7 @@ def resource_group_strategy(resource_group_name: str, location: str) -> az.Resou
 def key_vault_strategy(location: str, resource_group_name: str, key_vault_name: str) -> az.KeyVault:
     """Method to setup an Azure key vault"""
     if not ACCOUNT.isSignedIn:
+        LOG.debug('account is not signed in')
         return az.KeyVault()
 
     # Ensure resource group exists
@@ -85,6 +86,7 @@ def ad_group_strategy(ad_member_id: str, ad_group_name: str = 'main-ad-group') -
     """Method to setup an Azure Active Directory group"""
     ad_group = az.AdGroup()
     if not ACCOUNT.isSignedIn:
+        LOG.debug('account is not signed in')
         return ad_group
 
     # Ensure active directory group exists
@@ -117,6 +119,7 @@ def ad_group_strategy(ad_member_id: str, ad_group_name: str = 'main-ad-group') -
 def service_principal_strategy(tenant: str, service_principal_name: str, app_id: str) -> az.ServicePrincipal:
     """Method to setup an Azure service principal"""
     if not ACCOUNT.isSignedIn:
+        LOG.debug('account is not signed in')
         return az.ServicePrincipal()
     # Full filepath to service principal data
     service_principal_name = az.format_resource_name(service_principal_name)
@@ -142,13 +145,14 @@ def login_service_principal_strategy() -> az.ServicePrincipal:
     # Ensure service principal exists in Azure and local
     if sh.path_exists(service_principal_path, 'f'):
         # Gather login info from service principal JSON
-        LOG.debug('service principal file exists, loading...')
+        LOG.info('service principal file exists, loading...')
         service_principal = az.service_principal_get(sp_name, sp_dir)
         LOG.debug(f'service principal (local) data: {service_principal}')
         return service_principal
 
     LOG.debug('service principal file missing, checking Azure...')
     if not ACCOUNT.isSignedIn:
+        LOG.debug('account is not signed in')
         return service_principal
 
     # Ensure key vault exists
@@ -236,6 +240,7 @@ def login_service_principal_strategy() -> az.ServicePrincipal:
 
 def login_strategy(retry: bool = True) -> az.Account:
     """Method to sign-in an Azure account"""
+    global ACCOUNT # to assign a value to global variable within a function (not needed for attribute values)
     # Full filepath to service principal data
     sp_dir = ARGS.login_service_principal_dir
     sp_name = az.format_resource_name(ARGS.login_service_principal)
@@ -244,13 +249,13 @@ def login_strategy(retry: bool = True) -> az.Account:
 
     # Check if account subscription exists (first chance to be signed-in)
     LOG.info('checking if already signed-in Azure...')
-    account = az.account_get(ARGS.subscription)
+    ACCOUNT = az.account_get(ARGS.subscription)
     # LOG.debug(f'account: {account}')
 
     # Ensure service principal credentials exist
     service_principal = login_service_principal_strategy()
     # LOG.debug(f'service principal data: {service_principal}')
-    account.login_sp = service_principal
+    ACCOUNT.login_sp = service_principal
 
     # --- elif used to limit recursive activity ---
 
@@ -259,40 +264,41 @@ def login_strategy(retry: bool = True) -> az.Account:
         LOG.info('detected service principal change, preparing to use new credentials...')
         az.account_logout()
         # Do not backup/rename SP credentials here if failed (it'll occur recursively)
-        account = login_strategy()
+        ACCOUNT = login_strategy()
 
-    elif account.isSignedIn and not service_principal.isValid:
+    elif ACCOUNT.isSignedIn and not service_principal.isValid:
         # Possibly due to a bad service principal file or insufficient privileges on account
         LOG.error('failed to retrieve valid service principal, signing out...')
         az.account_logout()
         # Prompt manual 'az login' indirectly
-        account = login_strategy()
+        ACCOUNT = login_strategy()
 
-    elif not account.isSignedIn:
+    elif not ACCOUNT.isSignedIn:
         if sh.path_exists(service_principal_path, 'f'):
             # Attempt login with service principal credentials found (last chance to be signed-in)
             LOG.debug('attempting login with service principal...')
-            account = az.account_login(
+            ACCOUNT = az.account_login(
                 ARGS.tenant, f'http://{service_principal.displayName}', service_principal.password)
-            if not account.isSignedIn:
+            if not ACCOUNT.isSignedIn:
+                LOG.debug('account is not signed in')
                 if retry:
                     # Will retry recursively only once
                     LOG.warning('Azure login with service principal failed, saving backup and retrying...')
                     sh.backup_file(service_principal_path)
-                    account = login_strategy(False)
+                    ACCOUNT = login_strategy(False)
                 else:
                     # This should never occur (theoretically)
                     LOG.error('Azure login with service principal failed again, exiting...')
                     sh.fail_process()
             else:
-                LOG.info('you are successfully signed-in Azure!')
+                LOG.info('you are successfully signed-in Azure!  (on repeat attempt)')
         else:
             # This can occur when signed-in with service principal but needing credentials changed
             LOG.error('not signed-in, enter "az login" to manually login before repeating your previous command')
             # Calling 'az login' in script "works" but the prompt in subprocess causes display issues
             sh.fail_process()
 
-    elif account.isSignedIn and service_principal.isValid:
+    elif ACCOUNT.isSignedIn and service_principal.isValid:
         LOG.info('you are successfully signed-in Azure!')
 
     # elif not account.subscription_is_default:
@@ -303,8 +309,10 @@ def login_strategy(retry: bool = True) -> az.Account:
     #         LOG.error('failed to activate subscription')
     #         sh.fail_process()
 
-    account.login_sp = service_principal
-    return account
+    ACCOUNT.login_sp = service_principal
+    LOG.debug(f'ACCOUNT data: {ACCOUNT}')
+    LOG.debug(f'ACCOUNT is signed in: {ACCOUNT.isSignedIn}')
+    return ACCOUNT
 
 
 # This is dependent upon an active PAT in DevOps saved to key vault secret
@@ -317,6 +325,7 @@ def login_devops_pat_strategy() -> str:
     pat_data: str = ''
 
     if not ACCOUNT.isSignedIn:
+        LOG.error('not signed into account')
         return pat_data
 
     # Ensure key vault exists
@@ -328,12 +337,12 @@ def login_devops_pat_strategy() -> str:
     # Ensure personal access token (PAT) exists in key vault as secret
     key_vault_secret = az.key_vault_secret_get(key_vault_name, secret_key)
     # key_vault_secret = az.key_vault_secret_get(account.auth, key_vault, secret_key)
-    if not key_vault_secret:
-        LOG.error('failed to retrieve PAT from key vault')
-        return pat_data
 
-    LOG.debug('successfully retrieved PAT from key vault!')
-    pat_data = key_vault_secret
+    if key_vault_secret:
+        LOG.debug('successfully retrieved PAT from key vault!')
+        pat_data = key_vault_secret
+    else:
+        LOG.error('failed to retrieve PAT from key vault')
     return pat_data
 
 
@@ -350,10 +359,9 @@ def login_devops_strategy():
 
     if not ACCOUNT.devops_pat:
         # This can occur when PAT is neither in local file nor key vault
-        LOG.error('failed to retrieve valid PAT, navigate the following site to manually create a PAT, go to user settings and select "Personal access tokens"')
+        LOG.error('failed to retrieve valid PAT, navigate Azure DevOps to manually create a PAT - open "User settings" (2nd icon from right) dropdown and select "Personal access tokens": https://dev.azure.com/david-rachwalik/_usersSettings/tokens')
+        LOG.error(f'this PAT should be stored in vault "{key_vault}" as secret "{secret_key}"')
         LOG.error('https://docs.microsoft.com/en-us/azure/devops/organizations/accounts/use-personal-access-tokens-to-authenticate')
-        LOG.error(
-            f'this PAT must be stored in "{key_vault}" as secret "{secret_key}" before repeating your previous command')
         sh.fail_process()
 
     LOG.debug('assigning DevOps PAT (personal access token) to environment...')
@@ -788,17 +796,17 @@ def deployment_group_strategy(sp_name: str, project: str, environment: str, loca
 
 # --- Commands ---
 
-def authenticate() -> az.Account:
+def authenticate():
     """Method that authenticates user to Azure"""
     # Sign-in Azure subscription using service principal
-    account = login_strategy()
+    login_strategy()
     # Generate credential (for Python SDK) from account details
     # account.auth = az.credential_get('secret', account.tenantId, account.login_sp.appId, account.login_sp.password)
-    az.environment_credential(account)
-    account.auth = az.credential_get()
+    az.environment_credential(ACCOUNT)
+    ACCOUNT.auth = az.credential_get()
+    LOG.debug(f'ACCOUNT auth data: {ACCOUNT.auth}')
     # Sign-in Azure DevOps using PAT
     login_devops_strategy()
-    return account
 
 
 def secret():
@@ -967,7 +975,7 @@ if __name__ == '__main__':
 
     # --- Run Actions ---
 
-    ACCOUNT = authenticate()
+    authenticate()
 
     # if ARGS.group == 'secret':
     #     secret()
