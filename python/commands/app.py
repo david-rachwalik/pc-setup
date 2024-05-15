@@ -50,13 +50,14 @@ import shell_boilerplate as sh
 def resource_group_strategy(resource_group_name: str, location: str) -> az.ResourceGroup:
     """Method to setup an Azure resource group"""
     if not ACCOUNT.isSignedIn:
+        LOG.debug('account is not signed in')
         return az.ResourceGroup()
     # Ensure resource group exists
     resource_group = az.resource_group_get(resource_group_name)
+    LOG.debug(f'resource_group data: {resource_group}')
     if not resource_group.isValid:
         LOG.warning('resource group is missing, creating...')
         resource_group = az.resource_group_set(resource_group_name, location)
-    LOG.debug(f'resource group data: {resource_group}')
     return resource_group
 
 
@@ -97,8 +98,7 @@ def ad_group_strategy(ad_member_id: str, ad_group_name: str = 'main-ad-group') -
         ad_group = az.ad_group_set(ad_group_name)
 
     # Ensure id is member of active directory group
-    is_ad_group_member: bool = az.ad_group_member_get(
-        ad_group_name, ad_member_id)
+    is_ad_group_member: bool = az.ad_group_member_get(ad_group_name, ad_member_id)
     if not is_ad_group_member:
         LOG.warning('active directory group member is missing, adding...')
         is_ad_group_member = az.ad_group_member_set(ad_group_name, ad_member_id)
@@ -107,8 +107,7 @@ def ad_group_strategy(ad_member_id: str, ad_group_name: str = 'main-ad-group') -
     scope: str = f'/subscriptions/{ACCOUNT.subscriptionId}'
     role_assigned: bool = az.role_assign_get(ad_group.id, scope)
     if not role_assigned:
-        LOG.warning(
-            'role is not assigned to active directory group, adding...')
+        LOG.warning('role is not assigned to active directory group, adding...')
         role_assigned = az.role_assign_set(ad_group.id, scope)
 
     LOG.debug(f'AD group data: {ad_group}')
@@ -124,8 +123,7 @@ def service_principal_strategy(tenant: str, service_principal_name: str, app_id:
     # Full filepath to service principal data
     service_principal_name = az.format_resource_name(service_principal_name)
     # Ensure service principal exists
-    service_principal: az.ServicePrincipal = az.service_principal_get(
-        service_principal_name, tenant=tenant)
+    service_principal: az.ServicePrincipal = az.service_principal_get(service_principal_name, tenant=tenant)
     if not service_principal.isValid:
         LOG.debug('service principal credentials not found, creating...')
         service_principal = az.service_principal_set(service_principal_name, app_id)
@@ -139,8 +137,7 @@ def login_service_principal_strategy() -> az.ServicePrincipal:
     # Full filepath to service principal data
     sp_dir = ARGS.login_service_principal_dir
     sp_name = az.format_resource_name(ARGS.login_service_principal)
-    service_principal_path = sh.join_path(
-        sh.expand_path(sp_dir), f'{sp_name}.json')
+    service_principal_path = sh.join_path(sh.expand_path(sp_dir), f'{sp_name}.json')
 
     # Ensure service principal exists in Azure and local
     if sh.path_exists(service_principal_path, 'f'):
@@ -244,8 +241,7 @@ def login_strategy(retry: bool = True) -> az.Account:
     # Full filepath to service principal data
     sp_dir = ARGS.login_service_principal_dir
     sp_name = az.format_resource_name(ARGS.login_service_principal)
-    service_principal_path = sh.join_path(
-        sh.expand_path(sp_dir), f'{sp_name}.json')
+    service_principal_path = sh.join_path(sh.expand_path(sp_dir), f'{sp_name}.json')
 
     # Check if account subscription exists (first chance to be signed-in)
     LOG.info('checking if already signed-in Azure...')
@@ -280,7 +276,6 @@ def login_strategy(retry: bool = True) -> az.Account:
             ACCOUNT = az.account_login(
                 ARGS.tenant, f'http://{service_principal.displayName}', service_principal.password)
             if not ACCOUNT.isSignedIn:
-                LOG.debug('account is not signed in')
                 if retry:
                     # Will retry recursively only once
                     LOG.warning('Azure login with service principal failed, saving backup and retrying...')
@@ -536,6 +531,7 @@ def application_strategy(root_dir: str, solution: str, project: str, strat: str,
                          framework: str) -> Tuple[bool, bool]:
     """Method to setup an Azure application"""
     if not ACCOUNT.isSignedIn:
+        LOG.debug('account is not signed in')
         return (False, False)
     app_changed = False
     # Determine solution scenario (if a solution directory should exist)
@@ -801,9 +797,10 @@ def authenticate():
     # Sign-in Azure subscription using service principal
     login_strategy()
     # Generate credential (for Python SDK) from account details
-    # account.auth = az.credential_get('secret', account.tenantId, account.login_sp.appId, account.login_sp.password)
-    az.environment_credential(ACCOUNT)
-    ACCOUNT.auth = az.credential_get()
+    # ACCOUNT.auth = az.sdk_credential_get('secret', ACCOUNT.tenantId, ACCOUNT.login_sp.appId, ACCOUNT.login_sp.password)
+    # az.sdk_credential_environment(ACCOUNT)
+    # ACCOUNT.auth = az.sdk_credential_get()
+    ACCOUNT.auth = az.sdk_credential_default(ACCOUNT)
     LOG.debug(f'ACCOUNT auth data: {ACCOUNT.auth}')
     # Sign-in Azure DevOps using PAT
     login_devops_strategy()
@@ -834,14 +831,12 @@ def app_create():
 def deploy():
     """Method to perform actions for deploying an application to Azure"""
     # Deploy ARM templates to resource group
-    # deployment_group_strategy(ARGS.login_service_principal,
-    #                           ARGS.project, ARGS.environment, ARGS.location, ARGS.arm)
+    # deployment_group_strategy(ARGS.login_service_principal, ARGS.project, ARGS.environment, ARGS.location, ARGS.arm)
 
     project = ARGS.project
     environment = ARGS.environment
     rg_name: str = az.format_resource_name(f'{project}-{environment}')
     LOG.debug(f'rg_name: {rg_name}')
-
     LOG.debug(f'script path: {__file__}')
 
     # Example deployment resource scenarios:

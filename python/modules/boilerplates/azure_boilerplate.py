@@ -306,7 +306,7 @@ def subscription_details(credential: Credential, name: str) -> Optional[Subscrip
     return None
 
 
-def environment_credential(account: Account):
+def sdk_credential_environment(account: Account):
     """Method that sets environment variables based on Azure account"""
     # --- Environment Variables, service principal with secret (based on subscription) ---
     # https://pypi.org/project/azure-identity
@@ -319,7 +319,7 @@ def environment_credential(account: Account):
         sh.environment_set('AZURE_CLIENT_SECRET', account.login_sp.password)
 
 
-def credential_get(scope: str = 'default', tenant_id: str = '', client_id: str = '', client_secret: str = '') -> Credential:
+def sdk_credential_get(scope: str = 'default', tenant_id: str = '', client_id: str = '', client_secret: str = '') -> Credential:
     """Method that fetches Azure authentication credential"""
     # https://pypi.org/project/azure-identity
     # https://learn.microsoft.com/en-us/python/api/overview/azure/identity-readme
@@ -330,11 +330,18 @@ def credential_get(scope: str = 'default', tenant_id: str = '', client_id: str =
         credential = azid.EnvironmentCredential()
     if scope == 'secret':
         # https://learn.microsoft.com/en-us/python/api/azure-identity/azure.identity.clientsecretcredential
-        credential = azid.ClientSecretCredential(
-            tenant_id, client_id, client_secret)
+        credential = azid.ClientSecretCredential(tenant_id, client_id, client_secret)
     else:
         # https://learn.microsoft.com/en-us/python/api/azure-identity/azure.identity.defaultazurecredential
         credential = azid.DefaultAzureCredential()
+    return credential
+
+
+def sdk_credential_default(account: Account) -> Credential:
+    """Method wrapper that handles all steps for obtaining an Azure SDK credential"""
+    sdk_credential_environment(account)
+    # Generate credential (for Python SDK) from account details
+    credential = sdk_credential_get()
     return credential
 
 
