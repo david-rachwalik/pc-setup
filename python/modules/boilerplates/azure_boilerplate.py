@@ -84,7 +84,7 @@ class Account:
     @property
     def isSignedIn(self) -> bool:
         """Getter method to validate whether the user is signed in"""
-        return bool(self.tenantId and self.subscriptionId)
+        return bool(self.tenantId and self.id)
 
     @property
     def username(self) -> str:
