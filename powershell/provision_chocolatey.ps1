@@ -20,8 +20,10 @@ $choco_packages = @(
     'oh-my-posh'
     'git'
     'github-desktop'
-    # 'docker-desktop'
     'vscode'
+    'docker-desktop'
+    'docker-compose'
+    # (apps that could be limited to containers)
     'nodejs-lts'
     # 'dotnetcore-sdk' # 3.1
     'dotnet-6.0-sdk'
@@ -39,16 +41,17 @@ $choco_packages = @(
     'adobereader'
     'AdobeAIR'
     # 'adobeshockwaveplayer'
-    'blender'
     'comicrack'
     'spotify'
-    # 'unity'
     # 'gimp'
+    'blender'
+    # 'unity'
 
     # --- Video Editing ---
     'k-litecodecpackfull'
-    'MakeMKV'
     'handbrake'
+    'lossless-cut'
+    'MakeMKV'
     'mkvtoolnix' # https://mkvtoolnix.download/doc/mkvmerge.html
     # 'jubler'
     
@@ -64,6 +67,7 @@ $choco_packages = @(
     'reshade'
     # Example of using params
     # 'reshade --params "/Desktop /NoStartMenu"'
+    # 'winpinator' # for Steam Deck file transfer
 )
 
 # Additional packages only for desktop systems
