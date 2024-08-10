@@ -20,6 +20,7 @@ $pip_packages = @(
     'dirsync' # https://github.com/tkhyn/dirsync
     'pyinstaller' # https://pyinstaller.org/en/stable
     'requests' # https://requests.readthedocs.io
+    'watchdog'
 
     # --- Projects ---
     # https://learn.microsoft.com/en-us/azure/developer/python/configure-local-development-environment
