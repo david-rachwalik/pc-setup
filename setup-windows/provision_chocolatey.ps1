@@ -10,7 +10,6 @@ $choco_packages = @(
     '7zip'
     'ccleaner'
     'nordvpn'
-    '4k-video-downloader'
     'qbittorrent'
     'chatgpt'
 

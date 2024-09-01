@@ -9,5 +9,7 @@ module.exports = {
   singleQuote: true,
   // printWidth: 160,
   tabWidth: 2,
+  bracketSpacing: true,
   bracketSameLine: true,
+  // plugins: ['prettier-plugin-sh'],
 };
