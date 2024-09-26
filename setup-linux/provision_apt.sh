@@ -8,28 +8,18 @@ packages=(
     firefox
     opera-stable           # Opera, Opera GX is available only as a browser extension (GX mode)
     # google-chrome-stable
-    nordvpn
     p7zip-full              # 7zip alternative
     hardinfo                # similar to speccy
     bleachbit               # similar to ccleaner
+    nordvpn
     qbittorrent
     # ChatGPT doesn't have a native Linux package, consider using the web app or Flatpak options
 
     # --- Development ---
-    code                    # Visual Studio Code
-    python3
-    git
-    azure-cli
-    nodejs
-    # npm                   # Node Package Manager, usually comes with nodejs
-    # dotnet-sdk-6.0
+    git                     # Source Control
+    code                    # IDE: Visual Studio Code
     docker.io
     docker-compose
-    # mongodb-org           # requires additional setup for the MongoDB repo
-    # postman               # usually installed via snap or Flatpak
-    # terraform
-    # ruby
-    # Additional setups (e.g., oh-my-posh) can be done post-installation
 
     # --- Media ---
     gimp
@@ -41,13 +31,33 @@ packages=(
     # Lossless Cut, MakeMKV, etc., can be installed via Flatpak or Snap
 
     # --- Streaming ---
-    # obs-studio
+    obs-studio
 
     # --- Videogames ---
     steam
     discord
-    # DirectX not required, use Wine for Windows compatibility
 )
+
+# Commands, packages, and applications for Docker containers
+packages_container=(
+    # --- Development ---
+    git                     # Source Control
+    python3
+    nodejs                  # Node Package Manager (npm) comes with NodeJS
+    # mongodb-org           # requires additional setup for the MongoDB repo
+    # dotnet-sdk-6.0
+    azure-cli
+    # terraform
+    # ruby
+    # Additional setups (e.g., oh-my-posh) can be done post-installation
+
+    # --- Video Editing ---
+    handbrake
+)
+
+
+# ------------------------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------------------------
 
 
 # Update package lists and upgrade existing packages

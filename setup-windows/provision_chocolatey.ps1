@@ -14,26 +14,12 @@ $choco_packages = @(
     'chatgpt'
 
     # --- Development ---
-    'powershell-core'
-    'python3'
-    'oh-my-posh'
-    'git'
+    # 'powershell-core'       # TODO: make this 1st in init along with a source/refresh of shell
+    # 'git'                   # Source Control
     'github-desktop'
-    'vscode'
+    'vscode'                # IDE: Visual Studio Code
     'docker-desktop'
     'docker-compose'
-    # (apps that could be limited to containers)
-    'nodejs-lts'
-    # 'dotnetcore-sdk' # 3.1
-    'dotnet-6.0-sdk'
-    'azure-cli'
-    'mongodb'
-    'mongodb-compass'
-    'mongodb-shell'
-    'postman'
-    'terraform'
-    'upx' # Ultimate Packer for eXecutables (for PyInstaller)
-    'ruby' # mainly for Jekyll (gem install jekyll bundler)
 
     # --- Media ---
     'geforce-experience'
@@ -66,7 +52,26 @@ $choco_packages = @(
     'reshade'
     # Example of using params
     # 'reshade --params "/Desktop /NoStartMenu"'
-    # 'winpinator' # for Steam Deck file transfer
+)
+
+# Commands, packages, and applications for Docker containers
+$choco_packages_container = @(
+    # --- Development ---
+    'git'                   # Source Control
+    'python3'
+    'nodejs-lts'
+    # 'mongodb'
+    # 'mongodb-shell'
+    # 'dotnetcore-sdk' # 3.1
+    # 'dotnet-6.0-sdk'
+    'azure-cli'
+    # 'terraform'
+    # 'upx' # Ultimate Packer for eXecutables (for PyInstaller)
+    # 'ruby' # mainly for Jekyll (gem install jekyll bundler)
+    'oh-my-posh'
+
+    # --- Video Editing ---
+    'handbrake'
 )
 
 # Additional packages only for desktop systems
