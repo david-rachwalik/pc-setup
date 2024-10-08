@@ -28,12 +28,32 @@ packages=(
     # Lossless Cut, MakeMKV, etc., can be installed via Flatpak or Snap
 
     # --- Streaming ---
-    # obs-studio
+    obs-studio
 
     # --- Videogames ---
     steam
     # DirectX not required, use Wine for Windows compatibility
 )
+
+# Commands, packages, and applications for Docker containers
+packages_container=(
+    # --- Development ---
+    git                     # Source Control
+    python3
+    nodejs                  # Node Package Manager (npm) comes with NodeJS
+    # mongodb-org           # requires additional setup for the MongoDB repo
+    # dotnet-sdk-6.0
+    azure-cli
+    # terraform
+    # ruby
+    # Additional setups (e.g., oh-my-posh) can be done post-installation
+
+    # --- Video Editing ---
+    handbrake
+)
+
+# ------------------------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------------------------
 
 
 # Update package lists and upgrade existing packages
@@ -70,7 +90,6 @@ echo "Cleaning up unnecessary files..."
 sudo apt autoremove -y && sudo apt clean
 
 echo "--- Completed provisioning of Linux Mint ---"
-
 
 
 # Standard Removal:     sudo apt remove <package>
