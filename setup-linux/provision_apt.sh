@@ -5,35 +5,22 @@
 # Array of packages to install
 packages=(
     # --- Productivity ---
-    firefox
-    opera-stable           # Opera, Opera GX is available only as a browser extension (GX mode)
+    # firefox
+    # opera-stable           # Opera, Opera GX is available only as a browser extension (GX mode)
     # google-chrome-stable
-    nordvpn
-    p7zip-full              # 7zip alternative
+    # p7zip-full              # 7zip alternative    * already installed
     hardinfo                # similar to speccy
     bleachbit               # similar to ccleaner
-    qbittorrent
     # ChatGPT doesn't have a native Linux package, consider using the web app or Flatpak options
 
     # --- Development ---
     code                    # Visual Studio Code
-    python3
-    git
-    azure-cli
-    nodejs
-    # npm                   # Node Package Manager, usually comes with nodejs
-    # dotnet-sdk-6.0
     docker.io
     docker-compose
-    # mongodb-org           # requires additional setup for the MongoDB repo
-    # postman               # usually installed via snap or Flatpak
-    # terraform
-    # ruby
-    # Additional setups (e.g., oh-my-posh) can be done post-installation
 
     # --- Media ---
     gimp
-    # blender
+    blender
 
     # --- Video Editing ---
     handbrake
@@ -45,7 +32,6 @@ packages=(
 
     # --- Videogames ---
     steam
-    discord
     # DirectX not required, use Wine for Windows compatibility
 )
 
@@ -65,8 +51,19 @@ for package in "${packages[@]}"; do
     fi
 done
 
+
 # Additional package installations from Flatpak, Snap, or other sources
 # e.g., Spotify, GitHub Desktop can be handled separately since they are not directly available via apt
+
+# Install Discord via Linux deb file installer
+url="https://discord.com/api/download?platform=linux&format=deb"
+curl -L -o /tmp/discord.deb $url
+sudo apt install /tmp/discord.deb
+
+# Install NordVPN on Linux distributions
+# https://support.nordvpn.com/hc/en-us/articles/20196094470929-Installing-NordVPN-on-Linux-distributions
+sh <(curl -sSf https://downloads.nordcdn.com/apps/linux/install.sh)
+
 
 # Cleaning up
 echo "Cleaning up unnecessary files..."
