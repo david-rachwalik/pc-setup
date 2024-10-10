@@ -305,8 +305,8 @@ def login_strategy(retry: bool = True) -> az.Account:
     #         sh.fail_process()
 
     ACCOUNT.login_sp = service_principal
-    LOG.debug(f'ACCOUNT data: {ACCOUNT}')
-    LOG.debug(f'ACCOUNT is signed in: {ACCOUNT.isSignedIn}')
+    # LOG.debug(f'ACCOUNT data: {ACCOUNT}')
+    # LOG.debug(f'ACCOUNT is signed in: {ACCOUNT.isSignedIn}')
     return ACCOUNT
 
 
@@ -334,10 +334,10 @@ def login_devops_pat_strategy() -> str:
     # key_vault_secret = az.key_vault_secret_get(account.auth, key_vault, secret_key)
 
     if key_vault_secret:
-        LOG.debug('successfully retrieved PAT from key vault!')
+        LOG.info('successfully retrieved DevOps PAT from key vault!')
         pat_data = key_vault_secret
     else:
-        LOG.error('failed to retrieve PAT from key vault')
+        LOG.error('failed to retrieve DevOps PAT from key vault')
     return pat_data
 
 
@@ -350,7 +350,7 @@ def login_devops_strategy():
 
     # Ensure user PAT/credentials exist
     ACCOUNT.devops_pat = login_devops_pat_strategy()
-    LOG.debug(f'PAT data: {ACCOUNT.devops_pat}')
+    # LOG.debug(f'PAT data: {ACCOUNT.devops_pat}')
 
     if not ACCOUNT.devops_pat:
         # This can occur when PAT is neither in local file nor key vault
@@ -743,7 +743,7 @@ def deployment_group_strategy(sp_name: str, project: str, environment: str, loca
     deployment_succeeded: bool = False
     deployment_changed: bool = False
     rg_name: str = az.format_resource_name(f'{project}-{environment}')
-    LOG.debug(f'rg_name: {rg_name}')
+    # LOG.debug(f'rg_name: {rg_name}')
 
     # Ensure resource group exists
     resource_group = resource_group_strategy(rg_name, location)
@@ -774,12 +774,10 @@ def deployment_group_strategy(sp_name: str, project: str, environment: str, loca
     LOG.debug(f'parameters: {parameters}')
 
     # Ensure deployment group template is valid
-    deploy_valid: bool = az.deployment_group_valid(
-        resource_group.name, template_path, parameters)
+    deploy_valid: bool = az.deployment_group_valid(resource_group.name, template_path, parameters)
     if deploy_valid:
         LOG.info('deployment validation has succeeded!')
-        deployment_succeeded = az.deployment_group_set(
-            resource_group.name, template_path, parameters)
+        deployment_succeeded = az.deployment_group_set(resource_group.name, template_path, parameters)
         if deployment_succeeded:
             LOG.info('deployment to resource group has succeeded!')
             deployment_changed = True
@@ -801,7 +799,7 @@ def authenticate():
     # az.sdk_credential_environment(ACCOUNT)
     # ACCOUNT.auth = az.sdk_credential_get()
     ACCOUNT.auth = az.sdk_credential_default(ACCOUNT)
-    LOG.debug(f'ACCOUNT auth data: {ACCOUNT.auth}')
+    # LOG.debug(f'ACCOUNT auth data: {ACCOUNT.auth}')
     # Sign-in Azure DevOps using PAT
     login_devops_strategy()
 
@@ -812,6 +810,18 @@ def secret():
     # Add a [key, secret, certificate] to vault (certificates have annual renewal costs)
     # az.key_vault_secret_set(ARGS.key_vault, ARGS.secret_key, ARGS.secret_value)
     # Set key vault advanced access policies
+
+
+def sdk_secret():
+    """Method to perform actions for creating an Azure key vault secret"""
+    main_vault_name = 'main-keyvault'
+    main_secret_key = 'main-devops-pat'
+    if ACCOUNT.auth:
+        secret_value = az.key_vault_secret_get_new(ACCOUNT.auth, main_vault_name, main_secret_key)
+        LOG.debug(f'secret_value: {secret_value}')
+    else:
+        LOG.debug('Cannot continue without valid credentials, exiting...')
+        sh.fail_process()
 
 
 def app_create():
@@ -831,13 +841,13 @@ def app_create():
 def deploy():
     """Method to perform actions for deploying an application to Azure"""
     # Deploy ARM templates to resource group
-    # deployment_group_strategy(ARGS.login_service_principal, ARGS.project, ARGS.environment, ARGS.location, ARGS.arm)
+    deployment_group_strategy(ARGS.login_service_principal, ARGS.project, ARGS.environment, ARGS.location, ARGS.arm)
 
-    project = ARGS.project
-    environment = ARGS.environment
-    rg_name: str = az.format_resource_name(f'{project}-{environment}')
-    LOG.debug(f'rg_name: {rg_name}')
-    LOG.debug(f'script path: {__file__}')
+    # project = ARGS.project
+    # environment = ARGS.environment
+    # rg_name: str = az.format_resource_name(f'{project}-{environment}')
+    # LOG.debug(f'rg_name: {rg_name}')
+    # LOG.debug(f'script path: {__file__}')
 
     # Example deployment resource scenarios:
     # - resource group, app service plan, web app service
@@ -971,6 +981,7 @@ if __name__ == '__main__':
     # --- Run Actions ---
 
     authenticate()
+    LOG.debug(f'ACCOUNT data: {ACCOUNT}')
 
     # if ARGS.group == 'secret':
     #     secret()
@@ -984,23 +995,20 @@ if __name__ == '__main__':
     match ARGS.group:
         case 'secret':
             secret()
+        case 'sdk_secret':
+            sdk_secret()
         case 'client':
             app_create()
         case 'deploy':
             deploy()
         case 'pipeline':
             pipeline()
-        # case _:
-        #     secret()
+        case _:
+            LOG.error('Argument provided is not a valid option')
 
-    main_vault_name = 'main-keyvault'
-    main_secret_key = 'main-devops-pat'
-    if ACCOUNT.auth:
-        secret_value = az.key_vault_secret_get_new(ACCOUNT.auth, main_vault_name, main_secret_key)
-        LOG.debug(f'secret_value: {secret_value}')
-    else:
-        LOG.debug('Cannot continue without valid credentials, exiting...')
-        sh.fail_process()
+    # TODO: finish methods for Azure SDK (Python) auth
+    # https://portal.azure.com => Microsoft Entra ID => Manage: App Registrations => Display Name: https://main-rbac-sp => Manage: Certificates & Secrets => Client secrets => +New client secret (~1 year)
+    # https://learn.microsoft.com/en-us/entra/identity-platform/quickstart-register-app#add-a-client-secret
 
 
     # If we get to this point, assume all went well
