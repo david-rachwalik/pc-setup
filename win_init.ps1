@@ -92,19 +92,17 @@ Add-EnvPath $user_py_command_dir
 pc_setup --debug
 
 
-# -------- STAGE 5: Establishing Scheduled Tasks --------
+# # -------- STAGE 5: Establishing Scheduled Tasks --------
 
-Write-Host "Calling 'scheduled_tasks.ps1' from remote..."
-$scheduled_tasks_url = "https://raw.githubusercontent.com/david-rachwalik/pc-setup/master/powershell/scheduled_tasks.ps1"
-$scheduled_tasks_script = Invoke-WebRequest $scheduled_tasks_url
-Invoke-Expression $scheduled_tasks_script.Content
-Write-Host "Completed 'scheduled_tasks.ps1' process"
+# Write-Host "Calling 'scheduled_tasks.ps1' from remote..."
+# $scheduled_tasks_url = "https://raw.githubusercontent.com/david-rachwalik/pc-setup/master/powershell/scheduled_tasks.ps1"
+# $scheduled_tasks_script = Invoke-WebRequest $scheduled_tasks_url
+# Invoke-Expression $scheduled_tasks_script.Content
+# Write-Host "Completed 'scheduled_tasks.ps1' process"
 
 
 Write-Host "--- Windows provisioning has completed ---" -ForegroundColor Green
 Exit
-
-
 
 
 
@@ -199,4 +197,3 @@ else
 {
     Write-Host "Hash passed: $psUserProfileFilename is up-to-date."
 }
-
